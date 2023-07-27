@@ -1,8 +1,8 @@
 package com.itservices.gpxanalyzer.logbook;
 
 public enum ViewMode {
-	CGM_CURVE,
-	GRID_VIEW;
+	TREND_CURVE,
+	INFO_ONLY_VIEW;
 
 	public ViewMode getNextCyclic() {
 		int currOrdinal  = ordinal();

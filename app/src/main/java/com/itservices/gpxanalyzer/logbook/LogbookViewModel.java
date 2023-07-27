@@ -1,6 +1,6 @@
 package com.itservices.gpxanalyzer.logbook;
 
-import static com.itservices.gpxanalyzer.logbook.ViewMode.CGM_CURVE;
+import static com.itservices.gpxanalyzer.logbook.ViewMode.TREND_CURVE;
 
 import android.content.res.Configuration;
 import android.view.View;
@@ -23,7 +23,7 @@ public class LogbookViewModel extends ViewModel {
 	private static final float CHART_PERCENTAGE_HEIGHT_PORTRAIT = 50f;
 	private static final float DEFAULT_MAX_100_PERCENT = 100f;
 	private static final float DEFAULT_FLOAT_RELATIVE_PERCENT_VALUE = 1.0f;
-	private final MutableLiveData<ViewMode> viewModeLiveData = new MutableLiveData<>(CGM_CURVE);
+	private final MutableLiveData<ViewMode> viewModeLiveData = new MutableLiveData<>(TREND_CURVE);
 
 	public MutableLiveData<Float> csgmChartPercentageHeightLiveData = new MutableLiveData<>(
 		DEFAULT_MAX_100_PERCENT);
@@ -35,7 +35,7 @@ public class LogbookViewModel extends ViewModel {
 		);
 	}
 
-	public float getCsgmChartPercentageHeight() {
+	public float getMeasurementChartPercentageHeight() {
 		return csgmChartPercentageHeightLiveData.getValue()!=null
 			? csgmChartPercentageHeightLiveData.getValue() / DEFAULT_MAX_100_PERCENT : DEFAULT_FLOAT_RELATIVE_PERCENT_VALUE;
 	}
@@ -64,7 +64,7 @@ public class LogbookViewModel extends ViewModel {
 	}
 
 	public boolean isCGMSMode() {
-		return viewModeLiveData.getValue() != null && (viewModeLiveData.getValue() == CGM_CURVE);
+		return viewModeLiveData.getValue() != null && (viewModeLiveData.getValue() == TREND_CURVE);
 	}
 
 

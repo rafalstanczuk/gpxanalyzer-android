@@ -13,7 +13,7 @@ import android.graphics.Paint;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.itservices.gpxanalyzer.R;
-import com.itservices.gpxanalyzer.logbook.chart.CSGMLineChart;
+import com.itservices.gpxanalyzer.logbook.chart.MeasurementCurveLineChart;
 
 
 import javax.inject.Inject;
@@ -27,8 +27,8 @@ public class LineChartSettings {
 	private static final float GRANULARITY = getFractionOfFullHourFromMinutes(1);
 	private final CustomMarker customMarker;
 	private final HourMinutesAxisValueFormatter hourMinutesAxisValueFormatter;
-	private final GlucoseAxisValueFormatter glucoseAxisValueFormatter;
-	private final GlucoseBoundariesPreferences glucoseBoundariesPreferences;
+	private final MeasurementAxisValueFormatter measurementAxisValueFormatter;
+	private final MeasurementBoundariesPreferences measurementBoundariesPreferences;
 	private final Paint paintGridBg = new Paint();
 	private final int primaryColor;
 
@@ -36,25 +36,25 @@ public class LineChartSettings {
 	LineChartSettings(
 		@ApplicationContext Context context, CustomMarker customMarker,
 		HourMinutesAxisValueFormatter hourMinutesAxisValueFormatter,
-		GlucoseAxisValueFormatter glucoseAxisValueFormatter,
-		GlucoseBoundariesPreferences glucoseBoundariesPreferences
+		MeasurementAxisValueFormatter measurementAxisValueFormatter,
+		MeasurementBoundariesPreferences measurementBoundariesPreferences
 	) {
 		this.customMarker = customMarker;
 		this.hourMinutesAxisValueFormatter = hourMinutesAxisValueFormatter;
 		primaryColor = context.getResources().getColor(R.color.colorPrimary);
-		this.glucoseBoundariesPreferences = glucoseBoundariesPreferences;
-		this.glucoseAxisValueFormatter = glucoseAxisValueFormatter;
+		this.measurementBoundariesPreferences = measurementBoundariesPreferences;
+		this.measurementAxisValueFormatter = measurementAxisValueFormatter;
 
 		paintGridBg.setStyle(Paint.Style.FILL);
 		paintGridBg.setColor(Color.WHITE);
 
-		glucoseBoundariesPreferences.initValues(context);
-		glucoseBoundariesPreferences.initLimitLines();
+		measurementBoundariesPreferences.initValues(context);
+		measurementBoundariesPreferences.initLimitLines();
 	}
 
-	public void setChartSettingsFor(CSGMLineChart lineChart) {
-		glucoseBoundariesPreferences.initValues(lineChart.getContext());
-		glucoseBoundariesPreferences.initLimitLines();
+	public void setChartSettingsFor(MeasurementCurveLineChart lineChart) {
+		measurementBoundariesPreferences.initValues(lineChart.getContext());
+		measurementBoundariesPreferences.initLimitLines();
 
 		lineChart.setPaint(paintGridBg, PAINT_GRID_BACKGROUND);
 		lineChart.setAutoScaleMinMaxEnabled(false);
@@ -66,7 +66,7 @@ public class LineChartSettings {
 		lineChart.setMaxHighlightDistance(10000.0f);
 
 		lineChart.resetZoom();
-		lineChart.setMaxVisibleValueCount(2000);
+		lineChart.setMaxVisibleValueCount(10000);
 		lineChart.setTouchEnabled(true);
 
 		lineChart.setDragYEnabled(false);
@@ -83,7 +83,7 @@ public class LineChartSettings {
 		setupDescriptions(lineChart);
 	}
 
-	private void setupXAxis(CSGMLineChart lineChart) {
+	private void setupXAxis(MeasurementCurveLineChart lineChart) {
 		XAxis xAxis = lineChart.getXAxis();
 		xAxis.setDrawAxisLine(false);
 		xAxis.setDrawGridLines(false);
@@ -97,7 +97,7 @@ public class LineChartSettings {
 		xAxis.setTextColor(Color.BLACK);
 	}
 
-	private void setupDescriptions(CSGMLineChart lineChart) {
+	private void setupDescriptions(MeasurementCurveLineChart lineChart) {
 		lineChart.getDescription().setEnabled(false);
 		lineChart.getLegend().setEnabled(false);
 /*
@@ -116,44 +116,44 @@ public class LineChartSettings {
 		lineChart.setDescription(description);*/
 	}
 
-	private void setupYAxisRight(CSGMLineChart lineChart) {
+	private void setupYAxisRight(MeasurementCurveLineChart lineChart) {
 		YAxis yAxisRight = lineChart.getAxisRight();
 		yAxisRight.setEnabled(false);
 		yAxisRight.setDrawAxisLine(false);
 		yAxisRight.setDrawGridLines(false);
 	}
 
-	private void setupYAxisLeft(CSGMLineChart lineChart) {
+	private void setupYAxisLeft(MeasurementCurveLineChart lineChart) {
 		YAxis yAxisLeft = lineChart.getAxisLeft();
 		yAxisLeft.setDrawAxisLine(false);
 		yAxisLeft.setDrawGridLines(false);
 //		yAxisLeft.setGridDashedLine(new DashPathEffect(new float[]{10f, 5f}, 0f));
 //		yAxisLeft.setAxisLineColor(ColorUtil.setAlphaInIntColor(Color.GRAY, 128));
 		yAxisLeft.setGranularityEnabled(false);
-		yAxisLeft.setValueFormatter(glucoseAxisValueFormatter);
+		yAxisLeft.setValueFormatter(measurementAxisValueFormatter);
 		yAxisLeft.setEnabled(true);
 		yAxisLeft.setTextColor(primaryColor);
 
 		yAxisLeft.removeAllLimitLines();
 
 		if (yAxisLeft.getLimitLines().size() == 0) {
-			if (glucoseBoundariesPreferences.getLineMaxValue() != null) {
-				yAxisLeft.addLimitLine(glucoseBoundariesPreferences.getLineMaxValue());
+			if (measurementBoundariesPreferences.getLineMaxValue() != null) {
+				yAxisLeft.addLimitLine(measurementBoundariesPreferences.getLineMaxValue());
 			}
-			/*if (glucoseBoundariesPreferences.getLineHyperMiddle() != null) {
-				yAxisLeft.addLimitLine(glucoseBoundariesPreferences.getLineHyperMiddle());
+			/*if (measurementBoundariesPreferences.getLineHyperMiddle() != null) {
+				yAxisLeft.addLimitLine(measurementBoundariesPreferences.getLineHyperMiddle());
 			}*/
-			if (glucoseBoundariesPreferences.getLineUpperMax() != null) {
-				yAxisLeft.addLimitLine(glucoseBoundariesPreferences.getLineUpperMax());
+			if (measurementBoundariesPreferences.getLineUpperMax() != null) {
+				yAxisLeft.addLimitLine(measurementBoundariesPreferences.getLineUpperMax());
 			}
-			if (glucoseBoundariesPreferences.getLineMaxTargetGlucose() != null) {
-				yAxisLeft.addLimitLine(glucoseBoundariesPreferences.getLineMaxTargetGlucose());
+			if (measurementBoundariesPreferences.getLineMaxTargetMeasurement() != null) {
+				yAxisLeft.addLimitLine(measurementBoundariesPreferences.getLineMaxTargetMeasurement());
 			}
-			if (glucoseBoundariesPreferences.getLineMinTargetGlucose() != null) {
-				yAxisLeft.addLimitLine(glucoseBoundariesPreferences.getLineMinTargetGlucose());
+			if (measurementBoundariesPreferences.getLineMinTargetMeasurement() != null) {
+				yAxisLeft.addLimitLine(measurementBoundariesPreferences.getLineMinTargetMeasurement());
 			}
-			if (glucoseBoundariesPreferences.getLineHypoglycemiaGlucose() != null) {
-				yAxisLeft.addLimitLine(glucoseBoundariesPreferences.getLineHypoglycemiaGlucose());
+			if (measurementBoundariesPreferences.getLineLowMeasurement() != null) {
+				yAxisLeft.addLimitLine(measurementBoundariesPreferences.getLineLowMeasurement());
 			}
 		}
 	}

@@ -31,7 +31,7 @@ public class Measurement5RangesUtil {
 
 	public static final int BACKGROUND_BOUNDARIES_AREA_COLOR_ALPHA = 55;
 
-	public static final List<Integer> GLUCOSE_5RANGES_COLOR_LIST =
+	public static final List<Integer> MEASUREMENT_5RANGES_COLOR_LIST =
 		Arrays.asList(
 			ColorUtil.setAlphaInIntColor(RANGE_ABOVE_TARGET_MAX_COLOR_DARK_YELLOW, BACKGROUND_BOUNDARIES_AREA_COLOR_ALPHA),
 			ColorUtil.setAlphaInIntColor(RANGE_IN_TARGET_COLOR_DARK_GREEN, BACKGROUND_BOUNDARIES_AREA_COLOR_ALPHA),
@@ -41,20 +41,20 @@ public class Measurement5RangesUtil {
 		);
 
 	public static int getColorForAreaId(int areaId) {
-		return GLUCOSE_5RANGES_COLOR_LIST.get(areaId);
+		return MEASUREMENT_5RANGES_COLOR_LIST.get(areaId);
 	}
 
 	public static int getRangeOfMeasurement(int value, Context context) {
 
-		int hypo = (int) GlucoseBoundariesPreferences.HEAVY_HYPOGLYCEMIA_TREND_DEFAULT;
+		int hypo = (int) MeasurementBoundariesPreferences.LOW_VALUE_MEASUREMENT_DEFAULT;
 
 		if (value < hypo) {
 			return RANGE_ID_BELOW_HYPO_LIMIT_RED;
-		} else if (value < GlucoseBoundariesPreferences.GLUCOSE_TARGET_DEFAULT_MIN) {
+		} else if (value < MeasurementBoundariesPreferences.MEASUREMENT_TARGET_DEFAULT_MIN) {
 			return RANGE_ID_BELOW_TARGET_MIN_ABOVE_HYPO_LIMIT_PINK;
-		} else if (value <= GlucoseBoundariesPreferences.GLUCOSE_TARGET_DEFAULT_MAX) {
+		} else if (value <= MeasurementBoundariesPreferences.MEASUREMENT_TARGET_DEFAULT_MAX) {
 			return RANGE_ID_IN_TARGET_MIN_MAX_GREEN;
-		} else if (value <= GlucoseBoundariesPreferences.GLUCOSE_UPPER_MAX) {
+		} else if (value <= MeasurementBoundariesPreferences.MEASUREMENT_UPPER_MAX) {
 			return RANGE_ID_ABOVE_TARGET_MAX_BELOW_HYPER_LIMIT_YELLOW;
 		}
 

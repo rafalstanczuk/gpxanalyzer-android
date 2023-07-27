@@ -1,6 +1,5 @@
 package com.itservices.gpxanalyzer.logbook.chart.entry;
 
-import static com.itservices.gpxanalyzer.logbook.chart.entry.IconsUtil.getDateFromIntTimestamp;
 import static com.itservices.gpxanalyzer.logbook.chart.settings.Measurement5RangesUtil.getRangeOfMeasurement;
 
 import android.content.Context;
@@ -20,16 +19,16 @@ import java.util.List;
 import com.itservices.gpxanalyzer.logbook.StatisticResults;
 import com.itservices.gpxanalyzer.logbook.chart.settings.HourMinutesAxisValueFormatter;
 
-public class GlucoseEntry extends BaseEntry {
-	public static final String GLUCOSE = "GLUCOSE";
+public class SingleMeasurementMeasurementEntry extends BaseEntry {
+	public static final String MEASUREMENT = "MEASUREMENT";
 
-	GlucoseEntry(
+	SingleMeasurementMeasurementEntry(
 		Calendar calendar, float x, float y, Drawable icon, StatisticResults statisticResults
 	) {
 		super(x, y, icon, statisticResults, calendar);
 	}
 
-	public static GlucoseEntry create(
+	public static SingleMeasurementMeasurementEntry create(
 		Context context, List<Drawable> drawableIconList, StatisticResults statisticResults,
 		float x, float y
 	) {
@@ -41,7 +40,7 @@ public class GlucoseEntry extends BaseEntry {
 		try {
 			drawableIcon = drawableIconList.get(areaColorId);
 		} catch (Exception ex) {
-			Log.e("GlucoseEntry", "create: ", ex);
+			Log.e("MeasurementEntry", "create: ", ex);
 		}
 
 
@@ -50,12 +49,12 @@ public class GlucoseEntry extends BaseEntry {
 
 		float timeConcat = HourMinutesAxisValueFormatter.combineIntoFloatTime(calendar);
 
-		return new GlucoseEntry(calendar, timeConcat, y, drawableIcon, statisticResults);
+		return new SingleMeasurementMeasurementEntry(calendar, timeConcat, y, drawableIcon, statisticResults);
 	}
 
 	@NonNull
-	public static LineDataSet createGlucoseLineDataSet(ArrayList<Entry> entries) {
-		LineDataSet updatedDataSet = new LineDataSet(entries, GLUCOSE);
+	public static LineDataSet createMeasurementLineDataSet(ArrayList<Entry> entries) {
+		LineDataSet updatedDataSet = new LineDataSet(entries, MEASUREMENT);
 
 		updatedDataSet.setLineWidth(0.0f);
 		updatedDataSet.setDrawIcons(true);

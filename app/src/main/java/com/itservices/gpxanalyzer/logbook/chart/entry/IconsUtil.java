@@ -1,7 +1,7 @@
 package com.itservices.gpxanalyzer.logbook.chart.entry;
 
 import static com.itservices.gpxanalyzer.logbook.chart.entry.ColorUtil.setAlphaInIntColor;
-import static com.itservices.gpxanalyzer.logbook.chart.settings.Measurement5RangesUtil.GLUCOSE_5RANGES_COLOR_LIST;
+import static com.itservices.gpxanalyzer.logbook.chart.settings.Measurement5RangesUtil.MEASUREMENT_5RANGES_COLOR_LIST;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -17,26 +17,26 @@ import java.util.List;
 public class IconsUtil {
 
 	public static List<Drawable> generateDrawableIconForAreaList(int size, int alpha) {
-		List<Drawable> glucoseDrawableIconList = new ArrayList<>();
+		List<Drawable> measurementDrawableIconList = new ArrayList<>();
 
-		for (int color : GLUCOSE_5RANGES_COLOR_LIST) {
+		for (int color : MEASUREMENT_5RANGES_COLOR_LIST) {
 
 			int colorWithAlpha = setAlphaInIntColor(color, alpha);
 
-			glucoseDrawableIconList.add(
+			measurementDrawableIconList.add(
 				getDrawableIconForAreaColorId(colorWithAlpha, size)
 			);
 		}
 
-		addDefaultIcon(size, alpha, glucoseDrawableIconList);
+		addDefaultIcon(size, alpha, measurementDrawableIconList);
 
-		return glucoseDrawableIconList;
+		return measurementDrawableIconList;
 	}
 
-	private static void addDefaultIcon(int size, int alpha, List<Drawable> glucoseDrawableIconList) {
+	private static void addDefaultIcon(int size, int alpha, List<Drawable> measurementDrawableIconList) {
 		int defaultWithAlpha = setAlphaInIntColor(Color.BLACK, alpha);
 
-		glucoseDrawableIconList.add(
+		measurementDrawableIconList.add(
 			getDrawableIconForAreaColorId(defaultWithAlpha, size)
 		);
 	}

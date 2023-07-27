@@ -13,8 +13,8 @@ import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.itservices.gpxanalyzer.logbook.StatisticResults;
 import com.itservices.gpxanalyzer.logbook.chart.entry.BaseEntry;
-import com.itservices.gpxanalyzer.logbook.chart.entry.CSGMEntry;
-import com.itservices.gpxanalyzer.logbook.chart.entry.GlucoseEntry;
+import com.itservices.gpxanalyzer.logbook.chart.entry.CurveMeasurementEntry;
+import com.itservices.gpxanalyzer.logbook.chart.entry.SingleMeasurementMeasurementEntry;
 import com.itservices.gpxanalyzer.logbook.chart.entry.IconsUtil;
 import com.itservices.gpxanalyzer.logbook.chart.settings.LineChartSettings;
 
@@ -30,8 +30,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 @HiltViewModel
 public class ChartViewModel extends ViewModel {
 
-	private static final List<String> TARGET_MATCHED_LINE_LABEL_DATA_TO_SHOW_WITH_GLUCOSE_BOUNDARIES = Arrays.asList(
-		GlucoseEntry.GLUCOSE);
+	private static final List<String> TARGET_MATCHED_LINE_LABEL_DATA_TO_SHOW_WITH_MEASUREMENT_BOUNDARIES = Arrays.asList(
+		SingleMeasurementMeasurementEntry.MEASUREMENT);
 
 	private final MutableLiveData<List<LineDataSet>> lineDataSetListToAddLive = new MutableLiveData<>();
 
@@ -61,41 +61,41 @@ public class ChartViewModel extends ViewModel {
 		return lineDataSetListToAddLive;
 	}
 
-	public void updateCGSMLineDataSetFrom(
-		Context context, StatisticResults cgmsStatisticResults
+	public void updateMeasurementCurveLineDataSetFrom(
+		Context context, StatisticResults curveMeasurementStatisticResults
 	) {
-		if (cgmsStatisticResults == null) {
+		if (curveMeasurementStatisticResults == null) {
 			return;
 		}
 
-		ArrayList<Entry> entries = lineChartScaledEntries.createCSGMEntryList(
-			context, cgmsStatisticResults);
+		ArrayList<Entry> entries = lineChartScaledEntries.createMeasurementCurveEntryList(
+			context, curveMeasurementStatisticResults);
 
 		if (!entries.isEmpty()) {
-			LineDataSet cgsmLineDataSet = CSGMEntry.createCGSMLineDataSet(entries);
+			LineDataSet measurementCurveLineDataSet = CurveMeasurementEntry.createMeasurementCurveLineDataSet(entries);
 
-			addToLineDataSetListLive(cgsmLineDataSet);
+			addToLineDataSetListLive(measurementCurveLineDataSet);
 		}
 	}
 
-	public void updateGlucoseDataSetFrom(
-		Context context, StatisticResults glucoseStatisticResults
+	public void updateMeasurementDataSetFrom(
+		Context context, StatisticResults measurementStatisticResults
 	) {
-		if (glucoseStatisticResults == null) {
+		if (measurementStatisticResults == null) {
 			return;
 		}
 
-		ArrayList<Entry> entries = lineChartScaledEntries.createGlucoseEntryList(context,
-			glucoseStatisticResults
+		ArrayList<Entry> entries = lineChartScaledEntries.createMeasurementEntryList(context,
+			measurementStatisticResults
 		);
 
-		LineDataSet glucoseLineDataSet = GlucoseEntry.createGlucoseLineDataSet(entries);
+		LineDataSet measurementLineDataSet = SingleMeasurementMeasurementEntry.createMeasurementLineDataSet(entries);
 
-		addToLineDataSetListLive(glucoseLineDataSet);
+		addToLineDataSetListLive(measurementLineDataSet);
 	}
 
 	public void tryToUpdateDataChart(
-		CSGMLineChart lineChart, List<LineDataSet> newDataSetList
+		MeasurementCurveLineChart lineChart, List<LineDataSet> newDataSetList
 	) {
 
 		if (!isEnoughDataToShow(newDataSetList)) {
@@ -120,7 +120,7 @@ public class ChartViewModel extends ViewModel {
 
 	private boolean isEnoughDataToShow(final List<LineDataSet> newDataSetList) {
 		return checkPrecondition(
-			newDataSetList, TARGET_MATCHED_LINE_LABEL_DATA_TO_SHOW_WITH_GLUCOSE_BOUNDARIES);
+			newDataSetList, TARGET_MATCHED_LINE_LABEL_DATA_TO_SHOW_WITH_MEASUREMENT_BOUNDARIES);
 	}
 
 	private boolean checkPrecondition(
@@ -151,7 +151,7 @@ public class ChartViewModel extends ViewModel {
 		lineDataSetListToAddLive.setValue(lineDataSetList);
 	}
 
-	public void init(CSGMLineChart lineChart) {
+	public void init(MeasurementCurveLineChart lineChart) {
 		lineChart.clear();
 		lineChart.setData(new LineData());
 		lineChart.invalidate();
@@ -182,7 +182,7 @@ public class ChartViewModel extends ViewModel {
 		entryToHighlightTimeInt.setValue(entryTimeToSelect);
 	}
 
-	public void selectMarker(CSGMLineChart lineChart, Integer selectedColumnTimeInt) {
+	public void selectMarker(MeasurementCurveLineChart lineChart, Integer selectedColumnTimeInt) {
 
 		if (selectedColumnTimeInt < 0) {
 			lineChart.highlightValue(null, false);
@@ -220,11 +220,11 @@ public class ChartViewModel extends ViewModel {
 		}
 	}
 
-	public void resetMarkerAndSaveSelection(CSGMLineChart lineChart) {
+	public void resetMarkerAndSaveSelection(MeasurementCurveLineChart lineChart) {
 		selectMarker(lineChart, -1);
 	}
 
-	public void resetMarkerAndClearSelection(CSGMLineChart lineChart) {
+	public void resetMarkerAndClearSelection(MeasurementCurveLineChart lineChart) {
 		highlight.setValue(null);
 		highlightedEntry.setValue(null);
 		selectMarker(lineChart, -1);

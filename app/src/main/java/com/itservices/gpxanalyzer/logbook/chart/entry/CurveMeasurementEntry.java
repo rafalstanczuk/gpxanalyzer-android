@@ -19,27 +19,27 @@ import java.util.List;
 import com.itservices.gpxanalyzer.logbook.StatisticResults;
 import com.itservices.gpxanalyzer.logbook.chart.settings.HourMinutesAxisValueFormatter;
 
-public class CSGMEntry extends BaseEntry {
-	public static final String CGSM = "CGSM";
+public class CurveMeasurementEntry extends BaseEntry {
+	public static final String CURVE_MEASUREMENT = "CURVE_MEASUREMENT";
 	public static final int FILL_COLOR_UNDER_CURVE = ColorUtil.rgb(0.96f, 0.96f, 0.96f);
 	public static final int FILL_COLOR_ALPHA_UNDER_CURVE = (int) (0.3f * 255.0f);
-	public static boolean SHOW_COLOR_GLUCOSE_RANGE_CIRCLES_ICONS = false;
-	public static boolean SHOW_COLOR_GLUCOSE_RANGE_CIRCLES_ONLY_AS_DEFAULT = false;
+	public static boolean SHOW_COLOR_CURVE_MEASUREMENT_RANGE_CIRCLES_ICONS = false;
+	public static boolean SHOW_COLOR_CURVE_MEASUREMENT_RANGE_CIRCLES_ONLY_AS_DEFAULT = false;
 
-	CSGMEntry(
+	CurveMeasurementEntry(
 		Calendar calendar, float x, float y, Drawable icon, StatisticResults statisticResults
 	) {
 		super(x, y, icon, statisticResults, calendar);
 	}
 
-	public static CSGMEntry create(
+	public static CurveMeasurementEntry create(
 		Context context, final List<Drawable> drawableIconList, StatisticResults statisticResults,
 		float x, float y
 	) {
 
 		int areaColorId = getRangeOfMeasurement((int) y, context);
 
-		if (SHOW_COLOR_GLUCOSE_RANGE_CIRCLES_ONLY_AS_DEFAULT) {
+		if (SHOW_COLOR_CURVE_MEASUREMENT_RANGE_CIRCLES_ONLY_AS_DEFAULT) {
 			areaColorId = drawableIconList.size() - 1;
 		}
 
@@ -48,7 +48,7 @@ public class CSGMEntry extends BaseEntry {
 		try {
 			drawableIcon = drawableIconList.get(areaColorId);
 		} catch (Exception ex) {
-			Log.e("CSGMEntry", "create: ", ex);
+			Log.e("MeasurementCurveEntry", "create: ", ex);
 		}
 
 		Calendar calendar = Calendar.getInstance();
@@ -56,15 +56,15 @@ public class CSGMEntry extends BaseEntry {
 
 		float timeConcat = HourMinutesAxisValueFormatter.combineIntoFloatTime(calendar);
 
-		return new CSGMEntry(
-			calendar, timeConcat, y, SHOW_COLOR_GLUCOSE_RANGE_CIRCLES_ICONS ? drawableIcon : null,
+		return new CurveMeasurementEntry(
+			calendar, timeConcat, y, SHOW_COLOR_CURVE_MEASUREMENT_RANGE_CIRCLES_ICONS ? drawableIcon : null,
 			statisticResults
 		);
 	}
 
 	@NonNull
-	public static LineDataSet createCGSMLineDataSet(ArrayList<Entry> entries) {
-		LineDataSet dataSet = new LineDataSet(entries, CGSM);
+	public static LineDataSet createMeasurementCurveLineDataSet(ArrayList<Entry> entries) {
+		LineDataSet dataSet = new LineDataSet(entries, CURVE_MEASUREMENT);
 		dataSet.setMode(LineDataSet.Mode.HORIZONTAL_BEZIER);
 		dataSet.setHighlightEnabled(true);
 
@@ -88,7 +88,7 @@ public class CSGMEntry extends BaseEntry {
 
 		dataSet.setHighLightColor(Color.BLACK);
 
-		dataSet.setDrawIcons(SHOW_COLOR_GLUCOSE_RANGE_CIRCLES_ICONS);
+		dataSet.setDrawIcons(SHOW_COLOR_CURVE_MEASUREMENT_RANGE_CIRCLES_ICONS);
 		dataSet.setDrawValues(false);
 
 		return dataSet;

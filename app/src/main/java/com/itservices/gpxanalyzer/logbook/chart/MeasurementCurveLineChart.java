@@ -1,6 +1,6 @@
 package com.itservices.gpxanalyzer.logbook.chart;
 
-import static com.itservices.gpxanalyzer.logbook.chart.entry.CSGMEntry.CGSM;
+import static com.itservices.gpxanalyzer.logbook.chart.entry.CurveMeasurementEntry.CURVE_MEASUREMENT;
 import static com.itservices.gpxanalyzer.logbook.chart.entry.IconsUtil.getTimeAsIntFromDate;
 import static com.itservices.gpxanalyzer.logbook.chart.settings.CustomMarker.formatTime;
 import static com.itservices.gpxanalyzer.logbook.chart.settings.HourMinutesAxisValueFormatter.MIN_X_SCALED_TIME;
@@ -27,7 +27,7 @@ import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.utils.MPPointF;
 import com.github.mikephil.charting.utils.ViewPortHandler;
 import com.itservices.gpxanalyzer.MainActivity;
-import com.itservices.gpxanalyzer.logbook.chart.entry.GlucoseEntry;
+import com.itservices.gpxanalyzer.logbook.chart.entry.SingleMeasurementMeasurementEntry;
 
 import java.util.Calendar;
 
@@ -35,37 +35,37 @@ import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import com.itservices.gpxanalyzer.logbook.chart.entry.BaseEntry;
-import com.itservices.gpxanalyzer.logbook.chart.entry.CSGMEntry;
-import com.itservices.gpxanalyzer.logbook.chart.settings.GlucoseBoundariesPreferences;
+import com.itservices.gpxanalyzer.logbook.chart.entry.CurveMeasurementEntry;
+import com.itservices.gpxanalyzer.logbook.chart.settings.MeasurementBoundariesPreferences;
 import com.itservices.gpxanalyzer.logbook.chart.settings.StaticChartHighlighter;
 
 @AndroidEntryPoint
-public class CSGMLineChart extends LineChart {
+public class MeasurementCurveLineChart extends LineChart {
 
-	CsgmInfoLayoutView csgmInfoLayoutView;
+	MeasurementInfoLayoutView measurementInfoLayoutView;
 
 	@Inject
-	GlucoseBoundariesPreferences glucose;
+	MeasurementBoundariesPreferences measurement;
 
-	public CSGMLineChart(Context context) {
+	public MeasurementCurveLineChart(Context context) {
 		super(context);
 		initPreferencesValues();
 	}
 
-	public CSGMLineChart(Context context, AttributeSet attrs) {
+	public MeasurementCurveLineChart(Context context, AttributeSet attrs) {
 		super(context, attrs);
 
 		initPreferencesValues();
 	}
 
-	public CSGMLineChart(Context context, AttributeSet attrs, int defStyle) {
+	public MeasurementCurveLineChart(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 
 		initPreferencesValues();
 	}
 
 	public static int getDataSetIndexForEntryWithTimeInt(
-		CSGMLineChart lineChart, int csgmEntryTimeInt
+		MeasurementCurveLineChart lineChart, int csgmEntryTimeInt
 	) {
 		int dataSetIndexToHighlight = 0;
 
@@ -97,15 +97,15 @@ public class CSGMLineChart extends LineChart {
 	}
 
 	private void initPreferencesValues() {
-		csgmInfoLayoutView = new CsgmInfoLayoutView(getContext());
-		csgmInfoLayoutView.setDrawingCacheEnabled(true);
+		measurementInfoLayoutView = new MeasurementInfoLayoutView(getContext());
+		measurementInfoLayoutView.setDrawingCacheEnabled(true);
 
 		try {
-			this.addView(csgmInfoLayoutView);
+			this.addView(measurementInfoLayoutView);
 		} catch (Exception ignored) {
 		}
 
-		glucose.initValues(getContext());
+		measurement.initValues(getContext());
 	}
 
 	@Override
@@ -131,9 +131,9 @@ public class CSGMLineChart extends LineChart {
 	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
 		super.onLayout(changed, left, top, right, bottom);
 
-		//csgmInfoLayoutView.getMeasuredWidth()
+		//measurementInfoLayoutView.getMeasuredWidth()
 
-		csgmInfoLayoutView.layout(getWidth() / 2 +
+		measurementInfoLayoutView.layout(getWidth() / 2 +
 				(int) (getContext().getResources().getDisplayMetrics().density * 20.0f),
 			(int) (getContext().getResources().getDisplayMetrics().density * 20.0f), getWidth(),
 			getHeight()
@@ -144,13 +144,13 @@ public class CSGMLineChart extends LineChart {
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-		csgmInfoLayoutView.measure(csgmInfoLayoutView.getMeasuredWidth(),
-			csgmInfoLayoutView.getMeasuredHeight()
+		measurementInfoLayoutView.measure(measurementInfoLayoutView.getMeasuredWidth(),
+			measurementInfoLayoutView.getMeasuredHeight()
 		);
 	}
 
 	public void drawRectArea(Canvas canvas, Context context, int areaid) {
-		if (hasMinMaxGlucose()) {
+		if (hasMinMaxMeasurement()) {
 			int colorForAreaId = getColorForAreaId(areaid);
 
 			ViewPortHandler viewPort = mViewPortHandler;
@@ -160,13 +160,13 @@ public class CSGMLineChart extends LineChart {
 
 			switch (areaid) {
 				case RANGE_ID_ABOVE_HYPER_LIMIT_ORANGE: {
-					if (glucose.getUpperMax() > 0) {
-						leftMin = getPosition(new Entry(MIN_X_SCALED_TIME, glucose.getUpperMax()),
+					if (measurement.getUpperMax() > 0) {
+						leftMin = getPosition(new Entry(MIN_X_SCALED_TIME, measurement.getUpperMax()),
 							YAxis.AxisDependency.LEFT
 						);
 					} else {
 						leftMin = getPosition(
-							new Entry(MIN_X_SCALED_TIME, glucose.getMaxTargetGlucose()),
+							new Entry(MIN_X_SCALED_TIME, measurement.getMaxTargetMeasurement()),
 							YAxis.AxisDependency.LEFT
 						);
 					}
@@ -175,12 +175,12 @@ public class CSGMLineChart extends LineChart {
 					break;
 				}
 				case RANGE_ID_ABOVE_TARGET_MAX_BELOW_HYPER_LIMIT_YELLOW: {
-					if (glucose.getUpperMax() > 0) {
+					if (measurement.getUpperMax() > 0) {
 						leftMin = getPosition(
-							new Entry(MIN_X_SCALED_TIME, glucose.getMaxTargetGlucose()),
+							new Entry(MIN_X_SCALED_TIME, measurement.getMaxTargetMeasurement()),
 							YAxis.AxisDependency.LEFT
 						);
-						leftMax = getPosition(new Entry(MIN_X_SCALED_TIME, glucose.getUpperMax()),
+						leftMax = getPosition(new Entry(MIN_X_SCALED_TIME, measurement.getUpperMax()),
 							YAxis.AxisDependency.LEFT
 						);
 					}
@@ -188,22 +188,22 @@ public class CSGMLineChart extends LineChart {
 				}
 				case RANGE_ID_IN_TARGET_MIN_MAX_GREEN: {
 					leftMin = getPosition(
-						new Entry(MIN_X_SCALED_TIME, glucose.getMinTargetGlucose()),
+						new Entry(MIN_X_SCALED_TIME, measurement.getMinTargetMeasurement()),
 						YAxis.AxisDependency.LEFT
 					);
 					leftMax = getPosition(
-						new Entry(MIN_X_SCALED_TIME, glucose.getMaxTargetGlucose()),
+						new Entry(MIN_X_SCALED_TIME, measurement.getMaxTargetMeasurement()),
 						YAxis.AxisDependency.LEFT
 					);
 					break;
 				}
 				case RANGE_ID_BELOW_TARGET_MIN_ABOVE_HYPO_LIMIT_PINK: {
 					leftMin = getPosition(
-						new Entry(MIN_X_SCALED_TIME, glucose.getHypoglycemiaGlucose()),
+						new Entry(MIN_X_SCALED_TIME, measurement.getLowMeasurement()),
 						YAxis.AxisDependency.LEFT
 					);
 					leftMax = getPosition(
-						new Entry(MIN_X_SCALED_TIME, glucose.getMinTargetGlucose()),
+						new Entry(MIN_X_SCALED_TIME, measurement.getMinTargetMeasurement()),
 						YAxis.AxisDependency.LEFT
 					);
 					break;
@@ -212,7 +212,7 @@ public class CSGMLineChart extends LineChart {
 					leftMin = getPosition(
 						new Entry(MIN_X_SCALED_TIME, getYChartMin()), YAxis.AxisDependency.LEFT);
 					leftMax = getPosition(
-						new Entry(MIN_X_SCALED_TIME, glucose.getHypoglycemiaGlucose()),
+						new Entry(MIN_X_SCALED_TIME, measurement.getLowMeasurement()),
 						YAxis.AxisDependency.LEFT
 					);
 					break;
@@ -235,16 +235,16 @@ public class CSGMLineChart extends LineChart {
 		}
 	}
 
-	public boolean hasMinMaxGlucose() {
-		return glucose.getMinTargetGlucose() != Integer.MAX_VALUE &&
-			glucose.getMaxTargetGlucose() != Integer.MIN_VALUE;
+	public boolean hasMinMaxMeasurement() {
+		return measurement.getMinTargetMeasurement() != Integer.MAX_VALUE &&
+			measurement.getMaxTargetMeasurement() != Integer.MIN_VALUE;
 	}
 
 	@Override
 	public void init() {
 		super.init();
 
-		StaticChartHighlighter<CSGMLineChart> staticChartHighlighter = new StaticChartHighlighter<>(
+		StaticChartHighlighter<MeasurementCurveLineChart> staticChartHighlighter = new StaticChartHighlighter<>(
 			this, (BarLineChartTouchListener) mChartTouchListener);
 		setHighlighter(staticChartHighlighter);
 	}
@@ -278,7 +278,7 @@ public class CSGMLineChart extends LineChart {
 
 		// isFullyZoomedOut() 		
 
-		determineSettingsCGSMLineHighlightIndicator(chartGesture);
+		determineSettingsMeasurementCurveLineHighlightIndicator(chartGesture);
 
 		BaseEntry baseEntry = (BaseEntry) selectedEntry;
 
@@ -286,34 +286,34 @@ public class CSGMLineChart extends LineChart {
 
 		String unit = "[A]";
 
-		if (selectedEntry instanceof CSGMEntry) {
+		if (selectedEntry instanceof CurveMeasurementEntry) {
 
-		} else if (selectedEntry instanceof GlucoseEntry) {
+		} else if (selectedEntry instanceof SingleMeasurementMeasurementEntry) {
 
 		}
 
 		activity.runOnUiThread(() -> {
-			csgmInfoLayoutView.setTime(formatTime(calendar));
-			csgmInfoLayoutView.setValue(String.valueOf((int) baseEntry.getY()));
-			csgmInfoLayoutView.setValueUnit(unit);
+			measurementInfoLayoutView.setTime(formatTime(calendar));
+			measurementInfoLayoutView.setValue(String.valueOf((int) baseEntry.getY()));
+			measurementInfoLayoutView.setValueUnit(unit);
 
-			csgmInfoLayoutView.invalidate();
+			measurementInfoLayoutView.invalidate();
 		});
 	}
 
-	private void determineSettingsCGSMLineHighlightIndicator(
+	private void determineSettingsMeasurementCurveLineHighlightIndicator(
 		ChartTouchListener.ChartGesture chartGesture
 	) {
 		if (getLineData()==null) {
 			return;
 		}
 
-		LineDataSet cgsmLineDataSet = ((LineDataSet) getLineData().getDataSetByLabel(CGSM, false));
+		LineDataSet measurementCurveLineDataSet = ((LineDataSet) getLineData().getDataSetByLabel(CURVE_MEASUREMENT, false));
 
-		if (cgsmLineDataSet != null) {
+		if (measurementCurveLineDataSet != null) {
 
 			if (isFullyZoomedOut()) {
-				cgsmLineDataSet.setDrawHorizontalHighlightIndicator(true);
+				measurementCurveLineDataSet.setDrawHorizontalHighlightIndicator(true);
 			} else {
 				switch (chartGesture) {
 					case NONE:
@@ -324,13 +324,13 @@ public class CSGMLineChart extends LineChart {
 					case DOUBLE_TAP:
 					case LONG_PRESS:
 					case SINGLE_TAP:
-						cgsmLineDataSet.setDrawHorizontalHighlightIndicator(true);
+						measurementCurveLineDataSet.setDrawHorizontalHighlightIndicator(true);
 
 						break;
 
 					case FLING:
 					case DRAG:
-						cgsmLineDataSet.setDrawHorizontalHighlightIndicator(false);
+						measurementCurveLineDataSet.setDrawHorizontalHighlightIndicator(false);
 
 						break;
 				}
