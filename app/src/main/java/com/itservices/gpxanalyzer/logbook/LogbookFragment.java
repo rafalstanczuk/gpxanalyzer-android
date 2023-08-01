@@ -1,7 +1,5 @@
 package com.itservices.gpxanalyzer.logbook;
 
-import static com.itservices.gpxanalyzer.logbook.chart.entry.IconsUtil.getTimeAsIntFromDate;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -129,11 +127,9 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 						Calendar calendar = Calendar.getInstance();
 						calendar.setTime(trackPoint.getTime().toDate());
 
-						measurement.timestamp = calendar.getTimeInMillis();
+						measurement.timestamp = calendar;
 
 						statisticResults.addMeasurements(measurement);
-
-
 					}
 				}
 			}
@@ -161,14 +157,14 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 		super.onResume();
 	}
 
-	private void resetCSGMMarkerAndClearSelection() {
-		if (logbookViewModel.isCGMSMode()) {
+	private void resetMeasurementCurveMarkerAndClearSelection() {
+		if (logbookViewModel.isTrendCurveMode()) {
 			chartViewModel.resetMarkerAndClearSelection(binding.lineChart);
 		}
 	}
 
-	private void resetCSGMMarkerAndSaveSelection() {
-		if (logbookViewModel.isCGMSMode()) {
+	private void resetMeasurementCurveMarkerAndSaveSelection() {
+		if (logbookViewModel.isTrendCurveMode()) {
 			chartViewModel.resetMarkerAndSaveSelection(binding.lineChart);
 		}
 	}
@@ -208,16 +204,16 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 				chartViewModel.selectMarker(binding.lineChart, selectedColumnTimeInt);
 			});
 
-		statisticsViewModel.getCGMSStatisticResults()
-			.observe(getViewLifecycleOwner(), cgmsStatisticResults ->
-				chartViewModel.updateCGSMLineDataSetFrom(
-					requireContext(), cgmsStatisticResults)
+		statisticsViewModel.getCurveMeasurementsStatisticResults()
+			.observe(getViewLifecycleOwner(), curveMeasurementStatisticResults ->
+				chartViewModel.updateCurveMeasurementLineDataSetFrom(
+					requireContext(), curveMeasurementStatisticResults)
 			);
 
-		statisticsViewModel.getGlucoseStatisticResults()
-			.observe(getViewLifecycleOwner(), glucoseStatisticResults ->
-				chartViewModel.updateGlucoseDataSetFrom(
-					requireContext(), glucoseStatisticResults)
+		statisticsViewModel.getMeasurementStatisticResults()
+			.observe(getViewLifecycleOwner(), measurementStatisticResults ->
+				chartViewModel.updateSingleMeasurementDataSetFrom(
+					requireContext(), measurementStatisticResults)
 			);
 
 	}
@@ -257,10 +253,10 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 	private void switchViewMode(ViewMode viewMode) {
 
 		switch (viewMode) {
-			case CGM_CURVE:
+			case TREND_CURVE:
 				switchToCGMCurveView();
 				break;
-			case GRID_VIEW:
+			case INFO_ONLY_VIEW:
 
 				break;
 		}
@@ -318,7 +314,7 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 
 	@Override
 	public void onNothingSelected() {
-		resetCSGMMarkerAndClearSelection();
+		resetMeasurementCurveMarkerAndClearSelection();
 	}
 
 	public void initChart() {

@@ -20,10 +20,10 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             app:layout_constraintHeight_default="percent"
-            app:layout_constraintHeight_percent="@{viewModel.csgmChartPercentageHeight}"
+            app:layout_constraintHeight_percent="@{viewModel.measurementChartPercentageHeight}"
             app:layout_constraintTop_toTopOf="parent">
 
-            <com.itservices.gpxanalyzer.logbook.chart.CSGMLineChart
+            <com.itservices.gpxanalyzer.logbook.chart.MeasurementCurveLineChart
                 android:id="@+id/lineChart"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"

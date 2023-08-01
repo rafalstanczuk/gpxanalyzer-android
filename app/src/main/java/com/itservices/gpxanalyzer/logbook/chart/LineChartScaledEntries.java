@@ -7,9 +7,10 @@ import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.itservices.gpxanalyzer.logbook.Measurement;
 import com.itservices.gpxanalyzer.logbook.StatisticResults;
-import com.itservices.gpxanalyzer.logbook.chart.entry.CSGMEntry;
-import com.itservices.gpxanalyzer.logbook.chart.entry.GlucoseEntry;
-import com.itservices.gpxanalyzer.logbook.chart.entry.IconsUtil;
+import com.itservices.gpxanalyzer.logbook.chart.entry.CurveMeasurementEntry;
+import com.itservices.gpxanalyzer.utils.common.PrecisionUtil;
+import com.itservices.gpxanalyzer.logbook.chart.entry.SingleMeasurementEntry;
+import com.itservices.gpxanalyzer.utils.ui.IconsUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,105 +19,105 @@ import java.util.Vector;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.itservices.gpxanalyzer.logbook.chart.settings.GlucoseBoundariesPreferences;
+import com.itservices.gpxanalyzer.logbook.chart.settings.MeasurementBoundariesPreferences;
 
 @Singleton
 public class LineChartScaledEntries {
-	private static List<Drawable>  csgmDrawableIconList = new ArrayList<>();
-	private static List<Drawable> glucoseDrawableIconList = new ArrayList<>();
+	private static List<Drawable> valuesIndicatorDrawableIconList = new ArrayList<>();
+	private static List<Drawable> measurementDrawableIconList = new ArrayList<>();
 
-	private StatisticResults csgmStatisticResults = null;
-	private StatisticResults glucoseStatisticResults = null;
-	private GlucoseBoundariesPreferences glucose;
+	private StatisticResults measurementCurveStatisticResults = null;
+	private StatisticResults measurementStatisticResults = null;
+	private MeasurementBoundariesPreferences measurement;
 
 	@Inject
-	LineChartScaledEntries(GlucoseBoundariesPreferences glucose) {
-		this.glucose = glucose;
-		csgmDrawableIconList = IconsUtil.generateDrawableIconForAreaList(10, 255);
-		glucoseDrawableIconList = IconsUtil.generateDrawableIconForAreaList(15, 255);
+	LineChartScaledEntries(MeasurementBoundariesPreferences measurement) {
+		this.measurement = measurement;
+		valuesIndicatorDrawableIconList = IconsUtil.generateDrawableIconForAreaList(10, 255);
+		measurementDrawableIconList = IconsUtil.generateDrawableIconForAreaList(15, 255);
 	}
 
-	public ArrayList<Entry> createGlucoseEntryList(
-		Context context, StatisticResults glucoseStatisticResults
+	public ArrayList<Entry> createSingleMeasurementEntryList(
+		Context context, StatisticResults statisticResults
 	) {
-		Vector<Measurement> glucoseValues = glucoseStatisticResults.getMeasurements();
+		Vector<Measurement> measurementVector = statisticResults.getMeasurements();
 
 		int startXIndex = 0;
-		int endXIndex = glucoseValues.size();
+		int endXIndex = measurementVector.size();
 
 		ArrayList<Entry> scaledEntries = new ArrayList<>();
-		if (glucoseValues.isEmpty()) {
+		if (measurementVector.isEmpty()) {
 			return scaledEntries;
 		}
 
-		this.glucoseStatisticResults = glucoseStatisticResults;
+		this.measurementStatisticResults = statisticResults;
 
 		for (int i = startXIndex; i < endXIndex; i++) {
-			double value = glucoseValues.get(i).measurement;
+			double value = measurementVector.get(i).measurement;
 
 			scaledEntries.add(
-				GlucoseEntry.create(context, glucoseDrawableIconList, glucoseStatisticResults, i,
+				SingleMeasurementEntry.create(context, measurementDrawableIconList, statisticResults, i,
 						(float) value
 				));
 		}
 		return scaledEntries;
 	}
 
-	public ArrayList<Entry> createCSGMEntryList(
-		Context context, StatisticResults csgmStatisticResults
+	public ArrayList<Entry> createCurveMeasurementEntryList(
+		Context context, StatisticResults statisticResults
 	) {
-		Vector<Measurement> csgmValues = csgmStatisticResults.getMeasurements();
+		Vector<Measurement> measurementVector = statisticResults.getMeasurements();
 
 		int startXIndex = 0;
-		int endXIndex = csgmValues.size();
+		int endXIndex = measurementVector.size();
 
 		ArrayList<Entry> scaledEntries = new ArrayList<>();
-		if (csgmValues.isEmpty()) {
+		if (measurementVector.isEmpty()) {
 			return scaledEntries;
 		}
 
-		this.csgmStatisticResults = csgmStatisticResults;
+		this.measurementCurveStatisticResults = statisticResults;
 
 		for (int i = startXIndex; i < endXIndex; i++) {
-			double value = csgmValues.get(i).measurement;
+			double value = measurementVector.get(i).measurement;
 
-			scaledEntries.add(CSGMEntry.create(context, csgmDrawableIconList, csgmStatisticResults, i, (float) value));
+			scaledEntries.add(CurveMeasurementEntry.create(context, valuesIndicatorDrawableIconList, statisticResults, i, (float) value));
 		}
 		return scaledEntries;
 	}
 
-	public void update(CSGMLineChart lineChart) {
+	public void update(MeasurementCurveLineChart lineChart) {
 
 		//combinedChart.setAutoScaleMinMaxEnabled(true);
 
 		lineChart.setVisibleXRangeMinimum(0);
 
-		double glucoseMinStatisticsY = Double.MAX_VALUE;
-		double glucoseMaxStatisticsY = Double.MIN_VALUE;
+		double measurementMinStatisticsY = Double.MAX_VALUE;
+		double measurementMaxStatisticsY = Double.MIN_VALUE;
 
-		if (glucoseStatisticResults != null) {
-			glucoseMinStatisticsY = glucoseStatisticResults.getMinValue();
-			glucoseMaxStatisticsY = glucoseStatisticResults.getMaxValue();
+		if (measurementStatisticResults != null) {
+			measurementMinStatisticsY = measurementStatisticResults.getMinValue();
+			measurementMaxStatisticsY = measurementStatisticResults.getMaxValue();
 		}
 
-		double csgmMinStatisticsY = Double.MAX_VALUE;
-		double csgmMaxStatisticsY = Double.MIN_VALUE;
+		double measurementCurveMinStatisticsY = Double.MAX_VALUE;
+		double measurementCurveMaxStatisticsY = Double.MIN_VALUE;
 
-		if (csgmStatisticResults != null) {
-			csgmMinStatisticsY = csgmStatisticResults.getMinValue();
-			csgmMaxStatisticsY = csgmStatisticResults.getMaxValue();
+		if (measurementCurveStatisticResults != null) {
+			measurementCurveMinStatisticsY = measurementCurveStatisticResults.getMinValue();
+			measurementCurveMaxStatisticsY = measurementCurveStatisticResults.getMaxValue();
 		}
 
-		double minStatisticsY = Double.min(csgmMinStatisticsY, glucoseMinStatisticsY);
-		double maxStatisticsY = Double.max(csgmMaxStatisticsY, glucoseMaxStatisticsY);
+		double minStatisticsY = Double.min(measurementCurveMinStatisticsY, measurementMinStatisticsY);
+		double maxStatisticsY = Double.max(measurementCurveMaxStatisticsY, measurementMaxStatisticsY);
 
-		double maxY = Double.max(maxStatisticsY, glucose.getMaxTargetGlucose());
-		double minY = Double.min(minStatisticsY, glucose.getMinTargetGlucose());
+		double maxY = Double.max(maxStatisticsY, measurement.getMaxTargetMeasurement());
+		double minY = Double.min(minStatisticsY, measurement.getMinTargetMeasurement());
 
-		maxY = Double.max(maxY, glucose.getUpperMax());
-		maxY = Double.max(maxY, glucose.getHyperMiddleValue());
-		maxY = Double.max(maxY, glucose.getMaxYLimitValue());
-		minY = Double.min(minY, glucose.getHypoglycemiaGlucose());
+		maxY = Double.max(maxY, measurement.getUpperMax());
+		maxY = Double.max(maxY, measurement.getHyperMiddleValue());
+		maxY = Double.max(maxY, measurement.getMaxYLimitValue());
+		minY = Double.min(minY, measurement.getLowMeasurement());
 
 		if (maxY > 1 && maxY > minY) {
 			lineChart.setVisibleXRangeMaximum(lineChart.getXRange());
@@ -127,7 +128,7 @@ public class LineChartScaledEntries {
 			YAxis leftAxis = lineChart.getAxisLeft();
 			leftAxis.setAxisMinimum((float) (minY - offset));
 
-			if (IconsUtil.isGreaterEqual((float) maxStatisticsY, (float) maxY, IconsUtil.NDIG_PREC_COMP)) {
+			if (PrecisionUtil.isGreaterEqual((float) maxStatisticsY, (float) maxY, PrecisionUtil.NDIG_PREC_COMP)) {
 				leftAxis.setAxisMaximum((float) (maxY + 2.0f * offset));
 			} else {
 				leftAxis.setAxisMaximum((float) maxY);

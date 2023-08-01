@@ -1,10 +1,11 @@
-package com.itservices.gpxanalyzer.logbook.chart.settings;
+package com.itservices.gpxanalyzer.logbook.chart.settings.axis;
 
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.formatter.IValueFormatter;
 import com.github.mikephil.charting.utils.ViewPortHandler;
+import com.itservices.gpxanalyzer.logbook.chart.settings.MeasurementBoundariesPreferences;
 
 import java.util.Arrays;
 import java.util.List;
@@ -13,15 +14,15 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
-public class GlucoseAxisValueFormatter implements IAxisValueFormatter, IValueFormatter {
+public class MeasurementAxisValueFormatter implements IAxisValueFormatter, IValueFormatter {
 
 	private static final int MIN_DISTANCE_VALUE_TO_DRAW = 5;
 
-	private final GlucoseBoundariesPreferences glucoseBoundariesPreferences;
+	private final MeasurementBoundariesPreferences measurementBoundariesPreferences;
 
 	@Inject
-	GlucoseAxisValueFormatter(GlucoseBoundariesPreferences glucoseBoundariesPreferences) {
-		this.glucoseBoundariesPreferences = glucoseBoundariesPreferences;
+	MeasurementAxisValueFormatter(MeasurementBoundariesPreferences measurementBoundariesPreferences) {
+		this.measurementBoundariesPreferences = measurementBoundariesPreferences;
 	}
 
 	public String getFormattedValue(float value) {
@@ -41,10 +42,10 @@ public class GlucoseAxisValueFormatter implements IAxisValueFormatter, IValueFor
 		int intVal = Math.round(value);
 
 		List<Integer> allowedValues = Arrays.asList(
-			glucoseBoundariesPreferences.getUpperMax(),
-			glucoseBoundariesPreferences.getMinTargetGlucose(),
-			glucoseBoundariesPreferences.getMaxTargetGlucose(),
-			glucoseBoundariesPreferences.getHypoglycemiaGlucose()
+			measurementBoundariesPreferences.getUpperMax(),
+			measurementBoundariesPreferences.getMinTargetMeasurement(),
+			measurementBoundariesPreferences.getMaxTargetMeasurement(),
+			measurementBoundariesPreferences.getLowMeasurement()
 		);
 
 		return isAllowedDistance(intVal, allowedValues);

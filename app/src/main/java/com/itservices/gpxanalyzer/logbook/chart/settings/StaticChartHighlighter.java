@@ -10,9 +10,9 @@ import com.github.mikephil.charting.interfaces.datasets.IDataSet;
 import com.github.mikephil.charting.listener.BarLineChartTouchListener;
 import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.utils.MPPointD;
-import com.itservices.gpxanalyzer.logbook.chart.CSGMLineChart;
+import com.itservices.gpxanalyzer.logbook.chart.MeasurementCurveLineChart;
 import com.itservices.gpxanalyzer.logbook.chart.entry.BaseEntry;
-import com.itservices.gpxanalyzer.logbook.chart.entry.CSGMEntry;
+import com.itservices.gpxanalyzer.logbook.chart.entry.CurveMeasurementEntry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +36,7 @@ public class StaticChartHighlighter<T extends BarLineScatterCandleBubbleDataProv
 
 		ArrayList<Highlight> highlights = new ArrayList<>();
 
-		if (((CSGMLineChart) mChart).isFullyZoomedOut()) {
+		if (((MeasurementCurveLineChart) mChart).isFullyZoomedOut()) {
 			highlights = getHighlightsForClassEntries(
 				BaseEntry.class, set, dataSetIndex, xVal, rounding);
 		} else {
@@ -57,7 +57,7 @@ public class StaticChartHighlighter<T extends BarLineScatterCandleBubbleDataProv
 				case FLING:
 				case DRAG:
 					highlights = getHighlightsForClassEntries(
-						CSGMEntry.class, set, dataSetIndex, xVal, rounding);
+						CurveMeasurementEntry.class, set, dataSetIndex, xVal, rounding);
 					break;
 			}
 		}

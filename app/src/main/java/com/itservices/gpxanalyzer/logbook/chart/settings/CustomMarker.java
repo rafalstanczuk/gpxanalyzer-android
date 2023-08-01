@@ -18,9 +18,10 @@ import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.utils.MPPointF;
 import com.itservices.gpxanalyzer.R;
-import com.itservices.gpxanalyzer.logbook.chart.CSGMLineChart;
-import com.itservices.gpxanalyzer.logbook.chart.entry.CSGMEntry;
-import com.itservices.gpxanalyzer.logbook.chart.entry.GlucoseEntry;
+import com.itservices.gpxanalyzer.logbook.chart.MeasurementCurveLineChart;
+import com.itservices.gpxanalyzer.logbook.chart.entry.CurveMeasurementEntry;
+import com.itservices.gpxanalyzer.logbook.chart.entry.SingleMeasurementEntry;
+import com.itservices.gpxanalyzer.utils.common.FormatNumberUtil;
 
 import java.util.Calendar;
 
@@ -48,21 +49,6 @@ public class CustomMarker extends MarkerView {
 		markerTextViewValue = findViewById(R.id.markerTextViewValue);
 	}
 
-	public static String formatTime(@NonNull Calendar calendar) {
-		int min = calendar.get(Calendar.MINUTE);
-		int hour = calendar.get(Calendar.HOUR_OF_DAY);
-
-		String time;
-
-		if (min < 10) {
-			time = hour + ":0" + min;
-		} else {
-			time = hour + ":" + min;
-		}
-
-		return time;
-	}
-
 	@NonNull
 	private SpannableStringBuilder getSpannableStringBuilder(String value, String postFixText) {
 		SpannableStringBuilder valueLine = new SpannableStringBuilder();
@@ -86,39 +72,39 @@ public class CustomMarker extends MarkerView {
 
 	@Override
 	public void refreshContent(Entry entry, Highlight highlight) {
-		CSGMLineChart chartView = (CSGMLineChart) getChartView();
+		MeasurementCurveLineChart chartView = (MeasurementCurveLineChart) getChartView();
 		currentEntry = entry;
 
 		ChartTouchListener.ChartGesture chartGesture = chartView.getChartTouchListener()
 			.getLastGesture();
 
-		if (entry instanceof CSGMEntry) {
-			CSGMEntry csgmEntry = (CSGMEntry) entry;
+		if (entry instanceof CurveMeasurementEntry) {
+			CurveMeasurementEntry curveMeasurementEntry = (CurveMeasurementEntry) entry;
 
-			Calendar calendar = csgmEntry.getCalendar();
+			Calendar calendar = curveMeasurementEntry.getCalendar();
 
 			/*String timeText = "\u231A ";
 			String valueString = "\uD83D\uDCA7 " ;*/
 
-			String unit = "[A]";
+			String unit = "[m]";
 
-			SpannableStringBuilder timeLine = getSpannableStringBuilder(formatTime(calendar), " h");
+			SpannableStringBuilder timeLine = getSpannableStringBuilder(FormatNumberUtil.getFormattedTime(calendar), " h");
 			SpannableStringBuilder valueLine = getSpannableStringBuilder(
-				String.valueOf((int) csgmEntry.getY()), " " + unit);
+				String.valueOf((int) curveMeasurementEntry.getY()), " " + unit);
 
 			markerTextViewTime.setText(timeLine, TextView.BufferType.SPANNABLE);
 			markerTextViewValue.setText(valueLine, TextView.BufferType.SPANNABLE);
-		} else if (entry instanceof GlucoseEntry) {
+		} else if (entry instanceof SingleMeasurementEntry) {
 
-			GlucoseEntry glucoseEntry = (GlucoseEntry) entry;
+			SingleMeasurementEntry singleMeasurementEntry = (SingleMeasurementEntry) entry;
 
-			Calendar calendar = glucoseEntry.getCalendar();
+			Calendar calendar = singleMeasurementEntry.getCalendar();
 
-			String unit = "[A]";
+			String unit = "[m]";
 
-			SpannableStringBuilder timeLine = getSpannableStringBuilder(formatTime(calendar), " h");
+			SpannableStringBuilder timeLine = getSpannableStringBuilder(FormatNumberUtil.getFormattedTime(calendar), " h");
 			SpannableStringBuilder valueLine = getSpannableStringBuilder(
-				String.valueOf((int) glucoseEntry.getY()), " " + unit);
+				String.valueOf((int) singleMeasurementEntry.getY()), " " + unit);
 
 			markerTextViewTime.setText(timeLine, TextView.BufferType.SPANNABLE);
 			markerTextViewValue.setText(valueLine, TextView.BufferType.SPANNABLE);
@@ -129,7 +115,7 @@ public class CustomMarker extends MarkerView {
 
 	@Override
 	public void draw(Canvas canvas, float posX, float posY) {
-		CSGMLineChart chartView = (CSGMLineChart) getChartView();
+		MeasurementCurveLineChart chartView = (MeasurementCurveLineChart) getChartView();
 
 		ChartTouchListener.ChartGesture chartGesture = chartView.getChartTouchListener()
 			.getLastGesture();

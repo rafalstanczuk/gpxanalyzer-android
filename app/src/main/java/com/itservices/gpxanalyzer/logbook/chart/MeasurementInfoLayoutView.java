@@ -8,28 +8,28 @@ import android.widget.TextView;
 
 import com.itservices.gpxanalyzer.R;
 
-public class CsgmInfoLayoutView extends LinearLayout {
+public class MeasurementInfoLayoutView extends LinearLayout {
 
 	private TextView textViewTime;
 	private TextView textViewValue;
 	private TextView textViewValueUnit;
 
-	public CsgmInfoLayoutView(Context context) {
+	public MeasurementInfoLayoutView(Context context) {
 		super(context);
 		initView(context);
 	}
 
-	public CsgmInfoLayoutView(Context context, AttributeSet attrs) {
+	public MeasurementInfoLayoutView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		initView(context);
 	}
 
-	public CsgmInfoLayoutView(Context context, AttributeSet attrs, int defStyleAttr) {
+	public MeasurementInfoLayoutView(Context context, AttributeSet attrs, int defStyleAttr) {
 		super(context, attrs, defStyleAttr);
 		initView(context);
 	}
 
-	public CsgmInfoLayoutView(
+	public MeasurementInfoLayoutView(
 		Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes
 	) {
 		super(context, attrs, defStyleAttr, defStyleRes);
@@ -39,7 +39,7 @@ public class CsgmInfoLayoutView extends LinearLayout {
 	private void initView(Context context) {
 		LayoutInflater inflater = (LayoutInflater) context.getSystemService(
 			Context.LAYOUT_INFLATER_SERVICE);
-		inflater.inflate(R.layout.csgm_chart_info_view, this, true);
+		inflater.inflate(R.layout.measurement_chart_info_view, this, true);
 
 		textViewTime = findViewById(R.id.textViewTime);
 		textViewValue = findViewById(R.id.textViewValue);
