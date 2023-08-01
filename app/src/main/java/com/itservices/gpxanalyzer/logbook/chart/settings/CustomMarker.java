@@ -20,7 +20,8 @@ import com.github.mikephil.charting.utils.MPPointF;
 import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.logbook.chart.MeasurementCurveLineChart;
 import com.itservices.gpxanalyzer.logbook.chart.entry.CurveMeasurementEntry;
-import com.itservices.gpxanalyzer.logbook.chart.entry.SingleMeasurementMeasurementEntry;
+import com.itservices.gpxanalyzer.logbook.chart.entry.SingleMeasurementEntry;
+import com.itservices.gpxanalyzer.utils.common.FormatNumberUtil;
 
 import java.util.Calendar;
 
@@ -46,21 +47,6 @@ public class CustomMarker extends MarkerView {
 
 		markerTextViewTime = findViewById(R.id.markerTextViewTime);
 		markerTextViewValue = findViewById(R.id.markerTextViewValue);
-	}
-
-	public static String formatTime(@NonNull Calendar calendar) {
-		int min = calendar.get(Calendar.MINUTE);
-		int hour = calendar.get(Calendar.HOUR_OF_DAY);
-
-		String time;
-
-		if (min < 10) {
-			time = hour + ":0" + min;
-		} else {
-			time = hour + ":" + min;
-		}
-
-		return time;
 	}
 
 	@NonNull
@@ -100,25 +86,25 @@ public class CustomMarker extends MarkerView {
 			/*String timeText = "\u231A ";
 			String valueString = "\uD83D\uDCA7 " ;*/
 
-			String unit = "[A]";
+			String unit = "[m]";
 
-			SpannableStringBuilder timeLine = getSpannableStringBuilder(formatTime(calendar), " h");
+			SpannableStringBuilder timeLine = getSpannableStringBuilder(FormatNumberUtil.getFormattedTime(calendar), " h");
 			SpannableStringBuilder valueLine = getSpannableStringBuilder(
 				String.valueOf((int) curveMeasurementEntry.getY()), " " + unit);
 
 			markerTextViewTime.setText(timeLine, TextView.BufferType.SPANNABLE);
 			markerTextViewValue.setText(valueLine, TextView.BufferType.SPANNABLE);
-		} else if (entry instanceof SingleMeasurementMeasurementEntry) {
+		} else if (entry instanceof SingleMeasurementEntry) {
 
-			SingleMeasurementMeasurementEntry singleMeasurementMeasurementEntry = (SingleMeasurementMeasurementEntry) entry;
+			SingleMeasurementEntry singleMeasurementEntry = (SingleMeasurementEntry) entry;
 
-			Calendar calendar = singleMeasurementMeasurementEntry.getCalendar();
+			Calendar calendar = singleMeasurementEntry.getCalendar();
 
-			String unit = "[A]";
+			String unit = "[m]";
 
-			SpannableStringBuilder timeLine = getSpannableStringBuilder(formatTime(calendar), " h");
+			SpannableStringBuilder timeLine = getSpannableStringBuilder(FormatNumberUtil.getFormattedTime(calendar), " h");
 			SpannableStringBuilder valueLine = getSpannableStringBuilder(
-				String.valueOf((int) singleMeasurementMeasurementEntry.getY()), " " + unit);
+				String.valueOf((int) singleMeasurementEntry.getY()), " " + unit);
 
 			markerTextViewTime.setText(timeLine, TextView.BufferType.SPANNABLE);
 			markerTextViewValue.setText(valueLine, TextView.BufferType.SPANNABLE);

@@ -5,7 +5,7 @@ import android.graphics.Color;
 
 import com.github.mikephil.charting.components.LimitLine;
 import com.itservices.gpxanalyzer.R;
-import com.itservices.gpxanalyzer.logbook.chart.entry.ColorUtil;
+import com.itservices.gpxanalyzer.utils.ui.ColorUtil;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

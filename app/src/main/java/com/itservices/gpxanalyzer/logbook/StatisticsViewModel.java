@@ -1,14 +1,10 @@
 package com.itservices.gpxanalyzer.logbook;
 
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-
-
 import javax.inject.Inject;
-
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
 @HiltViewModel
@@ -22,7 +18,7 @@ public class StatisticsViewModel extends ViewModel {
 		return _measurementStatisticResults;
 	}
 
-	public LiveData<StatisticResults> getCGMSStatisticResults() {
+	public LiveData<StatisticResults> getCurveMeasurementsStatisticResults() {
 		return _curveMeasurementStatisticResults;
 	}
 
@@ -33,6 +29,6 @@ public class StatisticsViewModel extends ViewModel {
 	public StatisticsViewModel() {}
 
 	public void refreshStatisticResults() {
-		_measurementStatisticResults.setValue(statisticResults);
+		_curveMeasurementStatisticResults.setValue(statisticResults);
 	}
 }

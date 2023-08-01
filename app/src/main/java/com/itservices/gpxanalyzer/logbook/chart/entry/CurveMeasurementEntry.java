@@ -17,7 +17,8 @@ import java.util.Calendar;
 import java.util.List;
 
 import com.itservices.gpxanalyzer.logbook.StatisticResults;
-import com.itservices.gpxanalyzer.logbook.chart.settings.HourMinutesAxisValueFormatter;
+import com.itservices.gpxanalyzer.logbook.chart.settings.axis.HourMinutesAxisValueFormatter;
+import com.itservices.gpxanalyzer.utils.ui.ColorUtil;
 
 public class CurveMeasurementEntry extends BaseEntry {
 	public static final String CURVE_MEASUREMENT = "CURVE_MEASUREMENT";
@@ -51,8 +52,7 @@ public class CurveMeasurementEntry extends BaseEntry {
 			Log.e("MeasurementCurveEntry", "create: ", ex);
 		}
 
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTimeInMillis(statisticResults.getMeasurements().elementAt((int) x).timestamp);
+		Calendar calendar = statisticResults.getMeasurements().elementAt((int) x).timestamp;
 
 		float timeConcat = HourMinutesAxisValueFormatter.combineIntoFloatTime(calendar);
 
@@ -63,7 +63,7 @@ public class CurveMeasurementEntry extends BaseEntry {
 	}
 
 	@NonNull
-	public static LineDataSet createMeasurementCurveLineDataSet(ArrayList<Entry> entries) {
+	public static LineDataSet createCurveMeasurementLineDataSet(ArrayList<Entry> entries) {
 		LineDataSet dataSet = new LineDataSet(entries, CURVE_MEASUREMENT);
 		dataSet.setMode(LineDataSet.Mode.HORIZONTAL_BEZIER);
 		dataSet.setHighlightEnabled(true);

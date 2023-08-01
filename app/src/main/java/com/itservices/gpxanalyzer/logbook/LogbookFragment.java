@@ -127,11 +127,9 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 						Calendar calendar = Calendar.getInstance();
 						calendar.setTime(trackPoint.getTime().toDate());
 
-						measurement.timestamp = calendar.getTimeInMillis();
+						measurement.timestamp = calendar;
 
 						statisticResults.addMeasurements(measurement);
-
-
 					}
 				}
 			}
@@ -160,13 +158,13 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 	}
 
 	private void resetMeasurementCurveMarkerAndClearSelection() {
-		if (logbookViewModel.isCGMSMode()) {
+		if (logbookViewModel.isTrendCurveMode()) {
 			chartViewModel.resetMarkerAndClearSelection(binding.lineChart);
 		}
 	}
 
 	private void resetMeasurementCurveMarkerAndSaveSelection() {
-		if (logbookViewModel.isCGMSMode()) {
+		if (logbookViewModel.isTrendCurveMode()) {
 			chartViewModel.resetMarkerAndSaveSelection(binding.lineChart);
 		}
 	}
@@ -206,15 +204,15 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 				chartViewModel.selectMarker(binding.lineChart, selectedColumnTimeInt);
 			});
 
-		statisticsViewModel.getCGMSStatisticResults()
+		statisticsViewModel.getCurveMeasurementsStatisticResults()
 			.observe(getViewLifecycleOwner(), curveMeasurementStatisticResults ->
-				chartViewModel.updateMeasurementCurveLineDataSetFrom(
+				chartViewModel.updateCurveMeasurementLineDataSetFrom(
 					requireContext(), curveMeasurementStatisticResults)
 			);
 
 		statisticsViewModel.getMeasurementStatisticResults()
 			.observe(getViewLifecycleOwner(), measurementStatisticResults ->
-				chartViewModel.updateMeasurementDataSetFrom(
+				chartViewModel.updateSingleMeasurementDataSetFrom(
 					requireContext(), measurementStatisticResults)
 			);
 

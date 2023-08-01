@@ -2,7 +2,7 @@ package com.itservices.gpxanalyzer.logbook.chart.settings;
 
 import android.content.Context;
 
-import com.itservices.gpxanalyzer.logbook.chart.entry.ColorUtil;
+import com.itservices.gpxanalyzer.utils.ui.ColorUtil;
 
 import java.util.Arrays;
 import java.util.List;

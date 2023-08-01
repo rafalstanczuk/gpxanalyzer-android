@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.logbook.chart.entry;
+package com.itservices.gpxanalyzer.utils.ui;
 
 import android.content.Context;
 import android.graphics.Bitmap;

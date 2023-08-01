@@ -1,15 +1,14 @@
 package com.itservices.gpxanalyzer.logbook.chart;
 
 import static com.itservices.gpxanalyzer.logbook.chart.entry.CurveMeasurementEntry.CURVE_MEASUREMENT;
-import static com.itservices.gpxanalyzer.logbook.chart.entry.IconsUtil.getTimeAsIntFromDate;
-import static com.itservices.gpxanalyzer.logbook.chart.settings.CustomMarker.formatTime;
-import static com.itservices.gpxanalyzer.logbook.chart.settings.HourMinutesAxisValueFormatter.MIN_X_SCALED_TIME;
+import static com.itservices.gpxanalyzer.logbook.chart.settings.axis.HourMinutesAxisValueFormatter.MIN_X_SCALED_TIME;
 import static com.itservices.gpxanalyzer.logbook.chart.settings.Measurement5RangesUtil.RANGE_ID_ABOVE_HYPER_LIMIT_ORANGE;
 import static com.itservices.gpxanalyzer.logbook.chart.settings.Measurement5RangesUtil.RANGE_ID_ABOVE_TARGET_MAX_BELOW_HYPER_LIMIT_YELLOW;
 import static com.itservices.gpxanalyzer.logbook.chart.settings.Measurement5RangesUtil.RANGE_ID_BELOW_HYPO_LIMIT_RED;
 import static com.itservices.gpxanalyzer.logbook.chart.settings.Measurement5RangesUtil.RANGE_ID_BELOW_TARGET_MIN_ABOVE_HYPO_LIMIT_PINK;
 import static com.itservices.gpxanalyzer.logbook.chart.settings.Measurement5RangesUtil.RANGE_ID_IN_TARGET_MIN_MAX_GREEN;
 import static com.itservices.gpxanalyzer.logbook.chart.settings.Measurement5RangesUtil.getColorForAreaId;
+import static com.itservices.gpxanalyzer.utils.common.FormatNumberUtil.getFormattedTime;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -27,7 +26,7 @@ import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.utils.MPPointF;
 import com.github.mikephil.charting.utils.ViewPortHandler;
 import com.itservices.gpxanalyzer.MainActivity;
-import com.itservices.gpxanalyzer.logbook.chart.entry.SingleMeasurementMeasurementEntry;
+import com.itservices.gpxanalyzer.logbook.chart.entry.SingleMeasurementEntry;
 
 import java.util.Calendar;
 
@@ -65,7 +64,7 @@ public class MeasurementCurveLineChart extends LineChart {
 	}
 
 	public static int getDataSetIndexForEntryWithTimeInt(
-		MeasurementCurveLineChart lineChart, int csgmEntryTimeInt
+		MeasurementCurveLineChart lineChart, long entryTimeInt
 	) {
 		int dataSetIndexToHighlight = 0;
 
@@ -76,17 +75,17 @@ public class MeasurementCurveLineChart extends LineChart {
 
 			LineDataSet lineDataSet = (LineDataSet) iLineDataSet;
 
-			for (Entry entryLinedata : lineDataSet.getValues()) {
+			for (Entry entryLineData : lineDataSet.getEntries()) {
 
-				if (!(entryLinedata instanceof BaseEntry)) {
+				if (!(entryLineData instanceof BaseEntry)) {
 					break;
 				}
 
-				Calendar calendar = ((BaseEntry) entryLinedata).getCalendar();
+				Calendar calendar = ((BaseEntry) entryLineData).getCalendar();
 
-				int timeInt = getTimeAsIntFromDate(calendar);
+				long timeInt = calendar.getTime().getTime();
 
-				if (timeInt == csgmEntryTimeInt) {
+				if (timeInt == entryTimeInt) {
 					dataSetIndexToHighlight = dataSetIndex;
 
 					break;
@@ -259,9 +258,9 @@ public class MeasurementCurveLineChart extends LineChart {
 		if (entry instanceof BaseEntry) {
 			BaseEntry baseEntry = (BaseEntry) entry;
 
-			int csgmEntryTimeInt = getTimeAsIntFromDate(baseEntry.getCalendar());
+			long entryTimeInt = baseEntry.getCalendar().getTime().getTime();
 			int dataSetIndexToHighlight = getDataSetIndexForEntryWithTimeInt(
-				this, csgmEntryTimeInt);
+				this, entryTimeInt);
 
 			if (baseEntry != null) {
 				highlightValue(baseEntry.getX(), baseEntry.getY(), dataSetIndexToHighlight, true);
@@ -284,16 +283,16 @@ public class MeasurementCurveLineChart extends LineChart {
 
 		Calendar calendar = baseEntry.getCalendar();
 
-		String unit = "[A]";
+		String unit = "[m]";
 
 		if (selectedEntry instanceof CurveMeasurementEntry) {
 
-		} else if (selectedEntry instanceof SingleMeasurementMeasurementEntry) {
+		} else if (selectedEntry instanceof SingleMeasurementEntry) {
 
 		}
 
 		activity.runOnUiThread(() -> {
-			measurementInfoLayoutView.setTime(formatTime(calendar));
+			measurementInfoLayoutView.setTime(getFormattedTime(calendar));
 			measurementInfoLayoutView.setValue(String.valueOf((int) baseEntry.getY()));
 			measurementInfoLayoutView.setValueUnit(unit);
 

@@ -17,18 +17,18 @@ import java.util.Calendar;
 import java.util.List;
 
 import com.itservices.gpxanalyzer.logbook.StatisticResults;
-import com.itservices.gpxanalyzer.logbook.chart.settings.HourMinutesAxisValueFormatter;
+import com.itservices.gpxanalyzer.logbook.chart.settings.axis.HourMinutesAxisValueFormatter;
 
-public class SingleMeasurementMeasurementEntry extends BaseEntry {
+public class SingleMeasurementEntry extends BaseEntry {
 	public static final String MEASUREMENT = "MEASUREMENT";
 
-	SingleMeasurementMeasurementEntry(
+	SingleMeasurementEntry(
 		Calendar calendar, float x, float y, Drawable icon, StatisticResults statisticResults
 	) {
 		super(x, y, icon, statisticResults, calendar);
 	}
 
-	public static SingleMeasurementMeasurementEntry create(
+	public static SingleMeasurementEntry create(
 		Context context, List<Drawable> drawableIconList, StatisticResults statisticResults,
 		float x, float y
 	) {
@@ -44,16 +44,15 @@ public class SingleMeasurementMeasurementEntry extends BaseEntry {
 		}
 
 
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTimeInMillis(statisticResults.getMeasurements().elementAt((int) x).timestamp);
+		Calendar calendar = statisticResults.getMeasurements().elementAt((int) x).timestamp;
 
 		float timeConcat = HourMinutesAxisValueFormatter.combineIntoFloatTime(calendar);
 
-		return new SingleMeasurementMeasurementEntry(calendar, timeConcat, y, drawableIcon, statisticResults);
+		return new SingleMeasurementEntry(calendar, timeConcat, y, drawableIcon, statisticResults);
 	}
 
 	@NonNull
-	public static LineDataSet createMeasurementLineDataSet(ArrayList<Entry> entries) {
+	public static LineDataSet createSingleMeasurementLineDataSet(ArrayList<Entry> entries) {
 		LineDataSet updatedDataSet = new LineDataSet(entries, MEASUREMENT);
 
 		updatedDataSet.setLineWidth(0.0f);

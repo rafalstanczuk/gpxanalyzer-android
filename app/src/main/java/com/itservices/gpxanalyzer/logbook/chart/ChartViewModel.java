@@ -14,8 +14,7 @@ import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.itservices.gpxanalyzer.logbook.StatisticResults;
 import com.itservices.gpxanalyzer.logbook.chart.entry.BaseEntry;
 import com.itservices.gpxanalyzer.logbook.chart.entry.CurveMeasurementEntry;
-import com.itservices.gpxanalyzer.logbook.chart.entry.SingleMeasurementMeasurementEntry;
-import com.itservices.gpxanalyzer.logbook.chart.entry.IconsUtil;
+import com.itservices.gpxanalyzer.logbook.chart.entry.SingleMeasurementEntry;
 import com.itservices.gpxanalyzer.logbook.chart.settings.LineChartSettings;
 
 import java.util.ArrayList;
@@ -31,7 +30,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 public class ChartViewModel extends ViewModel {
 
 	private static final List<String> TARGET_MATCHED_LINE_LABEL_DATA_TO_SHOW_WITH_MEASUREMENT_BOUNDARIES = Arrays.asList(
-		SingleMeasurementMeasurementEntry.MEASUREMENT);
+		CurveMeasurementEntry.CURVE_MEASUREMENT);
 
 	private final MutableLiveData<List<LineDataSet>> lineDataSetListToAddLive = new MutableLiveData<>();
 
@@ -61,35 +60,35 @@ public class ChartViewModel extends ViewModel {
 		return lineDataSetListToAddLive;
 	}
 
-	public void updateMeasurementCurveLineDataSetFrom(
+	public void updateCurveMeasurementLineDataSetFrom(
 		Context context, StatisticResults curveMeasurementStatisticResults
 	) {
 		if (curveMeasurementStatisticResults == null) {
 			return;
 		}
 
-		ArrayList<Entry> entries = lineChartScaledEntries.createMeasurementCurveEntryList(
+		ArrayList<Entry> entries = lineChartScaledEntries.createCurveMeasurementEntryList(
 			context, curveMeasurementStatisticResults);
 
 		if (!entries.isEmpty()) {
-			LineDataSet measurementCurveLineDataSet = CurveMeasurementEntry.createMeasurementCurveLineDataSet(entries);
+			LineDataSet measurementCurveLineDataSet = CurveMeasurementEntry.createCurveMeasurementLineDataSet(entries);
 
 			addToLineDataSetListLive(measurementCurveLineDataSet);
 		}
 	}
 
-	public void updateMeasurementDataSetFrom(
-		Context context, StatisticResults measurementStatisticResults
+	public void updateSingleMeasurementDataSetFrom(
+		Context context, StatisticResults statisticResults
 	) {
-		if (measurementStatisticResults == null) {
+		if (statisticResults == null) {
 			return;
 		}
 
-		ArrayList<Entry> entries = lineChartScaledEntries.createMeasurementEntryList(context,
-			measurementStatisticResults
+		ArrayList<Entry> entries = lineChartScaledEntries.createSingleMeasurementEntryList(context,
+			statisticResults
 		);
 
-		LineDataSet measurementLineDataSet = SingleMeasurementMeasurementEntry.createMeasurementLineDataSet(entries);
+		LineDataSet measurementLineDataSet = SingleMeasurementEntry.createSingleMeasurementLineDataSet(entries);
 
 		addToLineDataSetListLive(measurementLineDataSet);
 	}
@@ -182,7 +181,7 @@ public class ChartViewModel extends ViewModel {
 		entryToHighlightTimeInt.setValue(entryTimeToSelect);
 	}
 
-	public void selectMarker(MeasurementCurveLineChart lineChart, Integer selectedColumnTimeInt) {
+	public void selectMarker(MeasurementCurveLineChart lineChart, long selectedColumnTimeInt) {
 
 		if (selectedColumnTimeInt < 0) {
 			lineChart.highlightValue(null, false);
@@ -209,7 +208,7 @@ public class ChartViewModel extends ViewModel {
 
 				Calendar calendar = ((BaseEntry) entry).getCalendar();
 
-				int timeInt = IconsUtil.getTimeAsIntFromDate(calendar);
+				long timeInt = calendar.getTime().getTime();
 
 				if (timeInt == selectedColumnTimeInt) {
 					lineChart.highlightValue(entry.getX(), entry.getY(), dataSetIndex, true);

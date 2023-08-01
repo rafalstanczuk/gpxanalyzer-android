@@ -8,8 +8,9 @@ import com.github.mikephil.charting.data.Entry;
 import com.itservices.gpxanalyzer.logbook.Measurement;
 import com.itservices.gpxanalyzer.logbook.StatisticResults;
 import com.itservices.gpxanalyzer.logbook.chart.entry.CurveMeasurementEntry;
-import com.itservices.gpxanalyzer.logbook.chart.entry.SingleMeasurementMeasurementEntry;
-import com.itservices.gpxanalyzer.logbook.chart.entry.IconsUtil;
+import com.itservices.gpxanalyzer.utils.common.PrecisionUtil;
+import com.itservices.gpxanalyzer.logbook.chart.entry.SingleMeasurementEntry;
+import com.itservices.gpxanalyzer.utils.ui.IconsUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,65 +23,65 @@ import com.itservices.gpxanalyzer.logbook.chart.settings.MeasurementBoundariesPr
 
 @Singleton
 public class LineChartScaledEntries {
-	private static List<Drawable>  csgmDrawableIconList = new ArrayList<>();
+	private static List<Drawable> valuesIndicatorDrawableIconList = new ArrayList<>();
 	private static List<Drawable> measurementDrawableIconList = new ArrayList<>();
 
-	private StatisticResults csgmStatisticResults = null;
+	private StatisticResults measurementCurveStatisticResults = null;
 	private StatisticResults measurementStatisticResults = null;
 	private MeasurementBoundariesPreferences measurement;
 
 	@Inject
 	LineChartScaledEntries(MeasurementBoundariesPreferences measurement) {
 		this.measurement = measurement;
-		csgmDrawableIconList = IconsUtil.generateDrawableIconForAreaList(10, 255);
+		valuesIndicatorDrawableIconList = IconsUtil.generateDrawableIconForAreaList(10, 255);
 		measurementDrawableIconList = IconsUtil.generateDrawableIconForAreaList(15, 255);
 	}
 
-	public ArrayList<Entry> createMeasurementEntryList(
-		Context context, StatisticResults measurementStatisticResults
+	public ArrayList<Entry> createSingleMeasurementEntryList(
+		Context context, StatisticResults statisticResults
 	) {
-		Vector<Measurement> measurementValues = measurementStatisticResults.getMeasurements();
+		Vector<Measurement> measurementVector = statisticResults.getMeasurements();
 
 		int startXIndex = 0;
-		int endXIndex = measurementValues.size();
+		int endXIndex = measurementVector.size();
 
 		ArrayList<Entry> scaledEntries = new ArrayList<>();
-		if (measurementValues.isEmpty()) {
+		if (measurementVector.isEmpty()) {
 			return scaledEntries;
 		}
 
-		this.measurementStatisticResults = measurementStatisticResults;
+		this.measurementStatisticResults = statisticResults;
 
 		for (int i = startXIndex; i < endXIndex; i++) {
-			double value = measurementValues.get(i).measurement;
+			double value = measurementVector.get(i).measurement;
 
 			scaledEntries.add(
-				SingleMeasurementMeasurementEntry.create(context, measurementDrawableIconList, measurementStatisticResults, i,
+				SingleMeasurementEntry.create(context, measurementDrawableIconList, statisticResults, i,
 						(float) value
 				));
 		}
 		return scaledEntries;
 	}
 
-	public ArrayList<Entry> createMeasurementCurveEntryList(
-		Context context, StatisticResults csgmStatisticResults
+	public ArrayList<Entry> createCurveMeasurementEntryList(
+		Context context, StatisticResults statisticResults
 	) {
-		Vector<Measurement> csgmValues = csgmStatisticResults.getMeasurements();
+		Vector<Measurement> measurementVector = statisticResults.getMeasurements();
 
 		int startXIndex = 0;
-		int endXIndex = csgmValues.size();
+		int endXIndex = measurementVector.size();
 
 		ArrayList<Entry> scaledEntries = new ArrayList<>();
-		if (csgmValues.isEmpty()) {
+		if (measurementVector.isEmpty()) {
 			return scaledEntries;
 		}
 
-		this.csgmStatisticResults = csgmStatisticResults;
+		this.measurementCurveStatisticResults = statisticResults;
 
 		for (int i = startXIndex; i < endXIndex; i++) {
-			double value = csgmValues.get(i).measurement;
+			double value = measurementVector.get(i).measurement;
 
-			scaledEntries.add(CurveMeasurementEntry.create(context, csgmDrawableIconList, csgmStatisticResults, i, (float) value));
+			scaledEntries.add(CurveMeasurementEntry.create(context, valuesIndicatorDrawableIconList, statisticResults, i, (float) value));
 		}
 		return scaledEntries;
 	}
@@ -99,16 +100,16 @@ public class LineChartScaledEntries {
 			measurementMaxStatisticsY = measurementStatisticResults.getMaxValue();
 		}
 
-		double csgmMinStatisticsY = Double.MAX_VALUE;
-		double csgmMaxStatisticsY = Double.MIN_VALUE;
+		double measurementCurveMinStatisticsY = Double.MAX_VALUE;
+		double measurementCurveMaxStatisticsY = Double.MIN_VALUE;
 
-		if (csgmStatisticResults != null) {
-			csgmMinStatisticsY = csgmStatisticResults.getMinValue();
-			csgmMaxStatisticsY = csgmStatisticResults.getMaxValue();
+		if (measurementCurveStatisticResults != null) {
+			measurementCurveMinStatisticsY = measurementCurveStatisticResults.getMinValue();
+			measurementCurveMaxStatisticsY = measurementCurveStatisticResults.getMaxValue();
 		}
 
-		double minStatisticsY = Double.min(csgmMinStatisticsY, measurementMinStatisticsY);
-		double maxStatisticsY = Double.max(csgmMaxStatisticsY, measurementMaxStatisticsY);
+		double minStatisticsY = Double.min(measurementCurveMinStatisticsY, measurementMinStatisticsY);
+		double maxStatisticsY = Double.max(measurementCurveMaxStatisticsY, measurementMaxStatisticsY);
 
 		double maxY = Double.max(maxStatisticsY, measurement.getMaxTargetMeasurement());
 		double minY = Double.min(minStatisticsY, measurement.getMinTargetMeasurement());
@@ -127,7 +128,7 @@ public class LineChartScaledEntries {
 			YAxis leftAxis = lineChart.getAxisLeft();
 			leftAxis.setAxisMinimum((float) (minY - offset));
 
-			if (IconsUtil.isGreaterEqual((float) maxStatisticsY, (float) maxY, IconsUtil.NDIG_PREC_COMP)) {
+			if (PrecisionUtil.isGreaterEqual((float) maxStatisticsY, (float) maxY, PrecisionUtil.NDIG_PREC_COMP)) {
 				leftAxis.setAxisMaximum((float) (maxY + 2.0f * offset));
 			} else {
 				leftAxis.setAxisMaximum((float) maxY);

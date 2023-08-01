@@ -2,9 +2,10 @@ package com.itservices.gpxanalyzer.logbook.chart.settings;
 
 import static com.github.mikephil.charting.charts.Chart.PAINT_GRID_BACKGROUND;
 
-import static com.itservices.gpxanalyzer.logbook.chart.settings.HourMinutesAxisValueFormatter.MAX_X_SCALED_TIME;
-import static com.itservices.gpxanalyzer.logbook.chart.settings.HourMinutesAxisValueFormatter.MIN_X_SCALED_TIME;
-import static com.itservices.gpxanalyzer.logbook.chart.settings.HourMinutesAxisValueFormatter.getFractionOfFullHourFromMinutes;
+import static com.itservices.gpxanalyzer.logbook.chart.settings.axis.HourMinutesAxisValueFormatter.MAX_X_SCALED_TIME;
+import static com.itservices.gpxanalyzer.logbook.chart.settings.axis.HourMinutesAxisValueFormatter.MIN_X_SCALED_TIME;
+import static com.itservices.gpxanalyzer.logbook.chart.settings.axis.HourMinutesAxisValueFormatter.getFractionOfFullHourFromMinutes;
+import static com.itservices.gpxanalyzer.logbook.chart.settings.axis.HourMinutesAxisValueFormatter.getFractionOfFullHourFromSeconds;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -14,6 +15,8 @@ import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.logbook.chart.MeasurementCurveLineChart;
+import com.itservices.gpxanalyzer.logbook.chart.settings.axis.HourMinutesAxisValueFormatter;
+import com.itservices.gpxanalyzer.logbook.chart.settings.axis.MeasurementAxisValueFormatter;
 
 
 import javax.inject.Inject;
@@ -24,7 +27,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext;
 @Singleton
 public class LineChartSettings {
 
-	private static final float GRANULARITY = getFractionOfFullHourFromMinutes(1);
+	private static final float GRANULARITY = getFractionOfFullHourFromSeconds(1);
 	private final CustomMarker customMarker;
 	private final HourMinutesAxisValueFormatter hourMinutesAxisValueFormatter;
 	private final MeasurementAxisValueFormatter measurementAxisValueFormatter;
