@@ -25,8 +25,8 @@ import com.itservices.gpxanalyzer.logbook.chart.settings.MeasurementBoundariesPr
 
 @Singleton
 public class LineChartScaledEntries {
-	private static List<Drawable> valuesIndicatorDrawableIconList = new ArrayList<>();
-	private static List<Drawable> measurementDrawableIconList = new ArrayList<>();
+	private static List<Drawable> curveValuesIndicatorDrawableIconList = new ArrayList<>();
+	private static List<Drawable> singleValuesIndicatorDrawableIconList = new ArrayList<>();
 
 	private StatisticResults measurementCurveStatisticResults = null;
 	private StatisticResults measurementSingleStatisticResults = null;
@@ -35,8 +35,8 @@ public class LineChartScaledEntries {
 	@Inject
 	LineChartScaledEntries(MeasurementBoundariesPreferences boundariesPreferences) {
 		this.boundariesPreferences = boundariesPreferences;
-		valuesIndicatorDrawableIconList = IconsUtil.generateDrawableIconForAreaList(10, 255);
-		measurementDrawableIconList = IconsUtil.generateDrawableIconForAreaList(15, 255);
+		curveValuesIndicatorDrawableIconList = IconsUtil.generateDrawableIconForAreaList(10, 255);
+		singleValuesIndicatorDrawableIconList = IconsUtil.generateDrawableIconForAreaList(15, 255);
 	}
 
 	public ArrayList<Entry> createSingleMeasurementEntryList(
@@ -58,7 +58,7 @@ public class LineChartScaledEntries {
 			double value = measurementVector.get(i).measurement;
 
 			scaledEntries.add(
-				SingleMeasurementEntry.create(context, measurementDrawableIconList, statisticResults, i,
+				SingleMeasurementEntry.create(context, singleValuesIndicatorDrawableIconList, statisticResults, i,
 						(float) value
 				));
 		}
@@ -83,7 +83,7 @@ public class LineChartScaledEntries {
 		for (int i = startXIndex; i < endXIndex; i++) {
 			double value = measurementVector.get(i).measurement;
 
-			scaledEntries.add(CurveMeasurementEntry.create(context, valuesIndicatorDrawableIconList, statisticResults, i, (float) value));
+			scaledEntries.add(CurveMeasurementEntry.create(context, curveValuesIndicatorDrawableIconList, statisticResults, i, (float) value));
 		}
 		return scaledEntries;
 	}
