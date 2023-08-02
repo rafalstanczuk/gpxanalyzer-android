@@ -46,15 +46,15 @@ public class Measurement5RangesUtil {
 
 	public static int getRangeOfMeasurement(int value, Context context) {
 
-		int hypo = (int) MeasurementBoundariesPreferences.LOW_VALUE_MEASUREMENT_DEFAULT;
+		int hypo = (int) MeasurementBoundariesPreferences.VALUE_0_MEASUREMENT;
 
 		if (value < hypo) {
 			return RANGE_ID_BELOW_HYPO_LIMIT_RED;
-		} else if (value < MeasurementBoundariesPreferences.MEASUREMENT_TARGET_DEFAULT_MIN) {
+		} else if (value < MeasurementBoundariesPreferences.VALUE_1_MEASUREMENT) {
 			return RANGE_ID_BELOW_TARGET_MIN_ABOVE_HYPO_LIMIT_PINK;
-		} else if (value <= MeasurementBoundariesPreferences.MEASUREMENT_TARGET_DEFAULT_MAX) {
+		} else if (value <= MeasurementBoundariesPreferences.VALUE_2_MEASUREMENT) {
 			return RANGE_ID_IN_TARGET_MIN_MAX_GREEN;
-		} else if (value <= MeasurementBoundariesPreferences.MEASUREMENT_UPPER_MAX) {
+		} else if (value <= MeasurementBoundariesPreferences.VALUE_3_MEASUREMENT) {
 			return RANGE_ID_ABOVE_TARGET_MAX_BELOW_HYPER_LIMIT_YELLOW;
 		}
 

@@ -104,7 +104,6 @@ public class MeasurementCurveLineChart extends LineChart {
 		} catch (Exception ignored) {
 		}
 
-		measurement.initValues(getContext());
 	}
 
 	@Override
@@ -159,13 +158,13 @@ public class MeasurementCurveLineChart extends LineChart {
 
 			switch (areaid) {
 				case RANGE_ID_ABOVE_HYPER_LIMIT_ORANGE: {
-					if (measurement.getUpperMax() > 0) {
-						leftMin = getPosition(new Entry(MIN_X_SCALED_TIME, measurement.getUpperMax()),
+					if (measurement.getLimitValue3() > 0) {
+						leftMin = getPosition(new Entry(MIN_X_SCALED_TIME, measurement.getLimitValue3()),
 							YAxis.AxisDependency.LEFT
 						);
 					} else {
 						leftMin = getPosition(
-							new Entry(MIN_X_SCALED_TIME, measurement.getMaxTargetMeasurement()),
+							new Entry(MIN_X_SCALED_TIME, measurement.getLimitValue2()),
 							YAxis.AxisDependency.LEFT
 						);
 					}
@@ -174,12 +173,12 @@ public class MeasurementCurveLineChart extends LineChart {
 					break;
 				}
 				case RANGE_ID_ABOVE_TARGET_MAX_BELOW_HYPER_LIMIT_YELLOW: {
-					if (measurement.getUpperMax() > 0) {
+					if (measurement.getLimitValue3() > 0) {
 						leftMin = getPosition(
-							new Entry(MIN_X_SCALED_TIME, measurement.getMaxTargetMeasurement()),
+							new Entry(MIN_X_SCALED_TIME, measurement.getLimitValue2()),
 							YAxis.AxisDependency.LEFT
 						);
-						leftMax = getPosition(new Entry(MIN_X_SCALED_TIME, measurement.getUpperMax()),
+						leftMax = getPosition(new Entry(MIN_X_SCALED_TIME, measurement.getLimitValue3()),
 							YAxis.AxisDependency.LEFT
 						);
 					}
@@ -187,22 +186,22 @@ public class MeasurementCurveLineChart extends LineChart {
 				}
 				case RANGE_ID_IN_TARGET_MIN_MAX_GREEN: {
 					leftMin = getPosition(
-						new Entry(MIN_X_SCALED_TIME, measurement.getMinTargetMeasurement()),
+						new Entry(MIN_X_SCALED_TIME, measurement.getLimitValue1()),
 						YAxis.AxisDependency.LEFT
 					);
 					leftMax = getPosition(
-						new Entry(MIN_X_SCALED_TIME, measurement.getMaxTargetMeasurement()),
+						new Entry(MIN_X_SCALED_TIME, measurement.getLimitValue2()),
 						YAxis.AxisDependency.LEFT
 					);
 					break;
 				}
 				case RANGE_ID_BELOW_TARGET_MIN_ABOVE_HYPO_LIMIT_PINK: {
 					leftMin = getPosition(
-						new Entry(MIN_X_SCALED_TIME, measurement.getLowMeasurement()),
+						new Entry(MIN_X_SCALED_TIME, measurement.getLimitValue0()),
 						YAxis.AxisDependency.LEFT
 					);
 					leftMax = getPosition(
-						new Entry(MIN_X_SCALED_TIME, measurement.getMinTargetMeasurement()),
+						new Entry(MIN_X_SCALED_TIME, measurement.getLimitValue1()),
 						YAxis.AxisDependency.LEFT
 					);
 					break;
@@ -211,7 +210,7 @@ public class MeasurementCurveLineChart extends LineChart {
 					leftMin = getPosition(
 						new Entry(MIN_X_SCALED_TIME, getYChartMin()), YAxis.AxisDependency.LEFT);
 					leftMax = getPosition(
-						new Entry(MIN_X_SCALED_TIME, measurement.getLowMeasurement()),
+						new Entry(MIN_X_SCALED_TIME, measurement.getLimitValue0()),
 						YAxis.AxisDependency.LEFT
 					);
 					break;
@@ -235,8 +234,8 @@ public class MeasurementCurveLineChart extends LineChart {
 	}
 
 	public boolean hasMinMaxMeasurement() {
-		return measurement.getMinTargetMeasurement() != Integer.MAX_VALUE &&
-			measurement.getMaxTargetMeasurement() != Integer.MIN_VALUE;
+		return measurement.getLimitValue1() != Integer.MAX_VALUE &&
+			measurement.getLimitValue2() != Integer.MIN_VALUE;
 	}
 
 	@Override

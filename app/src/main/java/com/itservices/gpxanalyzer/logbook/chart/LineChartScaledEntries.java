@@ -13,6 +13,8 @@ import com.itservices.gpxanalyzer.logbook.chart.entry.SingleMeasurementEntry;
 import com.itservices.gpxanalyzer.utils.ui.IconsUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Vector;
 
@@ -28,11 +30,11 @@ public class LineChartScaledEntries {
 
 	private StatisticResults measurementCurveStatisticResults = null;
 	private StatisticResults measurementStatisticResults = null;
-	private MeasurementBoundariesPreferences measurement;
+	private MeasurementBoundariesPreferences boundariesPreferences;
 
 	@Inject
-	LineChartScaledEntries(MeasurementBoundariesPreferences measurement) {
-		this.measurement = measurement;
+	LineChartScaledEntries(MeasurementBoundariesPreferences boundariesPreferences) {
+		this.boundariesPreferences = boundariesPreferences;
 		valuesIndicatorDrawableIconList = IconsUtil.generateDrawableIconForAreaList(10, 255);
 		measurementDrawableIconList = IconsUtil.generateDrawableIconForAreaList(15, 255);
 	}
@@ -88,36 +90,38 @@ public class LineChartScaledEntries {
 
 	public void update(MeasurementCurveLineChart lineChart) {
 
+		List<Double> valYStatisticsList =
+				Arrays.asList(
+						0.0,
+						measurementStatisticResults!=null ? measurementStatisticResults.getMinValue() : 0.0,
+						measurementStatisticResults!=null ? measurementStatisticResults.getMaxValue() : 0.0,
+						measurementCurveStatisticResults!=null ? measurementCurveStatisticResults.getMinValue() : 0.0,
+						measurementCurveStatisticResults!=null ? measurementCurveStatisticResults.getMaxValue() : 0.0
+				);
+
+		List<Double> valYList =
+				Arrays.asList(
+						0.0,
+						measurementStatisticResults!=null ? measurementStatisticResults.getMinValue() : 0.0,
+						measurementStatisticResults!=null ? measurementStatisticResults.getMaxValue() : 0.0,
+						measurementCurveStatisticResults!=null ? measurementCurveStatisticResults.getMinValue() : 0.0,
+						measurementCurveStatisticResults!=null ? measurementCurveStatisticResults.getMaxValue() : 0.0,
+						(double) boundariesPreferences.getLimitValue0(),
+						(double) boundariesPreferences.getLimitValue1(),
+						(double) boundariesPreferences.getLimitValue2(),
+						(double) boundariesPreferences.getLimitValue3(),
+						(double) boundariesPreferences.getLimitValue4(),
+						(double) boundariesPreferences.getLimitValue5()
+				);
+
 		//combinedChart.setAutoScaleMinMaxEnabled(true);
 
 		lineChart.setVisibleXRangeMinimum(0);
 
-		double measurementMinStatisticsY = Double.MAX_VALUE;
-		double measurementMaxStatisticsY = Double.MIN_VALUE;
+		double minY = valYList.stream().min(Comparator.naturalOrder()).get();
+		double maxY = valYList.stream().max(Comparator.naturalOrder()).get();
 
-		if (measurementStatisticResults != null) {
-			measurementMinStatisticsY = measurementStatisticResults.getMinValue();
-			measurementMaxStatisticsY = measurementStatisticResults.getMaxValue();
-		}
-
-		double measurementCurveMinStatisticsY = Double.MAX_VALUE;
-		double measurementCurveMaxStatisticsY = Double.MIN_VALUE;
-
-		if (measurementCurveStatisticResults != null) {
-			measurementCurveMinStatisticsY = measurementCurveStatisticResults.getMinValue();
-			measurementCurveMaxStatisticsY = measurementCurveStatisticResults.getMaxValue();
-		}
-
-		double minStatisticsY = Double.min(measurementCurveMinStatisticsY, measurementMinStatisticsY);
-		double maxStatisticsY = Double.max(measurementCurveMaxStatisticsY, measurementMaxStatisticsY);
-
-		double maxY = Double.max(maxStatisticsY, measurement.getMaxTargetMeasurement());
-		double minY = Double.min(minStatisticsY, measurement.getMinTargetMeasurement());
-
-		maxY = Double.max(maxY, measurement.getUpperMax());
-		maxY = Double.max(maxY, measurement.getHyperMiddleValue());
-		maxY = Double.max(maxY, measurement.getMaxYLimitValue());
-		minY = Double.min(minY, measurement.getLowMeasurement());
+		double maxStatisticsY = valYStatisticsList.stream().max(Comparator.naturalOrder()).get();
 
 		if (maxY > 1 && maxY > minY) {
 			lineChart.setVisibleXRangeMaximum(lineChart.getXRange());

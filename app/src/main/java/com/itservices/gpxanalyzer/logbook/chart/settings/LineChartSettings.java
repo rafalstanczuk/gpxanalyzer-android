@@ -4,7 +4,6 @@ import static com.github.mikephil.charting.charts.Chart.PAINT_GRID_BACKGROUND;
 
 import static com.itservices.gpxanalyzer.logbook.chart.settings.axis.HourMinutesAxisValueFormatter.MAX_X_SCALED_TIME;
 import static com.itservices.gpxanalyzer.logbook.chart.settings.axis.HourMinutesAxisValueFormatter.MIN_X_SCALED_TIME;
-import static com.itservices.gpxanalyzer.logbook.chart.settings.axis.HourMinutesAxisValueFormatter.getFractionOfFullHourFromMinutes;
 import static com.itservices.gpxanalyzer.logbook.chart.settings.axis.HourMinutesAxisValueFormatter.getFractionOfFullHourFromSeconds;
 
 import android.content.Context;
@@ -51,12 +50,10 @@ public class LineChartSettings {
 		paintGridBg.setStyle(Paint.Style.FILL);
 		paintGridBg.setColor(Color.WHITE);
 
-		measurementBoundariesPreferences.initValues(context);
 		measurementBoundariesPreferences.initLimitLines();
 	}
 
 	public void setChartSettingsFor(MeasurementCurveLineChart lineChart) {
-		measurementBoundariesPreferences.initValues(lineChart.getContext());
 		measurementBoundariesPreferences.initLimitLines();
 
 		lineChart.setPaint(paintGridBg, PAINT_GRID_BACKGROUND);
@@ -140,23 +137,20 @@ public class LineChartSettings {
 		yAxisLeft.removeAllLimitLines();
 
 		if (yAxisLeft.getLimitLines().size() == 0) {
-			if (measurementBoundariesPreferences.getLineMaxValue() != null) {
-				yAxisLeft.addLimitLine(measurementBoundariesPreferences.getLineMaxValue());
+			if (measurementBoundariesPreferences.getLine5() != null) {
+				yAxisLeft.addLimitLine(measurementBoundariesPreferences.getLine5());
 			}
-			/*if (measurementBoundariesPreferences.getLineHyperMiddle() != null) {
-				yAxisLeft.addLimitLine(measurementBoundariesPreferences.getLineHyperMiddle());
-			}*/
-			if (measurementBoundariesPreferences.getLineUpperMax() != null) {
-				yAxisLeft.addLimitLine(measurementBoundariesPreferences.getLineUpperMax());
+			if (measurementBoundariesPreferences.getLine3() != null) {
+				yAxisLeft.addLimitLine(measurementBoundariesPreferences.getLine3());
 			}
-			if (measurementBoundariesPreferences.getLineMaxTargetMeasurement() != null) {
-				yAxisLeft.addLimitLine(measurementBoundariesPreferences.getLineMaxTargetMeasurement());
+			if (measurementBoundariesPreferences.getLine2() != null) {
+				yAxisLeft.addLimitLine(measurementBoundariesPreferences.getLine2());
 			}
-			if (measurementBoundariesPreferences.getLineMinTargetMeasurement() != null) {
-				yAxisLeft.addLimitLine(measurementBoundariesPreferences.getLineMinTargetMeasurement());
+			if (measurementBoundariesPreferences.getLine1() != null) {
+				yAxisLeft.addLimitLine(measurementBoundariesPreferences.getLine1());
 			}
-			if (measurementBoundariesPreferences.getLineLowMeasurement() != null) {
-				yAxisLeft.addLimitLine(measurementBoundariesPreferences.getLineLowMeasurement());
+			if (measurementBoundariesPreferences.getLine0() != null) {
+				yAxisLeft.addLimitLine(measurementBoundariesPreferences.getLine0());
 			}
 		}
 	}

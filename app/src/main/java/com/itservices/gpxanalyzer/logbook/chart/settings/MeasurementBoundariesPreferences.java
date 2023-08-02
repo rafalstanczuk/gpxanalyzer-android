@@ -14,169 +14,99 @@ import dagger.hilt.android.qualifiers.ApplicationContext;
 
 @Singleton
 public class MeasurementBoundariesPreferences {
-	public static final float LOW_VALUE_MEASUREMENT_DEFAULT = 54.0f;
+	public static final int VALUE_0_MEASUREMENT = 54;
+	public static final int VALUE_1_MEASUREMENT = 70;
+	public static final int VALUE_2_MEASUREMENT = 180;
+	public static final int VALUE_3_MEASUREMENT = 250;
+	public static final int VALUE_4_MEASUREMENT = 300;
 
-	public static final int MEASUREMENT_TARGET_DEFAULT_MIN = 70;
-	public static final int MEASUREMENT_TARGET_DEFAULT_MAX = 180;
-	public static final int MEASUREMENT_UPPER_MAX = 250;
-	public static final int MEASUREMENT_HYPER_MIDDLE = computeHyperMiddle(MEASUREMENT_UPPER_MAX);
+	private int limitValue5 = (int) (VALUE_4_MEASUREMENT*1.2f);
+	private int limitValue4 = VALUE_4_MEASUREMENT;
+	private int limitValue3 = VALUE_3_MEASUREMENT;
+	private int limitValue2 = VALUE_2_MEASUREMENT;
+	private int limitValue1 = VALUE_1_MEASUREMENT;
+	private int limitValue0 = VALUE_0_MEASUREMENT;
 
-	public static int computeHyperMiddle(int hyper) {
-		return ( (int)Math.ceil(hyper/50.0) + 1 )*50;
-	}
-	private final Context context;
-	private int maxYLimitValue = computeMaxYLimit(MEASUREMENT_UPPER_MAX);
-	private int hyperMiddleValue = MEASUREMENT_HYPER_MIDDLE;
-	private int upperMax = 0;
-	private int minTargetMeasurement = 0;
-	private int maxTargetMeasurement = 0;
-	private int lowMeasurement = 0;
+	private LimitLine line5 = new LimitLine(limitValue5);
+	private LimitLine line4 = new LimitLine(limitValue4);
+	private LimitLine line3 = new LimitLine(limitValue3);
+	private LimitLine line2 = new LimitLine(limitValue2);
+	private LimitLine line1 = new LimitLine(limitValue1);
+	private LimitLine line0 = new LimitLine(limitValue0);
 
-	private LimitLine lineMaxValue = new LimitLine(maxYLimitValue);
-	private LimitLine lineHyperMiddle = new LimitLine(hyperMiddleValue);
-	private LimitLine lineUpperMax = new LimitLine(upperMax);
-	private LimitLine lineMinTargetMeasurement = new LimitLine(minTargetMeasurement);
-	private LimitLine lineMaxTargetMeasurement = new LimitLine(maxTargetMeasurement);
-	private LimitLine lineLowMeasurement = new LimitLine(lowMeasurement);
 	private final int primaryColor;
-	private final int DEFAULT_LIMIT_LINES_COLOR = Color.BLACK;
+	private static final int DEFAULT_LIMIT_LINES_COLOR = Color.BLACK;
 
 	@Inject
 	public MeasurementBoundariesPreferences(@ApplicationContext Context context) {
-		this.context = context;
 		this.primaryColor = context.getResources().getColor(R.color.colorPrimary);
-		initValues(context);
-	}
-
-	public void initValues(Context context) {
-
-		maxTargetMeasurement = MEASUREMENT_TARGET_DEFAULT_MAX;
-
-		upperMax = MEASUREMENT_UPPER_MAX;
-
-		maxYLimitValue = computeMaxYLimit(upperMax);
-		hyperMiddleValue = computeHyperMiddle(upperMax);
-
-		minTargetMeasurement = MEASUREMENT_TARGET_DEFAULT_MIN;
-		lowMeasurement = (int) LOW_VALUE_MEASUREMENT_DEFAULT;
-	}
-
-	private static int computeMaxYLimit(int hyper) {
-		return ( (int)Math.ceil(hyper/50.0) + 2 )*50;
 	}
 
 	public void initLimitLines() {
-		if (maxYLimitValue > 0) {
-			lineMaxValue = new LimitLine(maxYLimitValue, String.valueOf(maxYLimitValue));
-			lineMaxValue.setLabelPosition(LimitLine.LimitLabelPosition.LEFT_BOTTOM);
-			lineMaxValue.setTextColor(DEFAULT_LIMIT_LINES_COLOR);
-			lineMaxValue.setLineWidth(0.4f);
-
-			lineMaxValue.setTextSize(12f);
-			lineMaxValue.enableDashedLine(10f, 5f, 0f);
-			lineMaxValue.setLineColor(ColorUtil.setAlphaInIntColor(Color.GRAY, 128));
-		} else {
-			lineMaxValue = null;
-		}
-
-		if (hyperMiddleValue > 0) {
-			lineHyperMiddle = new LimitLine(hyperMiddleValue, String.valueOf(hyperMiddleValue));
-			lineHyperMiddle.setLabelPosition(LimitLine.LimitLabelPosition.LEFT_BOTTOM);
-			lineHyperMiddle.setTextColor(DEFAULT_LIMIT_LINES_COLOR);
-			lineHyperMiddle.setLineWidth(0.4f);
-
-			lineHyperMiddle.setTextSize(12f);
-			lineHyperMiddle.enableDashedLine(10f, 5f, 0f);
-			lineHyperMiddle.setLineColor(ColorUtil.setAlphaInIntColor(Color.GRAY, 128));
-		} else {
-			lineHyperMiddle = null;
-		}
-
-		if (upperMax > 0) {
-			lineUpperMax = new LimitLine(upperMax, String.valueOf(upperMax));
-			lineUpperMax.setLabelPosition(LimitLine.LimitLabelPosition.LEFT_TOP);
-			lineUpperMax.setTextColor(DEFAULT_LIMIT_LINES_COLOR);
-			lineUpperMax.setLineWidth(0.4f);
-
-			lineUpperMax.setTextSize(12f);
-			lineUpperMax.enableDashedLine(10f, 5f, 0f);
-			lineUpperMax.setLineColor(ColorUtil.setAlphaInIntColor(Color.GRAY, 128));
-
-		} else {
-			lineUpperMax = null;
-		}
-
-		lineMinTargetMeasurement = new LimitLine(minTargetMeasurement, String.valueOf(minTargetMeasurement));
-		lineMinTargetMeasurement.setLabelPosition(LimitLine.LimitLabelPosition.LEFT_TOP);
-		lineMinTargetMeasurement.setTextColor(DEFAULT_LIMIT_LINES_COLOR);
-		lineMinTargetMeasurement.setLineWidth(0.4f);
-		lineMinTargetMeasurement.enableDashedLine(10f, 5f, 0f);
-		lineMinTargetMeasurement.setLineColor(ColorUtil.setAlphaInIntColor(Color.GRAY, 128));
-		lineMinTargetMeasurement.setTextSize(12f);
-
-		lineMaxTargetMeasurement = new LimitLine(maxTargetMeasurement, String.valueOf(maxTargetMeasurement));
-		lineMaxTargetMeasurement.setLabelPosition(LimitLine.LimitLabelPosition.LEFT_BOTTOM);
-		lineMaxTargetMeasurement.setTextColor(DEFAULT_LIMIT_LINES_COLOR);
-		lineMaxTargetMeasurement.setLineWidth(0.4f);
-		lineMaxTargetMeasurement.enableDashedLine(10f, 5f, 0f);
-		lineMaxTargetMeasurement.setLineColor(ColorUtil.setAlphaInIntColor(Color.GRAY, 128));
-		lineMaxTargetMeasurement.setTextSize(12f);
-
-		lineLowMeasurement = new LimitLine(
-				lowMeasurement, String.valueOf(lowMeasurement));
-		lineLowMeasurement.setLabelPosition(LimitLine.LimitLabelPosition.LEFT_BOTTOM);
-		lineLowMeasurement.setTextColor(DEFAULT_LIMIT_LINES_COLOR);
-		lineLowMeasurement.setLineWidth(0.4f);
-		lineLowMeasurement.enableDashedLine(10f, 5f, 0f);
-		lineLowMeasurement.setLineColor(ColorUtil.setAlphaInIntColor(Color.GRAY, 128));
-		lineLowMeasurement.setTextSize(12f);
+		line0 = createLimitLine(limitValue0, LimitLine.LimitLabelPosition.LEFT_BOTTOM);
+		line1 = createLimitLine(limitValue1, LimitLine.LimitLabelPosition.LEFT_TOP);
+		line2 = createLimitLine(limitValue2, LimitLine.LimitLabelPosition.LEFT_BOTTOM);
+		line3 = createLimitLine(limitValue3, LimitLine.LimitLabelPosition.LEFT_TOP);
+		line4 = createLimitLine(limitValue4, LimitLine.LimitLabelPosition.LEFT_BOTTOM);
+		line5 = createLimitLine(limitValue5, LimitLine.LimitLabelPosition.LEFT_BOTTOM);
 	}
 
-	public int getMaxYLimitValue() {
-		return maxYLimitValue;
+	private static LimitLine createLimitLine(int limitValue, LimitLine.LimitLabelPosition labelPosition) {
+		LimitLine line = new LimitLine(limitValue, String.valueOf(limitValue));
+			line.setLabelPosition(labelPosition);
+			line.setTextColor(DEFAULT_LIMIT_LINES_COLOR);
+			line.setLineWidth(0.4f);
+			line.setTextSize(12f);
+			line.enableDashedLine(10f, 5f, 0f);
+			line.setLineColor(ColorUtil.setAlphaInIntColor(Color.GRAY, 128));
+		return line;
 	}
 
-	public int getHyperMiddleValue() {
-		return hyperMiddleValue;
+	public int getLimitValue5() {
+		return limitValue5;
 	}
 
-	public int getUpperMax() {
-		return upperMax;
+	public int getLimitValue4() {
+		return limitValue4;
 	}
 
-	public int getMinTargetMeasurement() {
-		return minTargetMeasurement;
+	public int getLimitValue3() {
+		return limitValue3;
 	}
 
-	public int getMaxTargetMeasurement() {
-		return maxTargetMeasurement;
+	public int getLimitValue1() {
+		return limitValue1;
 	}
 
-	public int getLowMeasurement() {
-		return lowMeasurement;
+	public int getLimitValue2() {
+		return limitValue2;
 	}
 
-	public LimitLine getLineMaxValue() {
-		return lineMaxValue;
+	public int getLimitValue0() {
+		return limitValue0;
 	}
 
-	public LimitLine getLineHyperMiddle() {
-		return lineHyperMiddle;
+	public LimitLine getLine5() {
+		return line5;
 	}
 
-	public LimitLine getLineUpperMax() {
-		return lineUpperMax;
+	public LimitLine getLine4() {
+		return line4;
 	}
 
-	public LimitLine getLineMinTargetMeasurement() {
-		return lineMinTargetMeasurement;
+	public LimitLine getLine3() {
+		return line3;
 	}
 
-	public LimitLine getLineMaxTargetMeasurement() {
-		return lineMaxTargetMeasurement;
+	public LimitLine getLine1() {
+		return line1;
 	}
 
-	public LimitLine getLineLowMeasurement() {
-		return lineLowMeasurement;
+	public LimitLine getLine2() {
+		return line2;
+	}
+
+	public LimitLine getLine0() {
+		return line0;
 	}
 }

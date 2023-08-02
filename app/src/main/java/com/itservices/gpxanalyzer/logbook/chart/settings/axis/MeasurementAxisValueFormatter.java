@@ -42,10 +42,10 @@ public class MeasurementAxisValueFormatter implements IAxisValueFormatter, IValu
 		int intVal = Math.round(value);
 
 		List<Integer> allowedValues = Arrays.asList(
-			measurementBoundariesPreferences.getUpperMax(),
-			measurementBoundariesPreferences.getMinTargetMeasurement(),
-			measurementBoundariesPreferences.getMaxTargetMeasurement(),
-			measurementBoundariesPreferences.getLowMeasurement()
+			measurementBoundariesPreferences.getLimitValue3(),
+			measurementBoundariesPreferences.getLimitValue1(),
+			measurementBoundariesPreferences.getLimitValue2(),
+			measurementBoundariesPreferences.getLimitValue0()
 		);
 
 		return isAllowedDistance(intVal, allowedValues);
