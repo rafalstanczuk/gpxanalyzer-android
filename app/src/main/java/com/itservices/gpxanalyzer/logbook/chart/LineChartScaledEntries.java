@@ -29,7 +29,7 @@ public class LineChartScaledEntries {
 	private static List<Drawable> measurementDrawableIconList = new ArrayList<>();
 
 	private StatisticResults measurementCurveStatisticResults = null;
-	private StatisticResults measurementStatisticResults = null;
+	private StatisticResults measurementSingleStatisticResults = null;
 	private MeasurementBoundariesPreferences boundariesPreferences;
 
 	@Inject
@@ -52,7 +52,7 @@ public class LineChartScaledEntries {
 			return scaledEntries;
 		}
 
-		this.measurementStatisticResults = statisticResults;
+		this.measurementSingleStatisticResults = statisticResults;
 
 		for (int i = startXIndex; i < endXIndex; i++) {
 			double value = measurementVector.get(i).measurement;
@@ -93,8 +93,8 @@ public class LineChartScaledEntries {
 		List<Double> valYStatisticsList =
 				Arrays.asList(
 						0.0,
-						measurementStatisticResults!=null ? measurementStatisticResults.getMinValue() : 0.0,
-						measurementStatisticResults!=null ? measurementStatisticResults.getMaxValue() : 0.0,
+						measurementSingleStatisticResults !=null ? measurementSingleStatisticResults.getMinValue() : 0.0,
+						measurementSingleStatisticResults !=null ? measurementSingleStatisticResults.getMaxValue() : 0.0,
 						measurementCurveStatisticResults!=null ? measurementCurveStatisticResults.getMinValue() : 0.0,
 						measurementCurveStatisticResults!=null ? measurementCurveStatisticResults.getMaxValue() : 0.0
 				);
@@ -102,8 +102,8 @@ public class LineChartScaledEntries {
 		List<Double> valYList =
 				Arrays.asList(
 						0.0,
-						measurementStatisticResults!=null ? measurementStatisticResults.getMinValue() : 0.0,
-						measurementStatisticResults!=null ? measurementStatisticResults.getMaxValue() : 0.0,
+						measurementSingleStatisticResults !=null ? measurementSingleStatisticResults.getMinValue() : 0.0,
+						measurementSingleStatisticResults !=null ? measurementSingleStatisticResults.getMaxValue() : 0.0,
 						measurementCurveStatisticResults!=null ? measurementCurveStatisticResults.getMinValue() : 0.0,
 						measurementCurveStatisticResults!=null ? measurementCurveStatisticResults.getMaxValue() : 0.0,
 						(double) boundariesPreferences.getLimitValue0(),
