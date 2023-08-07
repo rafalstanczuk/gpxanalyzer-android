@@ -8,6 +8,7 @@ import com.github.mikephil.charting.data.Entry;
 import com.itservices.gpxanalyzer.logbook.Measurement;
 import com.itservices.gpxanalyzer.logbook.StatisticResults;
 import com.itservices.gpxanalyzer.logbook.chart.entry.CurveMeasurementEntry;
+import com.itservices.gpxanalyzer.logbook.chart.legend.PaletteColorDeterminer;
 import com.itservices.gpxanalyzer.utils.common.PrecisionUtil;
 import com.itservices.gpxanalyzer.logbook.chart.entry.SingleMeasurementEntry;
 import com.itservices.gpxanalyzer.utils.ui.IconsUtil;
@@ -30,17 +31,24 @@ public class LineChartScaledEntries {
 
 	private StatisticResults measurementCurveStatisticResults = null;
 	private StatisticResults measurementSingleStatisticResults = null;
+
+	private final PaletteColorDeterminer paletteColorDeterminer;
 	private MeasurementBoundariesPreferences boundariesPreferences;
+	private double maxY = 100.0;
+	private double minY = 0.0;
+
+
 
 	@Inject
-	LineChartScaledEntries(MeasurementBoundariesPreferences boundariesPreferences) {
+	LineChartScaledEntries(PaletteColorDeterminer paletteColorDeterminer, MeasurementBoundariesPreferences boundariesPreferences) {
+		this.paletteColorDeterminer = paletteColorDeterminer;
 		this.boundariesPreferences = boundariesPreferences;
 		curveValuesIndicatorDrawableIconList = IconsUtil.generateDrawableIconForAreaList(10, 255);
 		singleValuesIndicatorDrawableIconList = IconsUtil.generateDrawableIconForAreaList(15, 255);
 	}
 
 	public ArrayList<Entry> createSingleMeasurementEntryList(
-		Context context, StatisticResults statisticResults
+		StatisticResults statisticResults
 	) {
 		Vector<Measurement> measurementVector = statisticResults.getMeasurements();
 
@@ -58,7 +66,7 @@ public class LineChartScaledEntries {
 			double value = measurementVector.get(i).measurement;
 
 			scaledEntries.add(
-				SingleMeasurementEntry.create(context, singleValuesIndicatorDrawableIconList, statisticResults, i,
+				SingleMeasurementEntry.create(singleValuesIndicatorDrawableIconList, statisticResults, i,
 						(float) value
 				));
 		}
@@ -66,7 +74,7 @@ public class LineChartScaledEntries {
 	}
 
 	public ArrayList<Entry> createCurveMeasurementEntryList(
-		Context context, StatisticResults statisticResults
+		StatisticResults statisticResults
 	) {
 		Vector<Measurement> measurementVector = statisticResults.getMeasurements();
 
@@ -83,7 +91,7 @@ public class LineChartScaledEntries {
 		for (int i = startXIndex; i < endXIndex; i++) {
 			double value = measurementVector.get(i).measurement;
 
-			scaledEntries.add(CurveMeasurementEntry.create(context, curveValuesIndicatorDrawableIconList, statisticResults, i, (float) value));
+			scaledEntries.add(CurveMeasurementEntry.create(paletteColorDeterminer, curveValuesIndicatorDrawableIconList, statisticResults, i, (float) value));
 		}
 		return scaledEntries;
 	}
@@ -124,6 +132,9 @@ public class LineChartScaledEntries {
 		double maxStatisticsY = valYStatisticsList.stream().max(Comparator.naturalOrder()).get();
 
 		if (maxY > 1 && maxY > minY) {
+			this.maxY = maxY;
+			this.minY = minY;
+
 			lineChart.setVisibleXRangeMaximum(lineChart.getXRange());
 
 			double range = maxY - minY;

@@ -37,13 +37,13 @@ public class IconsUtil {
 		);
 	}
 
-	private static Drawable getDrawableIconForAreaColorId(int color, int size) {
+	public static Drawable getDrawableIconForAreaColorId(int color, int size) {
 
 		GradientDrawable shape = new GradientDrawable();
 		shape.setShape(GradientDrawable.OVAL);
 		shape.setCornerRadii(new float[]{0, 0, 0, 0, 0, 0, 0, 0});
 		shape.setColor(color);
-		shape.setStroke(1, Color.BLACK);
+		//shape.setStroke(1, Color.BLACK);
 		shape.setSize(size, size);
 
 		return shape;

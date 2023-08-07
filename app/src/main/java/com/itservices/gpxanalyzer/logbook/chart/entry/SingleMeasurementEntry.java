@@ -29,11 +29,11 @@ public class SingleMeasurementEntry extends BaseEntry {
 	}
 
 	public static SingleMeasurementEntry create(
-		Context context, List<Drawable> drawableIconList, StatisticResults statisticResults,
+		List<Drawable> drawableIconList, StatisticResults statisticResults,
 		float x, float y
 	) {
 
-		int areaColorId = getRangeOfMeasurement((int) y, context);
+		int areaColorId = getRangeOfMeasurement((int) y);
 
 		Drawable drawableIcon = null;
 

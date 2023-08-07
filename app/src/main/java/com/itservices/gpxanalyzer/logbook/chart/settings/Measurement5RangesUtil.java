@@ -1,7 +1,11 @@
 package com.itservices.gpxanalyzer.logbook.chart.settings;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 
+import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.utils.ui.ColorUtil;
 
 import java.util.Arrays;
@@ -44,7 +48,7 @@ public class Measurement5RangesUtil {
 		return MEASUREMENT_5RANGES_COLOR_LIST.get(areaId);
 	}
 
-	public static int getRangeOfMeasurement(int value, Context context) {
+	public static int getRangeOfMeasurement(int value) {
 
 		int hypo = (int) MeasurementBoundariesPreferences.VALUE_0_MEASUREMENT;
 

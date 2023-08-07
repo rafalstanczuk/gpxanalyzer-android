@@ -67,8 +67,8 @@ public class ChartViewModel extends ViewModel {
 			return;
 		}
 
-		ArrayList<Entry> entries = lineChartScaledEntries.createCurveMeasurementEntryList(
-			context, curveMeasurementStatisticResults);
+		ArrayList<Entry> entries = lineChartScaledEntries
+				.createCurveMeasurementEntryList(curveMeasurementStatisticResults);
 
 		if (!entries.isEmpty()) {
 			LineDataSet measurementCurveLineDataSet = CurveMeasurementEntry.createCurveMeasurementLineDataSet(entries);
@@ -84,7 +84,7 @@ public class ChartViewModel extends ViewModel {
 			return;
 		}
 
-		ArrayList<Entry> entries = lineChartScaledEntries.createSingleMeasurementEntryList(context,
+		ArrayList<Entry> entries = lineChartScaledEntries.createSingleMeasurementEntryList(
 			statisticResults
 		);
 
