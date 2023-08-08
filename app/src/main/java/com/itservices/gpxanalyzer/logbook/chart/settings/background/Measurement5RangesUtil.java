@@ -1,11 +1,5 @@
-package com.itservices.gpxanalyzer.logbook.chart.settings;
+package com.itservices.gpxanalyzer.logbook.chart.settings.background;
 
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-
-import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.utils.ui.ColorUtil;
 
 import java.util.Arrays;

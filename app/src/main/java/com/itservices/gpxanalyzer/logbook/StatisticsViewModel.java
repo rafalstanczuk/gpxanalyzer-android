@@ -4,6 +4,8 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.itservices.gpxanalyzer.logbook.chart.data.StatisticResults;
+
 import javax.inject.Inject;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 

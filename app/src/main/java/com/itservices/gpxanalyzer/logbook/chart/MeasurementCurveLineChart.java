@@ -2,12 +2,12 @@ package com.itservices.gpxanalyzer.logbook.chart;
 
 import static com.itservices.gpxanalyzer.logbook.chart.entry.CurveMeasurementEntry.CURVE_MEASUREMENT;
 import static com.itservices.gpxanalyzer.logbook.chart.settings.axis.HourMinutesAxisValueFormatter.MIN_X_SCALED_TIME;
-import static com.itservices.gpxanalyzer.logbook.chart.settings.Measurement5RangesUtil.RANGE_ID_ABOVE_HYPER_LIMIT_ORANGE;
-import static com.itservices.gpxanalyzer.logbook.chart.settings.Measurement5RangesUtil.RANGE_ID_ABOVE_TARGET_MAX_BELOW_HYPER_LIMIT_YELLOW;
-import static com.itservices.gpxanalyzer.logbook.chart.settings.Measurement5RangesUtil.RANGE_ID_BELOW_HYPO_LIMIT_RED;
-import static com.itservices.gpxanalyzer.logbook.chart.settings.Measurement5RangesUtil.RANGE_ID_BELOW_TARGET_MIN_ABOVE_HYPO_LIMIT_PINK;
-import static com.itservices.gpxanalyzer.logbook.chart.settings.Measurement5RangesUtil.RANGE_ID_IN_TARGET_MIN_MAX_GREEN;
-import static com.itservices.gpxanalyzer.logbook.chart.settings.Measurement5RangesUtil.getColorForAreaId;
+import static com.itservices.gpxanalyzer.logbook.chart.settings.background.Measurement5RangesUtil.RANGE_ID_ABOVE_HYPER_LIMIT_ORANGE;
+import static com.itservices.gpxanalyzer.logbook.chart.settings.background.Measurement5RangesUtil.RANGE_ID_ABOVE_TARGET_MAX_BELOW_HYPER_LIMIT_YELLOW;
+import static com.itservices.gpxanalyzer.logbook.chart.settings.background.Measurement5RangesUtil.RANGE_ID_BELOW_HYPO_LIMIT_RED;
+import static com.itservices.gpxanalyzer.logbook.chart.settings.background.Measurement5RangesUtil.RANGE_ID_BELOW_TARGET_MIN_ABOVE_HYPO_LIMIT_PINK;
+import static com.itservices.gpxanalyzer.logbook.chart.settings.background.Measurement5RangesUtil.RANGE_ID_IN_TARGET_MIN_MAX_GREEN;
+import static com.itservices.gpxanalyzer.logbook.chart.settings.background.Measurement5RangesUtil.getColorForAreaId;
 import static com.itservices.gpxanalyzer.utils.common.FormatNumberUtil.getFormattedTime;
 
 import android.content.Context;
@@ -35,7 +35,7 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 import com.itservices.gpxanalyzer.logbook.chart.entry.BaseEntry;
 import com.itservices.gpxanalyzer.logbook.chart.entry.CurveMeasurementEntry;
-import com.itservices.gpxanalyzer.logbook.chart.settings.MeasurementBoundariesPreferences;
+import com.itservices.gpxanalyzer.logbook.chart.settings.background.MeasurementBoundariesPreferences;
 import com.itservices.gpxanalyzer.logbook.chart.settings.StaticChartHighlighter;
 
 @AndroidEntryPoint

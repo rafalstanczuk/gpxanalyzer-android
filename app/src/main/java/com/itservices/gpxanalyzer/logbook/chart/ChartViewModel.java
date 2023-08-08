@@ -11,7 +11,7 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
-import com.itservices.gpxanalyzer.logbook.StatisticResults;
+import com.itservices.gpxanalyzer.logbook.chart.data.StatisticResults;
 import com.itservices.gpxanalyzer.logbook.chart.entry.BaseEntry;
 import com.itservices.gpxanalyzer.logbook.chart.entry.CurveMeasurementEntry;
 import com.itservices.gpxanalyzer.logbook.chart.entry.SingleMeasurementEntry;

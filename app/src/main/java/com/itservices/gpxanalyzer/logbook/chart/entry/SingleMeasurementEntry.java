@@ -1,8 +1,7 @@
 package com.itservices.gpxanalyzer.logbook.chart.entry;
 
-import static com.itservices.gpxanalyzer.logbook.chart.settings.Measurement5RangesUtil.getRangeOfMeasurement;
+import static com.itservices.gpxanalyzer.logbook.chart.settings.background.Measurement5RangesUtil.getRangeOfMeasurement;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
@@ -16,7 +15,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import com.itservices.gpxanalyzer.logbook.StatisticResults;
+import com.itservices.gpxanalyzer.logbook.chart.data.StatisticResults;
 import com.itservices.gpxanalyzer.logbook.chart.settings.axis.HourMinutesAxisValueFormatter;
 
 public class SingleMeasurementEntry extends BaseEntry {

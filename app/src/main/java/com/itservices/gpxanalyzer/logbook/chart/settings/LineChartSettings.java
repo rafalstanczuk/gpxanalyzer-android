@@ -16,6 +16,7 @@ import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.logbook.chart.MeasurementCurveLineChart;
 import com.itservices.gpxanalyzer.logbook.chart.settings.axis.HourMinutesAxisValueFormatter;
 import com.itservices.gpxanalyzer.logbook.chart.settings.axis.MeasurementAxisValueFormatter;
+import com.itservices.gpxanalyzer.logbook.chart.settings.background.MeasurementBoundariesPreferences;
 
 
 import javax.inject.Inject;

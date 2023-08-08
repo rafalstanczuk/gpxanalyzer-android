@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.logbook;
+package com.itservices.gpxanalyzer.logbook.chart.data;
 
 import java.util.Calendar;
 

@@ -1,12 +1,11 @@
 package com.itservices.gpxanalyzer.logbook.chart;
 
-import android.content.Context;
 import android.graphics.drawable.Drawable;
 
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
-import com.itservices.gpxanalyzer.logbook.Measurement;
-import com.itservices.gpxanalyzer.logbook.StatisticResults;
+import com.itservices.gpxanalyzer.logbook.chart.data.Measurement;
+import com.itservices.gpxanalyzer.logbook.chart.data.StatisticResults;
 import com.itservices.gpxanalyzer.logbook.chart.entry.CurveMeasurementEntry;
 import com.itservices.gpxanalyzer.logbook.chart.legend.PaletteColorDeterminer;
 import com.itservices.gpxanalyzer.utils.common.PrecisionUtil;
@@ -22,7 +21,7 @@ import java.util.Vector;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.itservices.gpxanalyzer.logbook.chart.settings.MeasurementBoundariesPreferences;
+import com.itservices.gpxanalyzer.logbook.chart.settings.background.MeasurementBoundariesPreferences;
 
 @Singleton
 public class LineChartScaledEntries {
@@ -93,6 +92,13 @@ public class LineChartScaledEntries {
 
 			scaledEntries.add(CurveMeasurementEntry.create(paletteColorDeterminer, curveValuesIndicatorDrawableIconList, statisticResults, i, (float) value));
 		}
+
+		paletteColorDeterminer.generatePalette(
+				(float) 0,
+				(float) statisticResults.getMaxValue(),
+				10,
+				PaletteColorDeterminer.PaletteDirection.MAX_IS_ZERO_INDEX_Y_PIXEL);
+
 		return scaledEntries;
 	}
 

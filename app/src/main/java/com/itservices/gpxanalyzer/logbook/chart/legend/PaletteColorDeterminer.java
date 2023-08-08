@@ -4,8 +4,13 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.util.Log;
 
 import com.itservices.gpxanalyzer.R;
+import com.itservices.gpxanalyzer.utils.common.PrecisionUtil;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -50,6 +55,48 @@ public class PaletteColorDeterminer {
         return scaledPixelColor;
     }
 
+    public static boolean isWithinBoundary(float value, BoundaryColorSpan boundaryColorSpan) {
+        return PrecisionUtil.isGreaterEqual(boundaryColorSpan.getMin(), value, PrecisionUtil.NDIG_PREC_COMP)
+                &&
+                value < boundaryColorSpan.getMax();
+    }
+
+    public Map<Integer, BoundaryColorSpan> generatePalette(float min, float max, int numOfDividing, PaletteDirection paletteDirection) {
+        Map<Integer, BoundaryColorSpan> boundaryColorSpan = new HashMap<>();
+
+        int maxYPalette = colorPalette.getHeight() - 1;
+        int x = (int) Math.floor((colorPalette.getWidth() -1)/2.0);
+
+        float stepYPalette =  maxYPalette / (float)numOfDividing ;
+        float stepValue =  (max - min) / (float)numOfDividing ;
+
+        for( int i=0; i < numOfDividing; i++) {
+            float value = i * stepValue + min;
+            float nextValue = (i+1) * stepValue + min;
+            float colorFloatScaledIndex = maxYPalette * ((value - min) / (max - min));
+
+            int indexStep = (int) Math.ceil( colorFloatScaledIndex / stepYPalette);
+
+            int colorFloatScaledIndexSteppedDiscrete = (int) (indexStep * stepYPalette);
+
+            int scaledPixelColor = colorPalette.getPixel(x, colorFloatScaledIndexSteppedDiscrete);
+
+            switch (paletteDirection) {
+
+                case MIN_IS_ZERO_INDEX_Y_PIXEL:
+                    scaledPixelColor = colorPalette.getPixel(x, colorFloatScaledIndexSteppedDiscrete);
+                    break;
+                case MAX_IS_ZERO_INDEX_Y_PIXEL:
+                    scaledPixelColor = colorPalette.getPixel(x, maxYPalette - colorFloatScaledIndexSteppedDiscrete);
+                    break;
+            }
+
+            boundaryColorSpan.put(i, new BoundaryColorSpan(i, String.valueOf(value), value, nextValue, scaledPixelColor));
+        }
+
+        return boundaryColorSpan;
+    }
+
     public int determineDiscreteColorFromScaledValue(float value, float min, float max, int numOfDividing, PaletteDirection paletteDirection) {
 
         int maxYPalette = colorPalette.getHeight() - 1;
@@ -59,11 +106,21 @@ public class PaletteColorDeterminer {
 
         float colorFloatScaledIndex = maxYPalette * ( (value - min)/(max - min) );
 
-        int indexStep = (int) Math.floor( colorFloatScaledIndex / stepYPalette);
+        int indexStep = (int) Math.ceil( colorFloatScaledIndex / stepYPalette);
 
         int colorFloatScaledIndexSteppedDiscrete = (int) (indexStep * stepYPalette);
 
         int scaledPixelColor = colorPalette.getPixel(x,  colorFloatScaledIndexSteppedDiscrete);
+
+/*        Log.d("PaletteColorDeterminer", "determineDiscreteColorFromScaledValue() called with: value = [" + value + "], min = [" + min + "], max = [" + max + "], numOfDividing = [" + numOfDividing + "], paletteDirection = [" + paletteDirection + "]");
+
+        Log.d("PaletteColorDeterminer",
+                String.format(
+                        "indexStep=%d\n, " +
+                        "colorFloatScaled=%d\n, " +
+                        "stepYPalette=%f\n, " +
+                        "maxYPalette=%d\n",
+                        indexStep, colorFloatScaledIndexSteppedDiscrete, stepYPalette, maxYPalette ));*/
 
         switch (paletteDirection) {
 

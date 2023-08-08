@@ -32,6 +32,8 @@ import io.ticofab.androidgpxparser.parser.domain.TrackPoint;
 import io.ticofab.androidgpxparser.parser.domain.TrackSegment;
 
 import com.itservices.gpxanalyzer.logbook.chart.ChartViewModel;
+import com.itservices.gpxanalyzer.logbook.chart.data.Measurement;
+import com.itservices.gpxanalyzer.logbook.chart.data.StatisticResults;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -56,7 +58,7 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 	public GPXParser mParser;
 
 	@Inject
-	StatisticResults statisticResults;
+    StatisticResults statisticResults;
 
 	private MainActivity activity;
 	private FragmentLogbookBinding binding;

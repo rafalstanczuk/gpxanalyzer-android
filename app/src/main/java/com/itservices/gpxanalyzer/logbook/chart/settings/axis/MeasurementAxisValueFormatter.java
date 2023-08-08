@@ -5,7 +5,7 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.formatter.IValueFormatter;
 import com.github.mikephil.charting.utils.ViewPortHandler;
-import com.itservices.gpxanalyzer.logbook.chart.settings.MeasurementBoundariesPreferences;
+import com.itservices.gpxanalyzer.logbook.chart.settings.background.MeasurementBoundariesPreferences;
 
 import java.util.Arrays;
 import java.util.List;

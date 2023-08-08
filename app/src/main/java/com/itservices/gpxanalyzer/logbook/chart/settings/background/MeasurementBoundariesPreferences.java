@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.logbook.chart.settings;
+package com.itservices.gpxanalyzer.logbook.chart.settings.background;
 
 import android.content.Context;
 import android.graphics.Color;
