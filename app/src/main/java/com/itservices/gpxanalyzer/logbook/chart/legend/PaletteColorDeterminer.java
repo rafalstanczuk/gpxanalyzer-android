@@ -7,9 +7,11 @@ import android.graphics.drawable.BitmapDrawable;
 import android.util.Log;
 
 import com.itservices.gpxanalyzer.R;
+import com.itservices.gpxanalyzer.logbook.chart.data.StatisticResults;
 import com.itservices.gpxanalyzer.utils.common.PrecisionUtil;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -22,6 +24,8 @@ public class PaletteColorDeterminer {
 
     private final Bitmap colorPalette;
 
+    private Map<Integer, BoundaryColorSpan> paletteMap = new HashMap<>();
+
     @Inject
     public PaletteColorDeterminer(@ApplicationContext Context context) {
 
@@ -31,6 +35,33 @@ public class PaletteColorDeterminer {
 
         BitmapDrawable bitmapDrawable = new BitmapDrawable(context.getResources(), colorPalette);
 
+    }
+
+    public void initPalette(StatisticResults statisticResults) {
+        LinkedHashMap<Integer, BoundaryColorSpan> paletteMap = new LinkedHashMap<>();
+
+        paletteMap = generatePalette(
+                (float) 0,
+                (float) statisticResults.getMaxValue(),
+                10,
+                PaletteColorDeterminer.PaletteDirection.MAX_IS_ZERO_INDEX_Y_PIXEL);
+
+        float valToTest = 120.0f;
+
+        BoundaryColorSpan boundaryColorSpan = getBoundaryFrom(valToTest, paletteMap);
+    }
+
+    private BoundaryColorSpan getBoundaryFrom(float valToTest, LinkedHashMap<Integer, BoundaryColorSpan> paletteMap) {
+
+        BoundaryColorSpan first =  paletteMap.entrySet().iterator().next().getValue();
+
+        float delta = first.getMax() - first.getMin();
+
+        int estimatedKeyIndex = (int) Math.floor( valToTest / delta );
+
+        BoundaryColorSpan objectFound = paletteMap.get(estimatedKeyIndex);
+
+        return objectFound;
     }
 
     public int determineColorFromScaledValue(float value, float min, float max, PaletteDirection paletteDirection) {
@@ -61,8 +92,8 @@ public class PaletteColorDeterminer {
                 value < boundaryColorSpan.getMax();
     }
 
-    public Map<Integer, BoundaryColorSpan> generatePalette(float min, float max, int numOfDividing, PaletteDirection paletteDirection) {
-        Map<Integer, BoundaryColorSpan> boundaryColorSpan = new HashMap<>();
+    public LinkedHashMap<Integer, BoundaryColorSpan> generatePalette(float min, float max, int numOfDividing, PaletteDirection paletteDirection) {
+        LinkedHashMap<Integer, BoundaryColorSpan> boundaryColorSpan = new LinkedHashMap<>();
 
         int maxYPalette = colorPalette.getHeight() - 1;
         int x = (int) Math.floor((colorPalette.getWidth() -1)/2.0);

@@ -65,7 +65,7 @@ public class LineChartScaledEntries {
 			double value = measurementVector.get(i).measurement;
 
 			scaledEntries.add(
-				SingleMeasurementEntry.create(singleValuesIndicatorDrawableIconList, statisticResults, i,
+				SingleMeasurementEntry.create(paletteColorDeterminer, statisticResults, i,
 						(float) value
 				));
 		}
@@ -90,14 +90,9 @@ public class LineChartScaledEntries {
 		for (int i = startXIndex; i < endXIndex; i++) {
 			double value = measurementVector.get(i).measurement;
 
-			scaledEntries.add(CurveMeasurementEntry.create(paletteColorDeterminer, curveValuesIndicatorDrawableIconList, statisticResults, i, (float) value));
+			scaledEntries.add(CurveMeasurementEntry.create(paletteColorDeterminer, statisticResults, i, (float) value));
 		}
-
-		paletteColorDeterminer.generatePalette(
-				(float) 0,
-				(float) statisticResults.getMaxValue(),
-				10,
-				PaletteColorDeterminer.PaletteDirection.MAX_IS_ZERO_INDEX_Y_PIXEL);
+		//paletteColorDeterminer.initPalette(statisticResults);
 
 		return scaledEntries;
 	}

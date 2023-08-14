@@ -1,7 +1,5 @@
 package com.itservices.gpxanalyzer.logbook.chart.entry;
 
-import static com.itservices.gpxanalyzer.logbook.chart.settings.background.Measurement5RangesUtil.getRangeOfMeasurement;
-
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
@@ -10,16 +8,17 @@ import androidx.annotation.NonNull;
 
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.itservices.gpxanalyzer.logbook.chart.data.StatisticResults;
+import com.itservices.gpxanalyzer.logbook.chart.legend.PaletteColorDeterminer;
+import com.itservices.gpxanalyzer.logbook.chart.settings.axis.HourMinutesAxisValueFormatter;
+import com.itservices.gpxanalyzer.utils.ui.IconsUtil;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
-
-import com.itservices.gpxanalyzer.logbook.chart.data.StatisticResults;
-import com.itservices.gpxanalyzer.logbook.chart.settings.axis.HourMinutesAxisValueFormatter;
 
 public class SingleMeasurementEntry extends BaseEntry {
 	public static final String MEASUREMENT = "MEASUREMENT";
+	public static boolean SHOW_COLOR_SINGLE_MEASUREMENT_RANGE_CIRCLES_ICONS = true;
 
 	SingleMeasurementEntry(
 		Calendar calendar, float x, float y, Drawable icon, StatisticResults statisticResults
@@ -28,26 +27,32 @@ public class SingleMeasurementEntry extends BaseEntry {
 	}
 
 	public static SingleMeasurementEntry create(
-		List<Drawable> drawableIconList, StatisticResults statisticResults,
-		float x, float y
+			PaletteColorDeterminer paletteColorDeterminer,
+			StatisticResults statisticResults,
+			float x, float y
 	) {
-
-		int areaColorId = getRangeOfMeasurement((int) y);
-
 		Drawable drawableIcon = null;
 
 		try {
-			drawableIcon = drawableIconList.get(areaColorId);
+			int colorInt = paletteColorDeterminer.determineDiscreteColorFromScaledValue(
+					y,
+					(float) 0,
+					(float) statisticResults.getMaxValue(),
+					10,
+					PaletteColorDeterminer.PaletteDirection.MAX_IS_ZERO_INDEX_Y_PIXEL);
+			drawableIcon = IconsUtil.getDrawableIconForAreaColorId(colorInt, 10, false);
 		} catch (Exception ex) {
-			Log.e("MeasurementEntry", "create: ", ex);
+			Log.e("MeasurementCurveEntry", "create: ", ex);
 		}
-
 
 		Calendar calendar = statisticResults.getMeasurements().elementAt((int) x).timestamp;
 
 		float timeConcat = HourMinutesAxisValueFormatter.combineIntoFloatTime(calendar);
 
-		return new SingleMeasurementEntry(calendar, timeConcat, y, drawableIcon, statisticResults);
+		return new SingleMeasurementEntry(
+				calendar, timeConcat, y, SHOW_COLOR_SINGLE_MEASUREMENT_RANGE_CIRCLES_ICONS ? drawableIcon : null,
+				statisticResults
+		);
 	}
 
 	@NonNull
