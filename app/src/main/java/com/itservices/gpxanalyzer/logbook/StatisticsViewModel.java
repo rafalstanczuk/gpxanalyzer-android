@@ -35,7 +35,7 @@ public class StatisticsViewModel extends ViewModel {
 	public StatisticsViewModel() {}
 
 	public void refreshStatisticResults() {
-		paletteColorDeterminer.initPalette(statisticResults);
+		paletteColorDeterminer.initPalette();
 		_curveMeasurementStatisticResults.setValue(statisticResults);
 	}
 }

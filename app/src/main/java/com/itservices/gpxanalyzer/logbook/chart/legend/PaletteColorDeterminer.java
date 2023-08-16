@@ -25,7 +25,9 @@ public class PaletteColorDeterminer {
     private final Bitmap colorPalette;
 
     private Map<Integer, BoundaryColorSpan> paletteMap = new HashMap<>();
-    private StatisticResults statisticResults;
+
+    @Inject
+    protected StatisticResults statisticResults;
 
     @Inject
     public PaletteColorDeterminer(@ApplicationContext Context context) {
@@ -38,8 +40,7 @@ public class PaletteColorDeterminer {
 
     }
 
-    public void initPalette(StatisticResults statisticResults) {
-        this.statisticResults = statisticResults;
+    public void initPalette() {
         paletteMap = generatePalette(
                 (float) statisticResults.getMinValue(),
                 (float) statisticResults.getMaxValue(),
@@ -47,9 +48,9 @@ public class PaletteColorDeterminer {
                 PaletteDirection.MAX_IS_ZERO_INDEX_Y_PIXEL);
     }
 
-    public BoundaryColorSpan getBoundaryFrom(float valToTest) {
+    public BoundaryColorSpan getBoundaryFrom(float value) {
 
-        float normalizedVal = valToTest - (float)statisticResults.getMinValue();
+        float normalizedVal = value - (float)statisticResults.getMinValue();
 
         BoundaryColorSpan first =  paletteMap.entrySet().iterator().next().getValue();
 
@@ -81,8 +82,8 @@ public class PaletteColorDeterminer {
         int x = (int) Math.floor((colorPalette.getWidth() -1)/2.0);
 
         float stepYPalette =  maxYPalette / (float)numOfDividing ;
-        float valuesSpann = max - min;
-        float stepValue =  valuesSpann / (float)numOfDividing ;
+        float valuesSpan = max - min;
+        float stepValue =  valuesSpan / (float)numOfDividing ;
 
         float shiftFromStartValueOfBoundary = 0.5f * stepValue;
 
@@ -91,7 +92,7 @@ public class PaletteColorDeterminer {
             float nextValue = value + stepValue;
 
             float middleValueOfCurrentBoundary = value + shiftFromStartValueOfBoundary;
-            float colorFloatScaledIndex = maxYPalette * ( (middleValueOfCurrentBoundary - min)/ valuesSpann );
+            float colorFloatScaledIndex = maxYPalette * ( (middleValueOfCurrentBoundary - min)/ valuesSpan );
 
             int indexColorStep = (int) Math.floor( colorFloatScaledIndex / stepYPalette);
 
