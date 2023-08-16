@@ -7,6 +7,7 @@ import com.github.mikephil.charting.data.Entry;
 import com.itservices.gpxanalyzer.logbook.chart.data.Measurement;
 import com.itservices.gpxanalyzer.logbook.chart.data.StatisticResults;
 import com.itservices.gpxanalyzer.logbook.chart.entry.CurveMeasurementEntry;
+import com.itservices.gpxanalyzer.logbook.chart.legend.BoundaryColorSpan;
 import com.itservices.gpxanalyzer.logbook.chart.legend.PaletteColorDeterminer;
 import com.itservices.gpxanalyzer.utils.common.PrecisionUtil;
 import com.itservices.gpxanalyzer.logbook.chart.entry.SingleMeasurementEntry;
@@ -92,7 +93,6 @@ public class LineChartScaledEntries {
 
 			scaledEntries.add(CurveMeasurementEntry.create(paletteColorDeterminer, statisticResults, i, (float) value));
 		}
-		//paletteColorDeterminer.initPalette(statisticResults);
 
 		return scaledEntries;
 	}

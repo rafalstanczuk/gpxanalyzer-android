@@ -102,22 +102,22 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 			for (int i = 0; i < tracks.size(); i++) {
 
 				Track track = tracks.get(i);
-				Log.d(TAG, "track " + i + ":");
+				//Log.d(TAG, "track " + i + ":");
 				List<TrackSegment> segments = track.getTrackSegments();
 				for (int j = 0; j < segments.size(); j++) {
 					TrackSegment segment = segments.get(j);
-					Log.d(TAG, "  segment " + j + ":");
+					//Log.d(TAG, "  segment " + j + ":");
 					for (TrackPoint trackPoint : segment.getTrackPoints()) {
-						String msg = "    point: lat " + trackPoint.getLatitude() + ", lon " + trackPoint.getLongitude()
+						/*String msg = "    point: lat " + trackPoint.getLatitude() + ", lon " + trackPoint.getLongitude()
 								+ ", elev " + trackPoint.getElevation()
-								+ ", time " + trackPoint.getTime();
+								+ ", time " + trackPoint.getTime();*/
 						Extensions ext = trackPoint.getExtensions();
 						Double speed;
 						if (ext != null) {
 							speed = ext.getSpeed();
-							msg = msg.concat(", speed " + speed);
+							//msg = msg.concat(", speed " + speed);
 						}
-						Log.d(TAG, msg);
+						//Log.d(TAG, msg);
 
 
 
@@ -240,7 +240,6 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 
 		logbookViewModel.getViewMode().observe(getViewLifecycleOwner(), viewMode -> {
 			switchViewMode(viewMode);
-			statisticsViewModel.refreshStatisticResults();
 		});
 
 		return binding.getRoot();

@@ -10,6 +10,7 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.itservices.gpxanalyzer.logbook.chart.data.StatisticResults;
 import com.itservices.gpxanalyzer.logbook.chart.legend.PaletteColorDeterminer;
+import com.itservices.gpxanalyzer.logbook.chart.legend.PaletteDirection;
 import com.itservices.gpxanalyzer.logbook.chart.settings.axis.HourMinutesAxisValueFormatter;
 import com.itservices.gpxanalyzer.utils.ui.IconsUtil;
 
@@ -34,12 +35,7 @@ public class SingleMeasurementEntry extends BaseEntry {
 		Drawable drawableIcon = null;
 
 		try {
-			int colorInt = paletteColorDeterminer.determineDiscreteColorFromScaledValue(
-					y,
-					(float) 0,
-					(float) statisticResults.getMaxValue(),
-					10,
-					PaletteColorDeterminer.PaletteDirection.MAX_IS_ZERO_INDEX_Y_PIXEL);
+			int colorInt = paletteColorDeterminer.getBoundaryFrom(y).getColor();
 			drawableIcon = IconsUtil.getDrawableIconForAreaColorId(colorInt, 10, false);
 		} catch (Exception ex) {
 			Log.e("MeasurementCurveEntry", "create: ", ex);
