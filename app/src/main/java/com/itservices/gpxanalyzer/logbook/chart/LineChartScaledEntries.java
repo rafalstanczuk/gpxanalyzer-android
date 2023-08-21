@@ -1,50 +1,40 @@
 package com.itservices.gpxanalyzer.logbook.chart;
 
-import android.graphics.drawable.Drawable;
-
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.itservices.gpxanalyzer.logbook.chart.data.Measurement;
 import com.itservices.gpxanalyzer.logbook.chart.data.StatisticResults;
 import com.itservices.gpxanalyzer.logbook.chart.entry.CurveMeasurementEntry;
-import com.itservices.gpxanalyzer.logbook.chart.legend.BoundaryColorSpan;
-import com.itservices.gpxanalyzer.logbook.chart.legend.PaletteColorDeterminer;
-import com.itservices.gpxanalyzer.utils.common.PrecisionUtil;
 import com.itservices.gpxanalyzer.logbook.chart.entry.SingleMeasurementEntry;
-import com.itservices.gpxanalyzer.utils.ui.IconsUtil;
+import com.itservices.gpxanalyzer.logbook.chart.legend.PaletteColorDeterminer;
+import com.itservices.gpxanalyzer.logbook.chart.settings.background.LimitLinesBoundaries;
+import com.itservices.gpxanalyzer.utils.common.PrecisionUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Vector;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.itservices.gpxanalyzer.logbook.chart.settings.background.MeasurementBoundariesPreferences;
-
 @Singleton
 public class LineChartScaledEntries {
-	private static List<Drawable> curveValuesIndicatorDrawableIconList = new ArrayList<>();
-	private static List<Drawable> singleValuesIndicatorDrawableIconList = new ArrayList<>();
-
+	private static final double DEFAULT_MIN_Y_VALUE = 0.0;
+	private double minY = DEFAULT_MIN_Y_VALUE;
 	private StatisticResults measurementCurveStatisticResults = null;
 	private StatisticResults measurementSingleStatisticResults = null;
 
-	private final PaletteColorDeterminer paletteColorDeterminer;
-	private MeasurementBoundariesPreferences boundariesPreferences;
-	private double maxY = 100.0;
-	private double minY = 0.0;
-
-
+	@Inject
+	PaletteColorDeterminer paletteColorDeterminer;
 
 	@Inject
-	LineChartScaledEntries(PaletteColorDeterminer paletteColorDeterminer, MeasurementBoundariesPreferences boundariesPreferences) {
-		this.paletteColorDeterminer = paletteColorDeterminer;
-		this.boundariesPreferences = boundariesPreferences;
-		curveValuesIndicatorDrawableIconList = IconsUtil.generateDrawableIconForAreaList(10, 255);
-		singleValuesIndicatorDrawableIconList = IconsUtil.generateDrawableIconForAreaList(15, 255);
+	LimitLinesBoundaries boundariesPreferences;
+
+	@Inject
+	LineChartScaledEntries() {
 	}
 
 	public ArrayList<Entry> createSingleMeasurementEntryList(
@@ -96,32 +86,40 @@ public class LineChartScaledEntries {
 
 		return scaledEntries;
 	}
+	
+	public void setMinY(double minY) {
+		this.minY = minY;
+	}
 
 	public void update(MeasurementCurveLineChart lineChart) {
+		double r = measurementCurveStatisticResults.getMaxValue() - measurementCurveStatisticResults.getMinValue();
+		double o = r * 0.1f;
+		minY = (measurementCurveStatisticResults.getMinValue() - 2.0f * o);
 
 		List<Double> valYStatisticsList =
 				Arrays.asList(
-						0.0,
-						measurementSingleStatisticResults !=null ? measurementSingleStatisticResults.getMinValue() : 0.0,
-						measurementSingleStatisticResults !=null ? measurementSingleStatisticResults.getMaxValue() : 0.0,
-						measurementCurveStatisticResults!=null ? measurementCurveStatisticResults.getMinValue() : 0.0,
-						measurementCurveStatisticResults!=null ? measurementCurveStatisticResults.getMaxValue() : 0.0
+						minY,
+						measurementSingleStatisticResults !=null ? measurementSingleStatisticResults.getMinValue() : minY,
+						measurementSingleStatisticResults !=null ? measurementSingleStatisticResults.getMaxValue() : minY,
+						measurementCurveStatisticResults!=null ? measurementCurveStatisticResults.getMinValue() : minY,
+						measurementCurveStatisticResults!=null ? measurementCurveStatisticResults.getMaxValue() : minY
 				);
 
-		List<Double> valYList =
-				Arrays.asList(
-						0.0,
-						measurementSingleStatisticResults !=null ? measurementSingleStatisticResults.getMinValue() : 0.0,
-						measurementSingleStatisticResults !=null ? measurementSingleStatisticResults.getMaxValue() : 0.0,
-						measurementCurveStatisticResults!=null ? measurementCurveStatisticResults.getMinValue() : 0.0,
-						measurementCurveStatisticResults!=null ? measurementCurveStatisticResults.getMaxValue() : 0.0,
-						(double) boundariesPreferences.getLimitValue0(),
-						(double) boundariesPreferences.getLimitValue1(),
-						(double) boundariesPreferences.getLimitValue2(),
-						(double) boundariesPreferences.getLimitValue3(),
-						(double) boundariesPreferences.getLimitValue4(),
-						(double) boundariesPreferences.getLimitValue5()
-				);
+		List<Double> limitlinesValues =
+				boundariesPreferences.getLimitLineList()
+						.stream()
+						.map(limitLine -> (double)limitLine.getLimit())
+						.collect(Collectors.toList());
+
+		Vector<Double> valYList =
+				new Vector<>(Arrays.asList(
+						minY,
+						measurementSingleStatisticResults !=null ? measurementSingleStatisticResults.getMinValue() : minY,
+						measurementSingleStatisticResults !=null ? measurementSingleStatisticResults.getMaxValue() : minY,
+						measurementCurveStatisticResults!=null ? measurementCurveStatisticResults.getMinValue() : minY,
+						measurementCurveStatisticResults!=null ? measurementCurveStatisticResults.getMaxValue() : minY
+				));
+		valYList.addAll(limitlinesValues);
 
 		//combinedChart.setAutoScaleMinMaxEnabled(true);
 
@@ -133,9 +131,6 @@ public class LineChartScaledEntries {
 		double maxStatisticsY = valYStatisticsList.stream().max(Comparator.naturalOrder()).get();
 
 		if (maxY > 1 && maxY > minY) {
-			this.maxY = maxY;
-			this.minY = minY;
-
 			lineChart.setVisibleXRangeMaximum(lineChart.getXRange());
 
 			double range = maxY - minY;

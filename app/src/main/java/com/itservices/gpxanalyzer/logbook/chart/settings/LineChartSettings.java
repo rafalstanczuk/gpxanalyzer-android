@@ -16,7 +16,7 @@ import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.logbook.chart.MeasurementCurveLineChart;
 import com.itservices.gpxanalyzer.logbook.chart.settings.axis.HourMinutesAxisValueFormatter;
 import com.itservices.gpxanalyzer.logbook.chart.settings.axis.MeasurementAxisValueFormatter;
-import com.itservices.gpxanalyzer.logbook.chart.settings.background.MeasurementBoundariesPreferences;
+import com.itservices.gpxanalyzer.logbook.chart.settings.background.LimitLinesBoundaries;
 
 
 import javax.inject.Inject;
@@ -31,7 +31,7 @@ public class LineChartSettings {
 	private final CustomMarker customMarker;
 	private final HourMinutesAxisValueFormatter hourMinutesAxisValueFormatter;
 	private final MeasurementAxisValueFormatter measurementAxisValueFormatter;
-	private final MeasurementBoundariesPreferences measurementBoundariesPreferences;
+	private final LimitLinesBoundaries limitLinesBoundaries;
 	private final Paint paintGridBg = new Paint();
 	private final int primaryColor;
 
@@ -40,22 +40,22 @@ public class LineChartSettings {
 		@ApplicationContext Context context, CustomMarker customMarker,
 		HourMinutesAxisValueFormatter hourMinutesAxisValueFormatter,
 		MeasurementAxisValueFormatter measurementAxisValueFormatter,
-		MeasurementBoundariesPreferences measurementBoundariesPreferences
+		LimitLinesBoundaries limitLinesBoundaries
 	) {
 		this.customMarker = customMarker;
 		this.hourMinutesAxisValueFormatter = hourMinutesAxisValueFormatter;
 		primaryColor = context.getResources().getColor(R.color.colorPrimary);
-		this.measurementBoundariesPreferences = measurementBoundariesPreferences;
+		this.limitLinesBoundaries = limitLinesBoundaries;
 		this.measurementAxisValueFormatter = measurementAxisValueFormatter;
 
 		paintGridBg.setStyle(Paint.Style.FILL);
 		paintGridBg.setColor(Color.WHITE);
 
-		measurementBoundariesPreferences.initLimitLines();
+		limitLinesBoundaries.initLimitLines();
 	}
 
 	public void setChartSettingsFor(MeasurementCurveLineChart lineChart) {
-		measurementBoundariesPreferences.initLimitLines();
+		limitLinesBoundaries.initLimitLines();
 
 		lineChart.setPaint(paintGridBg, PAINT_GRID_BACKGROUND);
 		lineChart.setAutoScaleMinMaxEnabled(false);
@@ -138,21 +138,7 @@ public class LineChartSettings {
 		yAxisLeft.removeAllLimitLines();
 
 		if (yAxisLeft.getLimitLines().size() == 0) {
-			if (measurementBoundariesPreferences.getLine5() != null) {
-				yAxisLeft.addLimitLine(measurementBoundariesPreferences.getLine5());
-			}
-			if (measurementBoundariesPreferences.getLine3() != null) {
-				yAxisLeft.addLimitLine(measurementBoundariesPreferences.getLine3());
-			}
-			if (measurementBoundariesPreferences.getLine2() != null) {
-				yAxisLeft.addLimitLine(measurementBoundariesPreferences.getLine2());
-			}
-			if (measurementBoundariesPreferences.getLine1() != null) {
-				yAxisLeft.addLimitLine(measurementBoundariesPreferences.getLine1());
-			}
-			if (measurementBoundariesPreferences.getLine0() != null) {
-				yAxisLeft.addLimitLine(measurementBoundariesPreferences.getLine0());
-			}
+			limitLinesBoundaries.addLimitLinesInto(yAxisLeft);
 		}
 	}
 }

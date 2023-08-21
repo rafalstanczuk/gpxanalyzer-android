@@ -1,21 +1,25 @@
 package com.itservices.gpxanalyzer.utils.ui;
 
 import static com.itservices.gpxanalyzer.utils.ui.ColorUtil.setAlphaInIntColor;
-import static com.itservices.gpxanalyzer.logbook.chart.settings.background.Measurement5RangesUtil.MEASUREMENT_5RANGES_COLOR_LIST;
 
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 
+import com.itservices.gpxanalyzer.logbook.chart.legend.BoundaryColorSpan;
+import com.itservices.gpxanalyzer.logbook.chart.legend.PaletteColorDeterminer;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class IconsUtil {
 
-	public static List<Drawable> generateDrawableIconForAreaList(int size, int alpha) {
+	public static List<Drawable> generateDrawableIconForAreaList(int size, int alpha, PaletteColorDeterminer paletteColorDeterminer) {
 		List<Drawable> measurementDrawableIconList = new ArrayList<>();
 
-		for (int color : MEASUREMENT_5RANGES_COLOR_LIST) {
+		for (Map.Entry<Integer, BoundaryColorSpan> entry: paletteColorDeterminer.getPalette().entrySet()) {
+			int color = entry.getValue().getColor();
 
 			int colorWithAlpha = setAlphaInIntColor(color, alpha);
 

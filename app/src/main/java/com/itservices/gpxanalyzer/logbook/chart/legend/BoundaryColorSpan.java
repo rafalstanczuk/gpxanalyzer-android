@@ -1,7 +1,5 @@
 package com.itservices.gpxanalyzer.logbook.chart.legend;
 
-import android.util.Log;
-
 public class BoundaryColorSpan {
     private final int id;
     private final String name;
@@ -10,7 +8,6 @@ public class BoundaryColorSpan {
     private final int color;
 
     public BoundaryColorSpan(int id, String name, float min, float max, int color) {
-        //Log.d("BoundaryColorSpan", "id = [" + id + "], name = [" + name + "], min = [" + min + "], max = [" + max + "], color = [" + color + "]");
         this.id = id;
         this.name = name;
         this.min = min;

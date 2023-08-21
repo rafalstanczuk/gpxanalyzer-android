@@ -1,7 +1,6 @@
 package com.itservices.gpxanalyzer.logbook.chart.settings.axis;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.data.Entry;
@@ -54,8 +53,6 @@ public class HourMinutesAxisValueFormatter implements IAxisValueFormatter, IValu
 		calendar.set(Calendar.HOUR_OF_DAY, hour);
 		calendar.set(Calendar.MINUTE, minutes);
 		calendar.set(Calendar.SECOND, seconds);
-
-		Log.i("HourMinutes", String.format("%dd:%dd:%dd", hour, minutes, seconds) );
 
 		return calendar;
 	}
