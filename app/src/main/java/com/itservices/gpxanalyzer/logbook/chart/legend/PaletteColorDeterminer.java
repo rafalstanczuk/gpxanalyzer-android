@@ -31,7 +31,7 @@ public class PaletteColorDeterminer {
 
     @Inject
     public PaletteColorDeterminer(@ApplicationContext Context context) {
-        Bitmap colorPalette = BitmapFactory.decodeResource(context.getResources(), R.drawable.color_pallette);
+        Bitmap colorPalette = BitmapFactory.decodeResource(context.getResources(), R.drawable.color_palette);
         paletteNumberOfDivisions = context.getResources().getInteger(R.integer.palette_number_of_divisions);
         paletteFromBitmap = compactPalettePixelsFrom(colorPalette);
     }
