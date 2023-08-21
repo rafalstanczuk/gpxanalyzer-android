@@ -4,6 +4,9 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.itservices.gpxanalyzer.logbook.chart.data.StatisticResults;
+import com.itservices.gpxanalyzer.logbook.chart.legend.PaletteColorDeterminer;
+
 import javax.inject.Inject;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
@@ -23,12 +26,16 @@ public class StatisticsViewModel extends ViewModel {
 	}
 
 	@Inject
-	StatisticResults statisticResults;
+	protected StatisticResults statisticResults;
+
+	@Inject
+	protected PaletteColorDeterminer paletteColorDeterminer;
 
 	@Inject
 	public StatisticsViewModel() {}
 
 	public void refreshStatisticResults() {
+		paletteColorDeterminer.initPalette();
 		_curveMeasurementStatisticResults.setValue(statisticResults);
 	}
 }

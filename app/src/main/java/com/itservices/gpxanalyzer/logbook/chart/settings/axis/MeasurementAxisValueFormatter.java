@@ -1,13 +1,13 @@
 package com.itservices.gpxanalyzer.logbook.chart.settings.axis;
 
 import com.github.mikephil.charting.components.AxisBase;
+import com.github.mikephil.charting.components.LimitLine;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.formatter.IValueFormatter;
 import com.github.mikephil.charting.utils.ViewPortHandler;
-import com.itservices.gpxanalyzer.logbook.chart.settings.MeasurementBoundariesPreferences;
+import com.itservices.gpxanalyzer.logbook.chart.settings.background.LimitLinesBoundaries;
 
-import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -18,11 +18,11 @@ public class MeasurementAxisValueFormatter implements IAxisValueFormatter, IValu
 
 	private static final int MIN_DISTANCE_VALUE_TO_DRAW = 5;
 
-	private final MeasurementBoundariesPreferences measurementBoundariesPreferences;
+	private final LimitLinesBoundaries limitLinesBoundaries;
 
 	@Inject
-	MeasurementAxisValueFormatter(MeasurementBoundariesPreferences measurementBoundariesPreferences) {
-		this.measurementBoundariesPreferences = measurementBoundariesPreferences;
+	MeasurementAxisValueFormatter(LimitLinesBoundaries limitLinesBoundaries) {
+		this.limitLinesBoundaries = limitLinesBoundaries;
 	}
 
 	public String getFormattedValue(float value) {
@@ -41,22 +41,15 @@ public class MeasurementAxisValueFormatter implements IAxisValueFormatter, IValu
 	private boolean isValueAllowedAsLabel(float value) {
 		int intVal = Math.round(value);
 
-		List<Integer> allowedValues = Arrays.asList(
-			measurementBoundariesPreferences.getUpperMax(),
-			measurementBoundariesPreferences.getMinTargetMeasurement(),
-			measurementBoundariesPreferences.getMaxTargetMeasurement(),
-			measurementBoundariesPreferences.getLowMeasurement()
-		);
-
-		return isAllowedDistance(intVal, allowedValues);
+		return isAllowedDistance(intVal, limitLinesBoundaries.getLimitLineList());
 	}
 
 	private boolean isAllowedDistance(
-		int intVal, List<Integer> allowedValues
+			int intVal, List<LimitLine> limitLineList
 	) {
 
-		for(int boundValToCheck: allowedValues) {
-			if (Math.abs(intVal - boundValToCheck) < MIN_DISTANCE_VALUE_TO_DRAW) {
+		for(LimitLine limitLine: limitLineList) {
+			if (Math.abs(intVal - limitLine.getLimit()) < MIN_DISTANCE_VALUE_TO_DRAW) {
 				return false;
 			}
 		}

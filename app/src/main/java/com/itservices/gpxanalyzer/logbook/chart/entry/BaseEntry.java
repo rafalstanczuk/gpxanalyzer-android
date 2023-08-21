@@ -3,7 +3,7 @@ package com.itservices.gpxanalyzer.logbook.chart.entry;
 import android.graphics.drawable.Drawable;
 
 import com.github.mikephil.charting.data.Entry;
-import com.itservices.gpxanalyzer.logbook.StatisticResults;
+import com.itservices.gpxanalyzer.logbook.chart.data.StatisticResults;
 
 import java.util.Calendar;
 

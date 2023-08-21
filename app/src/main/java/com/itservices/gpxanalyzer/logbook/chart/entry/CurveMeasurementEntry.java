@@ -1,8 +1,5 @@
 package com.itservices.gpxanalyzer.logbook.chart.entry;
 
-import static com.itservices.gpxanalyzer.logbook.chart.settings.Measurement5RangesUtil.getRangeOfMeasurement;
-
-import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
@@ -11,21 +8,20 @@ import androidx.annotation.NonNull;
 
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.itservices.gpxanalyzer.logbook.chart.data.StatisticResults;
+import com.itservices.gpxanalyzer.logbook.chart.legend.PaletteColorDeterminer;
+import com.itservices.gpxanalyzer.logbook.chart.settings.axis.HourMinutesAxisValueFormatter;
+import com.itservices.gpxanalyzer.utils.ui.ColorUtil;
+import com.itservices.gpxanalyzer.utils.ui.IconsUtil;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
-
-import com.itservices.gpxanalyzer.logbook.StatisticResults;
-import com.itservices.gpxanalyzer.logbook.chart.settings.axis.HourMinutesAxisValueFormatter;
-import com.itservices.gpxanalyzer.utils.ui.ColorUtil;
 
 public class CurveMeasurementEntry extends BaseEntry {
 	public static final String CURVE_MEASUREMENT = "CURVE_MEASUREMENT";
 	public static final int FILL_COLOR_UNDER_CURVE = ColorUtil.rgb(0.96f, 0.96f, 0.96f);
 	public static final int FILL_COLOR_ALPHA_UNDER_CURVE = (int) (0.3f * 255.0f);
-	public static boolean SHOW_COLOR_CURVE_MEASUREMENT_RANGE_CIRCLES_ICONS = false;
-	public static boolean SHOW_COLOR_CURVE_MEASUREMENT_RANGE_CIRCLES_ONLY_AS_DEFAULT = false;
+	public static boolean SHOW_COLOR_CURVE_MEASUREMENT_RANGE_CIRCLES_ICONS = true;
 
 	CurveMeasurementEntry(
 		Calendar calendar, float x, float y, Drawable icon, StatisticResults statisticResults
@@ -34,20 +30,15 @@ public class CurveMeasurementEntry extends BaseEntry {
 	}
 
 	public static CurveMeasurementEntry create(
-		Context context, final List<Drawable> drawableIconList, StatisticResults statisticResults,
+		PaletteColorDeterminer paletteColorDeterminer,
+		StatisticResults statisticResults,
 		float x, float y
 	) {
-
-		int areaColorId = getRangeOfMeasurement((int) y, context);
-
-		if (SHOW_COLOR_CURVE_MEASUREMENT_RANGE_CIRCLES_ONLY_AS_DEFAULT) {
-			areaColorId = drawableIconList.size() - 1;
-		}
-
 		Drawable drawableIcon = null;
 
 		try {
-			drawableIcon = drawableIconList.get(areaColorId);
+			int colorInt = paletteColorDeterminer.getBoundaryFrom(y).getColor();
+			drawableIcon = IconsUtil.getDrawableIconForAreaColorId(colorInt, 10, false);
 		} catch (Exception ex) {
 			Log.e("MeasurementCurveEntry", "create: ", ex);
 		}

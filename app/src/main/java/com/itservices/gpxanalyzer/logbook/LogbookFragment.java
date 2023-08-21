@@ -32,6 +32,8 @@ import io.ticofab.androidgpxparser.parser.domain.TrackPoint;
 import io.ticofab.androidgpxparser.parser.domain.TrackSegment;
 
 import com.itservices.gpxanalyzer.logbook.chart.ChartViewModel;
+import com.itservices.gpxanalyzer.logbook.chart.data.Measurement;
+import com.itservices.gpxanalyzer.logbook.chart.data.StatisticResults;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -56,7 +58,7 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 	public GPXParser mParser;
 
 	@Inject
-	StatisticResults statisticResults;
+    StatisticResults statisticResults;
 
 	private MainActivity activity;
 	private FragmentLogbookBinding binding;
@@ -100,22 +102,22 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 			for (int i = 0; i < tracks.size(); i++) {
 
 				Track track = tracks.get(i);
-				Log.d(TAG, "track " + i + ":");
+				//Log.d(TAG, "track " + i + ":");
 				List<TrackSegment> segments = track.getTrackSegments();
 				for (int j = 0; j < segments.size(); j++) {
 					TrackSegment segment = segments.get(j);
-					Log.d(TAG, "  segment " + j + ":");
+					//Log.d(TAG, "  segment " + j + ":");
 					for (TrackPoint trackPoint : segment.getTrackPoints()) {
-						String msg = "    point: lat " + trackPoint.getLatitude() + ", lon " + trackPoint.getLongitude()
+						/*String msg = "    point: lat " + trackPoint.getLatitude() + ", lon " + trackPoint.getLongitude()
 								+ ", elev " + trackPoint.getElevation()
-								+ ", time " + trackPoint.getTime();
+								+ ", time " + trackPoint.getTime();*/
 						Extensions ext = trackPoint.getExtensions();
 						Double speed;
 						if (ext != null) {
 							speed = ext.getSpeed();
-							msg = msg.concat(", speed " + speed);
+							//msg = msg.concat(", speed " + speed);
 						}
-						Log.d(TAG, msg);
+						//Log.d(TAG, msg);
 
 
 
@@ -206,14 +208,12 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 
 		statisticsViewModel.getCurveMeasurementsStatisticResults()
 			.observe(getViewLifecycleOwner(), curveMeasurementStatisticResults ->
-				chartViewModel.updateCurveMeasurementLineDataSetFrom(
-					requireContext(), curveMeasurementStatisticResults)
+				chartViewModel.updateCurveMeasurementLineDataSetFrom(curveMeasurementStatisticResults)
 			);
 
 		statisticsViewModel.getMeasurementStatisticResults()
 			.observe(getViewLifecycleOwner(), measurementStatisticResults ->
-				chartViewModel.updateSingleMeasurementDataSetFrom(
-					requireContext(), measurementStatisticResults)
+				chartViewModel.updateSingleMeasurementDataSetFrom(measurementStatisticResults)
 			);
 
 	}
@@ -238,7 +238,6 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 
 		logbookViewModel.getViewMode().observe(getViewLifecycleOwner(), viewMode -> {
 			switchViewMode(viewMode);
-			statisticsViewModel.refreshStatisticResults();
 		});
 
 		return binding.getRoot();

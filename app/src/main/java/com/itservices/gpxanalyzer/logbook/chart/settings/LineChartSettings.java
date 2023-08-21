@@ -1,23 +1,24 @@
 package com.itservices.gpxanalyzer.logbook.chart.settings;
 
 import static com.github.mikephil.charting.charts.Chart.PAINT_GRID_BACKGROUND;
-
 import static com.itservices.gpxanalyzer.logbook.chart.settings.axis.HourMinutesAxisValueFormatter.MAX_X_SCALED_TIME;
 import static com.itservices.gpxanalyzer.logbook.chart.settings.axis.HourMinutesAxisValueFormatter.MIN_X_SCALED_TIME;
-import static com.itservices.gpxanalyzer.logbook.chart.settings.axis.HourMinutesAxisValueFormatter.getFractionOfFullHourFromMinutes;
 import static com.itservices.gpxanalyzer.logbook.chart.settings.axis.HourMinutesAxisValueFormatter.getFractionOfFullHourFromSeconds;
 
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Paint;
 
+import androidx.core.content.ContextCompat;
+
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.itservices.gpxanalyzer.R;
-import com.itservices.gpxanalyzer.logbook.chart.MeasurementCurveLineChart;
+import com.itservices.gpxanalyzer.logbook.chart.MeasurementLineChart;
 import com.itservices.gpxanalyzer.logbook.chart.settings.axis.HourMinutesAxisValueFormatter;
 import com.itservices.gpxanalyzer.logbook.chart.settings.axis.MeasurementAxisValueFormatter;
-
+import com.itservices.gpxanalyzer.logbook.chart.settings.background.LimitLinesBoundaries;
+import com.itservices.gpxanalyzer.logbook.chart.settings.highlight.CustomMarker;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -31,7 +32,7 @@ public class LineChartSettings {
 	private final CustomMarker customMarker;
 	private final HourMinutesAxisValueFormatter hourMinutesAxisValueFormatter;
 	private final MeasurementAxisValueFormatter measurementAxisValueFormatter;
-	private final MeasurementBoundariesPreferences measurementBoundariesPreferences;
+	private final LimitLinesBoundaries limitLinesBoundaries;
 	private final Paint paintGridBg = new Paint();
 	private final int primaryColor;
 
@@ -40,24 +41,22 @@ public class LineChartSettings {
 		@ApplicationContext Context context, CustomMarker customMarker,
 		HourMinutesAxisValueFormatter hourMinutesAxisValueFormatter,
 		MeasurementAxisValueFormatter measurementAxisValueFormatter,
-		MeasurementBoundariesPreferences measurementBoundariesPreferences
+		LimitLinesBoundaries limitLinesBoundaries
 	) {
 		this.customMarker = customMarker;
 		this.hourMinutesAxisValueFormatter = hourMinutesAxisValueFormatter;
-		primaryColor = context.getResources().getColor(R.color.colorPrimary);
-		this.measurementBoundariesPreferences = measurementBoundariesPreferences;
+		primaryColor = ContextCompat.getColor(context, R.color.colorPrimary);
+		this.limitLinesBoundaries = limitLinesBoundaries;
 		this.measurementAxisValueFormatter = measurementAxisValueFormatter;
 
 		paintGridBg.setStyle(Paint.Style.FILL);
 		paintGridBg.setColor(Color.WHITE);
 
-		measurementBoundariesPreferences.initValues(context);
-		measurementBoundariesPreferences.initLimitLines();
+		limitLinesBoundaries.initLimitLines();
 	}
 
-	public void setChartSettingsFor(MeasurementCurveLineChart lineChart) {
-		measurementBoundariesPreferences.initValues(lineChart.getContext());
-		measurementBoundariesPreferences.initLimitLines();
+	public void setChartSettingsFor(MeasurementLineChart lineChart) {
+		limitLinesBoundaries.initLimitLines();
 
 		lineChart.setPaint(paintGridBg, PAINT_GRID_BACKGROUND);
 		lineChart.setAutoScaleMinMaxEnabled(false);
@@ -86,7 +85,7 @@ public class LineChartSettings {
 		setupDescriptions(lineChart);
 	}
 
-	private void setupXAxis(MeasurementCurveLineChart lineChart) {
+	private void setupXAxis(MeasurementLineChart lineChart) {
 		XAxis xAxis = lineChart.getXAxis();
 		xAxis.setDrawAxisLine(false);
 		xAxis.setDrawGridLines(false);
@@ -100,7 +99,7 @@ public class LineChartSettings {
 		xAxis.setTextColor(Color.BLACK);
 	}
 
-	private void setupDescriptions(MeasurementCurveLineChart lineChart) {
+	private void setupDescriptions(MeasurementLineChart lineChart) {
 		lineChart.getDescription().setEnabled(false);
 		lineChart.getLegend().setEnabled(false);
 /*
@@ -119,14 +118,14 @@ public class LineChartSettings {
 		lineChart.setDescription(description);*/
 	}
 
-	private void setupYAxisRight(MeasurementCurveLineChart lineChart) {
+	private void setupYAxisRight(MeasurementLineChart lineChart) {
 		YAxis yAxisRight = lineChart.getAxisRight();
 		yAxisRight.setEnabled(false);
 		yAxisRight.setDrawAxisLine(false);
 		yAxisRight.setDrawGridLines(false);
 	}
 
-	private void setupYAxisLeft(MeasurementCurveLineChart lineChart) {
+	private void setupYAxisLeft(MeasurementLineChart lineChart) {
 		YAxis yAxisLeft = lineChart.getAxisLeft();
 		yAxisLeft.setDrawAxisLine(false);
 		yAxisLeft.setDrawGridLines(false);
@@ -140,24 +139,7 @@ public class LineChartSettings {
 		yAxisLeft.removeAllLimitLines();
 
 		if (yAxisLeft.getLimitLines().size() == 0) {
-			if (measurementBoundariesPreferences.getLineMaxValue() != null) {
-				yAxisLeft.addLimitLine(measurementBoundariesPreferences.getLineMaxValue());
-			}
-			/*if (measurementBoundariesPreferences.getLineHyperMiddle() != null) {
-				yAxisLeft.addLimitLine(measurementBoundariesPreferences.getLineHyperMiddle());
-			}*/
-			if (measurementBoundariesPreferences.getLineUpperMax() != null) {
-				yAxisLeft.addLimitLine(measurementBoundariesPreferences.getLineUpperMax());
-			}
-			if (measurementBoundariesPreferences.getLineMaxTargetMeasurement() != null) {
-				yAxisLeft.addLimitLine(measurementBoundariesPreferences.getLineMaxTargetMeasurement());
-			}
-			if (measurementBoundariesPreferences.getLineMinTargetMeasurement() != null) {
-				yAxisLeft.addLimitLine(measurementBoundariesPreferences.getLineMinTargetMeasurement());
-			}
-			if (measurementBoundariesPreferences.getLineLowMeasurement() != null) {
-				yAxisLeft.addLimitLine(measurementBoundariesPreferences.getLineLowMeasurement());
-			}
+			limitLinesBoundaries.addLimitLinesInto(yAxisLeft);
 		}
 	}
 }
