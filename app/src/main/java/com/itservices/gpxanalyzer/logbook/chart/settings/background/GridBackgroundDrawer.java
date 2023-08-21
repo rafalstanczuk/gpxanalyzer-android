@@ -27,9 +27,6 @@ public class GridBackgroundDrawer {
     public static final int BACKGROUND_BOUNDARIES_AREA_COLOR_ALPHA = 70;
 
     @Inject
-    public LimitLinesBoundaries measurement;
-
-    @Inject
     public PaletteColorDeterminer palette;
 
     @Inject
@@ -38,7 +35,7 @@ public class GridBackgroundDrawer {
     }
 
     public void drawGridBackground(LineChart lineChart, Canvas canvas) {
-        for(Map.Entry<Integer, BoundaryColorSpan> entry: palette.getPalette().entrySet()) {
+        for (Map.Entry<Integer, BoundaryColorSpan> entry : palette.getPalette().entrySet()) {
             drawRectArea(canvas, entry.getValue(), lineChart);
         }
     }
@@ -46,12 +43,9 @@ public class GridBackgroundDrawer {
     public void drawRectArea(Canvas canvas, BoundaryColorSpan boundaryColorSpan, LineChart lineChart) {
         int colorForAreaId = ColorUtil.setAlphaInIntColor(boundaryColorSpan.getColor(), BACKGROUND_BOUNDARIES_AREA_COLOR_ALPHA);
 
-        MPPointF leftMin = null;
-        MPPointF leftMax = null;
-
-        leftMin = lineChart.getPosition(
+        MPPointF leftMin = lineChart.getPosition(
                 new Entry(MIN_X_SCALED_TIME, boundaryColorSpan.getMin()), YAxis.AxisDependency.LEFT);
-        leftMax = lineChart.getPosition(
+        MPPointF leftMax = lineChart.getPosition(
                 new Entry(MIN_X_SCALED_TIME, boundaryColorSpan.getMax()),
                 YAxis.AxisDependency.LEFT
         );

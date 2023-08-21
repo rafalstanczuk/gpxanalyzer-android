@@ -23,7 +23,7 @@
             app:layout_constraintHeight_percent="@{viewModel.measurementChartPercentageHeight}"
             app:layout_constraintTop_toTopOf="parent">
 
-            <com.itservices.gpxanalyzer.logbook.chart.MeasurementCurveLineChart
+            <com.itservices.gpxanalyzer.logbook.chart.MeasurementLineChart
                 android:id="@+id/lineChart"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"

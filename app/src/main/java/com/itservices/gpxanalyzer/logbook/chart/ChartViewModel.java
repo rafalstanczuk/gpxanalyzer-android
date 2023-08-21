@@ -101,7 +101,7 @@ public class ChartViewModel extends ViewModel {
     }
 
     public void tryToUpdateDataChart(
-            MeasurementCurveLineChart lineChart, List<LineDataSet> newDataSetList
+            MeasurementLineChart lineChart, List<LineDataSet> newDataSetList
     ) {
 
         if (!isEnoughDataToShow(newDataSetList)) {
@@ -157,7 +157,7 @@ public class ChartViewModel extends ViewModel {
         lineDataSetListToAddLive.setValue(lineDataSetList);
     }
 
-    public void init(MeasurementCurveLineChart lineChart) {
+    public void init(MeasurementLineChart lineChart) {
         lineChart.clear();
         lineChart.setData(new LineData());
         lineChart.invalidate();
@@ -188,7 +188,7 @@ public class ChartViewModel extends ViewModel {
         entryToHighlightTimeInt.setValue(entryTimeToSelect);
     }
 
-    public void selectMarker(MeasurementCurveLineChart lineChart, long selectedColumnTimeInt) {
+    public void selectMarker(MeasurementLineChart lineChart, long selectedColumnTimeInt) {
 
         if (selectedColumnTimeInt < 0) {
             lineChart.highlightValue(null, false);
@@ -226,11 +226,11 @@ public class ChartViewModel extends ViewModel {
         }
     }
 
-    public void resetMarkerAndSaveSelection(MeasurementCurveLineChart lineChart) {
+    public void resetMarkerAndSaveSelection(MeasurementLineChart lineChart) {
         selectMarker(lineChart, -1);
     }
 
-    public void resetMarkerAndClearSelection(MeasurementCurveLineChart lineChart) {
+    public void resetMarkerAndClearSelection(MeasurementLineChart lineChart) {
         highlight.setValue(null);
         highlightedEntry.setValue(null);
         selectMarker(lineChart, -1);

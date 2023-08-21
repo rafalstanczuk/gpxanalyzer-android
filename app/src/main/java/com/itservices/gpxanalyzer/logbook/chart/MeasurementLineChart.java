@@ -16,11 +16,9 @@ import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.itservices.gpxanalyzer.MainActivity;
 import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.logbook.chart.entry.BaseEntry;
-import com.itservices.gpxanalyzer.logbook.chart.entry.CurveMeasurementEntry;
-import com.itservices.gpxanalyzer.logbook.chart.entry.SingleMeasurementEntry;
 import com.itservices.gpxanalyzer.logbook.chart.settings.background.GridBackgroundDrawer;
-import com.itservices.gpxanalyzer.logbook.chart.settings.StaticChartHighlighter;
 import com.itservices.gpxanalyzer.logbook.chart.settings.background.LimitLinesBoundaries;
+import com.itservices.gpxanalyzer.logbook.chart.settings.highlight.StaticChartHighlighter;
 
 import java.util.Calendar;
 
@@ -29,7 +27,7 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class MeasurementCurveLineChart extends LineChart {
+public class MeasurementLineChart extends LineChart {
 
 	MeasurementInfoLayoutView measurementInfoLayoutView;
 
@@ -39,25 +37,25 @@ public class MeasurementCurveLineChart extends LineChart {
 	@Inject
 	GridBackgroundDrawer gridBackgroundDrawer;
 
-	public MeasurementCurveLineChart(Context context) {
+	public MeasurementLineChart(Context context) {
 		super(context);
 		initMeasurementInfoLayoutView();
 	}
 
-	public MeasurementCurveLineChart(Context context, AttributeSet attrs) {
+	public MeasurementLineChart(Context context, AttributeSet attrs) {
 		super(context, attrs);
 
 		initMeasurementInfoLayoutView();
 	}
 
-	public MeasurementCurveLineChart(Context context, AttributeSet attrs, int defStyle) {
+	public MeasurementLineChart(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 
 		initMeasurementInfoLayoutView();
 	}
 
 	public static int getDataSetIndexForEntryWithTimeInt(
-		MeasurementCurveLineChart lineChart, long entryTimeInt
+			MeasurementLineChart lineChart, long entryTimeInt
 	) {
 		int dataSetIndexToHighlight = 0;
 
@@ -137,7 +135,7 @@ public class MeasurementCurveLineChart extends LineChart {
 	public void init() {
 		super.init();
 
-		StaticChartHighlighter<MeasurementCurveLineChart> staticChartHighlighter = new StaticChartHighlighter<>(
+		StaticChartHighlighter<MeasurementLineChart> staticChartHighlighter = new StaticChartHighlighter<>(
 			this, (BarLineChartTouchListener) mChartTouchListener);
 		setHighlighter(staticChartHighlighter);
 	}
@@ -156,9 +154,7 @@ public class MeasurementCurveLineChart extends LineChart {
 			int dataSetIndexToHighlight = getDataSetIndexForEntryWithTimeInt(
 				this, entryTimeInt);
 
-			if (baseEntry != null) {
-				highlightValue(baseEntry.getX(), baseEntry.getY(), dataSetIndexToHighlight, true);
-			}
+			highlightValue(baseEntry.getX(), baseEntry.getY(), dataSetIndexToHighlight, true);
 		}
 	}
 
@@ -179,11 +175,11 @@ public class MeasurementCurveLineChart extends LineChart {
 
 		String unit = getContext().getResources().getString(R.string.default_measurement_unit);
 
-		if (selectedEntry instanceof CurveMeasurementEntry) {
+/*		if (selectedEntry instanceof CurveMeasurementEntry) {
 
 		} else if (selectedEntry instanceof SingleMeasurementEntry) {
 
-		}
+		}*/
 
 		activity.runOnUiThread(() -> {
 			measurementInfoLayoutView.setTime(getFormattedTime(calendar));

@@ -40,7 +40,7 @@ public class LineChartScaledEntries {
 		this.minY = minY;
 	}
 
-	public void update(MeasurementCurveLineChart lineChart) {
+	public void update(MeasurementLineChart lineChart) {
 		double r = measurementCurveStatisticResults.getMaxValue() - measurementCurveStatisticResults.getMinValue();
 		double o = r * 0.1f;
 		minY = (measurementCurveStatisticResults.getMinValue() - 2.0f * o);
@@ -54,7 +54,7 @@ public class LineChartScaledEntries {
 						measurementCurveStatisticResults!=null ? measurementCurveStatisticResults.getMaxValue() : minY
 				);
 
-		List<Double> limitlinesValues =
+		List<Double> limitLinesValues =
 				boundariesPreferences.getLimitLineList()
 						.stream()
 						.map(limitLine -> (double)limitLine.getLimit())
@@ -68,7 +68,7 @@ public class LineChartScaledEntries {
 						measurementCurveStatisticResults!=null ? measurementCurveStatisticResults.getMinValue() : minY,
 						measurementCurveStatisticResults!=null ? measurementCurveStatisticResults.getMaxValue() : minY
 				));
-		valYList.addAll(limitlinesValues);
+		valYList.addAll(limitLinesValues);
 
 		//combinedChart.setAutoScaleMinMaxEnabled(true);
 

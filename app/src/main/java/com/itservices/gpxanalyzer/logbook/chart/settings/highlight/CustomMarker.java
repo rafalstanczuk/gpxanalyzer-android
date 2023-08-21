@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.logbook.chart.settings;
+package com.itservices.gpxanalyzer.logbook.chart.settings.highlight;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -18,7 +18,7 @@ import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.utils.MPPointF;
 import com.itservices.gpxanalyzer.R;
-import com.itservices.gpxanalyzer.logbook.chart.MeasurementCurveLineChart;
+import com.itservices.gpxanalyzer.logbook.chart.MeasurementLineChart;
 import com.itservices.gpxanalyzer.logbook.chart.entry.CurveMeasurementEntry;
 import com.itservices.gpxanalyzer.logbook.chart.entry.SingleMeasurementEntry;
 import com.itservices.gpxanalyzer.utils.common.FormatNumberUtil;
@@ -38,8 +38,6 @@ public class CustomMarker extends MarkerView {
 
 	private final TextView markerTextViewTime;
 	private final TextView markerTextViewValue;
-
-	private Entry currentEntry = null;
 
 	@Inject
 	public CustomMarker(@ApplicationContext Context context) {
@@ -72,8 +70,7 @@ public class CustomMarker extends MarkerView {
 
 	@Override
 	public void refreshContent(Entry entry, Highlight highlight) {
-		MeasurementCurveLineChart chartView = (MeasurementCurveLineChart) getChartView();
-		currentEntry = entry;
+		MeasurementLineChart chartView = (MeasurementLineChart) getChartView();
 
 		ChartTouchListener.ChartGesture chartGesture = chartView.getChartTouchListener()
 			.getLastGesture();
@@ -115,7 +112,7 @@ public class CustomMarker extends MarkerView {
 
 	@Override
 	public void draw(Canvas canvas, float posX, float posY) {
-		MeasurementCurveLineChart chartView = (MeasurementCurveLineChart) getChartView();
+		MeasurementLineChart chartView = (MeasurementLineChart) getChartView();
 
 		ChartTouchListener.ChartGesture chartGesture = chartView.getChartTouchListener()
 			.getLastGesture();

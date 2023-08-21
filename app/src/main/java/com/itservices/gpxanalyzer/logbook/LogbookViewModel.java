@@ -7,11 +7,7 @@ import static com.itservices.gpxanalyzer.utils.ui.BindingAdapters.DEFAULT_FLOAT_
 import static com.itservices.gpxanalyzer.utils.ui.BindingAdapters.DEFAULT_MAX_100_PERCENT;
 
 import android.content.res.Configuration;
-import android.view.View;
 
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.ConstraintSet;
-import androidx.databinding.BindingAdapter;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
