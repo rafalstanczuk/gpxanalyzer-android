@@ -1,16 +1,10 @@
 package com.itservices.gpxanalyzer.logbook.chart;
 
 import com.github.mikephil.charting.components.YAxis;
-import com.github.mikephil.charting.data.Entry;
-import com.itservices.gpxanalyzer.logbook.chart.data.Measurement;
 import com.itservices.gpxanalyzer.logbook.chart.data.StatisticResults;
-import com.itservices.gpxanalyzer.logbook.chart.entry.CurveMeasurementEntry;
-import com.itservices.gpxanalyzer.logbook.chart.entry.SingleMeasurementEntry;
-import com.itservices.gpxanalyzer.logbook.chart.legend.PaletteColorDeterminer;
 import com.itservices.gpxanalyzer.logbook.chart.settings.background.LimitLinesBoundaries;
 import com.itservices.gpxanalyzer.utils.common.PrecisionUtil;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -28,65 +22,20 @@ public class LineChartScaledEntries {
 	private StatisticResults measurementSingleStatisticResults = null;
 
 	@Inject
-	PaletteColorDeterminer paletteColorDeterminer;
-
-	@Inject
 	LimitLinesBoundaries boundariesPreferences;
 
 	@Inject
 	LineChartScaledEntries() {
 	}
 
-	public ArrayList<Entry> createSingleMeasurementEntryList(
-		StatisticResults statisticResults
-	) {
-		Vector<Measurement> measurementVector = statisticResults.getMeasurements();
-
-		int startXIndex = 0;
-		int endXIndex = measurementVector.size();
-
-		ArrayList<Entry> scaledEntries = new ArrayList<>();
-		if (measurementVector.isEmpty()) {
-			return scaledEntries;
-		}
-
-		this.measurementSingleStatisticResults = statisticResults;
-
-		for (int i = startXIndex; i < endXIndex; i++) {
-			double value = measurementVector.get(i).measurement;
-
-			scaledEntries.add(
-				SingleMeasurementEntry.create(paletteColorDeterminer, statisticResults, i,
-						(float) value
-				));
-		}
-		return scaledEntries;
+	public void setMeasurementCurveStatisticResults(StatisticResults measurementCurveStatisticResults) {
+		this.measurementCurveStatisticResults = measurementCurveStatisticResults;
 	}
 
-	public ArrayList<Entry> createCurveMeasurementEntryList(
-		StatisticResults statisticResults
-	) {
-		Vector<Measurement> measurementVector = statisticResults.getMeasurements();
-
-		int startXIndex = 0;
-		int endXIndex = measurementVector.size();
-
-		ArrayList<Entry> scaledEntries = new ArrayList<>();
-		if (measurementVector.isEmpty()) {
-			return scaledEntries;
-		}
-
-		this.measurementCurveStatisticResults = statisticResults;
-
-		for (int i = startXIndex; i < endXIndex; i++) {
-			double value = measurementVector.get(i).measurement;
-
-			scaledEntries.add(CurveMeasurementEntry.create(paletteColorDeterminer, statisticResults, i, (float) value));
-		}
-
-		return scaledEntries;
+	public void setMeasurementSingleStatisticResults(StatisticResults measurementSingleStatisticResults) {
+		this.measurementSingleStatisticResults = measurementSingleStatisticResults;
 	}
-	
+
 	public void setMinY(double minY) {
 		this.minY = minY;
 	}

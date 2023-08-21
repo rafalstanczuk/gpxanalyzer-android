@@ -18,7 +18,7 @@ import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.logbook.chart.entry.BaseEntry;
 import com.itservices.gpxanalyzer.logbook.chart.entry.CurveMeasurementEntry;
 import com.itservices.gpxanalyzer.logbook.chart.entry.SingleMeasurementEntry;
-import com.itservices.gpxanalyzer.logbook.chart.legend.GridBackgroundDrawer;
+import com.itservices.gpxanalyzer.logbook.chart.settings.background.GridBackgroundDrawer;
 import com.itservices.gpxanalyzer.logbook.chart.settings.StaticChartHighlighter;
 import com.itservices.gpxanalyzer.logbook.chart.settings.background.LimitLinesBoundaries;
 

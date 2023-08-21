@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.logbook.chart.legend;
+package com.itservices.gpxanalyzer.logbook.chart.settings.background;
 
 import static com.itservices.gpxanalyzer.logbook.chart.settings.axis.HourMinutesAxisValueFormatter.MIN_X_SCALED_TIME;
 
@@ -11,7 +11,8 @@ import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.utils.MPPointF;
-import com.itservices.gpxanalyzer.logbook.chart.settings.background.LimitLinesBoundaries;
+import com.itservices.gpxanalyzer.logbook.chart.legend.BoundaryColorSpan;
+import com.itservices.gpxanalyzer.logbook.chart.legend.PaletteColorDeterminer;
 import com.itservices.gpxanalyzer.utils.ui.ColorUtil;
 
 import java.util.Map;
@@ -26,10 +27,10 @@ public class GridBackgroundDrawer {
     public static final int BACKGROUND_BOUNDARIES_AREA_COLOR_ALPHA = 70;
 
     @Inject
-    LimitLinesBoundaries measurement;
+    public LimitLinesBoundaries measurement;
 
     @Inject
-    PaletteColorDeterminer palette;
+    public PaletteColorDeterminer palette;
 
     @Inject
     public GridBackgroundDrawer(@ApplicationContext Context context) {

@@ -208,14 +208,12 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 
 		statisticsViewModel.getCurveMeasurementsStatisticResults()
 			.observe(getViewLifecycleOwner(), curveMeasurementStatisticResults ->
-				chartViewModel.updateCurveMeasurementLineDataSetFrom(
-					requireContext(), curveMeasurementStatisticResults)
+				chartViewModel.updateCurveMeasurementLineDataSetFrom(curveMeasurementStatisticResults)
 			);
 
 		statisticsViewModel.getMeasurementStatisticResults()
 			.observe(getViewLifecycleOwner(), measurementStatisticResults ->
-				chartViewModel.updateSingleMeasurementDataSetFrom(
-					requireContext(), measurementStatisticResults)
+				chartViewModel.updateSingleMeasurementDataSetFrom(measurementStatisticResults)
 			);
 
 	}

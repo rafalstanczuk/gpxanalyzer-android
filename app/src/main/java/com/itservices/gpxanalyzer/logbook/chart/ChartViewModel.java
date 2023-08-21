@@ -1,7 +1,5 @@
 package com.itservices.gpxanalyzer.logbook.chart;
 
-import android.content.Context;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -14,7 +12,9 @@ import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.itservices.gpxanalyzer.logbook.chart.data.StatisticResults;
 import com.itservices.gpxanalyzer.logbook.chart.entry.BaseEntry;
 import com.itservices.gpxanalyzer.logbook.chart.entry.CurveMeasurementEntry;
+import com.itservices.gpxanalyzer.logbook.chart.entry.EntryListCreator;
 import com.itservices.gpxanalyzer.logbook.chart.entry.SingleMeasurementEntry;
+import com.itservices.gpxanalyzer.logbook.chart.legend.PaletteColorDeterminer;
 import com.itservices.gpxanalyzer.logbook.chart.settings.LineChartSettings;
 
 import java.util.ArrayList;
@@ -29,203 +29,210 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 @HiltViewModel
 public class ChartViewModel extends ViewModel {
 
-	private static final List<String> TARGET_MATCHED_LINE_LABEL_DATA_TO_SHOW_WITH_MEASUREMENT_BOUNDARIES = Arrays.asList(
-		CurveMeasurementEntry.CURVE_MEASUREMENT);
+    private static final List<String> TARGET_MATCHED_LINE_LABEL_DATA_TO_SHOW_WITH_MEASUREMENT_BOUNDARIES = Arrays.asList(
+            CurveMeasurementEntry.CURVE_MEASUREMENT);
 
-	private final MutableLiveData<List<LineDataSet>> lineDataSetListToAddLive = new MutableLiveData<>();
+    private final MutableLiveData<List<LineDataSet>> lineDataSetListToAddLive = new MutableLiveData<>();
 
-	private final MutableLiveData<Integer> entryToHighlightTimeInt = new MutableLiveData<>();
-	private final MutableLiveData<Entry> highlightedEntry = new MutableLiveData<>();
-	private final MutableLiveData<Highlight> highlight = new MutableLiveData<>();
+    private final MutableLiveData<Integer> entryToHighlightTimeInt = new MutableLiveData<>();
+    private final MutableLiveData<Entry> highlightedEntry = new MutableLiveData<>();
+    private final MutableLiveData<Highlight> highlight = new MutableLiveData<>();
 
-	@Inject
-	public LineChartScaledEntries lineChartScaledEntries;
+    @Inject
+    public LineChartScaledEntries lineChartScaledEntries;
 
-	@Inject
-	public LineChartSettings lineChartSettings;
+    @Inject
+    public LineChartSettings lineChartSettings;
 
-	@Inject
-	ChartViewModel() {
-	}
+    @Inject
+    PaletteColorDeterminer paletteColorDeterminer;
 
-	public MutableLiveData<Integer> getEntryToHighlightTimeInt() {
-		return entryToHighlightTimeInt;
-	}
+    @Inject
+    ChartViewModel() {
+    }
 
-	public LiveData<Entry> getHighlightedEntry() {
-		return highlightedEntry;
-	}
+    public MutableLiveData<Integer> getEntryToHighlightTimeInt() {
+        return entryToHighlightTimeInt;
+    }
 
-	public LiveData<List<LineDataSet>> getLineDataSetListToAddLive() {
-		return lineDataSetListToAddLive;
-	}
+    public LiveData<Entry> getHighlightedEntry() {
+        return highlightedEntry;
+    }
 
-	public void updateCurveMeasurementLineDataSetFrom(
-		Context context, StatisticResults curveMeasurementStatisticResults
-	) {
-		if (curveMeasurementStatisticResults == null) {
-			return;
-		}
+    public LiveData<List<LineDataSet>> getLineDataSetListToAddLive() {
+        return lineDataSetListToAddLive;
+    }
 
-		ArrayList<Entry> entries = lineChartScaledEntries
-				.createCurveMeasurementEntryList(curveMeasurementStatisticResults);
+    public void updateCurveMeasurementLineDataSetFrom(
+            StatisticResults curveMeasurementStatisticResults
+    ) {
+        if (curveMeasurementStatisticResults == null) {
+            return;
+        }
 
-		if (!entries.isEmpty()) {
-			LineDataSet measurementCurveLineDataSet = CurveMeasurementEntry.createCurveMeasurementLineDataSet(entries);
+        ArrayList<Entry> entries =
+                EntryListCreator.createCurveMeasurementEntryList(curveMeasurementStatisticResults, paletteColorDeterminer);
 
-			addToLineDataSetListLive(measurementCurveLineDataSet);
-		}
-	}
+        lineChartScaledEntries.setMeasurementCurveStatisticResults(curveMeasurementStatisticResults);
 
-	public void updateSingleMeasurementDataSetFrom(
-		Context context, StatisticResults statisticResults
-	) {
-		if (statisticResults == null) {
-			return;
-		}
+        if (!entries.isEmpty()) {
+            LineDataSet measurementCurveLineDataSet = CurveMeasurementEntry.createCurveMeasurementLineDataSet(entries);
 
-		ArrayList<Entry> entries = lineChartScaledEntries.createSingleMeasurementEntryList(
-			statisticResults
-		);
+            addToLineDataSetListLive(measurementCurveLineDataSet);
+        }
+    }
 
-		LineDataSet measurementLineDataSet = SingleMeasurementEntry.createSingleMeasurementLineDataSet(entries);
+    public void updateSingleMeasurementDataSetFrom(
+            StatisticResults statisticResults
+    ) {
+        if (statisticResults == null) {
+            return;
+        }
 
-		addToLineDataSetListLive(measurementLineDataSet);
-	}
+        ArrayList<Entry> entries = EntryListCreator.createSingleMeasurementEntryList(
+                statisticResults, paletteColorDeterminer
+        );
 
-	public void tryToUpdateDataChart(
-		MeasurementCurveLineChart lineChart, List<LineDataSet> newDataSetList
-	) {
+        lineChartScaledEntries.setMeasurementSingleStatisticResults(statisticResults);
 
-		if (!isEnoughDataToShow(newDataSetList)) {
-			return;
-		}
+        LineDataSet measurementLineDataSet = SingleMeasurementEntry.createSingleMeasurementLineDataSet(entries);
 
-		LineData lineData = new LineData();
+        addToLineDataSetListLive(measurementLineDataSet);
+    }
 
-		for (LineDataSet lineDataSet : newDataSetList) {
-			lineData.addDataSet(lineDataSet);
-		}
+    public void tryToUpdateDataChart(
+            MeasurementCurveLineChart lineChart, List<LineDataSet> newDataSetList
+    ) {
 
-		lineChart.clear();
-		lineChartSettings.setChartSettingsFor(lineChart);
+        if (!isEnoughDataToShow(newDataSetList)) {
+            return;
+        }
 
-		lineChart.setData(lineData);
-		lineChartScaledEntries.update(lineChart);
+        LineData lineData = new LineData();
 
-		lineChart.highlightValue(highlight.getValue(), true);
-		lineChart.invalidate();
-	}
+        for (LineDataSet lineDataSet : newDataSetList) {
+            lineData.addDataSet(lineDataSet);
+        }
 
-	private boolean isEnoughDataToShow(final List<LineDataSet> newDataSetList) {
-		return checkPrecondition(
-			newDataSetList, TARGET_MATCHED_LINE_LABEL_DATA_TO_SHOW_WITH_MEASUREMENT_BOUNDARIES);
-	}
+        lineChart.clear();
+        lineChartSettings.setChartSettingsFor(lineChart);
 
-	private boolean checkPrecondition(
-		final List<LineDataSet> newDataSetList, final List<String> minimumMatchedDataSet
-	) {
-		int currentMatchedDataSetCount = 0;
-		int minimumMatchedDataSetCount = minimumMatchedDataSet.size();
+        lineChart.setData(lineData);
+        lineChartScaledEntries.update(lineChart);
 
-		for (String currentLabel : minimumMatchedDataSet) {
-			for (LineDataSet lineDataSet : newDataSetList) {
-				if (lineDataSet.getLabel().contentEquals(currentLabel)) {
-					currentMatchedDataSetCount++;
-				}
-			}
-		}
+        lineChart.highlightValue(highlight.getValue(), true);
+        lineChart.invalidate();
+    }
 
-		return currentMatchedDataSetCount == minimumMatchedDataSetCount;
-	}
+    private boolean isEnoughDataToShow(final List<LineDataSet> newDataSetList) {
+        return checkPrecondition(
+                newDataSetList, TARGET_MATCHED_LINE_LABEL_DATA_TO_SHOW_WITH_MEASUREMENT_BOUNDARIES);
+    }
 
-	private void addToLineDataSetListLive(LineDataSet lineDataSet) {
-		List<LineDataSet> lineDataSetList = lineDataSetListToAddLive.getValue();
-		if (lineDataSetList == null) {
-			lineDataSetList = new ArrayList<>();
-		}
+    private boolean checkPrecondition(
+            final List<LineDataSet> newDataSetList, final List<String> minimumMatchedDataSet
+    ) {
+        int currentMatchedDataSetCount = 0;
+        int minimumMatchedDataSetCount = minimumMatchedDataSet.size();
 
-		lineDataSetList.add(lineDataSet);
+        for (String currentLabel : minimumMatchedDataSet) {
+            for (LineDataSet lineDataSet : newDataSetList) {
+                if (lineDataSet.getLabel().contentEquals(currentLabel)) {
+                    currentMatchedDataSetCount++;
+                }
+            }
+        }
 
-		lineDataSetListToAddLive.setValue(lineDataSetList);
-	}
+        return currentMatchedDataSetCount == minimumMatchedDataSetCount;
+    }
 
-	public void init(MeasurementCurveLineChart lineChart) {
-		lineChart.clear();
-		lineChart.setData(new LineData());
-		lineChart.invalidate();
+    private void addToLineDataSetListLive(LineDataSet lineDataSet) {
+        List<LineDataSet> lineDataSetList = lineDataSetListToAddLive.getValue();
+        if (lineDataSetList == null) {
+            lineDataSetList = new ArrayList<>();
+        }
 
-		clearLineDataSetListToAddLive();
-		lineChartSettings.setChartSettingsFor(lineChart);
-	}
+        lineDataSetList.add(lineDataSet);
 
-	private void clearLineDataSetListToAddLive() {
-		List<LineDataSet> lineDataSetList = lineDataSetListToAddLive.getValue();
-		if (lineDataSetList != null) {
-			lineDataSetList.clear();
-			lineDataSetListToAddLive.setValue(lineDataSetList);
-		} else {
-			lineDataSetListToAddLive.setValue(new ArrayList<>());
-		}
-	}
+        lineDataSetListToAddLive.setValue(lineDataSetList);
+    }
 
-	public void setSelectionEntry(Entry entry) {
-		highlightedEntry.setValue(entry);
-	}
+    public void init(MeasurementCurveLineChart lineChart) {
+        lineChart.clear();
+        lineChart.setData(new LineData());
+        lineChart.invalidate();
 
-	public void setSelectionHighlight(Highlight h) {
-		highlight.setValue(h);
-	}
+        clearLineDataSetListToAddLive();
+        lineChartSettings.setChartSettingsFor(lineChart);
+    }
 
-	public void selectEntryForTime(int entryTimeToSelect) {
-		entryToHighlightTimeInt.setValue(entryTimeToSelect);
-	}
+    private void clearLineDataSetListToAddLive() {
+        List<LineDataSet> lineDataSetList = lineDataSetListToAddLive.getValue();
+        if (lineDataSetList != null) {
+            lineDataSetList.clear();
+            lineDataSetListToAddLive.setValue(lineDataSetList);
+        } else {
+            lineDataSetListToAddLive.setValue(new ArrayList<>());
+        }
+    }
 
-	public void selectMarker(MeasurementCurveLineChart lineChart, long selectedColumnTimeInt) {
+    public void setSelectionEntry(Entry entry) {
+        highlightedEntry.setValue(entry);
+    }
 
-		if (selectedColumnTimeInt < 0) {
-			lineChart.highlightValue(null, false);
-			lineChart.invalidate();
-			return;
-		}
+    public void setSelectionHighlight(Highlight h) {
+        highlight.setValue(h);
+    }
 
-		if (lineChart.getData() == null) {
-			return;
-		}
+    public void selectEntryForTime(int entryTimeToSelect) {
+        entryToHighlightTimeInt.setValue(entryTimeToSelect);
+    }
 
-		for (int dataSetIndex = 0;
-			dataSetIndex < lineChart.getData().getDataSets().size(); dataSetIndex++) {
+    public void selectMarker(MeasurementCurveLineChart lineChart, long selectedColumnTimeInt) {
 
-			ILineDataSet iLineDataSet = lineChart.getData().getDataSets().get(dataSetIndex);
+        if (selectedColumnTimeInt < 0) {
+            lineChart.highlightValue(null, false);
+            lineChart.invalidate();
+            return;
+        }
 
-			LineDataSet lineDataSet = (LineDataSet) iLineDataSet;
+        if (lineChart.getData() == null) {
+            return;
+        }
 
-			for (Entry entry : lineDataSet.getValues()) {
+        for (int dataSetIndex = 0;
+             dataSetIndex < lineChart.getData().getDataSets().size(); dataSetIndex++) {
 
-				if (!(entry instanceof BaseEntry)) {
-					break;
-				}
+            ILineDataSet iLineDataSet = lineChart.getData().getDataSets().get(dataSetIndex);
 
-				Calendar calendar = ((BaseEntry) entry).getCalendar();
+            LineDataSet lineDataSet = (LineDataSet) iLineDataSet;
 
-				long timeInt = calendar.getTime().getTime();
+            for (Entry entry : lineDataSet.getValues()) {
 
-				if (timeInt == selectedColumnTimeInt) {
-					lineChart.highlightValue(entry.getX(), entry.getY(), dataSetIndex, true);
+                if (!(entry instanceof BaseEntry)) {
+                    break;
+                }
 
-					return;
-				}
-			}
-		}
-	}
+                Calendar calendar = ((BaseEntry) entry).getCalendar();
 
-	public void resetMarkerAndSaveSelection(MeasurementCurveLineChart lineChart) {
-		selectMarker(lineChart, -1);
-	}
+                long timeInt = calendar.getTime().getTime();
 
-	public void resetMarkerAndClearSelection(MeasurementCurveLineChart lineChart) {
-		highlight.setValue(null);
-		highlightedEntry.setValue(null);
-		selectMarker(lineChart, -1);
-	}
+                if (timeInt == selectedColumnTimeInt) {
+                    lineChart.highlightValue(entry.getX(), entry.getY(), dataSetIndex, true);
+
+                    return;
+                }
+            }
+        }
+    }
+
+    public void resetMarkerAndSaveSelection(MeasurementCurveLineChart lineChart) {
+        selectMarker(lineChart, -1);
+    }
+
+    public void resetMarkerAndClearSelection(MeasurementCurveLineChart lineChart) {
+        highlight.setValue(null);
+        highlightedEntry.setValue(null);
+        selectMarker(lineChart, -1);
+    }
 }
