@@ -84,7 +84,7 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 		binding.button.setOnClickListener( view -> {
 			activity.runOnUiThread(() -> { binding.button.setEnabled(false); } );
 
-			dataProvider.parse(requireContext(), R.raw.test20230729)
+			dataProvider.provide(requireContext(), R.raw.test20230729)
 					.subscribeOn(Schedulers.io())
 					.observeOn(Schedulers.io())
 					.doOnNext(measurements -> {

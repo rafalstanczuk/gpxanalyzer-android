@@ -1,4 +1,4 @@
-package io.ticofab.androidgpxparser.parser.domain;
+package itservices.gpxparser.domain;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -1,4 +1,4 @@
-package io.ticofab.androidgpxparser.parser.domain;
+package itservices.gpxparser.domain;
 
 /**
  * A track point (trkpt) element.

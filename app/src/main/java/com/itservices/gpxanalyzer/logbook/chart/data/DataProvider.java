@@ -15,12 +15,12 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.reactivex.Observable;
-import io.ticofab.androidgpxparser.parser.GPXParser;
-import io.ticofab.androidgpxparser.parser.domain.Extensions;
-import io.ticofab.androidgpxparser.parser.domain.Gpx;
-import io.ticofab.androidgpxparser.parser.domain.Track;
-import io.ticofab.androidgpxparser.parser.domain.TrackPoint;
-import io.ticofab.androidgpxparser.parser.domain.TrackSegment;
+import itservices.gpxparser.GPXParser;
+import itservices.gpxparser.domain.Extensions;
+import itservices.gpxparser.domain.Gpx;
+import itservices.gpxparser.domain.Track;
+import itservices.gpxparser.domain.TrackPoint;
+import itservices.gpxparser.domain.TrackSegment;
 
 @Singleton
 public class DataProvider {
@@ -33,7 +33,7 @@ public class DataProvider {
 
     }
 
-    public Observable<Vector<Measurement>> parse(Context context, int rawId) {
+    public Observable<Vector<Measurement>> provide(Context context, int rawId) {
 
         Vector<Measurement> measurementList = new Vector<>();
 
