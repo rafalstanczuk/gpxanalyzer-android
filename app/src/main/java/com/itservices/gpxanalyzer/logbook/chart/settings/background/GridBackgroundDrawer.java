@@ -1,7 +1,5 @@
 package com.itservices.gpxanalyzer.logbook.chart.settings.background;
 
-import static com.itservices.gpxanalyzer.logbook.chart.settings.axis.HourMinutesAxisValueFormatter.MIN_X_SCALED_TIME;
-
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -24,7 +22,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext;
 
 @Singleton
 public class GridBackgroundDrawer {
-    public static final int BACKGROUND_BOUNDARIES_AREA_COLOR_ALPHA = 70;
+    private static final int BACKGROUND_BOUNDARIES_AREA_COLOR_ALPHA = 70;
+    private static final float DEFAULT_START_DRAW_X = 0.0f;
 
     @Inject
     public PaletteColorDeterminer palette;
@@ -40,13 +39,13 @@ public class GridBackgroundDrawer {
         }
     }
 
-    public void drawRectArea(Canvas canvas, BoundaryColorSpan boundaryColorSpan, LineChart lineChart) {
+    private void drawRectArea(Canvas canvas, BoundaryColorSpan boundaryColorSpan, LineChart lineChart) {
         int colorForAreaId = ColorUtil.setAlphaInIntColor(boundaryColorSpan.getColor(), BACKGROUND_BOUNDARIES_AREA_COLOR_ALPHA);
 
         MPPointF leftMin = lineChart.getPosition(
-                new Entry(MIN_X_SCALED_TIME, boundaryColorSpan.getMin()), YAxis.AxisDependency.LEFT);
+                new Entry(DEFAULT_START_DRAW_X, boundaryColorSpan.getMin()), YAxis.AxisDependency.LEFT);
         MPPointF leftMax = lineChart.getPosition(
-                new Entry(MIN_X_SCALED_TIME, boundaryColorSpan.getMax()),
+                new Entry(DEFAULT_START_DRAW_X, boundaryColorSpan.getMax()),
                 YAxis.AxisDependency.LEFT
         );
 

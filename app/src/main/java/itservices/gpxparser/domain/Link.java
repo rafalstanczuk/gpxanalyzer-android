@@ -1,8 +1,4 @@
-package io.ticofab.androidgpxparser.parser.domain;
-
-/**
- * Created by Stu Stirling on 04/10/2017.
- */
+package itservices.gpxparser.domain;
 
 public class Link {
 

@@ -1,4 +1,4 @@
-package io.ticofab.androidgpxparser.parser;
+package itservices.gpxparser;
 
 import android.util.Xml;
 
@@ -15,21 +15,21 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import io.ticofab.androidgpxparser.parser.domain.Author;
-import io.ticofab.androidgpxparser.parser.domain.Bounds;
-import io.ticofab.androidgpxparser.parser.domain.Copyright;
-import io.ticofab.androidgpxparser.parser.domain.Email;
-import io.ticofab.androidgpxparser.parser.domain.Extensions;
-import io.ticofab.androidgpxparser.parser.domain.Gpx;
-import io.ticofab.androidgpxparser.parser.domain.Link;
-import io.ticofab.androidgpxparser.parser.domain.Metadata;
-import io.ticofab.androidgpxparser.parser.domain.Point;
-import io.ticofab.androidgpxparser.parser.domain.Route;
-import io.ticofab.androidgpxparser.parser.domain.RoutePoint;
-import io.ticofab.androidgpxparser.parser.domain.Track;
-import io.ticofab.androidgpxparser.parser.domain.TrackPoint;
-import io.ticofab.androidgpxparser.parser.domain.TrackSegment;
-import io.ticofab.androidgpxparser.parser.domain.WayPoint;
+import itservices.gpxparser.domain.Author;
+import itservices.gpxparser.domain.Bounds;
+import itservices.gpxparser.domain.Copyright;
+import itservices.gpxparser.domain.Email;
+import itservices.gpxparser.domain.Extensions;
+import itservices.gpxparser.domain.Gpx;
+import itservices.gpxparser.domain.Link;
+import itservices.gpxparser.domain.Metadata;
+import itservices.gpxparser.domain.Point;
+import itservices.gpxparser.domain.Route;
+import itservices.gpxparser.domain.RoutePoint;
+import itservices.gpxparser.domain.Track;
+import itservices.gpxparser.domain.TrackPoint;
+import itservices.gpxparser.domain.TrackSegment;
+import itservices.gpxparser.domain.WayPoint;
 
 @Singleton
 public class GPXParser {

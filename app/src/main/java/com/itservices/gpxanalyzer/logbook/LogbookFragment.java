@@ -2,7 +2,6 @@ package com.itservices.gpxanalyzer.logbook;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -21,28 +20,15 @@ import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.itservices.gpxanalyzer.MainActivity;
 import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.databinding.FragmentLogbookBinding;
+import com.itservices.gpxanalyzer.logbook.chart.ChartViewModel;
+import com.itservices.gpxanalyzer.logbook.chart.data.DataProvider;
+import com.itservices.gpxanalyzer.logbook.chart.data.StatisticResults;
+
+import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.disposables.Disposable;
-import io.ticofab.androidgpxparser.parser.GPXParser;
-import io.ticofab.androidgpxparser.parser.domain.Extensions;
-import io.ticofab.androidgpxparser.parser.domain.Gpx;
-import io.ticofab.androidgpxparser.parser.domain.Track;
-import io.ticofab.androidgpxparser.parser.domain.TrackPoint;
-import io.ticofab.androidgpxparser.parser.domain.TrackSegment;
-
-import com.itservices.gpxanalyzer.logbook.chart.ChartViewModel;
-import com.itservices.gpxanalyzer.logbook.chart.data.Measurement;
-import com.itservices.gpxanalyzer.logbook.chart.data.StatisticResults;
-
-import org.xmlpull.v1.XmlPullParserException;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Calendar;
-import java.util.List;
-
-import javax.inject.Inject;
+import io.reactivex.schedulers.Schedulers;
 
 @AndroidEntryPoint
 public class LogbookFragment  extends Fragment implements OnChartGestureListener, OnChartValueSelectedListener {
@@ -53,9 +39,8 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 	public LogbookViewModel logbookViewModel;
 	public ChartViewModel chartViewModel;
 
-
 	@Inject
-	public GPXParser mParser;
+	DataProvider dataProvider;
 
 	@Inject
     StatisticResults statisticResults;
@@ -63,8 +48,7 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 	private MainActivity activity;
 	private FragmentLogbookBinding binding;
 
-	@Nullable
-	private Disposable disposableFoodTable;
+	Disposable disposable = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -81,82 +65,39 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 	) {
 		super.onViewCreated(view, savedInstanceState);
 
-		setupObservers();
-
-
-		Gpx parsedGpx = null;
-		try {
-			//InputStream in = getAssets().open("test20230719.gpx");
-			InputStream in = requireContext().getResources().openRawResource(R.raw.test20230719);
-			parsedGpx = mParser.parse(in); // consider doing this on a background thread
-		} catch (IOException | XmlPullParserException e) {
-			e.printStackTrace();
-		}
-
-		if (parsedGpx != null) {
-			// log stuff
-			List<Track> tracks = parsedGpx.getTracks();
-
-			statisticResults.clear();
-
-			for (int i = 0; i < tracks.size(); i++) {
-
-				Track track = tracks.get(i);
-				//Log.d(TAG, "track " + i + ":");
-				List<TrackSegment> segments = track.getTrackSegments();
-				for (int j = 0; j < segments.size(); j++) {
-					TrackSegment segment = segments.get(j);
-					//Log.d(TAG, "  segment " + j + ":");
-					for (TrackPoint trackPoint : segment.getTrackPoints()) {
-						/*String msg = "    point: lat " + trackPoint.getLatitude() + ", lon " + trackPoint.getLongitude()
-								+ ", elev " + trackPoint.getElevation()
-								+ ", time " + trackPoint.getTime();*/
-						Extensions ext = trackPoint.getExtensions();
-						Double speed;
-						if (ext != null) {
-							speed = ext.getSpeed();
-							//msg = msg.concat(", speed " + speed);
-						}
-						//Log.d(TAG, msg);
-
-
-
-
-						Measurement measurement = new Measurement();
-
-						measurement.measurement = trackPoint.getElevation();
-
-						Calendar calendar = Calendar.getInstance();
-						calendar.setTime(trackPoint.getTime().toDate());
-
-						measurement.timestamp = calendar;
-
-						statisticResults.addMeasurements(measurement);
-					}
-				}
-			}
-
-			statisticResults.compute();
-		} else {
-			Log.e(TAG, "Error parsing gpx track!");
-		}
-
-
-		statisticsViewModel.refreshStatisticResults();
-
-
 	}
 
 	@Override
 	public void onPause() {
-
 		super.onPause();
+		if (disposable!=null ) {
+			disposable.dispose();
+		}
 	}
 
 	@Override
 	public void onResume() {
-
 		super.onResume();
+
+		setupObservers();
+
+		binding.button.setOnClickListener( view -> {
+			activity.runOnUiThread(() -> { binding.button.setEnabled(false); } );
+
+			dataProvider.provide(requireContext(), R.raw.test20230729)
+					.subscribeOn(Schedulers.io())
+					.observeOn(Schedulers.io())
+					.doOnNext(measurements -> {
+						activity.runOnUiThread(() -> {binding.button.setEnabled(true); });
+
+						statisticResults.clear();
+						statisticResults.setMeasurements(measurements);
+						statisticResults.compute();
+						statisticsViewModel.refreshStatisticResults();
+					} )
+					.doOnError(e -> {})
+					.subscribe();
+		});
 	}
 
 	private void resetMeasurementCurveMarkerAndClearSelection() {
