@@ -26,16 +26,13 @@ public class StatisticsViewModel extends ViewModel {
 	}
 
 	@Inject
-	protected StatisticResults statisticResults;
-
-	@Inject
 	protected PaletteColorDeterminer paletteColorDeterminer;
 
 	@Inject
 	public StatisticsViewModel() {}
 
-	public void refreshStatisticResults() {
-		paletteColorDeterminer.initPalette();
+	public void refreshStatisticResults(StatisticResults statisticResults) {
+		paletteColorDeterminer.initPalette(statisticResults);
 		_curveMeasurementStatisticResults.postValue(statisticResults);
 	}
 }

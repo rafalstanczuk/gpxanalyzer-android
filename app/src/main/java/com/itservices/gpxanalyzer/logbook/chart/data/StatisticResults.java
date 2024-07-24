@@ -3,10 +3,6 @@ package com.itservices.gpxanalyzer.logbook.chart.data;
 
 import java.util.Vector;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-@Singleton
 public class StatisticResults {
 
     private double maxValue;
@@ -14,18 +10,18 @@ public class StatisticResults {
 
     private Vector<Measurement> measurements = new Vector<>();
 
-    @Inject
-    public StatisticResults() {
+    public StatisticResults(Vector<Measurement> measurements) {
+        setMeasurements(measurements);
     }
 
-    public void clear() {
+    private void clear() {
         measurements.clear();
 
         maxValue = Float.MIN_VALUE;
         minValue = Float.MAX_VALUE;
     }
 
-    public void compute() {
+    private void compute() {
 
         maxValue = measurements
                 .stream()
@@ -38,31 +34,21 @@ public class StatisticResults {
                 .reduce(Double.MAX_VALUE, Double::min);
     }
 
-    public Vector<Measurement> getMeasurements() {
+    public final Vector<Measurement> getMeasurements() {
         return measurements;
     }
 
     public void setMeasurements(Vector<Measurement> measurements) {
+        clear();
         this.measurements = measurements;
-    }
-
-    public void addMeasurements(Measurement measurement) {
-        measurements.add(measurement);
+        compute();
     }
 
     public double getMaxValue() {
         return maxValue;
     }
 
-    public void setMaxValue(float maxValue) {
-        this.maxValue = maxValue;
-    }
-
     public double getMinValue() {
         return minValue;
-    }
-
-    public void setMinValue(float minValue) {
-        this.minValue = minValue;
     }
 }

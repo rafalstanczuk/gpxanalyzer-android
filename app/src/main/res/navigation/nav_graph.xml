@@ -10,4 +10,11 @@
 
     </fragment>
 
+    <fragment
+        android:id="@+id/fftSpectrumTestFragment"
+        android:name="com.itservices.gpxanalyzer.fftspectrum.FFTSpectrumFragment"
+        android:label="LogbookFragment">
+
+    </fragment>
+
 </navigation>

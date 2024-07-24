@@ -23,7 +23,7 @@ import itservices.gpxparser.domain.TrackPoint;
 import itservices.gpxparser.domain.TrackSegment;
 
 @Singleton
-public class DataProvider {
+public class DataProvider implements IDataProvider {
 
     @Inject
     public GPXParser mParser;

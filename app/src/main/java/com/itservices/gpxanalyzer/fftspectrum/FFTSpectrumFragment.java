@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.logbook;
+package com.itservices.gpxanalyzer.fftspectrum;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -21,19 +21,25 @@ import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.itservices.gpxanalyzer.MainActivity;
 import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.databinding.FragmentLogbookBinding;
+import com.itservices.gpxanalyzer.logbook.LogbookViewModel;
+import com.itservices.gpxanalyzer.logbook.RequestType;
+import com.itservices.gpxanalyzer.logbook.StatisticsViewModel;
+import com.itservices.gpxanalyzer.logbook.ViewMode;
 import com.itservices.gpxanalyzer.logbook.chart.ChartViewModel;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.disposables.Disposable;
 
 @AndroidEntryPoint
-public class LogbookFragment  extends Fragment implements OnChartGestureListener, OnChartValueSelectedListener {
+public class FFTSpectrumFragment  extends Fragment implements OnChartGestureListener, OnChartValueSelectedListener {
 
-	static final String TAG = LogbookFragment.class.getSimpleName();
+	static final String TAG = FFTSpectrumFragment.class.getSimpleName();
 
 	public StatisticsViewModel statisticsViewModel;
 	public LogbookViewModel logbookViewModel;
 	public ChartViewModel chartViewModel;
+
+	public AudioViewModel audioViewModel;
 
 	private MainActivity activity;
 	private FragmentLogbookBinding binding;
@@ -47,11 +53,12 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 		chartViewModel = new ViewModelProvider(this).get(ChartViewModel.class);
 		logbookViewModel = new ViewModelProvider(this).get(LogbookViewModel.class);
 		logbookViewModel.setOrientation(getResources().getConfiguration().orientation);
+		audioViewModel = new ViewModelProvider(this).get(AudioViewModel.class);
 	}
 
 	@Override
 	public void onViewCreated(
-		@NonNull View view, @Nullable Bundle savedInstanceState
+			@NonNull View view, @Nullable Bundle savedInstanceState
 	) {
 		super.onViewCreated(view, savedInstanceState);
 
@@ -112,32 +119,32 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 		binding.button.setOnClickListener( view -> loadData());
 
 		chartViewModel.getLineDataSetListToAddLive()
-			.observe(getViewLifecycleOwner(), lineDataSetList -> {
-					activity.runOnUiThread(() ->
-						chartViewModel.tryToUpdateDataChart(binding.lineChart, lineDataSetList));
-				}
-			);
+				.observe(getViewLifecycleOwner(), lineDataSetList -> {
+							activity.runOnUiThread(() ->
+									chartViewModel.tryToUpdateDataChart(binding.lineChart, lineDataSetList));
+						}
+				);
 
 		chartViewModel.getHighlightedEntry()
-			.observe(getViewLifecycleOwner(), selectedEntry -> {
+				.observe(getViewLifecycleOwner(), selectedEntry -> {
 
-				binding.lineChart.setHighlightedEntry(activity, selectedEntry);
-			});
+					binding.lineChart.setHighlightedEntry(activity, selectedEntry);
+				});
 
 		chartViewModel.getEntryToHighlightTimeInt()
-			.observe(getViewLifecycleOwner(), selectedColumnTimeInt -> {
-				chartViewModel.selectMarker(binding.lineChart, selectedColumnTimeInt);
-			});
+				.observe(getViewLifecycleOwner(), selectedColumnTimeInt -> {
+					chartViewModel.selectMarker(binding.lineChart, selectedColumnTimeInt);
+				});
 
 		statisticsViewModel.getCurveMeasurementsStatisticResults()
-			.observe(getViewLifecycleOwner(), curveMeasurementStatisticResults ->
-				chartViewModel.updateCurveMeasurementLineDataSetFrom(curveMeasurementStatisticResults)
-			);
+				.observe(getViewLifecycleOwner(), curveMeasurementStatisticResults ->
+						chartViewModel.updateCurveMeasurementLineDataSetFrom(curveMeasurementStatisticResults)
+				);
 
 		statisticsViewModel.getMeasurementStatisticResults()
-			.observe(getViewLifecycleOwner(), measurementStatisticResults ->
-				chartViewModel.updateSingleMeasurementDataSetFrom(measurementStatisticResults)
-			);
+				.observe(getViewLifecycleOwner(), measurementStatisticResults ->
+						chartViewModel.updateSingleMeasurementDataSetFrom(measurementStatisticResults)
+				);
 
 	}
 
@@ -150,7 +157,7 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 
 	@Override
 	public View onCreateView(
-		@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState
+			@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState
 	) {
 		activity = (MainActivity) requireActivity();
 		binding = FragmentLogbookBinding.inflate(inflater);
@@ -198,14 +205,14 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 
 	@Override
 	public void onChartGestureStart(
-		MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture
+			MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture
 	) {
 
 	}
 
 	@Override
 	public void onChartGestureEnd(
-		MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture
+			MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture
 	) {
 
 	}
@@ -257,3 +264,28 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 		});
 	}
 }
+
+/*
+
+public class MainActivity extends AppCompatActivity {
+    private AudioCapture audioCapture;
+    private SpectrumView spectrumView;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        spectrumView = findViewById(R.id.spectrumView);
+        audioCapture = new AudioCapture();
+    }
+
+    public void start(View view) {
+        audioCapture.startRecording();
+    }
+
+    public void stop(View view) {
+        audioCapture.stopRecording();
+    }
+}
+ */

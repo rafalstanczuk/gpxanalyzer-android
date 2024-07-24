@@ -26,7 +26,6 @@ public class PaletteColorDeterminer {
     private final int[] paletteFromBitmap;
     private Map<Integer, BoundaryColorSpan> paletteMap = new HashMap<>();
 
-    @Inject
     protected StatisticResults statisticResults;
 
     @Inject
@@ -46,7 +45,9 @@ public class PaletteColorDeterminer {
         return paletteFromBitmap;
     }
 
-    public void initPalette() {
+    public void initPalette(StatisticResults statisticResults) {
+        this.statisticResults = statisticResults;
+
         paletteMap = generatePalette(
                 (float) statisticResults.getMinValue(),
                 (float) statisticResults.getMaxValue(),
