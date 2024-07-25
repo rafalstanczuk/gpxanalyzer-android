@@ -19,6 +19,8 @@ public class AudioViewModel extends ViewModel {
     @Inject
     public FFT fft;
     private MutableLiveData<AudioSpectrum> spectrumLiveData = new MutableLiveData<>();
+
+    private MutableLiveData<AudioCaptureState> audioCaptureState = new MutableLiveData<>();
     private Disposable disposables;
 
     @Inject
@@ -29,6 +31,9 @@ public class AudioViewModel extends ViewModel {
         return spectrumLiveData;
     }
 
+    public LiveData<AudioCaptureState> getAudioCaptureState() {
+        return audioCaptureState;
+    }
 
     public void startRecording() {
         disposables = audioCapture.startRecording()
@@ -69,5 +74,18 @@ public class AudioViewModel extends ViewModel {
     protected void onCleared() {
         super.onCleared();
         disposables.dispose();
+    }
+
+    public void switchOnOff() {
+        AudioCaptureState state = audioCaptureState.getValue();
+        if (state != null) {
+            audioCaptureState.postValue(
+                    state.getNextCyclic()
+            );
+        } else {
+            audioCaptureState.postValue(
+                    AudioCaptureState.ON
+            );
+        }
     }
 }

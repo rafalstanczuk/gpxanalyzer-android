@@ -31,238 +31,269 @@ import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.disposables.Disposable;
 
 @AndroidEntryPoint
-public class FFTSpectrumFragment  extends Fragment implements OnChartGestureListener, OnChartValueSelectedListener {
+public class FFTSpectrumFragment extends Fragment implements OnChartGestureListener, OnChartValueSelectedListener {
 
-	static final String TAG = FFTSpectrumFragment.class.getSimpleName();
+    static final String TAG = FFTSpectrumFragment.class.getSimpleName();
 
-	public StatisticsViewModel statisticsViewModel;
-	public LogbookViewModel logbookViewModel;
-	public ChartViewModel chartViewModel;
+    public StatisticsViewModel statisticsViewModel;
+    public LogbookViewModel logbookViewModel;
+    public ChartViewModel chartViewModel;
 
-	public AudioViewModel audioViewModel;
+    public AudioViewModel audioViewModel;
 
-	private MainActivity activity;
-	private FragmentLogbookBinding binding;
+    private MainActivity activity;
+    private FragmentLogbookBinding binding;
 
-	Disposable disposable = null;
+    Disposable disposable = null;
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		statisticsViewModel = new ViewModelProvider(this).get(StatisticsViewModel.class);
-		chartViewModel = new ViewModelProvider(this).get(ChartViewModel.class);
-		logbookViewModel = new ViewModelProvider(this).get(LogbookViewModel.class);
-		logbookViewModel.setOrientation(getResources().getConfiguration().orientation);
-		audioViewModel = new ViewModelProvider(this).get(AudioViewModel.class);
-	}
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        statisticsViewModel = new ViewModelProvider(this).get(StatisticsViewModel.class);
+        chartViewModel = new ViewModelProvider(this).get(ChartViewModel.class);
+        logbookViewModel = new ViewModelProvider(this).get(LogbookViewModel.class);
+        logbookViewModel.setOrientation(getResources().getConfiguration().orientation);
+        audioViewModel = new ViewModelProvider(this).get(AudioViewModel.class);
+    }
 
-	@Override
-	public void onViewCreated(
-			@NonNull View view, @Nullable Bundle savedInstanceState
-	) {
-		super.onViewCreated(view, savedInstanceState);
+    @Override
+    public void onViewCreated(
+            @NonNull View view, @Nullable Bundle savedInstanceState
+    ) {
+        super.onViewCreated(view, savedInstanceState);
 
-	}
+    }
 
-	@Override
-	public void onPause() {
-		super.onPause();
-		if (disposable!=null ) {
-			disposable.dispose();
-		}
-	}
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (disposable != null) {
+            disposable.dispose();
+        }
+    }
 
-	@Override
-	public void onResume() {
-		super.onResume();
+    @Override
+    public void onResume() {
+        super.onResume();
 
-		setupObservers();
-	}
+        setupObservers();
+    }
 
-	private void loadData() {
-		disposable = logbookViewModel
-				.loadData(requireContext(), R.raw.test20230729)
-				.doOnError(e -> {})
-				.subscribe(
-						statisticResults -> statisticsViewModel.refreshStatisticResults(statisticResults),
-						onError -> Log.e(TAG, "loadData: ", onError));
-	}
+    private void loadData() {
+        disposable = logbookViewModel
+                .loadData(requireContext(), R.raw.test20230729)
+                .doOnError(e -> {
+                })
+                .subscribe(
+                        statisticResults -> statisticsViewModel.refreshStatisticResults(statisticResults),
+                        onError -> Log.e(TAG, "loadData: ", onError));
+    }
 
-	private void resetMeasurementCurveMarkerAndClearSelection() {
-		if (logbookViewModel.isTrendCurveMode()) {
-			chartViewModel.resetMarkerAndClearSelection(binding.lineChart);
-		}
-	}
+    private void resetMeasurementCurveMarkerAndClearSelection() {
+        if (logbookViewModel.isTrendCurveMode()) {
+            chartViewModel.resetMarkerAndClearSelection(binding.lineChart);
+        }
+    }
 
-	private void resetMeasurementCurveMarkerAndSaveSelection() {
-		if (logbookViewModel.isTrendCurveMode()) {
-			chartViewModel.resetMarkerAndSaveSelection(binding.lineChart);
-		}
-	}
-
-
-	private void switchToCGMCurveView() {
-		activity.runOnUiThread(() -> {
-			initChart();
-
-			binding.lineChart.setOnChartValueSelectedListener(this);
-			binding.lineChart.setOnChartGestureListener(this);
-
-			binding.chartLayout.setVisibility(View.VISIBLE);
-
-			binding.invalidateAll();
-		});
-	}
-
-	private void setupObservers() {
-
-		binding.button.setOnClickListener( view -> loadData());
-
-		chartViewModel.getLineDataSetListToAddLive()
-				.observe(getViewLifecycleOwner(), lineDataSetList -> {
-							activity.runOnUiThread(() ->
-									chartViewModel.tryToUpdateDataChart(binding.lineChart, lineDataSetList));
-						}
-				);
-
-		chartViewModel.getHighlightedEntry()
-				.observe(getViewLifecycleOwner(), selectedEntry -> {
-
-					binding.lineChart.setHighlightedEntry(activity, selectedEntry);
-				});
-
-		chartViewModel.getEntryToHighlightTimeInt()
-				.observe(getViewLifecycleOwner(), selectedColumnTimeInt -> {
-					chartViewModel.selectMarker(binding.lineChart, selectedColumnTimeInt);
-				});
-
-		statisticsViewModel.getCurveMeasurementsStatisticResults()
-				.observe(getViewLifecycleOwner(), curveMeasurementStatisticResults ->
-						chartViewModel.updateCurveMeasurementLineDataSetFrom(curveMeasurementStatisticResults)
-				);
-
-		statisticsViewModel.getMeasurementStatisticResults()
-				.observe(getViewLifecycleOwner(), measurementStatisticResults ->
-						chartViewModel.updateSingleMeasurementDataSetFrom(measurementStatisticResults)
-				);
-
-	}
-
-	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    private void resetMeasurementCurveMarkerAndSaveSelection() {
+        if (logbookViewModel.isTrendCurveMode()) {
+            chartViewModel.resetMarkerAndSaveSelection(binding.lineChart);
+        }
+    }
 
 
-		super.onActivityResult(requestCode, resultCode, data);
-	}
+    private void switchToCGMCurveView() {
+        activity.runOnUiThread(() -> {
+            initChart();
 
-	@Override
-	public View onCreateView(
-			@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState
-	) {
-		activity = (MainActivity) requireActivity();
-		binding = FragmentLogbookBinding.inflate(inflater);
-		binding.setViewModel(logbookViewModel);
+            binding.lineChart.setOnChartValueSelectedListener(this);
+            binding.lineChart.setOnChartGestureListener(this);
 
-		logbookViewModel.getViewMode().observe(getViewLifecycleOwner(), this::switchViewMode);
+            binding.chartLayout.setVisibility(View.VISIBLE);
 
-		logbookViewModel.getRequestType().observe(getViewLifecycleOwner(), this::switchRequestType);
+            binding.invalidateAll();
+        });
+    }
 
-		return binding.getRoot();
-	}
+    private void setupObservers() {
 
-	private void switchRequestType(RequestType requestType) {
-		activity.runOnUiThread(() -> {
-			switch (requestType) {
-				case DEFAULT:
-				case DONE:
-					binding.button.setEnabled(true);
-					break;
-				case LOADING:
-				case PROCESSING:
-					binding.button.setEnabled(false);
-					break;
-			}
-		});
-	}
+        audioViewModel.getSpectrumLiveData()
+                .observe(getViewLifecycleOwner(), audioSpectrum -> {
+                            Log.d(TAG, "audioSpectrum() :" + audioSpectrum);
 
-	private void tryToDispose(Disposable disposable) {
-		if (disposable != null) {
-			disposable.dispose();
-		}
-	}
+                        }
+                );
 
-	private void switchViewMode(ViewMode viewMode) {
+        audioViewModel.getAudioCaptureState()
+                .observe(getViewLifecycleOwner(), audioCaptureState -> {
+                            if (audioCaptureState != null) {
+                                activity.runOnUiThread(() ->
+                                        binding.button.setText(audioCaptureState.name())
+                                );
 
-		switch (viewMode) {
-			case TREND_CURVE:
-				switchToCGMCurveView();
-				break;
-			case INFO_ONLY_VIEW:
+                                switch (audioCaptureState) {
 
-				break;
-		}
-	}
+                                    case OFF:
+                                        audioViewModel.stopRecording();
+                                        break;
+                                    case ON:
+                                        audioViewModel.startRecording();
+                                        break;
+                                }
 
-	@Override
-	public void onChartGestureStart(
-			MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture
-	) {
+                            }
+                        }
+                );
 
-	}
+        binding.button.setOnClickListener(view -> {
+            audioViewModel.switchOnOff();
+        });
 
-	@Override
-	public void onChartGestureEnd(
-			MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture
-	) {
+        chartViewModel.getLineDataSetListToAddLive()
+                .observe(getViewLifecycleOwner(), lineDataSetList -> {
+                            activity.runOnUiThread(() ->
+                                    chartViewModel.tryToUpdateDataChart(binding.lineChart, lineDataSetList));
+                        }
+                );
 
-	}
+        chartViewModel.getHighlightedEntry()
+                .observe(getViewLifecycleOwner(), selectedEntry -> {
 
-	@Override
-	public void onChartLongPressed(MotionEvent me) {
+                    binding.lineChart.setHighlightedEntry(activity, selectedEntry);
+                });
 
-	}
+        chartViewModel.getEntryToHighlightTimeInt()
+                .observe(getViewLifecycleOwner(), selectedColumnTimeInt -> {
+                    chartViewModel.selectMarker(binding.lineChart, selectedColumnTimeInt);
+                });
 
-	@Override
-	public void onChartDoubleTapped(MotionEvent me) {
+        statisticsViewModel.getCurveMeasurementsStatisticResults()
+                .observe(getViewLifecycleOwner(), curveMeasurementStatisticResults ->
+                        chartViewModel.updateCurveMeasurementLineDataSetFrom(curveMeasurementStatisticResults)
+                );
 
-	}
+        statisticsViewModel.getMeasurementStatisticResults()
+                .observe(getViewLifecycleOwner(), measurementStatisticResults ->
+                        chartViewModel.updateSingleMeasurementDataSetFrom(measurementStatisticResults)
+                );
 
-	@Override
-	public void onChartSingleTapped(MotionEvent me) {
+    }
 
-	}
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-	@Override
-	public void onChartFling(MotionEvent me1, MotionEvent me2, float velocityX, float velocityY) {
 
-	}
+        super.onActivityResult(requestCode, resultCode, data);
+    }
 
-	@Override
-	public void onChartScale(MotionEvent me, float scaleX, float scaleY) {
+    @Override
+    public View onCreateView(
+            @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState
+    ) {
+        activity = (MainActivity) requireActivity();
+        binding = FragmentLogbookBinding.inflate(inflater);
+        binding.setViewModel(logbookViewModel);
 
-	}
+        logbookViewModel.getViewMode().observe(getViewLifecycleOwner(), this::switchViewMode);
 
-	@Override
-	public void onChartTranslate(MotionEvent me, float dX, float dY) {
-		binding.lineChart.highlightCenterValueInTranslation();
-	}
+        logbookViewModel.getRequestType().observe(getViewLifecycleOwner(), this::switchRequestType);
 
-	@Override
-	public void onValueSelected(Entry e, Highlight h) {
-		chartViewModel.setSelectionEntry(e);
-		chartViewModel.setSelectionHighlight(h);
-	}
+        return binding.getRoot();
+    }
 
-	@Override
-	public void onNothingSelected() {
-		resetMeasurementCurveMarkerAndClearSelection();
-	}
+    private void switchRequestType(RequestType requestType) {
+        activity.runOnUiThread(() -> {
+            switch (requestType) {
+                case DEFAULT:
+                case DONE:
+                    binding.button.setEnabled(true);
+                    break;
+                case LOADING:
+                case PROCESSING:
+                    binding.button.setEnabled(false);
+                    break;
+            }
+        });
+    }
 
-	public void initChart() {
-		activity.runOnUiThread(() -> {
-			chartViewModel.init(binding.lineChart);
-		});
-	}
+    private void tryToDispose(Disposable disposable) {
+        if (disposable != null) {
+            disposable.dispose();
+        }
+    }
+
+    private void switchViewMode(ViewMode viewMode) {
+
+        switch (viewMode) {
+            case TREND_CURVE:
+                switchToCGMCurveView();
+                break;
+            case INFO_ONLY_VIEW:
+
+                break;
+        }
+    }
+
+    @Override
+    public void onChartGestureStart(
+            MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture
+    ) {
+
+    }
+
+    @Override
+    public void onChartGestureEnd(
+            MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture
+    ) {
+
+    }
+
+    @Override
+    public void onChartLongPressed(MotionEvent me) {
+
+    }
+
+    @Override
+    public void onChartDoubleTapped(MotionEvent me) {
+
+    }
+
+    @Override
+    public void onChartSingleTapped(MotionEvent me) {
+
+    }
+
+    @Override
+    public void onChartFling(MotionEvent me1, MotionEvent me2, float velocityX, float velocityY) {
+
+    }
+
+    @Override
+    public void onChartScale(MotionEvent me, float scaleX, float scaleY) {
+
+    }
+
+    @Override
+    public void onChartTranslate(MotionEvent me, float dX, float dY) {
+        binding.lineChart.highlightCenterValueInTranslation();
+    }
+
+    @Override
+    public void onValueSelected(Entry e, Highlight h) {
+        chartViewModel.setSelectionEntry(e);
+        chartViewModel.setSelectionHighlight(h);
+    }
+
+    @Override
+    public void onNothingSelected() {
+        resetMeasurementCurveMarkerAndClearSelection();
+    }
+
+    public void initChart() {
+        activity.runOnUiThread(() -> {
+            chartViewModel.init(binding.lineChart);
+        });
+    }
 }
 
 /*
