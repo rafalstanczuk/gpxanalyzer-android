@@ -117,7 +117,7 @@ public class FFTSpectrumFragment extends Fragment implements OnChartGestureListe
 
     private void setupObservers() {
 
-        audioViewModel.getSpectrumLiveData()
+        audioViewModel.getSpectrumPairListLiveData()
                 .observe(getViewLifecycleOwner(), audioSpectrum -> {
                             Log.d(TAG, "audioSpectrum() :" + audioSpectrum);
 

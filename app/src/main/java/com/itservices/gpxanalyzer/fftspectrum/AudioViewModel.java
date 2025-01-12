@@ -1,8 +1,12 @@
 package com.itservices.gpxanalyzer.fftspectrum;
 
+import android.util.Pair;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -17,8 +21,11 @@ public class AudioViewModel extends ViewModel {
     public AudioCapture audioCapture;
 
     @Inject
-    public FFT fft;
+    public FFTProcessor fftProcessor;
+
+
     private MutableLiveData<AudioSpectrum> spectrumLiveData = new MutableLiveData<>();
+    private MutableLiveData< List<Pair<Float, Double>> > spectrumPairListLiveData = new MutableLiveData<>();
 
     private MutableLiveData<AudioCaptureState> audioCaptureState = new MutableLiveData<>();
     private Disposable disposables;
@@ -31,39 +38,20 @@ public class AudioViewModel extends ViewModel {
         return spectrumLiveData;
     }
 
+    public LiveData<List<Pair<Float, Double>>> getSpectrumPairListLiveData() {
+        return spectrumPairListLiveData;
+    }
+
     public LiveData<AudioCaptureState> getAudioCaptureState() {
         return audioCaptureState;
     }
 
     public void startRecording() {
-        fft.init(audioCapture);
+        fftProcessor.init(audioCapture);
         disposables = audioCapture.startRecording()
-                .map(audioBufferObj -> {
-
-                    if (audioBufferObj instanceof AudioBuffer) {
-                        AudioBuffer audioBuffer = (AudioBuffer)audioBufferObj;
-                        short[] audioBufferArray = ( (AudioBuffer)audioBufferObj ).getAudioBufferArray();
-
-                        double[] real = new double[audioBufferArray.length];
-                        double[] imag = new double[audioBufferArray.length];
-                        for (int i = 0; i < audioBufferArray.length; i++) {
-                            real[i] = audioBufferArray[i];
-                            imag[i] = 0;
-                        }
-
-                        fft.fft(real, imag);
-
-                        double[] magnitude = new double[audioBufferArray.length];
-                        for (int i = 0; i < audioBufferArray.length; i++) {
-                            magnitude[i] = Math.sqrt(real[i] * real[i] + imag[i] * imag[i]);
-                        }
-
-                        return new AudioSpectrum(magnitude, audioBuffer.getSampleRate());
-                    } else {
-                        return new AudioSpectrum(new double[1], 0);
-                    }
-                })
-                .subscribe(spectrum -> spectrumLiveData.postValue(spectrum));
+                .map(fftProcessor::process)
+                .map(AudioSpectrum::getPositiveFrequencyAmplitudePairList)
+                .subscribe(spectrumPairList -> spectrumPairListLiveData.postValue(spectrumPairList));
     }
 
     public void stopRecording() {

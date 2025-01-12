@@ -1,6 +1,10 @@
 package com.itservices.gpxanalyzer.fftspectrum;
 
+import android.util.Pair;
+
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class AudioSpectrum {
 
@@ -12,18 +16,36 @@ public class AudioSpectrum {
         this.sampleRate = sampleRate;
     }
 
-    public double[] getAudioSpectrum() {
+    public double[] getAmplitudeArray() {
         return audioSpectrum;
     }
 
-    public float getFrequency(int index) {
-        return index * ( (float)sampleRate / (float)audioSpectrum.length);
+    /**
+     * Static helper method to get a list of pairs (frequency, amplitude).
+     */
+    public static List<Pair<Float, Double>> getPositiveFrequencyAmplitudePairList(AudioSpectrum spectrum) {
+        List<Pair<Float, Double>> list = new ArrayList<>();
+        double[] amplitudeArray = spectrum.getAmplitudeArray();
+
+        float deltaFreq = ((float) spectrum.sampleRate / (float) amplitudeArray.length);
+
+        for (int i = 0; i < amplitudeArray.length / 2; i++) {
+            float frequency = i * deltaFreq;
+            double amplitude = amplitudeArray[i];
+            list.add(new Pair<>(frequency, amplitude));
+        }
+
+        return list;
     }
+
+
+
 
     @Override
     public String toString() {
         return "AudioSpectrum{" +
                 "audioSpectrum=" + Arrays.toString(audioSpectrum) +
+                ", sampleRate=" + sampleRate +
                 '}';
     }
 }
