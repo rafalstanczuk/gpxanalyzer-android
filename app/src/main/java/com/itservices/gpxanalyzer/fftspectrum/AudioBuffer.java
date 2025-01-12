@@ -2,13 +2,19 @@ package com.itservices.gpxanalyzer.fftspectrum;
 
 public class AudioBuffer {
 
-    private final short[] audioBuffer;
+    private final short[] audioBufferArray;
+    private int sampleRate;
 
-    public AudioBuffer(short[] audioBuffer) {
-        this.audioBuffer = audioBuffer;
+    public AudioBuffer(short[] audioBufferArray, int sampleRate) {
+        this.audioBufferArray = audioBufferArray;
+        this.sampleRate = sampleRate;
     }
 
-    public short[] getAudioBuffer() {
-        return audioBuffer;
+    public short[] getAudioBufferArray() {
+        return audioBufferArray;
+    }
+
+    public int getSampleRate() {
+        return sampleRate;
     }
 }

@@ -20,7 +20,7 @@ import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.itservices.gpxanalyzer.MainActivity;
 import com.itservices.gpxanalyzer.R;
-import com.itservices.gpxanalyzer.databinding.FragmentLogbookBinding;
+import com.itservices.gpxanalyzer.databinding.FragmentFftspectrumBinding;
 import com.itservices.gpxanalyzer.logbook.LogbookViewModel;
 import com.itservices.gpxanalyzer.logbook.RequestType;
 import com.itservices.gpxanalyzer.logbook.StatisticsViewModel;
@@ -42,7 +42,7 @@ public class FFTSpectrumFragment extends Fragment implements OnChartGestureListe
     public AudioViewModel audioViewModel;
 
     private MainActivity activity;
-    private FragmentLogbookBinding binding;
+    private FragmentFftspectrumBinding binding;
 
     Disposable disposable = null;
 
@@ -91,13 +91,13 @@ public class FFTSpectrumFragment extends Fragment implements OnChartGestureListe
 
     private void resetMeasurementCurveMarkerAndClearSelection() {
         if (logbookViewModel.isTrendCurveMode()) {
-            chartViewModel.resetMarkerAndClearSelection(binding.lineChart);
+          //  chartViewModel.resetMarkerAndClearSelection(binding.lineChart);
         }
     }
 
     private void resetMeasurementCurveMarkerAndSaveSelection() {
         if (logbookViewModel.isTrendCurveMode()) {
-            chartViewModel.resetMarkerAndSaveSelection(binding.lineChart);
+           // chartViewModel.resetMarkerAndSaveSelection(binding.lineChart);
         }
     }
 
@@ -106,10 +106,10 @@ public class FFTSpectrumFragment extends Fragment implements OnChartGestureListe
         activity.runOnUiThread(() -> {
             initChart();
 
-            binding.lineChart.setOnChartValueSelectedListener(this);
-            binding.lineChart.setOnChartGestureListener(this);
+           // binding.lineChart.setOnChartValueSelectedListener(this);
+           // binding.lineChart.setOnChartGestureListener(this);
 
-            binding.chartLayout.setVisibility(View.VISIBLE);
+            //binding.chartLayout.setVisibility(View.VISIBLE);
 
             binding.invalidateAll();
         });
@@ -128,7 +128,7 @@ public class FFTSpectrumFragment extends Fragment implements OnChartGestureListe
                 .observe(getViewLifecycleOwner(), audioCaptureState -> {
                             if (audioCaptureState != null) {
                                 activity.runOnUiThread(() ->
-                                        binding.button.setText(audioCaptureState.name())
+                                        binding.button.setText(audioCaptureState.getNextCyclic().name())
                                 );
 
                                 switch (audioCaptureState) {
@@ -151,20 +151,21 @@ public class FFTSpectrumFragment extends Fragment implements OnChartGestureListe
 
         chartViewModel.getLineDataSetListToAddLive()
                 .observe(getViewLifecycleOwner(), lineDataSetList -> {
-                            activity.runOnUiThread(() ->
-                                    chartViewModel.tryToUpdateDataChart(binding.lineChart, lineDataSetList));
+                            activity.runOnUiThread(() -> {}
+                                   // chartViewModel.tryToUpdateDataChart(binding.lineChart, lineDataSetList)
+                            );
                         }
                 );
 
         chartViewModel.getHighlightedEntry()
                 .observe(getViewLifecycleOwner(), selectedEntry -> {
 
-                    binding.lineChart.setHighlightedEntry(activity, selectedEntry);
+                   // binding.lineChart.setHighlightedEntry(activity, selectedEntry);
                 });
 
         chartViewModel.getEntryToHighlightTimeInt()
                 .observe(getViewLifecycleOwner(), selectedColumnTimeInt -> {
-                    chartViewModel.selectMarker(binding.lineChart, selectedColumnTimeInt);
+                   // chartViewModel.selectMarker(binding.lineChart, selectedColumnTimeInt);
                 });
 
         statisticsViewModel.getCurveMeasurementsStatisticResults()
@@ -191,7 +192,7 @@ public class FFTSpectrumFragment extends Fragment implements OnChartGestureListe
             @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState
     ) {
         activity = (MainActivity) requireActivity();
-        binding = FragmentLogbookBinding.inflate(inflater);
+        binding = FragmentFftspectrumBinding.inflate(inflater);
         binding.setViewModel(logbookViewModel);
 
         logbookViewModel.getViewMode().observe(getViewLifecycleOwner(), this::switchViewMode);
@@ -275,7 +276,7 @@ public class FFTSpectrumFragment extends Fragment implements OnChartGestureListe
 
     @Override
     public void onChartTranslate(MotionEvent me, float dX, float dY) {
-        binding.lineChart.highlightCenterValueInTranslation();
+       // binding.lineChart.highlightCenterValueInTranslation();
     }
 
     @Override
@@ -291,7 +292,7 @@ public class FFTSpectrumFragment extends Fragment implements OnChartGestureListe
 
     public void initChart() {
         activity.runOnUiThread(() -> {
-            chartViewModel.init(binding.lineChart);
+            //chartViewModel.init(binding.lineChart);
         });
     }
 }

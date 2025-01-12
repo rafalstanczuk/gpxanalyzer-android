@@ -8,13 +8,19 @@
         android:name="com.itservices.gpxanalyzer.logbook.LogbookFragment"
         android:label="LogbookFragment">
 
+        <action
+            android:id="@+id/action_logbookFragment_to_fftSpectrumFragment"
+            app:destination="@id/fftSpectrumFragment" />
     </fragment>
 
     <fragment
-        android:id="@+id/fftSpectrumTestFragment"
+        android:id="@+id/fftSpectrumFragment"
         android:name="com.itservices.gpxanalyzer.fftspectrum.FFTSpectrumFragment"
-        android:label="LogbookFragment">
+        android:label="FFTSpectrumFragment">
 
+        <action
+            android:id="@+id/action_fftSpectrumFragment_to_logbookFragment"
+            app:destination="@id/logbookFragment" />
     </fragment>
 
 </navigation>

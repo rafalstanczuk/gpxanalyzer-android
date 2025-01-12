@@ -21,6 +21,8 @@ import io.reactivex.schedulers.Schedulers;
 public class AudioCapture {
     private static final int SAMPLE_RATE = 44100;
     private AudioRecord audioRecord;
+
+    private int minBufferSize;
     private int bufferSize;
     private boolean isRecording = false;
 
@@ -37,8 +39,14 @@ public class AudioCapture {
             return;
         }
 
-        bufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE,
+        minBufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE,
                 AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+
+        // Round up to the next power of 2
+        bufferSize = 1;
+        while (bufferSize < minBufferSize) {
+            bufferSize <<= 1; // equivalent to bufferSize *= 2
+        }
 
         audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE,
                 AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, bufferSize);
@@ -52,7 +60,7 @@ public class AudioCapture {
             while (isRecording && !emitter.isDisposed()) {
                 int readSize = audioRecord.read(audioBuffer, 0, bufferSize);
                 if (readSize > 0) {
-                    emitter.onNext(new AudioBuffer(audioBuffer));
+                    emitter.onNext(new AudioBuffer(audioBuffer, SAMPLE_RATE));
                 }
             }
             audioRecord.stop();
