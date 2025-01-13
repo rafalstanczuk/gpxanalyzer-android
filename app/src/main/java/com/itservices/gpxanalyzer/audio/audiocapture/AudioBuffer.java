@@ -2,7 +2,7 @@ package com.itservices.gpxanalyzer.audio.audiocapture;
 
 public class AudioBuffer {
 
-    private final short[] audioBufferArray;
+    private short[] audioBufferArray;
     private int sampleRate;
 
     public AudioBuffer(short[] audioBufferArray, int sampleRate) {
@@ -12,6 +12,10 @@ public class AudioBuffer {
 
     public short[] getAudioBufferArray() {
         return audioBufferArray;
+    }
+
+    public void setAudioBufferArray(short[] audioBufferArray) {
+        this.audioBufferArray = audioBufferArray;
     }
 
     public int getSampleRate() {

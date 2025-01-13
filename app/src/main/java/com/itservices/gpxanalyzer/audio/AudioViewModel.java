@@ -1,15 +1,18 @@
 package com.itservices.gpxanalyzer.audio;
 
+import android.util.Log;
 import android.util.Pair;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.itservices.gpxanalyzer.audio.audiocapture.AudioBuffer;
 import com.itservices.gpxanalyzer.audio.audiocapture.AudioCapture;
 import com.itservices.gpxanalyzer.audio.audiocapture.AudioCaptureState;
 import com.itservices.gpxanalyzer.audio.audiocapture.AudioSpectrum;
 import com.itservices.gpxanalyzer.dsp.FFTProcessor;
+import com.itservices.gpxanalyzer.dsp.NoiseFilter;
 
 import java.util.List;
 
@@ -55,11 +58,15 @@ public class AudioViewModel extends ViewModel {
     public void startRecording() {
         fftProcessor.init(audioCapture);
         disposables = audioCapture.startRecording()
+                .map(a -> (AudioBuffer) a)
+                .map(NoiseFilter::filter)
                 .map(fftProcessor::process)
                 .map(AudioSpectrum::getPositiveFrequencyAmplitudePairList)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
-                .subscribe(spectrumPairList -> spectrumPairListLiveData.postValue(spectrumPairList));
+                .doOnError(throwable -> Log.e("audioCapture", "startRecording: ", throwable))
+                .doOnNext(spectrumPairList -> spectrumPairListLiveData.postValue(spectrumPairList) )
+                .subscribe();
     }
 
     public void stopRecording() {

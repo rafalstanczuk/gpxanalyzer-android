@@ -1,7 +1,6 @@
 package com.itservices.gpxanalyzer.spectrum;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,9 +10,9 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.itservices.gpxanalyzer.databinding.FragmentSpectrumBinding;
-import com.itservices.gpxanalyzer.audio.audiocapture.AudioCaptureState;
 import com.itservices.gpxanalyzer.audio.AudioViewModel;
+import com.itservices.gpxanalyzer.audio.audiocapture.AudioCaptureState;
+import com.itservices.gpxanalyzer.databinding.FragmentSpectrumBinding;
 
 
 public class SpectrumFragment extends Fragment {
@@ -48,7 +47,7 @@ public class SpectrumFragment extends Fragment {
         // Observe the spectrum pair list
         audioViewModel.getSpectrumPairListLiveData().observe(getViewLifecycleOwner(), list -> {
             // Update the renderer’s data
-            Log.d(TAG, "Update the renderer’s data");
+            //Log.d(TAG, "Update the renderer’s data");
             binding.spectrumView.getRenderer().setSpectrumData(list);
             // Request a redraw (because we set RENDERMODE_WHEN_DIRTY)
             binding.spectrumView.requestRender();

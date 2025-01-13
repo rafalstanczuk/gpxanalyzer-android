@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -15,7 +16,6 @@ import javax.inject.Singleton;
 
 import dagger.hilt.android.qualifiers.ApplicationContext;
 import io.reactivex.Observable;
-import io.reactivex.schedulers.Schedulers;
 
 @Singleton
 public class AudioCapture {
@@ -39,7 +39,7 @@ public class AudioCapture {
             return;
         }
 
-        minBufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE,
+        minBufferSize = AudioRecord.getMinBufferSize(getMaxValidSampleRate(),
                 AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 
         // Round up to the next power of 2
@@ -50,6 +50,26 @@ public class AudioCapture {
 
         audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE,
                 AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, bufferSize);
+    }
+
+    private int getMaxValidSampleRate() {
+        int[] sampleRatesToTry = new int[]{192000, 96000, 48000, 44100, 22050, 16000, 11025};
+
+        for (int rate : sampleRatesToTry) {
+            int bufferSize = AudioRecord.getMinBufferSize(
+                    rate,
+                    AudioFormat.CHANNEL_IN_MONO,
+                    AudioFormat.ENCODING_PCM_16BIT
+            );
+            if (bufferSize != AudioRecord.ERROR && bufferSize != AudioRecord.ERROR_BAD_VALUE) {
+                // Found a valid sample rate
+                Log.d(AudioCapture.class.getSimpleName(), "getMaxValidSampleRate: [Hz]" + rate);
+                return rate;
+            }
+        }
+
+        // Fallback if nothing works (unlikely)
+        return 44100;
     }
 
     public @NonNull Observable<Object> startRecording() {
@@ -65,7 +85,7 @@ public class AudioCapture {
             }
             audioRecord.stop();
             emitter.onComplete();
-        }).subscribeOn(Schedulers.io());
+        });
     }
 
     public void stopRecording() {
