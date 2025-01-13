@@ -1,6 +1,10 @@
-package com.itservices.gpxanalyzer.fftspectrum;
+package com.itservices.gpxanalyzer.dsp;
 
 import androidx.annotation.NonNull;
+
+import com.itservices.gpxanalyzer.audio.audiocapture.AudioBuffer;
+import com.itservices.gpxanalyzer.audio.audiocapture.AudioCapture;
+import com.itservices.gpxanalyzer.audio.audiocapture.AudioSpectrum;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

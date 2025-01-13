@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.fftspectrum;
+package com.itservices.gpxanalyzer.audio.audiocapture;
 
 import android.util.Pair;
 

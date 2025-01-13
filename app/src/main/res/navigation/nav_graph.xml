@@ -24,7 +24,7 @@
     </fragment>
     <fragment
         android:id="@+id/spectrumFragment"
-        android:name="com.itservices.gpxanalyzer.opengl.SpectrumFragment"
+        android:name="com.itservices.gpxanalyzer.spectrum.SpectrumFragment"
         android:label="FFTSpectrumFragment">
 
         <action

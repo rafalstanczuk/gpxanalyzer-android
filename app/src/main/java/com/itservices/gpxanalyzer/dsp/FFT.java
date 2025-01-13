@@ -1,5 +1,7 @@
-package com.itservices.gpxanalyzer.fftspectrum;
+package com.itservices.gpxanalyzer.dsp;
 
+
+import com.itservices.gpxanalyzer.audio.audiocapture.AudioCapture;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

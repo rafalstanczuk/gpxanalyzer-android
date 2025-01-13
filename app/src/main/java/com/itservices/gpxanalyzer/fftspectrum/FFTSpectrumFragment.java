@@ -20,6 +20,7 @@ import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.itservices.gpxanalyzer.MainActivity;
 import com.itservices.gpxanalyzer.R;
+import com.itservices.gpxanalyzer.audio.AudioViewModel;
 import com.itservices.gpxanalyzer.databinding.FragmentFftspectrumBinding;
 import com.itservices.gpxanalyzer.logbook.LogbookViewModel;
 import com.itservices.gpxanalyzer.logbook.RequestType;
