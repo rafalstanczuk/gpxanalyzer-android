@@ -22,7 +22,7 @@ public class AudioCapture {
     private static final int SAMPLE_RATE = 44100;
     private AudioRecord audioRecord;
 
-    private int minBufferSize;
+    private int sampleRate;
     private int bufferSize;
     private boolean isRecording = false;
 
@@ -39,11 +39,10 @@ public class AudioCapture {
             return;
         }
 
-        minBufferSize = AudioRecord.getMinBufferSize(getMaxValidSampleRate(),
-                AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+        sampleRate = 44100;//getMaxValidSampleRate();
 
-        minBufferSize = 1024*4;
-        Log.d(AudioCapture.class.getSimpleName(), "minBufferSize = [" + minBufferSize + "]");
+        int minBufferSize = AudioRecord.getMinBufferSize(sampleRate,
+                AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 
         // Round up to the next power of 2
         bufferSize = 1;
@@ -51,7 +50,7 @@ public class AudioCapture {
             bufferSize <<= 1; // equivalent to bufferSize *= 2
         }
 
-        audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE,
+        audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, sampleRate,
                 AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, bufferSize);
     }
 
@@ -83,7 +82,7 @@ public class AudioCapture {
             while (isRecording && !emitter.isDisposed()) {
                 int readSize = audioRecord.read(audioBuffer, 0, bufferSize);
                 if (readSize > 0) {
-                    emitter.onNext(new AudioBuffer(audioBuffer, SAMPLE_RATE));
+                    emitter.onNext(new AudioBuffer(audioBuffer, sampleRate));
                 }
             }
             audioRecord.stop();

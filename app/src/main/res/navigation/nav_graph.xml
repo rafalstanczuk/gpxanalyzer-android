@@ -14,6 +14,19 @@
     </fragment>
 
     <fragment
+        android:id="@+id/spectrumFragment"
+        android:name="com.itservices.gpxanalyzer.spectrum.SpectrumFragment"
+        android:label="SpectrumFragment">
+    </fragment>
+
+    <fragment
+        android:id="@+id/mainMenuFragment"
+        android:name="com.itservices.gpxanalyzer.main.MainMenuFragment"
+        android:label="MainMenuFragment">
+    </fragment>
+
+
+    <fragment
         android:id="@+id/fftSpectrumFragment"
         android:name="com.itservices.gpxanalyzer.fftspectrum.FFTSpectrumFragment"
         android:label="FFTSpectrumFragment">
@@ -22,14 +35,4 @@
             android:id="@+id/action_fftSpectrumFragment_to_logbookFragment"
             app:destination="@id/logbookFragment" />
     </fragment>
-    <fragment
-        android:id="@+id/spectrumFragment"
-        android:name="com.itservices.gpxanalyzer.spectrum.SpectrumFragment"
-        android:label="FFTSpectrumFragment">
-
-        <action
-            android:id="@+id/action_openGLFragment_to_logbookFragment"
-            app:destination="@id/logbookFragment" />
-    </fragment>
-
 </navigation>

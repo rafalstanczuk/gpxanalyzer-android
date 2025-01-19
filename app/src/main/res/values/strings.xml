@@ -4,4 +4,6 @@
     <string name="undefined_measurement_value">---</string>
     <string name="undefined_measurement_unit">[---]</string>
     <string name="default_measurement_unit">[m]</string>
+    <string name="log_book">Log book</string>
+    <string name="audio_spectrum">Audio Spectrum</string>
 </resources>
