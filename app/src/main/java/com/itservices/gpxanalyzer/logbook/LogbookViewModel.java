@@ -13,8 +13,8 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.itservices.gpxanalyzer.logbook.chart.data.DataProvider;
-import com.itservices.gpxanalyzer.logbook.chart.data.StatisticResults;
+import com.itservices.gpxanalyzer.data.GPXDataProvider;
+import com.itservices.gpxanalyzer.data.StatisticResults;
 
 import javax.inject.Inject;
 
@@ -26,7 +26,7 @@ import io.reactivex.schedulers.Schedulers;
 public class LogbookViewModel extends ViewModel {
 
 	@Inject
-	DataProvider dataProvider;
+	GPXDataProvider gpxDataProvider;
 
 	private final MutableLiveData<ViewMode> viewModeLiveData = new MutableLiveData<>(TREND_CURVE);
 
@@ -71,7 +71,7 @@ public class LogbookViewModel extends ViewModel {
 	public Observable<StatisticResults> loadData(Context requireContext, int rawId) {
 		requestTypeLiveData.postValue(RequestType.LOADING);
 
-		return dataProvider.provide(requireContext, rawId)
+		return gpxDataProvider.provide(requireContext, rawId)
 				.subscribeOn(Schedulers.io())
 				.observeOn(Schedulers.io())
 				.map(measurements -> {

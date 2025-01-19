@@ -8,8 +8,6 @@ import android.graphics.drawable.Drawable;
 
 import androidx.annotation.DrawableRes;
 
-import com.itservices.gpxanalyzer.R;
-
 public class DrawableUtil {
 
 	public static Drawable scaledDrawable(Context context, @DrawableRes int id, int width, int height ) {

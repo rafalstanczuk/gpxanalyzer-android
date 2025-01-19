@@ -42,6 +42,9 @@ public class AudioCapture {
         minBufferSize = AudioRecord.getMinBufferSize(getMaxValidSampleRate(),
                 AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 
+        minBufferSize = 1024*4;
+        Log.d(AudioCapture.class.getSimpleName(), "minBufferSize = [" + minBufferSize + "]");
+
         // Round up to the next power of 2
         bufferSize = 1;
         while (bufferSize < minBufferSize) {
@@ -63,7 +66,7 @@ public class AudioCapture {
             );
             if (bufferSize != AudioRecord.ERROR && bufferSize != AudioRecord.ERROR_BAD_VALUE) {
                 // Found a valid sample rate
-                Log.d(AudioCapture.class.getSimpleName(), "getMaxValidSampleRate: [Hz]" + rate);
+                Log.d(AudioCapture.class.getSimpleName(), "getMaxValidSampleRate = " + rate + "[Hz]");
                 return rate;
             }
         }

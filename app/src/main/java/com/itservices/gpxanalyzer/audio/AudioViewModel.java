@@ -12,7 +12,6 @@ import com.itservices.gpxanalyzer.audio.audiocapture.AudioCapture;
 import com.itservices.gpxanalyzer.audio.audiocapture.AudioCaptureState;
 import com.itservices.gpxanalyzer.audio.audiocapture.AudioSpectrum;
 import com.itservices.gpxanalyzer.dsp.FFTProcessor;
-import com.itservices.gpxanalyzer.dsp.NoiseFilter;
 
 import java.util.List;
 
@@ -59,7 +58,7 @@ public class AudioViewModel extends ViewModel {
         fftProcessor.init(audioCapture);
         disposables = audioCapture.startRecording()
                 .map(a -> (AudioBuffer) a)
-                .map(NoiseFilter::filter)
+                //.map(NoiseFilter::filter)
                 .map(fftProcessor::process)
                 .map(AudioSpectrum::getPositiveFrequencyAmplitudePairList)
                 .subscribeOn(Schedulers.io())

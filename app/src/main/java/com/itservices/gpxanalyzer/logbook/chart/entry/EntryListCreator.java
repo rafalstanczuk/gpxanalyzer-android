@@ -1,8 +1,8 @@
 package com.itservices.gpxanalyzer.logbook.chart.entry;
 
 import com.github.mikephil.charting.data.Entry;
-import com.itservices.gpxanalyzer.logbook.chart.data.Measurement;
-import com.itservices.gpxanalyzer.logbook.chart.data.StatisticResults;
+import com.itservices.gpxanalyzer.data.Measurement;
+import com.itservices.gpxanalyzer.data.StatisticResults;
 import com.itservices.gpxanalyzer.logbook.chart.legend.PaletteColorDeterminer;
 
 import java.util.ArrayList;

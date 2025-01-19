@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.logbook.chart.data;
+package com.itservices.gpxanalyzer.data;
 
 
 import java.util.Vector;

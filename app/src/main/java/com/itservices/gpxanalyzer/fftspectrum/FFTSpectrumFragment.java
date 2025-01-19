@@ -103,7 +103,7 @@ public class FFTSpectrumFragment extends Fragment implements OnChartGestureListe
     }
 
 
-    private void switchToCGMCurveView() {
+    private void switchToCurveView() {
         activity.runOnUiThread(() -> {
             initChart();
 
@@ -228,7 +228,7 @@ public class FFTSpectrumFragment extends Fragment implements OnChartGestureListe
 
         switch (viewMode) {
             case TREND_CURVE:
-                switchToCGMCurveView();
+                switchToCurveView();
                 break;
             case INFO_ONLY_VIEW:
 

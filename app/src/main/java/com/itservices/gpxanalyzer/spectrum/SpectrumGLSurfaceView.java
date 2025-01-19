@@ -28,7 +28,7 @@ public class SpectrumGLSurfaceView extends GLSurfaceView {
         setRenderer(renderer);
 
         // If you want to update only on data changes:
-        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+        setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
     }
 
     public SpectrumRenderer getRenderer() {

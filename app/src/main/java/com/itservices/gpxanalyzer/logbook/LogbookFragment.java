@@ -94,7 +94,7 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 	}
 
 
-	private void switchToCGMCurveView() {
+	private void switchToCurveView() {
 		activity.runOnUiThread(() -> {
 			initChart();
 
@@ -188,7 +188,7 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 
 		switch (viewMode) {
 			case TREND_CURVE:
-				switchToCGMCurveView();
+				switchToCurveView();
 				break;
 			case INFO_ONLY_VIEW:
 
