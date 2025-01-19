@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.itservices.gpxanalyzer.logbook.chart.data.StatisticResults;
+import com.itservices.gpxanalyzer.data.StatisticResults;
 import com.itservices.gpxanalyzer.logbook.chart.legend.PaletteColorDeterminer;
 
 import javax.inject.Inject;
@@ -26,16 +26,13 @@ public class StatisticsViewModel extends ViewModel {
 	}
 
 	@Inject
-	protected StatisticResults statisticResults;
-
-	@Inject
 	protected PaletteColorDeterminer paletteColorDeterminer;
 
 	@Inject
 	public StatisticsViewModel() {}
 
-	public void refreshStatisticResults() {
-		paletteColorDeterminer.initPalette();
+	public void refreshStatisticResults(StatisticResults statisticResults) {
+		paletteColorDeterminer.initPalette(statisticResults);
 		_curveMeasurementStatisticResults.postValue(statisticResults);
 	}
 }

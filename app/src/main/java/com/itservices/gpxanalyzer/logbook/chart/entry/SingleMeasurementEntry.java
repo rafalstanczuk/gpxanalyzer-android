@@ -8,7 +8,7 @@ import androidx.annotation.NonNull;
 
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineDataSet;
-import com.itservices.gpxanalyzer.logbook.chart.data.StatisticResults;
+import com.itservices.gpxanalyzer.data.StatisticResults;
 import com.itservices.gpxanalyzer.logbook.chart.legend.PaletteColorDeterminer;
 import com.itservices.gpxanalyzer.logbook.chart.settings.axis.HourMinutesAxisValueFormatter;
 import com.itservices.gpxanalyzer.utils.ui.IconsUtil;

@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.logbook.chart.data;
+package com.itservices.gpxanalyzer.data;
 
 import android.content.Context;
 import android.util.Log;
@@ -23,13 +23,13 @@ import itservices.gpxparser.domain.TrackPoint;
 import itservices.gpxparser.domain.TrackSegment;
 
 @Singleton
-public class DataProvider {
+public class GPXDataProvider implements IDataProvider {
 
     @Inject
     public GPXParser mParser;
 
     @Inject
-    public DataProvider() {
+    public GPXDataProvider() {
 
     }
 
@@ -89,7 +89,7 @@ public class DataProvider {
             }
 
         } else {
-            Log.e("DataProvider", "Error parsing gpx track!");
+            Log.e("GPXDataProvider", "Error parsing gpx track!");
         }
 
         return Observable.just(measurementList);

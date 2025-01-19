@@ -2,6 +2,7 @@ package com.itservices.gpxanalyzer.logbook;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -21,14 +22,9 @@ import com.itservices.gpxanalyzer.MainActivity;
 import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.databinding.FragmentLogbookBinding;
 import com.itservices.gpxanalyzer.logbook.chart.ChartViewModel;
-import com.itservices.gpxanalyzer.logbook.chart.data.DataProvider;
-import com.itservices.gpxanalyzer.logbook.chart.data.StatisticResults;
-
-import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 @AndroidEntryPoint
 public class LogbookFragment  extends Fragment implements OnChartGestureListener, OnChartValueSelectedListener {
@@ -38,12 +34,6 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 	public StatisticsViewModel statisticsViewModel;
 	public LogbookViewModel logbookViewModel;
 	public ChartViewModel chartViewModel;
-
-	@Inject
-	DataProvider dataProvider;
-
-	@Inject
-    StatisticResults statisticResults;
 
 	private MainActivity activity;
 	private FragmentLogbookBinding binding;
@@ -80,24 +70,15 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 		super.onResume();
 
 		setupObservers();
+	}
 
-		binding.button.setOnClickListener( view -> {
-			activity.runOnUiThread(() -> { binding.button.setEnabled(false); } );
-
-			dataProvider.provide(requireContext(), R.raw.test20230729)
-					.subscribeOn(Schedulers.io())
-					.observeOn(Schedulers.io())
-					.doOnNext(measurements -> {
-						activity.runOnUiThread(() -> {binding.button.setEnabled(true); });
-
-						statisticResults.clear();
-						statisticResults.setMeasurements(measurements);
-						statisticResults.compute();
-						statisticsViewModel.refreshStatisticResults();
-					} )
-					.doOnError(e -> {})
-					.subscribe();
-		});
+	private void loadData() {
+		disposable = logbookViewModel
+				.loadData(requireContext(), R.raw.test20230729)
+				.doOnError(e -> {})
+				.subscribe(
+						statisticResults -> statisticsViewModel.refreshStatisticResults(statisticResults),
+						onError -> Log.e(TAG, "loadData: ", onError));
 	}
 
 	private void resetMeasurementCurveMarkerAndClearSelection() {
@@ -113,7 +94,7 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 	}
 
 
-	private void switchToCGMCurveView() {
+	private void switchToCurveView() {
 		activity.runOnUiThread(() -> {
 			initChart();
 
@@ -128,6 +109,7 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 
 	private void setupObservers() {
 
+		binding.button.setOnClickListener( view -> loadData());
 
 		chartViewModel.getLineDataSetListToAddLive()
 			.observe(getViewLifecycleOwner(), lineDataSetList -> {
@@ -174,14 +156,26 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 		binding = FragmentLogbookBinding.inflate(inflater);
 		binding.setViewModel(logbookViewModel);
 
+		logbookViewModel.getViewMode().observe(getViewLifecycleOwner(), this::switchViewMode);
 
-		//statisticResults.initStat();
-
-		logbookViewModel.getViewMode().observe(getViewLifecycleOwner(), viewMode -> {
-			switchViewMode(viewMode);
-		});
+		logbookViewModel.getRequestType().observe(getViewLifecycleOwner(), this::switchRequestType);
 
 		return binding.getRoot();
+	}
+
+	private void switchRequestType(RequestType requestType) {
+		activity.runOnUiThread(() -> {
+			switch (requestType) {
+				case DEFAULT:
+				case DONE:
+					binding.button.setEnabled(true);
+					break;
+				case LOADING:
+				case PROCESSING:
+					binding.button.setEnabled(false);
+					break;
+			}
+		});
 	}
 
 	private void tryToDispose(Disposable disposable) {
@@ -194,7 +188,7 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 
 		switch (viewMode) {
 			case TREND_CURVE:
-				switchToCGMCurveView();
+				switchToCurveView();
 				break;
 			case INFO_ONLY_VIEW:
 

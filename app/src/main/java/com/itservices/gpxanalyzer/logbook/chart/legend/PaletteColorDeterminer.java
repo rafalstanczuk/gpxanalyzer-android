@@ -7,7 +7,7 @@ import android.graphics.BitmapFactory;
 import androidx.annotation.NonNull;
 
 import com.itservices.gpxanalyzer.R;
-import com.itservices.gpxanalyzer.logbook.chart.data.StatisticResults;
+import com.itservices.gpxanalyzer.data.StatisticResults;
 import com.itservices.gpxanalyzer.utils.common.PrecisionUtil;
 
 import java.util.HashMap;
@@ -26,7 +26,6 @@ public class PaletteColorDeterminer {
     private final int[] paletteFromBitmap;
     private Map<Integer, BoundaryColorSpan> paletteMap = new HashMap<>();
 
-    @Inject
     protected StatisticResults statisticResults;
 
     @Inject
@@ -46,7 +45,9 @@ public class PaletteColorDeterminer {
         return paletteFromBitmap;
     }
 
-    public void initPalette() {
+    public void initPalette(StatisticResults statisticResults) {
+        this.statisticResults = statisticResults;
+
         paletteMap = generatePalette(
                 (float) statisticResults.getMinValue(),
                 (float) statisticResults.getMaxValue(),
