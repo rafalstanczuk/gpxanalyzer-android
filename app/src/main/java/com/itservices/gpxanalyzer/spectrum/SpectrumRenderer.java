@@ -51,8 +51,6 @@ public class SpectrumRenderer implements GLSurfaceView.Renderer {
     // We'll map amplitude on the Y-axis: [0..maxAmp]  => [-1..+1]
     // or some smaller range. This is up to you to decide scaling.
 
-    private float maxFrequency = 22050f; // e.g. half of 44100
-    private float maxAmplitude = 20000f; // example max amplitude scaling
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
