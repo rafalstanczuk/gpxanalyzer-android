@@ -5,6 +5,7 @@ import static com.itservices.gpxanalyzer.utils.common.FormatNumberUtil.getFormat
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.location.Location;
 import android.util.AttributeSet;
 
 import com.github.mikephil.charting.charts.LineChart;
@@ -21,6 +22,7 @@ import com.itservices.gpxanalyzer.logbook.chart.settings.background.LimitLinesBo
 import com.itservices.gpxanalyzer.logbook.chart.settings.highlight.StaticChartHighlighter;
 
 import java.util.Calendar;
+import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -72,9 +74,8 @@ public class MeasurementLineChart extends LineChart {
 					break;
 				}
 
-				Calendar calendar = ((BaseEntry) entryLineData).getCalendar();
 
-				long timeInt = calendar.getTime().getTime();
+				long timeInt = ((BaseEntry) entryLineData).getLocation().getTime();
 
 				if (timeInt == entryTimeInt) {
 					dataSetIndexToHighlight = dataSetIndex;
@@ -150,7 +151,7 @@ public class MeasurementLineChart extends LineChart {
 		if (entry instanceof BaseEntry) {
 			BaseEntry baseEntry = (BaseEntry) entry;
 
-			long entryTimeInt = baseEntry.getCalendar().getTime().getTime();
+			long entryTimeInt = baseEntry.getLocation().getTime();
 			int dataSetIndexToHighlight = getDataSetIndexForEntryWithTimeInt(
 				this, entryTimeInt);
 
@@ -171,9 +172,13 @@ public class MeasurementLineChart extends LineChart {
 
 		BaseEntry baseEntry = (BaseEntry) selectedEntry;
 
-		Calendar calendar = baseEntry.getCalendar();
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis( baseEntry.getLocation().getTime() );
 
-		String unit = getContext().getResources().getString(R.string.default_measurement_unit);
+		Location location = baseEntry.getLocation();
+
+		String unit1 = getContext().getResources().getString(R.string.default_distance_measurement_unit);
+		String unit2 = getContext().getResources().getString(R.string.default_speed_measurement_unit);
 
 /*		if (selectedEntry instanceof CurveMeasurementEntry) {
 
@@ -183,8 +188,11 @@ public class MeasurementLineChart extends LineChart {
 
 		activity.runOnUiThread(() -> {
 			measurementInfoLayoutView.setTime(getFormattedTime(calendar));
-			measurementInfoLayoutView.setValue(String.valueOf((int) baseEntry.getY()));
-			measurementInfoLayoutView.setValueUnit(unit);
+			measurementInfoLayoutView.setValue1(String.valueOf((int) baseEntry.getY()));
+			measurementInfoLayoutView.setValue1Unit(unit1);
+
+			measurementInfoLayoutView.setValue2(String.format(Locale.getDefault(), "%.2f", location.getSpeed()));
+			measurementInfoLayoutView.setValue2Unit(unit2);
 
 			measurementInfoLayoutView.invalidate();
 		});

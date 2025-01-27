@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.itservices.gpxanalyzer.data.StatisticResults;
+import com.itservices.gpxanalyzer.data.gpx.StatisticResults;
 import com.itservices.gpxanalyzer.logbook.chart.legend.PaletteColorDeterminer;
 
 import javax.inject.Inject;

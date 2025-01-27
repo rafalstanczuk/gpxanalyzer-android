@@ -19,3 +19,9 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Keep all classes and members in the Proj4j library
+-keep class org.locationtech.proj4j.** { *; }
+
+# Prevent ProGuard/R8 from issuing warnings related to Proj4j
+-dontwarn org.locationtech.proj4j.**

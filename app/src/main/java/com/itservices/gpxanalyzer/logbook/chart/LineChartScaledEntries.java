@@ -1,7 +1,7 @@
 package com.itservices.gpxanalyzer.logbook.chart;
 
 import com.github.mikephil.charting.components.YAxis;
-import com.itservices.gpxanalyzer.data.StatisticResults;
+import com.itservices.gpxanalyzer.data.gpx.StatisticResults;
 import com.itservices.gpxanalyzer.logbook.chart.settings.background.LimitLinesBoundaries;
 import com.itservices.gpxanalyzer.utils.common.PrecisionUtil;
 

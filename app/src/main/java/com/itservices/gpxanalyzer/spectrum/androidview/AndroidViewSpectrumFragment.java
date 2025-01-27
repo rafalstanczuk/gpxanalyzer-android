@@ -1,8 +1,7 @@
-package com.itservices.gpxanalyzer.fftspectrum;
+package com.itservices.gpxanalyzer.spectrum.androidview;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -19,7 +18,6 @@ import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.itservices.gpxanalyzer.MainActivity;
-import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.audio.AudioViewModel;
 import com.itservices.gpxanalyzer.databinding.FragmentFftspectrumBinding;
 import com.itservices.gpxanalyzer.logbook.LogbookViewModel;
@@ -32,9 +30,9 @@ import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.disposables.Disposable;
 
 @AndroidEntryPoint
-public class FFTSpectrumFragment extends Fragment implements OnChartGestureListener, OnChartValueSelectedListener {
+public class AndroidViewSpectrumFragment extends Fragment implements OnChartGestureListener, OnChartValueSelectedListener {
 
-    static final String TAG = FFTSpectrumFragment.class.getSimpleName();
+    static final String TAG = AndroidViewSpectrumFragment.class.getSimpleName();
 
     public StatisticsViewModel statisticsViewModel;
     public LogbookViewModel logbookViewModel;
@@ -80,16 +78,6 @@ public class FFTSpectrumFragment extends Fragment implements OnChartGestureListe
         setupObservers();
     }
 
-    private void loadData() {
-        disposable = logbookViewModel
-                .loadData(requireContext(), R.raw.test20230729)
-                .doOnError(e -> {
-                })
-                .subscribe(
-                        statisticResults -> statisticsViewModel.refreshStatisticResults(statisticResults),
-                        onError -> Log.e(TAG, "loadData: ", onError));
-    }
-
     private void resetMeasurementCurveMarkerAndClearSelection() {
         if (logbookViewModel.isTrendCurveMode()) {
           //  chartViewModel.resetMarkerAndClearSelection(binding.lineChart);
@@ -120,7 +108,17 @@ public class FFTSpectrumFragment extends Fragment implements OnChartGestureListe
 
         audioViewModel.getSpectrumPairListLiveData()
                 .observe(getViewLifecycleOwner(), audioSpectrum -> {
-                            Log.d(TAG, "audioSpectrum() :" + audioSpectrum);
+                         //   Log.d(TAG, "audioSpectrum() :" + audioSpectrum);
+
+                    double[] array = audioSpectrum.stream().map(
+                            pair -> pair.second
+                    ).mapToDouble(d -> d).toArray();
+
+                            requireActivity().runOnUiThread(() ->{
+
+
+                                binding.spectrumView.updateSpectrum(array);
+                            });
 
                         }
                 );

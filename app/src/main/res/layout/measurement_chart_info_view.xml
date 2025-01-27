@@ -37,7 +37,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/textViewValue"
+                android:id="@+id/textViewValue1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/undefined_measurement_value"
@@ -50,7 +50,7 @@
                 card_view:layout_constraintTop_toBottomOf="@+id/textViewTime" />
 
             <TextView
-                android:id="@+id/textViewValueUnit"
+                android:id="@+id/textViewValue1Unit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/undefined_measurement_unit"
@@ -58,9 +58,38 @@
                 android:textColor="@android:color/black"
                 android:textSize="11sp"
                 android:textStyle="normal"
-                app:layout_constraintStart_toStartOf="@+id/textViewValue"
-                card_view:layout_constraintEnd_toEndOf="@+id/textViewValue"
-                card_view:layout_constraintTop_toBottomOf="@+id/textViewValue" />
+                app:layout_constraintStart_toEndOf="@+id/textViewValue1"
+                card_view:layout_constraintTop_toTopOf="@+id/textViewValue1"
+                card_view:layout_constraintBottom_toBottomOf="@+id/textViewValue1"
+                />
+
+            <TextView
+                android:id="@+id/textViewValue2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/undefined_measurement_value"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="@android:color/black"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="@+id/textViewValue1"
+                card_view:layout_constraintEnd_toEndOf="@+id/textViewValue1"
+                card_view:layout_constraintTop_toBottomOf="@+id/textViewValue1" />
+
+            <TextView
+                android:id="@+id/textViewValue2Unit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/undefined_measurement_unit"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="@android:color/black"
+                android:textSize="11sp"
+                android:textStyle="normal"
+                app:layout_constraintStart_toEndOf="@+id/textViewValue2"
+                card_view:layout_constraintTop_toTopOf="@+id/textViewValue2"
+                card_view:layout_constraintBottom_toBottomOf="@+id/textViewValue2"
+                />
+
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>

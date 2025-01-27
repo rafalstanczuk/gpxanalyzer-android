@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.dsp;
+package com.itservices.gpxanalyzer.data.dsp;
 
 
 import com.itservices.gpxanalyzer.audio.audiocapture.AudioCapture;

@@ -1,5 +1,7 @@
 package com.itservices.gpxanalyzer.logbook.chart;
 
+import android.location.Location;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -9,7 +11,7 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
-import com.itservices.gpxanalyzer.data.StatisticResults;
+import com.itservices.gpxanalyzer.data.gpx.StatisticResults;
 import com.itservices.gpxanalyzer.logbook.chart.entry.BaseEntry;
 import com.itservices.gpxanalyzer.logbook.chart.entry.CurveMeasurementEntry;
 import com.itservices.gpxanalyzer.logbook.chart.entry.EntryListCreator;
@@ -19,7 +21,6 @@ import com.itservices.gpxanalyzer.logbook.chart.settings.LineChartSettings;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -213,9 +214,8 @@ public class ChartViewModel extends ViewModel {
                     break;
                 }
 
-                Calendar calendar = ((BaseEntry) entry).getCalendar();
-
-                long timeInt = calendar.getTime().getTime();
+                Location location = ((BaseEntry) entry).getLocation();
+                long timeInt = location.getTime();
 
                 if (timeInt == selectedColumnTimeInt) {
                     lineChart.highlightValue(entry.getX(), entry.getY(), dataSetIndex, true);

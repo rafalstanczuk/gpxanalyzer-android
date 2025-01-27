@@ -7,7 +7,7 @@ import android.graphics.BitmapFactory;
 import androidx.annotation.NonNull;
 
 import com.itservices.gpxanalyzer.R;
-import com.itservices.gpxanalyzer.data.StatisticResults;
+import com.itservices.gpxanalyzer.data.gpx.StatisticResults;
 import com.itservices.gpxanalyzer.utils.common.PrecisionUtil;
 
 import java.util.HashMap;

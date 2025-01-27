@@ -11,7 +11,7 @@ import com.itservices.gpxanalyzer.audio.audiocapture.AudioBuffer;
 import com.itservices.gpxanalyzer.audio.audiocapture.AudioCapture;
 import com.itservices.gpxanalyzer.audio.audiocapture.AudioCaptureState;
 import com.itservices.gpxanalyzer.audio.audiocapture.AudioSpectrum;
-import com.itservices.gpxanalyzer.dsp.FFTProcessor;
+import com.itservices.gpxanalyzer.data.dsp.FFTProcessor;
 
 import java.util.List;
 
@@ -70,13 +70,19 @@ public class AudioViewModel extends ViewModel {
 
     public void stopRecording() {
         audioCapture.stopRecording();
-        disposables.dispose();
+        tryToDispose();
+    }
+
+    private void tryToDispose() {
+        if(disposables!=null && !disposables.isDisposed()) {
+            disposables.dispose();
+        }
     }
 
     @Override
     protected void onCleared() {
         super.onCleared();
-        disposables.dispose();
+        tryToDispose();
     }
 
     public void switchOnOff() {

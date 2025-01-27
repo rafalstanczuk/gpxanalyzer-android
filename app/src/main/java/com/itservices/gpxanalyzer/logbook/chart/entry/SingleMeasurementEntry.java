@@ -2,13 +2,14 @@ package com.itservices.gpxanalyzer.logbook.chart.entry;
 
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.location.Location;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineDataSet;
-import com.itservices.gpxanalyzer.data.StatisticResults;
+import com.itservices.gpxanalyzer.data.gpx.StatisticResults;
 import com.itservices.gpxanalyzer.logbook.chart.legend.PaletteColorDeterminer;
 import com.itservices.gpxanalyzer.logbook.chart.settings.axis.HourMinutesAxisValueFormatter;
 import com.itservices.gpxanalyzer.utils.ui.IconsUtil;
@@ -21,9 +22,9 @@ public class SingleMeasurementEntry extends BaseEntry {
 	public static boolean SHOW_COLOR_SINGLE_MEASUREMENT_RANGE_CIRCLES_ICONS = true;
 
 	SingleMeasurementEntry(
-		Calendar calendar, float x, float y, Drawable icon, StatisticResults statisticResults
+			Location location, float x, float y, Drawable icon, StatisticResults statisticResults
 	) {
-		super(x, y, icon, statisticResults, calendar);
+		super(x, y, icon, statisticResults, location);
 	}
 
 	public static SingleMeasurementEntry create(
@@ -40,12 +41,15 @@ public class SingleMeasurementEntry extends BaseEntry {
 			Log.e("MeasurementCurveEntry", "create: ", ex);
 		}
 
-		Calendar calendar = statisticResults.getMeasurements().elementAt((int) x).timestamp;
+		Location location = statisticResults.getMeasurements().elementAt((int) x);
+
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis( location.getTime() );
 
 		float timeConcat = HourMinutesAxisValueFormatter.combineIntoFloatTime(calendar);
 
 		return new SingleMeasurementEntry(
-				calendar, timeConcat, y, SHOW_COLOR_SINGLE_MEASUREMENT_RANGE_CIRCLES_ICONS ? drawableIcon : null,
+				location, timeConcat, y, SHOW_COLOR_SINGLE_MEASUREMENT_RANGE_CIRCLES_ICONS ? drawableIcon : null,
 				statisticResults
 		);
 	}

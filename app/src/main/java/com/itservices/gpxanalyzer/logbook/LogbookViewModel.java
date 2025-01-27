@@ -13,8 +13,8 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.itservices.gpxanalyzer.data.GPXDataProvider;
-import com.itservices.gpxanalyzer.data.StatisticResults;
+import com.itservices.gpxanalyzer.data.gpx.GPXDataProvider;
+import com.itservices.gpxanalyzer.data.gpx.StatisticResults;
 
 import javax.inject.Inject;
 
@@ -31,6 +31,8 @@ public class LogbookViewModel extends ViewModel {
 	private final MutableLiveData<ViewMode> viewModeLiveData = new MutableLiveData<>(TREND_CURVE);
 
 	private final MutableLiveData<RequestType> requestTypeLiveData = new MutableLiveData<>(RequestType.DEFAULT);
+
+	private final MutableLiveData<Integer> percentageProcessingProgressLiveData = new MutableLiveData<>(0);
 
 	public MutableLiveData<Float> chartPercentageHeightLiveData = new MutableLiveData<>(
 		DEFAULT_MAX_100_PERCENT);
@@ -49,6 +51,10 @@ public class LogbookViewModel extends ViewModel {
 
 	@Inject
 	public LogbookViewModel() {}
+
+	public LiveData<Integer> getPercentageProcessingProgressLiveData() {
+		return percentageProcessingProgressLiveData;
+	}
 
 	public LiveData<ViewMode> getViewMode() {
 		return viewModeLiveData;
@@ -69,15 +75,11 @@ public class LogbookViewModel extends ViewModel {
 	}
 
 	public Observable<StatisticResults> loadData(Context requireContext, int rawId) {
-		requestTypeLiveData.postValue(RequestType.LOADING);
-
-		return gpxDataProvider.provide(requireContext, rawId)
+		return gpxDataProvider.provide(requireContext, rawId, requestTypeLiveData, percentageProcessingProgressLiveData)
 				.subscribeOn(Schedulers.io())
 				.observeOn(Schedulers.io())
-				.map(measurements -> {
-					requestTypeLiveData.postValue(RequestType.PROCESSING);
-					return new StatisticResults(measurements);
-				}).map(statisticResults -> {
+				.map(StatisticResults::new)
+				.map(statisticResults -> {
 					requestTypeLiveData.postValue(RequestType.DONE);
 					return statisticResults;
 				});

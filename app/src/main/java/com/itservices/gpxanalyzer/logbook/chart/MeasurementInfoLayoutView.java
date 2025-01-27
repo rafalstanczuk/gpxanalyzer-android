@@ -11,8 +11,11 @@ import com.itservices.gpxanalyzer.R;
 public class MeasurementInfoLayoutView extends LinearLayout {
 
 	private TextView textViewTime;
-	private TextView textViewValue;
-	private TextView textViewValueUnit;
+	private TextView textViewValue1;
+	private TextView textViewValue1Unit;
+
+	private TextView textViewValue2;
+	private TextView textViewValue2Unit;
 
 	public MeasurementInfoLayoutView(Context context) {
 		super(context);
@@ -42,20 +45,31 @@ public class MeasurementInfoLayoutView extends LinearLayout {
 		inflater.inflate(R.layout.measurement_chart_info_view, this, true);
 
 		textViewTime = findViewById(R.id.textViewTime);
-		textViewValue = findViewById(R.id.textViewValue);
-		textViewValueUnit = findViewById(R.id.textViewValueUnit);
+		textViewValue1 = findViewById(R.id.textViewValue1);
+		textViewValue1Unit = findViewById(R.id.textViewValue1Unit);
+
+		textViewValue2 = findViewById(R.id.textViewValue2);
+		textViewValue2Unit = findViewById(R.id.textViewValue2Unit);
 	}
 
 	public void setTime(String time) {
 		textViewTime.setText(time);
 	}
 
-	public void setValue(String value) {
-		textViewValue.setText(value);
+	public void setValue1(String value) {
+		textViewValue1.setText(value);
 	}
 
-	public void setValueUnit(String valueUnit) {
-		textViewValueUnit.setText(valueUnit);
+	public void setValue1Unit(String valueUnit) {
+		textViewValue1Unit.setText(valueUnit);
+	}
+
+	public void setValue2(String value) {
+		textViewValue2.setText(value);
+	}
+
+	public void setValue2Unit(String valueUnit) {
+		textViewValue2Unit.setText(valueUnit);
 	}
 
 	@Override

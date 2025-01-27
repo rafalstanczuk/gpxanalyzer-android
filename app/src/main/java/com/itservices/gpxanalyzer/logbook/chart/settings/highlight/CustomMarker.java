@@ -78,7 +78,8 @@ public class CustomMarker extends MarkerView {
 		if (entry instanceof CurveMeasurementEntry) {
 			CurveMeasurementEntry curveMeasurementEntry = (CurveMeasurementEntry) entry;
 
-			Calendar calendar = curveMeasurementEntry.getCalendar();
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTimeInMillis(curveMeasurementEntry.getLocation().getTime());
 
 			/*String timeText = "\u231A ";
 			String valueString = "\uD83D\uDCA7 " ;*/
@@ -95,7 +96,8 @@ public class CustomMarker extends MarkerView {
 
 			SingleMeasurementEntry singleMeasurementEntry = (SingleMeasurementEntry) entry;
 
-			Calendar calendar = singleMeasurementEntry.getCalendar();
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTimeInMillis(singleMeasurementEntry.getLocation().getTime());
 
 			String unit = "[m]";
 

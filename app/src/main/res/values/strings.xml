@@ -3,7 +3,9 @@
     <string name="undefined_measurement_time">--:--</string>
     <string name="undefined_measurement_value">---</string>
     <string name="undefined_measurement_unit">[---]</string>
-    <string name="default_measurement_unit">[m]</string>
+    <string name="default_distance_measurement_unit">[m]</string>
+    <string name="default_speed_measurement_unit">[m/s]</string>
     <string name="log_book">Log book</string>
-    <string name="audio_spectrum">Audio Spectrum</string>
+    <string name="audio_spectrum_opengl">Audio DSP OpenGL</string>
+    <string name="audio_spectrum_android_view">Audio DSP Android View</string>
 </resources>

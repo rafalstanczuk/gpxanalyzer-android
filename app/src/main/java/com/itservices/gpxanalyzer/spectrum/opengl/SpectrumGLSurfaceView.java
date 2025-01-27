@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.spectrum;
+package com.itservices.gpxanalyzer.spectrum.opengl;
 
 
 import android.content.Context;
@@ -28,7 +28,7 @@ public class SpectrumGLSurfaceView extends GLSurfaceView {
         setRenderer(renderer);
 
         // If you want to update only on data changes:
-        setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
     }
 
     public SpectrumRenderer getRenderer() {

@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.spectrum;
+package com.itservices.gpxanalyzer.spectrum.opengl;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,16 +12,16 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.itservices.gpxanalyzer.audio.AudioViewModel;
 import com.itservices.gpxanalyzer.audio.audiocapture.AudioCaptureState;
-import com.itservices.gpxanalyzer.databinding.FragmentSpectrumBinding;
+import com.itservices.gpxanalyzer.databinding.FragmentOpenglSpectrumBinding;
 
 
-public class SpectrumFragment extends Fragment {
+public class OpenGLSpectrumFragment extends Fragment {
 
-    private static final String TAG = "SpectrumFragment";
+    private static final String TAG = "OpenGLSpectrumFragment";
 
     private AudioViewModel audioViewModel;
 
-    private FragmentSpectrumBinding binding;
+    private com.itservices.gpxanalyzer.databinding.FragmentOpenglSpectrumBinding binding;
 
     @Nullable
     @Override
@@ -31,7 +31,7 @@ public class SpectrumFragment extends Fragment {
             @Nullable Bundle savedInstanceState
     ) {
 
-        binding = FragmentSpectrumBinding.inflate(inflater);
+        binding = com.itservices.gpxanalyzer.databinding.FragmentOpenglSpectrumBinding.inflate(inflater);
         binding.setViewModel(audioViewModel);
 
         return binding.getRoot();

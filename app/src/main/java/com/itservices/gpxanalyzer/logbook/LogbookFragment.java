@@ -74,7 +74,7 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 
 	private void loadData() {
 		disposable = logbookViewModel
-				.loadData(requireContext(), R.raw.test20230729)
+				.loadData(requireContext(), R.raw.skiing20250121t091423)
 				.doOnError(e -> {})
 				.subscribe(
 						statisticResults -> statisticsViewModel.refreshStatisticResults(statisticResults),
@@ -160,7 +160,16 @@ public class LogbookFragment  extends Fragment implements OnChartGestureListener
 
 		logbookViewModel.getRequestType().observe(getViewLifecycleOwner(), this::switchRequestType);
 
+		logbookViewModel.getPercentageProcessingProgressLiveData().observe(getViewLifecycleOwner(), this::updatePercentageProcessingProgress);
+
 		return binding.getRoot();
+	}
+
+	private void updatePercentageProcessingProgress(Integer percent) {
+		Log.d(TAG, "updatePercentageProcessingProgress() called with: percent = [" + percent + "]");
+		activity.runOnUiThread(() -> {
+			binding.percentageProgressTextView.setText( String.valueOf(percent) );
+		});
 	}
 
 	private void switchRequestType(RequestType requestType) {
