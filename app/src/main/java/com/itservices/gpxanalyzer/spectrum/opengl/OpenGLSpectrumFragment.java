@@ -21,7 +21,7 @@ public class OpenGLSpectrumFragment extends Fragment {
 
     private AudioViewModel audioViewModel;
 
-    private com.itservices.gpxanalyzer.databinding.FragmentOpenglSpectrumBinding binding;
+    private FragmentOpenglSpectrumBinding binding;
 
     @Nullable
     @Override
@@ -64,7 +64,7 @@ public class OpenGLSpectrumFragment extends Fragment {
         });
 
         binding.button.setOnClickListener(v -> {
-            audioViewModel.switchOnOff();
+            audioViewModel.switchOnOff(requireActivity());
         });
     }
 

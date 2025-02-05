@@ -14,7 +14,6 @@ import androidx.core.app.ActivityCompat;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import dagger.hilt.android.qualifiers.ApplicationContext;
 import io.reactivex.Observable;
 
 @Singleton
@@ -27,31 +26,7 @@ public class AudioCapture {
     private boolean isRecording = false;
 
     @Inject
-    public AudioCapture(@ApplicationContext Context context) {
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-
-        sampleRate = 44100;//getMaxValidSampleRate();
-
-        int minBufferSize = AudioRecord.getMinBufferSize(sampleRate,
-                AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
-
-        // Round up to the next power of 2
-        bufferSize = 1;
-        while (bufferSize < minBufferSize) {
-            bufferSize <<= 1; // equivalent to bufferSize *= 2
-        }
-
-        audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, sampleRate,
-                AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, bufferSize);
+    public AudioCapture() {
     }
 
     private int getMaxValidSampleRate() {
@@ -96,5 +71,34 @@ public class AudioCapture {
 
     public int getBufferSize() {
         return bufferSize;
+    }
+
+    public boolean init(Context context) {
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return false;
+        }
+
+        sampleRate = 44100;//getMaxValidSampleRate();
+
+        int minBufferSize = AudioRecord.getMinBufferSize(sampleRate,
+                AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+
+        // Round up to the next power of 2
+        bufferSize = 1;
+        while (bufferSize < minBufferSize) {
+            bufferSize <<= 1; // equivalent to bufferSize *= 2
+        }
+
+        audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, sampleRate,
+                AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, bufferSize);
+
+        return true;
     }
 }

@@ -1,10 +1,6 @@
 package com.itservices.gpxanalyzer.logbook;
 
-import static com.itservices.gpxanalyzer.logbook.ViewMode.TREND_CURVE;
-import static com.itservices.gpxanalyzer.utils.ui.BindingAdapters.CHART_PERCENTAGE_HEIGHT_LANDSCAPE;
-import static com.itservices.gpxanalyzer.utils.ui.BindingAdapters.CHART_PERCENTAGE_HEIGHT_PORTRAIT;
-import static com.itservices.gpxanalyzer.utils.ui.BindingAdapters.DEFAULT_FLOAT_RELATIVE_PERCENT_VALUE;
-import static com.itservices.gpxanalyzer.utils.ui.BindingAdapters.DEFAULT_MAX_100_PERCENT;
+import static com.itservices.gpxanalyzer.chart.RequestStatus.DEFAULT;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -13,75 +9,168 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.itservices.gpxanalyzer.data.gpx.GPXDataProvider;
-import com.itservices.gpxanalyzer.data.gpx.StatisticResults;
+import com.itservices.gpxanalyzer.MainActivity;
+import com.itservices.gpxanalyzer.chart.MeasurementLineChart;
+import com.itservices.gpxanalyzer.chart.RequestStatus;
+import com.itservices.gpxanalyzer.usecase.MultipleSyncedGpxChartUseCase;
+
+import java.util.Objects;
 
 import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Observable;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.PublishSubject;
 
 @HiltViewModel
 public class LogbookViewModel extends ViewModel {
+    public static final float CHART_PERCENTAGE_HEIGHT_LANDSCAPE = 0.3f;
+    public static final float CHART_PERCENTAGE_HEIGHT_PORTRAIT = 0.3f;
+    public static final float DEFAULT_MAX_100_PERCENT = 1f;
+    public static final float DEFAULT_PERCENT_VALUE = 0.5f;
 
-	@Inject
-	GPXDataProvider gpxDataProvider;
+    public final MutableLiveData<Float> chartPercentageHeightLiveData
+            = new MutableLiveData<>(DEFAULT_PERCENT_VALUE);
 
-	private final MutableLiveData<ViewMode> viewModeLiveData = new MutableLiveData<>(TREND_CURVE);
+    @Inject
+    MultipleSyncedGpxChartUseCase multipleSyncedGpxChartUseCase;
 
-	private final MutableLiveData<RequestType> requestTypeLiveData = new MutableLiveData<>(RequestType.DEFAULT);
+    private final PublishSubject<Integer> orientationPublishSubject = PublishSubject.create();
 
-	private final MutableLiveData<Integer> percentageProcessingProgressLiveData = new MutableLiveData<>(0);
+    private final MutableLiveData<RequestStatus> requestStatusMutableLiveData = new MutableLiveData<>(DEFAULT);
+    private final MutableLiveData<Integer> percentageProcessingProgressLiveData = new MutableLiveData<>(0);
 
-	public MutableLiveData<Float> chartPercentageHeightLiveData = new MutableLiveData<>(
-		DEFAULT_MAX_100_PERCENT);
+    @Inject
+    public LogbookViewModel() {
+    }
 
-	public void setOrientation(int orientation) {
-		chartPercentageHeightLiveData.setValue(
-			(orientation == Configuration.ORIENTATION_LANDSCAPE) ? CHART_PERCENTAGE_HEIGHT_LANDSCAPE
-				: CHART_PERCENTAGE_HEIGHT_PORTRAIT
-		);
-	}
+    public LiveData<Integer> getPercentageProcessingProgressLiveData() {
+        return percentageProcessingProgressLiveData;
+    }
 
-	public float getMeasurementChartPercentageHeight() {
-		return chartPercentageHeightLiveData.getValue()!=null
-			? chartPercentageHeightLiveData.getValue() / DEFAULT_MAX_100_PERCENT : DEFAULT_FLOAT_RELATIVE_PERCENT_VALUE;
-	}
+    public LiveData<RequestStatus> getRequestStatusLiveData() {
+        return requestStatusMutableLiveData;
+    }
 
-	@Inject
-	public LogbookViewModel() {}
+    public boolean getButtonEnabled(RequestStatus requestStatus) {
+        switch (Objects.requireNonNull(requestStatus)) {
+            case LOADING:
+            case DATA_LOADED:
+            case PROCESSING:
+                return false;
+            default:
+                return true;
+        }
+    }
 
-	public LiveData<Integer> getPercentageProcessingProgressLiveData() {
-		return percentageProcessingProgressLiveData;
-	}
+    public void setOrientation(int orientation) {
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            chartPercentageHeightLiveData.setValue(CHART_PERCENTAGE_HEIGHT_LANDSCAPE);
+        } else {
+            chartPercentageHeightLiveData.setValue(CHART_PERCENTAGE_HEIGHT_PORTRAIT);
+        }
 
-	public LiveData<ViewMode> getViewMode() {
-		return viewModeLiveData;
-	}
+        orientationPublishSubject.onNext(orientation);
+    }
 
-	public LiveData<RequestType> getRequestType() {
-		return requestTypeLiveData;
-	}
+    public LiveData<Float> getMeasurementChartPercentageHeight() {
+        return chartPercentageHeightLiveData;
+    }
 
-	public void switchViewMode() {
-		ViewMode current = viewModeLiveData.getValue();
-		if (current != null)
-			viewModeLiveData.setValue( current.getNextCyclic() );
-	}
+    public void onPause() {
+        multipleSyncedGpxChartUseCase.disposeAll();
+    }
 
-	public boolean isTrendCurveMode() {
-		return viewModeLiveData.getValue() != null && (viewModeLiveData.getValue() == TREND_CURVE);
-	}
+    public void bindHeightTimeChart(MeasurementLineChart heightTimeLineChart, MainActivity requireActivity) {
+        multipleSyncedGpxChartUseCase.bindHeightTimeChart(heightTimeLineChart, requireActivity);
+    }
 
-	public Observable<StatisticResults> loadData(Context requireContext, int rawId) {
-		return gpxDataProvider.provide(requireContext, rawId, requestTypeLiveData, percentageProcessingProgressLiveData)
-				.subscribeOn(Schedulers.io())
-				.observeOn(Schedulers.io())
-				.map(StatisticResults::new)
-				.map(statisticResults -> {
-					requestTypeLiveData.postValue(RequestType.DONE);
-					return statisticResults;
-				});
-	}
+    public void bindVelocityTimeChart(MeasurementLineChart velocityTimeLineChart, MainActivity requireActivity) {
+        multipleSyncedGpxChartUseCase.bindVelocityTimeChart(velocityTimeLineChart, requireActivity);
+    }
+
+    public void loadData(Context requireContext, int rawGpxDataId) {
+        observeProgressOnLiveData(multipleSyncedGpxChartUseCase.getPercentageProgress());
+        observeRequestStatusOnLiveData(multipleSyncedGpxChartUseCase.getRequestStatus());
+
+        observeOrientationChangeToReload(orientationPublishSubject, requireContext, rawGpxDataId);
+
+        multipleSyncedGpxChartUseCase.loadData(requireContext, rawGpxDataId);
+    }
+
+    private void observeOrientationChangeToReload(PublishSubject<Integer> orientationPublishSubject, Context requireContext, int rawGpxDataId) {
+        orientationPublishSubject
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Integer>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                    }
+
+                    @Override
+                    public void onNext(Integer orientation) {
+                        multipleSyncedGpxChartUseCase.loadData(requireContext, rawGpxDataId);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                    }
+
+                    @Override
+                    public void onComplete() {
+                    }
+                });
+    }
+
+    private void observeRequestStatusOnLiveData(Observable<RequestStatus> requestStatus) {
+        requestStatus
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<RequestStatus>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                    }
+
+                    @Override
+                    public void onNext(RequestStatus baseEntry) {
+                        requestStatusMutableLiveData.postValue(baseEntry);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                    }
+
+                    @Override
+                    public void onComplete() {
+                    }
+                });
+    }
+
+    private void observeProgressOnLiveData(Observable<Integer> integerObservable) {
+        integerObservable
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Integer>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                    }
+
+                    @Override
+                    public void onNext(Integer integer) {
+                        percentageProcessingProgressLiveData.postValue(integer);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                    }
+
+                    @Override
+                    public void onComplete() {
+                    }
+                });
+    }
 }

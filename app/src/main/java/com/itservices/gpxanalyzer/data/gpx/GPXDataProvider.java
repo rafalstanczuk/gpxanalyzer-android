@@ -5,76 +5,102 @@ import android.location.Location;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.MutableLiveData;
 
+import com.itservices.gpxanalyzer.R;
+import com.itservices.gpxanalyzer.data.DataEntity;
 import com.itservices.gpxanalyzer.data.gpx.calculation.LocationCalculatorUtil;
-import com.itservices.gpxanalyzer.logbook.RequestType;
+import com.itservices.gpxanalyzer.data.gpx.parser.GPXParser;
+import com.itservices.gpxanalyzer.data.gpx.parser.domain.Gpx;
+import com.itservices.gpxanalyzer.data.gpx.parser.domain.TrackPoint;
+import com.itservices.gpxanalyzer.data.gpx.parser.domain.TrackSegment;
 
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Vector;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
+import dagger.hilt.android.qualifiers.ApplicationContext;
 import io.reactivex.Observable;
-import itservices.gpxparser.GPXParser;
-import itservices.gpxparser.domain.Gpx;
-import itservices.gpxparser.domain.TrackPoint;
-import itservices.gpxparser.domain.TrackSegment;
+import io.reactivex.subjects.PublishSubject;
 
-@Singleton
 public class GPXDataProvider {
-
+    private static List<String> NAME_LIST = new ArrayList<>();
+    private static List<String> UNIT_LIST = new ArrayList<>();
     @Inject
     public GPXParser mParser;
 
+    private final PublishSubject<Integer> percentageProgressSubject = PublishSubject.create();
+
     @Inject
-    public GPXDataProvider() {
-
+    public GPXDataProvider(@ApplicationContext Context context) {
+        NAME_LIST = Arrays.asList(context.getResources().getStringArray(R.array.gpx_name_unit_array));
+        UNIT_LIST = Arrays.asList(context.getResources().getStringArray(R.array.gpx_unit_array));
     }
 
-    public Observable<Vector<Location>> provide(Context context, int rawId, MutableLiveData<RequestType> requestTypeLiveData, MutableLiveData<Integer> percentageProgressLiveData) {
-        requestTypeLiveData.postValue(RequestType.LOADING);
-        return provide(context.getResources().openRawResource(rawId), requestTypeLiveData, percentageProgressLiveData);
+    public Observable<Integer> getPercentageProgress() {
+        return percentageProgressSubject;
     }
 
-    public Observable<Vector<Location>> provide(InputStream in, MutableLiveData<RequestType> requestTypeLiveData, MutableLiveData<Integer> percentageProgressLiveData) {
+    public Observable<Vector<DataEntity>> provide(Context context, int rawId) {
+        return Observable.fromCallable(() -> {
+            InputStream inputStream = context.getResources().openRawResource(rawId);
+            return loadDataEntities(inputStream, DataEntity.DEFAULT_PRIMARY_DATA_INDEX);
+        });
+    }
 
-        Vector<Location> gpxPointList = new Vector<>();
+    public Observable<Vector<DataEntity>> provide(InputStream inputStream) {
+        return Observable.fromCallable(() -> loadDataEntities(inputStream, DataEntity.DEFAULT_PRIMARY_DATA_INDEX));
+    }
+
+    public Observable<Vector<DataEntity>> provide(Context context, int rawId, int primaryDataIndex) {
+        return Observable.fromCallable(() -> {
+            InputStream inputStream = context.getResources().openRawResource(rawId);
+            return loadDataEntities(inputStream, primaryDataIndex);
+        });
+    }
+
+    public Observable<Vector<DataEntity>> provide(InputStream inputStream, int primaryDataIndex) {
+        return Observable.fromCallable(() -> loadDataEntities(inputStream, primaryDataIndex));
+    }
+
+    @NonNull
+    private Vector<DataEntity> loadDataEntities(InputStream inputStream, int primaryDataIndex) {
+        Vector<DataEntity> gpxPointList = new Vector<>();
 
         Gpx parsedGpx = null;
         try {
-
-            parsedGpx = mParser.parse(in);
+            parsedGpx = mParser.parse(inputStream);
         } catch (IOException | XmlPullParserException e) {
             e.printStackTrace();
         }
 
-        requestTypeLiveData.postValue(RequestType.PROCESSING);
-
         if (parsedGpx != null) {
-
             parsedGpx.getTracks()
                     .forEach(track ->
                             track.getTrackSegments()
                                     .forEach(segment ->
-                                            addGpxPointsFromSegment(gpxPointList, segment, percentageProgressLiveData)
+                                            addGpxPointsFromSegment(gpxPointList, segment, primaryDataIndex)
                                     )
                     );
         } else {
             Log.e("GPXDataProvider", "Error parsing gpx track!");
         }
 
-        return Observable.just(gpxPointList);
+        return gpxPointList;
     }
 
-    private static void addGpxPointsFromSegment(Vector<Location> gpxPointList, TrackSegment segment, MutableLiveData<Integer> percentageProgressLiveData) {
+    private void addGpxPointsFromSegment(Vector<DataEntity> gpxPointList, TrackSegment segment, int primaryDataIndex) {
 
         int maxIteration = segment.getTrackPoints().size() - 1;
+
+        int lastIntPercentageProgress = 0;
+        percentageProgressSubject.onNext(lastIntPercentageProgress);
 
         for (int iTrackPoint = 0; iTrackPoint < maxIteration; iTrackPoint++) {
 
@@ -85,23 +111,39 @@ public class GPXDataProvider {
                     segment.getTrackPoints().get(iTrackPoint + 1)
             );
 
-            Location gpxPointMeanWithSpeed = LocationCalculatorUtil.calculateCentroidManual( Arrays.asList(gpxPointA, gpxPointB) );
+            Location centroidLocation = LocationCalculatorUtil.calculateCentroidManual(Arrays.asList(gpxPointA, gpxPointB));
 
             float speed = LocationCalculatorUtil.calculateSpeed3D(gpxPointA, gpxPointB);
-            gpxPointMeanWithSpeed.setSpeed(speed);
-            gpxPointMeanWithSpeed.setTime( LocationCalculatorUtil.computeMeanTime(gpxPointA, gpxPointB) );
+            centroidLocation.setSpeed(speed);
+            centroidLocation.setTime(LocationCalculatorUtil.computeMeanTime(gpxPointA, gpxPointB));
 
-            Log.d("GPXDataProvider", "gpxPointMeanWithSpeed = [" + gpxPointMeanWithSpeed.getTime() + "]");
+            DataEntity dataEntity = createDataEntity(centroidLocation, primaryDataIndex);
 
-            float percentageProgress = 100.0f * ( (float)(iTrackPoint + 1) / (float)maxIteration );
+            //Log.d("GPXDataProvider", "dataEntity = [" + dataEntity.getTimestampMillis() + "]");
 
-            percentageProgressLiveData.postValue((int) percentageProgress);
+            float percentageProgress = 100.0f * ((float) (iTrackPoint + 1) / (float) maxIteration);
 
-            gpxPointList.add( gpxPointMeanWithSpeed );
+
+            int intPercentageProgress = (int) percentageProgress;
+
+            if (lastIntPercentageProgress != intPercentageProgress) {
+                lastIntPercentageProgress = intPercentageProgress;
+                percentageProgressSubject.onNext(intPercentageProgress);
+            }
+
+            gpxPointList.add(dataEntity);
         }
     }
 
+    @NonNull
+    private DataEntity createDataEntity(Location location, int primaryDataIndex) {
+        DataEntity dataEntity = new DataEntity(location.getTime(), primaryDataIndex,
+                Arrays.asList((float) location.getAltitude(), location.getSpeed()),
+                NAME_LIST,
+                UNIT_LIST);
 
+        return dataEntity;
+    }
 
     @NonNull
     private static Location createLocation(TrackPoint trackPoint) {

@@ -1,5 +1,8 @@
 package com.itservices.gpxanalyzer.audio;
 
+import static com.itservices.gpxanalyzer.utils.common.ConcurrentUtil.tryToDispose;
+
+import android.content.Context;
 import android.util.Log;
 import android.util.Pair;
 
@@ -54,38 +57,34 @@ public class AudioViewModel extends ViewModel {
         return audioCaptureState;
     }
 
-    public void startRecording() {
-        fftProcessor.init(audioCapture);
-        disposables = audioCapture.startRecording()
-                .map(a -> (AudioBuffer) a)
-                //.map(NoiseFilter::filter)
-                .map(fftProcessor::process)
-                .map(AudioSpectrum::getPositiveFrequencyAmplitudePairList)
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io())
-                .doOnError(throwable -> Log.e("audioCapture", "startRecording: ", throwable))
-                .doOnNext(spectrumPairList -> spectrumPairListLiveData.postValue(spectrumPairList) )
-                .subscribe();
+    public void startRecording(Context context) {
+        if (audioCapture.init(context)) {
+            fftProcessor.init(audioCapture);
+            disposables = audioCapture.startRecording()
+                    .map(a -> (AudioBuffer) a)
+                    //.map(NoiseFilter::filter)
+                    .map(fftProcessor::process)
+                    .map(AudioSpectrum::getPositiveFrequencyAmplitudePairList)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(Schedulers.io())
+                    .doOnError(throwable -> Log.e("audioCapture", "startRecording: ", throwable))
+                    .doOnNext(spectrumPairList -> spectrumPairListLiveData.postValue(spectrumPairList))
+                    .subscribe();
+        }
     }
 
     public void stopRecording() {
         audioCapture.stopRecording();
-        tryToDispose();
-    }
-
-    private void tryToDispose() {
-        if(disposables!=null && !disposables.isDisposed()) {
-            disposables.dispose();
-        }
+        tryToDispose(disposables);
     }
 
     @Override
     protected void onCleared() {
         super.onCleared();
-        tryToDispose();
+        tryToDispose(disposables);
     }
 
-    public void switchOnOff() {
+    public void switchOnOff(Context context) {
         // Button logic: toggle ON/OFF
 
         AudioCaptureState state =
@@ -95,7 +94,7 @@ public class AudioViewModel extends ViewModel {
             if (state == AudioCaptureState.ON) {
                 stopRecording();
             } else {
-                startRecording();
+                startRecording(context);
             }
 
             audioCaptureState.postValue(

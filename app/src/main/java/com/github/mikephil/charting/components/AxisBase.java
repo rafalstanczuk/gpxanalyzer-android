@@ -437,7 +437,7 @@ public abstract class AxisBase extends ComponentBase {
         mLimitLines.add(l);
 
         if (mLimitLines.size() > 6) {
-            Log.e("MPAndroiChart",
+            Log.d("MPAndroiChart",
                     "Warning! You have more than 6 LimitLines on your axis, do you really want " +
                             "that?");
         }

@@ -8,6 +8,14 @@ import java.util.Locale;
 
 public class FormatNumberUtil {
 
+
+    @NonNull
+    public static String getFormattedTime(long timeInMillis) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis( timeInMillis );
+
+        return getFormattedTime(calendar);
+    }
     @NonNull
     public static String getFormattedTime(Calendar calendar) {
         return getFormattedTimeAmPm(calendar, false);

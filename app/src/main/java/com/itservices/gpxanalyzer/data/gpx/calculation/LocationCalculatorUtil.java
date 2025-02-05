@@ -10,7 +10,7 @@ public class LocationCalculatorUtil {
     /**
      * Calculates the centroid of a list of Location objects using manual ECEF conversion.
      *
-     * @param locations List of android.location.Location objects
+     * @param locations Location
      * @return Centroid Location object
      */
     public static Location calculateCentroidManual(List<Location> locations) {
@@ -47,7 +47,7 @@ public class LocationCalculatorUtil {
         Location centroid = new Location("centroid");
         centroid.setLatitude(centroidLat);
         centroid.setLongitude(centroidLon);
-        centroid.setAltitude(centroidAlt); // Optional: Only set if altitude is needed
+        centroid.setAltitude(centroidAlt);
 
         return centroid;
     }

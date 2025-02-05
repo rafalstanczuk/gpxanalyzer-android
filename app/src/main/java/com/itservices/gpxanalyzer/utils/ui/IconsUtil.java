@@ -6,8 +6,8 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 
-import com.itservices.gpxanalyzer.logbook.chart.legend.BoundaryColorSpan;
-import com.itservices.gpxanalyzer.logbook.chart.legend.PaletteColorDeterminer;
+import com.itservices.gpxanalyzer.chart.legend.BoundaryColorSpan;
+import com.itservices.gpxanalyzer.chart.legend.PaletteColorDeterminer;
 
 import java.util.ArrayList;
 import java.util.List;
