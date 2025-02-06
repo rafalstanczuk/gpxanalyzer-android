@@ -16,8 +16,8 @@ import javax.inject.Inject;
 public class LineChartScaler {
 	private static final double DEFAULT_MIN_Y_VALUE = 0.0;
 	private double minY = DEFAULT_MIN_Y_VALUE;
-	private StatisticResults measurementCurveStatisticResults = null;
-	private StatisticResults measurementSingleStatisticResults = null;
+	private StatisticResults dataEntityCurveStatisticResults = null;
+	private StatisticResults dataEntitySingleStatisticResults = null;
 
 	private LimitLinesBoundaries limitLinesBoundaries;
 
@@ -25,34 +25,30 @@ public class LineChartScaler {
 	LineChartScaler() {
 	}
 
-	public void setMeasurementCurveStatisticResults(StatisticResults measurementCurveStatisticResults) {
-		this.measurementCurveStatisticResults = measurementCurveStatisticResults;
+	public void setMeasurementCurveStatisticResults(StatisticResults dataEntityCurveStatisticResults) {
+		this.dataEntityCurveStatisticResults = dataEntityCurveStatisticResults;
 	}
 
-	public void setMeasurementSingleStatisticResults(StatisticResults measurementSingleStatisticResults) {
-		this.measurementSingleStatisticResults = measurementSingleStatisticResults;
+	public void setMeasurementSingleStatisticResults(StatisticResults dataEntitySingleStatisticResults) {
+		this.dataEntitySingleStatisticResults = dataEntitySingleStatisticResults;
 	}
 
 	public void setLimitLinesBoundaries(LimitLinesBoundaries limitLinesBoundaries) {
 		this.limitLinesBoundaries = limitLinesBoundaries;
 	}
 
-	public void setMinY(double minY) {
-		this.minY = minY;
-	}
-
-	public void scale(MeasurementLineChart lineChart) {
-		double r = measurementCurveStatisticResults.getMaxValue() - measurementCurveStatisticResults.getMinValue();
+	public void scale(DataEntitiesLineChart lineChart) {
+		double r = dataEntityCurveStatisticResults.getMaxValue() - dataEntityCurveStatisticResults.getMinValue();
 		double o = r * 0.1f;
-		minY = (measurementCurveStatisticResults.getMinValue() - 2.0f * o);
+		minY = (dataEntityCurveStatisticResults.getMinValue() - 2.0f * o);
 
 		List<Double> valYStatisticsList =
 				Arrays.asList(
 						minY,
-						measurementSingleStatisticResults !=null ? measurementSingleStatisticResults.getMinValue() : minY,
-						measurementSingleStatisticResults !=null ? measurementSingleStatisticResults.getMaxValue() : minY,
-						measurementCurveStatisticResults!=null ? measurementCurveStatisticResults.getMinValue() : minY,
-						measurementCurveStatisticResults!=null ? measurementCurveStatisticResults.getMaxValue() : minY
+						dataEntitySingleStatisticResults !=null ? dataEntitySingleStatisticResults.getMinValue() : minY,
+						dataEntitySingleStatisticResults !=null ? dataEntitySingleStatisticResults.getMaxValue() : minY,
+						dataEntityCurveStatisticResults!=null ? dataEntityCurveStatisticResults.getMinValue() : minY,
+						dataEntityCurveStatisticResults!=null ? dataEntityCurveStatisticResults.getMaxValue() : minY
 				);
 
 		List<Double> limitLinesValues =
@@ -64,16 +60,16 @@ public class LineChartScaler {
 		Vector<Double> valYList =
 				new Vector<>(Arrays.asList(
 						minY,
-						measurementSingleStatisticResults !=null ? measurementSingleStatisticResults.getMinValue() : minY,
-						measurementSingleStatisticResults !=null ? measurementSingleStatisticResults.getMaxValue() : minY,
-						measurementCurveStatisticResults!=null ? measurementCurveStatisticResults.getMinValue() : minY,
-						measurementCurveStatisticResults!=null ? measurementCurveStatisticResults.getMaxValue() : minY
+						dataEntitySingleStatisticResults !=null ? dataEntitySingleStatisticResults.getMinValue() : minY,
+						dataEntitySingleStatisticResults !=null ? dataEntitySingleStatisticResults.getMaxValue() : minY,
+						dataEntityCurveStatisticResults!=null ? dataEntityCurveStatisticResults.getMinValue() : minY,
+						dataEntityCurveStatisticResults!=null ? dataEntityCurveStatisticResults.getMaxValue() : minY
 				));
 		valYList.addAll(limitLinesValues);
 
 		//combinedChart.setAutoScaleMinMaxEnabled(true);
 
-		lineChart.setVisibleXRangeMinimum(0);
+		//lineChart.setVisibleXRangeMinimum(0);
 
 		double minY = valYList.stream().min(Comparator.naturalOrder()).get();
 		double maxY = valYList.stream().max(Comparator.naturalOrder()).get();
@@ -81,7 +77,7 @@ public class LineChartScaler {
 		double maxStatisticsY = valYStatisticsList.stream().max(Comparator.naturalOrder()).get();
 
 		if (maxY > 1 && maxY > minY) {
-			lineChart.setVisibleXRangeMaximum(lineChart.getXRange());
+			//lineChart.setVisibleXRangeMaximum(lineChart.getXRange());
 
 			double range = maxY - minY;
 			double offset = range * 0.1f;
@@ -98,8 +94,8 @@ public class LineChartScaler {
 	}
 
 	public StatisticResults getStatisticResults() {
-		return measurementCurveStatisticResults!=null ? measurementCurveStatisticResults
-				: measurementSingleStatisticResults;
+		return dataEntityCurveStatisticResults!=null ? dataEntityCurveStatisticResults
+				: dataEntitySingleStatisticResults;
 	}
 }
 

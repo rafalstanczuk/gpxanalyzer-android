@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.main;
+package com.itservices.gpxanalyzer.ui.main;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -35,7 +35,7 @@ public class MainMenuFragment extends Fragment {
 
         viewModel = new ViewModelProvider(this).get(MainMenuViewModel.class);
         viewModel.setMenuItems(Arrays.asList(
-                new MenuItem(getString(R.string.log_book), R.id.logbookFragment),
+                new MenuItem(getString(R.string.log_book), R.id.gpxChartsFragment),
                 new MenuItem(getString(R.string.audio_spectrum_opengl), R.id.openGLSpectrumFragment),
                 new MenuItem(getString(R.string.audio_spectrum_android_view), R.id.androidViewSpectrumFragment)
         ));

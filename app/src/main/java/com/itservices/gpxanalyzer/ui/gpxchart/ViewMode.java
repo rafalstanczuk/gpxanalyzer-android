@@ -1,7 +1,7 @@
-package com.itservices.gpxanalyzer.logbook;
+package com.itservices.gpxanalyzer.ui.gpxchart;
 
 public enum ViewMode {
-	TREND_CURVE,
+	CURVE,
 	INFO_ONLY_VIEW;
 
 	public ViewMode getNextCyclic() {

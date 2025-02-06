@@ -6,7 +6,7 @@
     <data>
         <variable
             name="viewModel"
-            type="com.itservices.gpxanalyzer.main.MainMenuViewModel" />
+            type="com.itservices.gpxanalyzer.ui.main.MainMenuViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

@@ -8,7 +8,7 @@ import android.widget.TextView;
 
 import com.itservices.gpxanalyzer.R;
 
-public class MeasurementInfoLayoutView extends LinearLayout {
+public class DataEntityInfoLayoutView extends LinearLayout {
 
 	private TextView textViewTime;
 	private TextView textViewValue1;
@@ -17,22 +17,22 @@ public class MeasurementInfoLayoutView extends LinearLayout {
 	//private TextView textViewValue2;
 	//private TextView textViewValue2Unit;
 
-	public MeasurementInfoLayoutView(Context context) {
+	public DataEntityInfoLayoutView(Context context) {
 		super(context);
 		inflateView(context);
 	}
 
-	public MeasurementInfoLayoutView(Context context, AttributeSet attrs) {
+	public DataEntityInfoLayoutView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		inflateView(context);
 	}
 
-	public MeasurementInfoLayoutView(Context context, AttributeSet attrs, int defStyleAttr) {
+	public DataEntityInfoLayoutView(Context context, AttributeSet attrs, int defStyleAttr) {
 		super(context, attrs, defStyleAttr);
 		inflateView(context);
 	}
 
-	public MeasurementInfoLayoutView(
+	public DataEntityInfoLayoutView(
 		Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes
 	) {
 		super(context, attrs, defStyleAttr, defStyleRes);
@@ -42,7 +42,7 @@ public class MeasurementInfoLayoutView extends LinearLayout {
 	private void inflateView(Context context) {
 		LayoutInflater inflater = (LayoutInflater) context.getSystemService(
 			Context.LAYOUT_INFLATER_SERVICE);
-		inflater.inflate(R.layout.measurement_chart_info_view, this, true);
+		inflater.inflate(R.layout.data_entity_chart_info_view, this, true);
 
 		textViewTime = findViewById(R.id.textViewTime);
 		textViewValue1 = findViewById(R.id.textViewValue1);

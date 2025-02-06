@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.spectrum.androidview;
+package com.itservices.gpxanalyzer.ui.spectrum.androidview;
 
 import android.content.Context;
 import android.graphics.Canvas;

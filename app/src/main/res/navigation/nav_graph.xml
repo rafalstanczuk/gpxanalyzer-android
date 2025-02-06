@@ -5,25 +5,25 @@
 
     <fragment
         android:id="@+id/mainMenuFragment"
-        android:name="com.itservices.gpxanalyzer.main.MainMenuFragment"
+        android:name="com.itservices.gpxanalyzer.ui.main.MainMenuFragment"
         android:label="MainMenuFragment">
     </fragment>
 
     <fragment
-        android:id="@+id/logbookFragment"
-        android:name="com.itservices.gpxanalyzer.logbook.LogbookFragment"
-        android:label="LogbookFragment">
+        android:id="@+id/gpxChartsFragment"
+        android:name="com.itservices.gpxanalyzer.ui.gpxchart.GpxChartsFragment"
+        android:label="GpxChartsFragment">
     </fragment>
 
     <fragment
         android:id="@+id/openGLSpectrumFragment"
-        android:name="com.itservices.gpxanalyzer.spectrum.opengl.OpenGLSpectrumFragment"
+        android:name="com.itservices.gpxanalyzer.ui.spectrum.opengl.OpenGLSpectrumFragment"
         android:label="SpectrumFragment">
     </fragment>
 
     <fragment
         android:id="@+id/androidViewSpectrumFragment"
-        android:name="com.itservices.gpxanalyzer.spectrum.androidview.AndroidViewSpectrumFragment"
+        android:name="com.itservices.gpxanalyzer.ui.spectrum.androidview.AndroidViewSpectrumFragment"
         android:label="FFTSpectrumFragment">
     </fragment>
 

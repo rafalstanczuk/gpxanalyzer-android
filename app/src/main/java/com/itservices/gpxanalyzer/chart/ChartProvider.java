@@ -29,23 +29,23 @@ public class ChartProvider {
     private static final List<String> DEFAULT_TARGET_MATCHED_LINE_LABEL_DATA_TO_SHOW_WITH_MEASUREMENT_BOUNDARIES =
             Arrays.asList(CurveMeasurementEntry.CURVE_MEASUREMENT);
 
-    private MeasurementLineChart measurementLineChart;
+    private DataEntitiesLineChart dataEntitiesLineChart;
 
     @Inject
     public ChartProvider() {
     }
 
-    public LineDataSet createCurveMeasurementDataSet(StatisticResults curveResults) {
+    public LineDataSet createCurveDataEntityDataSet(StatisticResults curveResults) {
         if (curveResults == null) return null;
 
-        PaletteColorDeterminer paletteColorDeterminer = measurementLineChart.getPaletteColorDeterminer();
+        PaletteColorDeterminer paletteColorDeterminer = dataEntitiesLineChart.getPaletteColorDeterminer();
         paletteColorDeterminer.initPalette(curveResults);
 
         ArrayList<Entry> entries =
                 EntryListCreator.createCurveMeasurementEntryList(curveResults, paletteColorDeterminer);
 
         // needed for scaling
-        measurementLineChart.getLineChartScaler().setMeasurementCurveStatisticResults(curveResults);
+        dataEntitiesLineChart.getLineChartScaler().setMeasurementCurveStatisticResults(curveResults);
 
         if (!entries.isEmpty()) {
             return CurveMeasurementEntry.createCurveMeasurementLineDataSet(entries);
@@ -53,16 +53,16 @@ public class ChartProvider {
         return null;
     }
 
-    public LineDataSet createSingleMeasurementDataSet(StatisticResults singleResults) {
+    public LineDataSet createSingleDataEntityDataSet(StatisticResults singleResults) {
         if (singleResults == null) return null;
 
-        PaletteColorDeterminer paletteColorDeterminer = measurementLineChart.getPaletteColorDeterminer();
+        PaletteColorDeterminer paletteColorDeterminer = dataEntitiesLineChart.getPaletteColorDeterminer();
 
         ArrayList<Entry> entries =
                 EntryListCreator.createSingleMeasurementEntryList(singleResults, paletteColorDeterminer);
 
         // needed for scaling
-        measurementLineChart.getLineChartScaler().setMeasurementSingleStatisticResults(singleResults);
+        dataEntitiesLineChart.getLineChartScaler().setMeasurementSingleStatisticResults(singleResults);
 
         return SingleMeasurementEntry.createSingleMeasurementLineDataSet(entries);
     }
@@ -70,8 +70,8 @@ public class ChartProvider {
     /**
      * Initialize the chart with empty data + styling.
      */
-    public void initChart(MeasurementLineChart lineChart, LineChartSettings lineChartSettings) {
-        this.measurementLineChart = lineChart;
+    public void initChart(DataEntitiesLineChart lineChart, LineChartSettings lineChartSettings) {
+        this.dataEntitiesLineChart = lineChart;
         lineChart.initChart(lineChartSettings);
     }
 
@@ -91,12 +91,12 @@ public class ChartProvider {
             lineData.addDataSet(ds);
         }
 
-        measurementLineChart.clear();
-        measurementLineChart.loadChartSettings();
-        measurementLineChart.setData(lineData);
-        measurementLineChart.scale();
-        measurementLineChart.highlightValue(highlight, true);
-        measurementLineChart.invalidate();
+        dataEntitiesLineChart.clear();
+        dataEntitiesLineChart.loadChartSettings();
+        dataEntitiesLineChart.setData(lineData);
+        dataEntitiesLineChart.scale();
+        dataEntitiesLineChart.highlightValue(highlight, true);
+        dataEntitiesLineChart.invalidate();
 
         return RequestStatus.DONE;
     }
@@ -115,7 +115,7 @@ public class ChartProvider {
         return (currentMatchedCount == requiredCount);
     }
 
-    public MeasurementLineChart getMeasurementLineChart() {
-        return measurementLineChart;
+    public DataEntitiesLineChart getMeasurementLineChart() {
+        return dataEntitiesLineChart;
     }
 }

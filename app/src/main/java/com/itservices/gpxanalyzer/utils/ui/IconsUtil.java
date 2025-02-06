@@ -16,27 +16,27 @@ import java.util.Map;
 public class IconsUtil {
 
 	public static List<Drawable> generateDrawableIconForAreaList(int size, int alpha, PaletteColorDeterminer paletteColorDeterminer) {
-		List<Drawable> measurementDrawableIconList = new ArrayList<>();
+		List<Drawable> dataEntityDrawableIconList = new ArrayList<>();
 
 		for (Map.Entry<Integer, BoundaryColorSpan> entry: paletteColorDeterminer.getPalette().entrySet()) {
 			int color = entry.getValue().getColor();
 
 			int colorWithAlpha = setAlphaInIntColor(color, alpha);
 
-			measurementDrawableIconList.add(
+			dataEntityDrawableIconList.add(
 				getDrawableIconForAreaColorId(colorWithAlpha, size, true)
 			);
 		}
 
-		addDefaultIcon(size, alpha, measurementDrawableIconList);
+		addDefaultIcon(size, alpha, dataEntityDrawableIconList);
 
-		return measurementDrawableIconList;
+		return dataEntityDrawableIconList;
 	}
 
-	private static void addDefaultIcon(int size, int alpha, List<Drawable> measurementDrawableIconList) {
+	private static void addDefaultIcon(int size, int alpha, List<Drawable> dataEntityDrawableIconList) {
 		int defaultWithAlpha = setAlphaInIntColor(Color.BLACK, alpha);
 
-		measurementDrawableIconList.add(
+		dataEntityDrawableIconList.add(
 			getDrawableIconForAreaColorId(defaultWithAlpha, size, true)
 		);
 	}

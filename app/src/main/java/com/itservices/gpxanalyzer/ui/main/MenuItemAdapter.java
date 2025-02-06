@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.main;
+package com.itservices.gpxanalyzer.ui.main;
 
 import android.view.LayoutInflater;
 import android.view.ViewGroup;

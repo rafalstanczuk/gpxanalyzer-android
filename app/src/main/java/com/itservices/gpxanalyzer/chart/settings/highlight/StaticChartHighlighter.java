@@ -10,7 +10,7 @@ import com.github.mikephil.charting.interfaces.datasets.IDataSet;
 import com.github.mikephil.charting.listener.BarLineChartTouchListener;
 import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.utils.MPPointD;
-import com.itservices.gpxanalyzer.chart.MeasurementLineChart;
+import com.itservices.gpxanalyzer.chart.DataEntitiesLineChart;
 import com.itservices.gpxanalyzer.chart.entry.BaseEntry;
 import com.itservices.gpxanalyzer.chart.entry.CurveMeasurementEntry;
 
@@ -36,7 +36,7 @@ public class StaticChartHighlighter<T extends BarLineScatterCandleBubbleDataProv
 
 		ArrayList<Highlight> highlights = new ArrayList<>();
 
-		if (((MeasurementLineChart) mChart).isFullyZoomedOut()) {
+		if (((DataEntitiesLineChart) mChart).isFullyZoomedOut()) {
 			highlights = getHighlightsForClassEntries(
 				BaseEntry.class, set, dataSetIndex, xVal, rounding);
 		} else {

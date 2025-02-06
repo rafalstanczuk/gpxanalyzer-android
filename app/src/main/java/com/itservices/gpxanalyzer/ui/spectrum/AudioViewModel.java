@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.audio;
+package com.itservices.gpxanalyzer.ui.spectrum;
 
 import static com.itservices.gpxanalyzer.utils.common.ConcurrentUtil.tryToDispose;
 
@@ -35,10 +35,10 @@ public class AudioViewModel extends ViewModel {
     public FFTProcessor fftProcessor;
 
 
-    private MutableLiveData<AudioSpectrum> spectrumLiveData = new MutableLiveData<>();
-    private MutableLiveData<List<Pair<Float, Double>>> spectrumPairListLiveData = new MutableLiveData<>();
+    private final MutableLiveData<AudioSpectrum> spectrumLiveData = new MutableLiveData<>();
+    private final MutableLiveData<List<Pair<Float, Double>>> spectrumPairListLiveData = new MutableLiveData<>();
 
-    private MutableLiveData<AudioCaptureState> audioCaptureState = new MutableLiveData<>(AudioCaptureState.OFF);
+    private final MutableLiveData<AudioCaptureState> audioCaptureState = new MutableLiveData<>(AudioCaptureState.OFF);
     private Disposable disposables;
 
     @Inject

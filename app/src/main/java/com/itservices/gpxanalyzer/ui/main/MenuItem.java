@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.main;
+package com.itservices.gpxanalyzer.ui.main;
 
 public class MenuItem {
     private final String title;

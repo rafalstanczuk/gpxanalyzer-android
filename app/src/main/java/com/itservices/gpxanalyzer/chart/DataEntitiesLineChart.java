@@ -33,9 +33,9 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class MeasurementLineChart extends LineChart {
+public class DataEntitiesLineChart extends LineChart {
 
-	MeasurementInfoLayoutView measurementInfoLayoutView;
+	DataEntityInfoLayoutView dataEntityInfoLayoutView;
 
 	@Inject
 	PaletteColorDeterminer paletteColorDeterminer;
@@ -53,18 +53,18 @@ public class MeasurementLineChart extends LineChart {
 	private MainActivity mainActivity;
 	private LineChartSettings lineChartSettings;
 
-	public MeasurementLineChart(Context context) {
+	public DataEntitiesLineChart(Context context) {
 		super(context);
 		initMeasurementInfoLayoutView();
 	}
 
-	public MeasurementLineChart(Context context, AttributeSet attrs) {
+	public DataEntitiesLineChart(Context context, AttributeSet attrs) {
 		super(context, attrs);
 
 		initMeasurementInfoLayoutView();
 	}
 
-	public MeasurementLineChart(Context context, AttributeSet attrs, int defStyle) {
+	public DataEntitiesLineChart(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 
 		initMeasurementInfoLayoutView();
@@ -75,7 +75,7 @@ public class MeasurementLineChart extends LineChart {
 	}
 
 	public static int getDataSetIndexForEntryWithTimeInt(
-			MeasurementLineChart lineChart, long entryTimeInt
+			DataEntitiesLineChart lineChart, long entryTimeInt
 	) {
 		int dataSetIndexToHighlight = 0;
 
@@ -106,11 +106,11 @@ public class MeasurementLineChart extends LineChart {
 	}
 
 	private void initMeasurementInfoLayoutView() {
-		measurementInfoLayoutView = new MeasurementInfoLayoutView(getContext());
-		measurementInfoLayoutView.setDrawingCacheEnabled(true);
+		dataEntityInfoLayoutView = new DataEntityInfoLayoutView(getContext());
+		dataEntityInfoLayoutView.setDrawingCacheEnabled(true);
 
 		try {
-			this.addView(measurementInfoLayoutView);
+			this.addView(dataEntityInfoLayoutView);
 		} catch (Exception ignored) {
 		}
 	}
@@ -134,7 +134,7 @@ public class MeasurementLineChart extends LineChart {
 	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
 		super.onLayout(changed, left, top, right, bottom);
 
-		measurementInfoLayoutView.layout(getWidth() / 2 +
+		dataEntityInfoLayoutView.layout(getWidth() / 2 +
 				(int) (getContext().getResources().getDisplayMetrics().density * 20.0f),
 			(int) (getContext().getResources().getDisplayMetrics().density * 20.0f), getWidth(),
 			getHeight()
@@ -145,13 +145,13 @@ public class MeasurementLineChart extends LineChart {
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-		measurementInfoLayoutView.measure(measurementInfoLayoutView.getMeasuredWidth(),
-			measurementInfoLayoutView.getMeasuredHeight()
+		dataEntityInfoLayoutView.measure(dataEntityInfoLayoutView.getMeasuredWidth(),
+			dataEntityInfoLayoutView.getMeasuredHeight()
 		);
 	}
 
 	public void initChart(LineChartSettings lineChartSettings) {
-		StaticChartHighlighter<MeasurementLineChart> staticChartHighlighter = new StaticChartHighlighter<>(
+		StaticChartHighlighter<DataEntitiesLineChart> staticChartHighlighter = new StaticChartHighlighter<>(
 				this, (BarLineChartTouchListener) mChartTouchListener);
 		setHighlighter(staticChartHighlighter);
 
@@ -201,20 +201,20 @@ public class MeasurementLineChart extends LineChart {
 		int primaryDataIndex = dataEntity.getPrimaryDataIndex();
 
 		mainActivity.runOnUiThread(() -> {
-			measurementInfoLayoutView.setTime( getFormattedTime(dataEntity.getTimestampMillis()) );
-			measurementInfoLayoutView.setValue1(
+			dataEntityInfoLayoutView.setTime( getFormattedTime(dataEntity.getTimestampMillis()) );
+			dataEntityInfoLayoutView.setValue1(
 					String.format(Locale.getDefault(), "%.1f", dataEntity.getValueList().get(primaryDataIndex))
 			);
 			String unit1 = dataEntity.getUnitList().get(primaryDataIndex);
-			measurementInfoLayoutView.setValue1Unit(unit1);
+			dataEntityInfoLayoutView.setValue1Unit(unit1);
 
-		/*	measurementInfoLayoutView.setValue2(
+		/*	dataEntityInfoLayoutView.setValue2(
 					String.format(Locale.getDefault(), "%.2f", dataEntity.getValueList().get(1))
 			);
 			String unit2 = dataEntity.getUnitList().get(1);
-			measurementInfoLayoutView.setValue2Unit(unit2);*/
+			dataEntityInfoLayoutView.setValue2Unit(unit2);*/
 
-			measurementInfoLayoutView.invalidate();
+			dataEntityInfoLayoutView.invalidate();
 		});
 	}
 
@@ -225,12 +225,12 @@ public class MeasurementLineChart extends LineChart {
 			return;
 		}
 
-		LineDataSet measurementCurveLineDataSet = ((LineDataSet) getLineData().getDataSetByLabel(CURVE_MEASUREMENT, false));
+		LineDataSet dataEntityCurveLineDataSet = ((LineDataSet) getLineData().getDataSetByLabel(CURVE_MEASUREMENT, false));
 
-		if (measurementCurveLineDataSet != null) {
+		if (dataEntityCurveLineDataSet != null) {
 
 			if (isFullyZoomedOut()) {
-				measurementCurveLineDataSet.setDrawHorizontalHighlightIndicator(true);
+				dataEntityCurveLineDataSet.setDrawHorizontalHighlightIndicator(true);
 			} else {
 				switch (chartGesture) {
 					case NONE:
@@ -241,13 +241,13 @@ public class MeasurementLineChart extends LineChart {
 					case DOUBLE_TAP:
 					case LONG_PRESS:
 					case SINGLE_TAP:
-						measurementCurveLineDataSet.setDrawHorizontalHighlightIndicator(true);
+						dataEntityCurveLineDataSet.setDrawHorizontalHighlightIndicator(true);
 
 						break;
 
 					case FLING:
 					case DRAG:
-						measurementCurveLineDataSet.setDrawHorizontalHighlightIndicator(false);
+						dataEntityCurveLineDataSet.setDrawHorizontalHighlightIndicator(false);
 
 						break;
 				}
@@ -273,5 +273,13 @@ public class MeasurementLineChart extends LineChart {
 
 	public void scale() {
 		lineChartScaler.scale(this);
+	}
+
+	public void resetTimeScale() {
+		assert mainActivity != null;
+
+		mainActivity.runOnUiThread(
+				DataEntitiesLineChart.this::fitScreen
+		);
 	}
 }

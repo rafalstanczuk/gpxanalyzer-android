@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.spectrum.opengl;
+package com.itservices.gpxanalyzer.ui.spectrum.opengl;
 
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;

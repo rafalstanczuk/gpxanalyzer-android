@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.spectrum.opengl;
+package com.itservices.gpxanalyzer.ui.spectrum.opengl;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,7 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.itservices.gpxanalyzer.audio.AudioViewModel;
+import com.itservices.gpxanalyzer.ui.spectrum.AudioViewModel;
 import com.itservices.gpxanalyzer.audio.audiocapture.AudioCaptureState;
 import com.itservices.gpxanalyzer.databinding.FragmentOpenglSpectrumBinding;
 

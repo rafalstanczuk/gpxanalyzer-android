@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.main;
+package com.itservices.gpxanalyzer.ui.main;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;

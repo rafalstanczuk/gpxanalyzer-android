@@ -6,8 +6,8 @@
     </string-array>
 
     <string-array name="gpx_unit_array">
-        <item>@string/default_distance_measurement_unit</item>
-        <item>@string/default_speed_measurement_unit</item>
+        <item>@string/default_distance_data_entity_unit</item>
+        <item>@string/default_speed_data_entity_unit</item>
     </string-array>
 
 </resources>

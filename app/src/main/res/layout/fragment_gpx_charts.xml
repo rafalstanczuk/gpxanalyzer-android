@@ -5,7 +5,7 @@
     <data>
         <variable
             name="viewModel"
-            type="com.itservices.gpxanalyzer.logbook.LogbookViewModel" />
+            type="com.itservices.gpxanalyzer.ui.gpxchart.GpxChartsViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -13,10 +13,10 @@
         android:layout_height="match_parent">
 
         <Button
-            android:id="@+id/button"
+            android:id="@+id/loadButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Load"
+            android:text="@string/load"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"/>
@@ -31,10 +31,10 @@
             android:text="@{ viewModel.percentageProcessingProgressLiveData.toString() }"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="@android:color/black"
-            android:textSize="10sp"
-            app:layout_constraintBottom_toBottomOf="@id/button"
-            app:layout_constraintStart_toEndOf="@id/button"
-            app:layout_constraintTop_toTopOf="@id/button" />
+            android:textSize="11sp"
+            app:layout_constraintBottom_toBottomOf="@id/loadButton"
+            app:layout_constraintStart_toEndOf="@id/loadButton"
+            app:layout_constraintTop_toTopOf="@id/loadButton" />
 
         <ProgressBar
             android:id="@+id/percentageProgressBarChart"
@@ -49,7 +49,7 @@
             android:progressDrawable="@drawable/loading_data_progressbar"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/button" />
+            app:layout_constraintTop_toBottomOf="@+id/loadButton" />
 
         <TextView
             android:id="@+id/requestStatusTextView"
@@ -70,14 +70,26 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             app:layout_constraintHeight_default="percent"
-            app:layout_constraintHeight_percent="@{viewModel.measurementChartPercentageHeight}"
+            app:layout_constraintHeight_percent="@{viewModel.dataEntityChartPercentageHeight}"
             app:layout_constraintTop_toBottomOf="@id/percentageProgressBarChart">
 
-            <com.itservices.gpxanalyzer.chart.MeasurementLineChart
+            <Button
+                android:id="@+id/heightTimeAutoscalingButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="@dimen/margin_very_small"
+                android:translationZ="100dp"
+                android:text="@string/reset_t_h"
+                android:textSize="11sp"
+                android:scaleX="0.6"
+                android:scaleY="0.6"
+                app:layout_constraintTop_toTopOf="@id/height_time_chart_Layout"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            <com.itservices.gpxanalyzer.chart.DataEntitiesLineChart
                 android:id="@+id/height_time_lineChart"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:paddingBottom="@dimen/margin_small"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -89,14 +101,26 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             app:layout_constraintHeight_default="percent"
-            app:layout_constraintHeight_percent="@{viewModel.measurementChartPercentageHeight}"
+            app:layout_constraintHeight_percent="@{viewModel.dataEntityChartPercentageHeight}"
             app:layout_constraintTop_toBottomOf="@id/height_time_chart_Layout">
 
-            <com.itservices.gpxanalyzer.chart.MeasurementLineChart
+            <Button
+                android:id="@+id/velocityTimeAutoscalingButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="@dimen/margin_very_small"
+                android:translationZ="100dp"
+                android:text="@string/reset_t_h"
+                android:scaleX="0.6"
+                android:scaleY="0.6"
+                android:textSize="11sp"
+                app:layout_constraintTop_toTopOf="@id/velocity_time_chart_Layout"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            <com.itservices.gpxanalyzer.chart.DataEntitiesLineChart
                 android:id="@+id/velocity_time_lineChart"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:paddingBottom="@dimen/margin_small"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />

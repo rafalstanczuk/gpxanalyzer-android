@@ -18,7 +18,7 @@ import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.utils.MPPointF;
 import com.itservices.gpxanalyzer.R;
-import com.itservices.gpxanalyzer.chart.MeasurementLineChart;
+import com.itservices.gpxanalyzer.chart.DataEntitiesLineChart;
 import com.itservices.gpxanalyzer.chart.entry.CurveMeasurementEntry;
 import com.itservices.gpxanalyzer.chart.entry.SingleMeasurementEntry;
 import com.itservices.gpxanalyzer.data.DataEntity;
@@ -67,7 +67,7 @@ public class CustomMarker extends MarkerView {
 
     @Override
     public void refreshContent(Entry entry, Highlight highlight) {
-        MeasurementLineChart chartView = (MeasurementLineChart) getChartView();
+        DataEntitiesLineChart chartView = (DataEntitiesLineChart) getChartView();
 
         ChartTouchListener.ChartGesture chartGesture = chartView.getChartTouchListener()
                 .getLastGesture();
@@ -103,7 +103,7 @@ public class CustomMarker extends MarkerView {
 
     @Override
     public void draw(Canvas canvas, float posX, float posY) {
-        MeasurementLineChart chartView = (MeasurementLineChart) getChartView();
+        DataEntitiesLineChart chartView = (DataEntitiesLineChart) getChartView();
 
         ChartTouchListener.ChartGesture chartGesture = chartView.getChartTouchListener()
                 .getLastGesture();

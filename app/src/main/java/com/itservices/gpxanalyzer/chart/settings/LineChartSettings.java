@@ -11,7 +11,7 @@ import androidx.core.content.ContextCompat;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.itservices.gpxanalyzer.R;
-import com.itservices.gpxanalyzer.chart.MeasurementLineChart;
+import com.itservices.gpxanalyzer.chart.DataEntitiesLineChart;
 import com.itservices.gpxanalyzer.chart.settings.axis.HourMinutesAxisValueFormatter;
 import com.itservices.gpxanalyzer.chart.settings.axis.MeasurementAxisValueFormatter;
 import com.itservices.gpxanalyzer.chart.settings.background.LimitLinesBoundaries;
@@ -26,7 +26,7 @@ public class LineChartSettings {
 	private static final float GRANULARITY = HourMinutesAxisValueFormatter.getFractionOfFullHourFromSeconds(1);
 	private final CustomMarker customMarker;
 	private final HourMinutesAxisValueFormatter hourMinutesAxisValueFormatter;
-	private final MeasurementAxisValueFormatter measurementAxisValueFormatter;
+	private final MeasurementAxisValueFormatter dataEntityAxisValueFormatter;
 	private LimitLinesBoundaries limitLinesBoundaries;
 	private final Paint paintGridBg = new Paint();
 	private final int primaryColor;
@@ -37,12 +37,12 @@ public class LineChartSettings {
 	LineChartSettings(
 		@ApplicationContext Context context, CustomMarker customMarker,
 		HourMinutesAxisValueFormatter hourMinutesAxisValueFormatter,
-		MeasurementAxisValueFormatter measurementAxisValueFormatter
+		MeasurementAxisValueFormatter dataEntityAxisValueFormatter
 	) {
 		primaryColor = ContextCompat.getColor(context, R.color.colorPrimary);
 		this.customMarker = customMarker;
 		this.hourMinutesAxisValueFormatter = hourMinutesAxisValueFormatter;
-		this.measurementAxisValueFormatter = measurementAxisValueFormatter;
+		this.dataEntityAxisValueFormatter = dataEntityAxisValueFormatter;
 
 		paintGridBg.setStyle(Paint.Style.FILL);
 		paintGridBg.setColor(Color.WHITE);
@@ -50,7 +50,7 @@ public class LineChartSettings {
 
 	public void setLimitLinesBoundaries(LimitLinesBoundaries limitLinesBoundaries) {
 		this.limitLinesBoundaries = limitLinesBoundaries;
-		measurementAxisValueFormatter.setLimitLinesBoundaries(limitLinesBoundaries);
+		dataEntityAxisValueFormatter.setLimitLinesBoundaries(limitLinesBoundaries);
 	}
 
 	public void setDrawXLabels(boolean drawXLabels) {
@@ -62,7 +62,7 @@ public class LineChartSettings {
 	}
 
 
-	public void setChartSettingsFor(MeasurementLineChart lineChart) {
+	public void setChartSettingsFor(DataEntitiesLineChart lineChart) {
 
 		lineChart.setDragDecelerationEnabled(dragDecelerationEnabled);
 		lineChart.setPaint(paintGridBg, PAINT_GRID_BACKGROUND);
@@ -92,7 +92,7 @@ public class LineChartSettings {
 		setupDescriptions(lineChart);
 	}
 
-	private void setupXAxis(MeasurementLineChart lineChart) {
+	private void setupXAxis(DataEntitiesLineChart lineChart) {
 		XAxis xAxis = lineChart.getXAxis();
 		xAxis.setDrawAxisLine(false);
 		xAxis.setDrawGridLines(false);
@@ -101,13 +101,13 @@ public class LineChartSettings {
 		xAxis.setGranularity(GRANULARITY);
 		xAxis.setLabelCount(12, false);
 		xAxis.setValueFormatter(hourMinutesAxisValueFormatter);
-		xAxis.setAxisMinimum(HourMinutesAxisValueFormatter.MIN_X_SCALED_TIME);
-		xAxis.setAxisMaximum(HourMinutesAxisValueFormatter.MAX_X_SCALED_TIME);
+		//xAxis.setAxisMinimum(HourMinutesAxisValueFormatter.MIN_X_SCALED_TIME);
+		//xAxis.setAxisMaximum(HourMinutesAxisValueFormatter.MAX_X_SCALED_TIME);
 		xAxis.setLabelRotationAngle(-45.0f);
 		xAxis.setTextColor(Color.BLACK);
 	}
 
-	private void setupDescriptions(MeasurementLineChart lineChart) {
+	private void setupDescriptions(DataEntitiesLineChart lineChart) {
 		lineChart.getDescription().setEnabled(false);
 		lineChart.getLegend().setEnabled(false);
 /*
@@ -126,21 +126,21 @@ public class LineChartSettings {
 		lineChart.setDescription(description);*/
 	}
 
-	private void setupYAxisRight(MeasurementLineChart lineChart) {
+	private void setupYAxisRight(DataEntitiesLineChart lineChart) {
 		YAxis yAxisRight = lineChart.getAxisRight();
 		yAxisRight.setEnabled(false);
 		yAxisRight.setDrawAxisLine(false);
 		yAxisRight.setDrawGridLines(false);
 	}
 
-	private void setupYAxisLeft(MeasurementLineChart lineChart) {
+	private void setupYAxisLeft(DataEntitiesLineChart lineChart) {
 		YAxis yAxisLeft = lineChart.getAxisLeft();
 		yAxisLeft.setDrawAxisLine(false);
 		yAxisLeft.setDrawGridLines(false);
 //		yAxisLeft.setGridDashedLine(new DashPathEffect(new float[]{10f, 5f}, 0f));
 //		yAxisLeft.setAxisLineColor(ColorUtil.setAlphaInIntColor(Color.GRAY, 128));
 		yAxisLeft.setGranularityEnabled(false);
-		yAxisLeft.setValueFormatter(measurementAxisValueFormatter);
+		yAxisLeft.setValueFormatter(dataEntityAxisValueFormatter);
 		yAxisLeft.setEnabled(true);
 		yAxisLeft.setTextColor(primaryColor);
 

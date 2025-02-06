@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.logbook;
+package com.itservices.gpxanalyzer.ui.gpxchart;
 
 import static com.itservices.gpxanalyzer.chart.RequestStatus.DEFAULT;
 
@@ -10,7 +10,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.itservices.gpxanalyzer.MainActivity;
-import com.itservices.gpxanalyzer.chart.MeasurementLineChart;
+import com.itservices.gpxanalyzer.chart.DataEntitiesLineChart;
 import com.itservices.gpxanalyzer.chart.RequestStatus;
 import com.itservices.gpxanalyzer.usecase.MultipleSyncedGpxChartUseCase;
 
@@ -27,9 +27,9 @@ import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
 
 @HiltViewModel
-public class LogbookViewModel extends ViewModel {
-    public static final float CHART_PERCENTAGE_HEIGHT_LANDSCAPE = 0.3f;
-    public static final float CHART_PERCENTAGE_HEIGHT_PORTRAIT = 0.3f;
+public class GpxChartsViewModel extends ViewModel {
+    public static final float CHART_PERCENTAGE_HEIGHT_LANDSCAPE = 0.4f;
+    public static final float CHART_PERCENTAGE_HEIGHT_PORTRAIT = 0.4f;
     public static final float DEFAULT_MAX_100_PERCENT = 1f;
     public static final float DEFAULT_PERCENT_VALUE = 0.5f;
 
@@ -45,7 +45,7 @@ public class LogbookViewModel extends ViewModel {
     private final MutableLiveData<Integer> percentageProcessingProgressLiveData = new MutableLiveData<>(0);
 
     @Inject
-    public LogbookViewModel() {
+    public GpxChartsViewModel() {
     }
 
     public LiveData<Integer> getPercentageProcessingProgressLiveData() {
@@ -77,7 +77,7 @@ public class LogbookViewModel extends ViewModel {
         orientationPublishSubject.onNext(orientation);
     }
 
-    public LiveData<Float> getMeasurementChartPercentageHeight() {
+    public LiveData<Float> getDataEntityChartPercentageHeight() {
         return chartPercentageHeightLiveData;
     }
 
@@ -85,11 +85,11 @@ public class LogbookViewModel extends ViewModel {
         multipleSyncedGpxChartUseCase.disposeAll();
     }
 
-    public void bindHeightTimeChart(MeasurementLineChart heightTimeLineChart, MainActivity requireActivity) {
+    public void bindHeightTimeChart(DataEntitiesLineChart heightTimeLineChart, MainActivity requireActivity) {
         multipleSyncedGpxChartUseCase.bindHeightTimeChart(heightTimeLineChart, requireActivity);
     }
 
-    public void bindVelocityTimeChart(MeasurementLineChart velocityTimeLineChart, MainActivity requireActivity) {
+    public void bindVelocityTimeChart(DataEntitiesLineChart velocityTimeLineChart, MainActivity requireActivity) {
         multipleSyncedGpxChartUseCase.bindVelocityTimeChart(velocityTimeLineChart, requireActivity);
     }
 
@@ -172,5 +172,9 @@ public class LogbookViewModel extends ViewModel {
                     public void onComplete() {
                     }
                 });
+    }
+
+    public void resetTimeScale(DataEntitiesLineChart dataEntitiesLineChart) {
+        dataEntitiesLineChart.resetTimeScale();
     }
 }

@@ -43,7 +43,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
      * Initialize the chart with no data (just styling).
      */
     @UiThread
-    public void bindChart(@NonNull MeasurementLineChart lineChartBindings, @NonNull LineChartSettings lineChartSettings, @NonNull MainActivity mainActivity) {
+    public void bindChart(@NonNull DataEntitiesLineChart lineChartBindings, @NonNull LineChartSettings lineChartSettings, @NonNull MainActivity mainActivity) {
         lineChartBindings.bindActivity(mainActivity);
         chartProvider.initChart(lineChartBindings, lineChartSettings);
         // clear any existing LiveData sets
@@ -64,20 +64,20 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     @UiThread
     public RequestStatus refreshStatisticResults(StatisticResults statisticResults) {
         // treat everything as "curve" results
-        return updateCurveMeasurementLineDataSetFrom(statisticResults);
+        return updateCurveDataEntityLineDataSetFrom(statisticResults);
     }
 
     @UiThread
-    private RequestStatus updateCurveMeasurementLineDataSetFrom(StatisticResults stats) {
-        LineDataSet ds = chartProvider.createCurveMeasurementDataSet(stats);
+    private RequestStatus updateCurveDataEntityLineDataSetFrom(StatisticResults stats) {
+        LineDataSet ds = chartProvider.createCurveDataEntityDataSet(stats);
         if (ds != null) {
             return addOrUpdateDataSet(ds);
         }
         return RequestStatus.ERROR_LINE_DATA_SET_NULL;
     }
 
-    private RequestStatus updateSingleMeasurementDataSetFrom(StatisticResults stats) {
-        LineDataSet ds = chartProvider.createSingleMeasurementDataSet(stats);
+    private RequestStatus updateSingleDataEntityDataSetFrom(StatisticResults stats) {
+        LineDataSet ds = chartProvider.createSingleDataEntityDataSet(stats);
         if (ds != null) {
             return addOrUpdateDataSet(ds);
         }
@@ -139,7 +139,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
         manualSelectEntryOnSelectedTime(chartProvider.getMeasurementLineChart(), selectedTimeMillis, true,false);
     }
 
-    private void manualSelectEntryOnSelectedTime(MeasurementLineChart lineChart, long selectedTimeMillis, boolean centerViewToSelection, boolean callListeners) {
+    private void manualSelectEntryOnSelectedTime(DataEntitiesLineChart lineChart, long selectedTimeMillis, boolean centerViewToSelection, boolean callListeners) {
         if (selectedTimeMillis < 0) {
             lineChart.highlightValue(null, false);
             lineChart.invalidate();
@@ -172,7 +172,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
         }
     }
 
-    private void resetMarkerAndClearSelection(MeasurementLineChart lineChart) {
+    private void resetMarkerAndClearSelection(DataEntitiesLineChart lineChart) {
         currentHighlight = null;
         chartProvider.getMeasurementLineChart().setHighlightedEntry(null);
 

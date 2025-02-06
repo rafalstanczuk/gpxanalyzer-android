@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.spectrum.opengl;
+package com.itservices.gpxanalyzer.ui.spectrum.opengl;
 
 
 import android.content.Context;

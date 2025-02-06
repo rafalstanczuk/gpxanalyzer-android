@@ -13,7 +13,7 @@ import androidx.annotation.NonNull;
 import com.itservices.gpxanalyzer.MainActivity;
 import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.chart.ChartController;
-import com.itservices.gpxanalyzer.chart.MeasurementLineChart;
+import com.itservices.gpxanalyzer.chart.DataEntitiesLineChart;
 import com.itservices.gpxanalyzer.chart.RequestStatus;
 import com.itservices.gpxanalyzer.chart.entry.BaseEntry;
 import com.itservices.gpxanalyzer.chart.settings.LineChartSettings;
@@ -140,13 +140,13 @@ public class MultipleSyncedGpxChartUseCase {
         ConcurrentUtil.tryToDispose(disposable);
     }
 
-    public void bindHeightTimeChart(@NonNull MeasurementLineChart lineChart, @NonNull MainActivity mainActivity) {
+    public void bindHeightTimeChart(@NonNull DataEntitiesLineChart lineChart, @NonNull MainActivity mainActivity) {
         heightLineChartSettings.setDrawXLabels(false);
         heightLineChartSettings.setDragDecelerationEnabled(false);
         heightTimeChartController.bindChart(lineChart, heightLineChartSettings, mainActivity);
     }
 
-    public void bindVelocityTimeChart(@NonNull MeasurementLineChart lineChart, @NonNull MainActivity mainActivity) {
+    public void bindVelocityTimeChart(@NonNull DataEntitiesLineChart lineChart, @NonNull MainActivity mainActivity) {
         velocityLineChartSettings.setDrawXLabels(true);
         velocityLineChartSettings.setDragDecelerationEnabled(false);
         velocityTimeChartController.bindChart(lineChart, velocityLineChartSettings, mainActivity);

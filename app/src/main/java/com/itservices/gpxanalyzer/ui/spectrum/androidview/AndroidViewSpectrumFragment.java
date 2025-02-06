@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.spectrum.androidview;
+package com.itservices.gpxanalyzer.ui.spectrum.androidview;
 
 import static com.itservices.gpxanalyzer.utils.common.ConcurrentUtil.tryToDispose;
 
@@ -14,7 +14,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.itservices.gpxanalyzer.MainActivity;
-import com.itservices.gpxanalyzer.audio.AudioViewModel;
+import com.itservices.gpxanalyzer.ui.spectrum.AudioViewModel;
 import com.itservices.gpxanalyzer.databinding.FragmentAndroidViewSpectrumBinding;
 
 import dagger.hilt.android.AndroidEntryPoint;
