@@ -109,6 +109,9 @@ public abstract class ChartTouchListener<T extends Chart<?>> extends GestureDete
         return mLastGesture;
     }
 
+    public void setLastGesture(ChartGesture mLastGesture) {
+        this.mLastGesture = mLastGesture;
+    }
 
     /**
      * Perform a highlight operation.

@@ -113,7 +113,6 @@ public class CustomMarker extends MarkerView {
 		} else {*/
 
         switch (chartGesture) {
-            case NONE:
             case ROTATE:
             case DOUBLE_TAP:
             case LONG_PRESS:
@@ -123,6 +122,7 @@ public class CustomMarker extends MarkerView {
 
                 break;
             }
+            case NONE:
             case X_ZOOM:
             case Y_ZOOM:
             case PINCH_ZOOM:

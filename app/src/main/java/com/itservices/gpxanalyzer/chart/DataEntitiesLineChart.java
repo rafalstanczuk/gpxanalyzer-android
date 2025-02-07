@@ -232,7 +232,6 @@ public class DataEntitiesLineChart extends LineChart {
 				dataEntityCurveLineDataSet.setDrawHorizontalHighlightIndicator(true);
 			} else {
 				switch (chartGesture) {
-					case NONE:
 					case X_ZOOM:
 					case Y_ZOOM:
 					case PINCH_ZOOM:
@@ -244,6 +243,7 @@ public class DataEntitiesLineChart extends LineChart {
 
 						break;
 
+					case NONE:
 					case FLING:
 					case DRAG:
 						dataEntityCurveLineDataSet.setDrawHorizontalHighlightIndicator(false);

@@ -140,6 +140,10 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     }
 
     private void manualSelectEntryOnSelectedTime(DataEntitiesLineChart lineChart, long selectedTimeMillis, boolean centerViewToSelection, boolean callListeners) {
+
+        lineChart.getChartTouchListener()
+                .setLastGesture( ChartTouchListener.ChartGesture.NONE );
+
         if (selectedTimeMillis < 0) {
             lineChart.highlightValue(null, false);
             lineChart.invalidate();
