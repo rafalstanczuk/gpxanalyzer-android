@@ -12,13 +12,13 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-public class MeasurementAxisValueFormatter implements IAxisValueFormatter, IValueFormatter {
+public class AxisValueFormatter implements IAxisValueFormatter, IValueFormatter {
 
 	private static final int MIN_DISTANCE_VALUE_TO_DRAW = 5;
 	private LimitLinesBoundaries limitLinesBoundaries;
 
 	@Inject
-	MeasurementAxisValueFormatter() {}
+	AxisValueFormatter() {}
 
 	public String getFormattedValue(float value) {
 

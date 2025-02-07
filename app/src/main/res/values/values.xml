@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-   <integer name="palette_number_of_divisions">10</integer>
+   <integer name="palette_number_of_divisions">8</integer>
 </resources>

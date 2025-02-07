@@ -12,8 +12,8 @@ import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.chart.DataEntitiesLineChart;
+import com.itservices.gpxanalyzer.chart.settings.axis.AxisValueFormatter;
 import com.itservices.gpxanalyzer.chart.settings.axis.HourMinutesAxisValueFormatter;
-import com.itservices.gpxanalyzer.chart.settings.axis.MeasurementAxisValueFormatter;
 import com.itservices.gpxanalyzer.chart.settings.background.LimitLinesBoundaries;
 import com.itservices.gpxanalyzer.chart.settings.highlight.CustomMarker;
 
@@ -26,7 +26,7 @@ public class LineChartSettings {
 	private static final float GRANULARITY = HourMinutesAxisValueFormatter.getFractionOfFullHourFromSeconds(1);
 	private final CustomMarker customMarker;
 	private final HourMinutesAxisValueFormatter hourMinutesAxisValueFormatter;
-	private final MeasurementAxisValueFormatter dataEntityAxisValueFormatter;
+	private final AxisValueFormatter dataEntityAxisValueFormatter;
 	private LimitLinesBoundaries limitLinesBoundaries;
 	private final Paint paintGridBg = new Paint();
 	private final int primaryColor;
@@ -37,7 +37,7 @@ public class LineChartSettings {
 	LineChartSettings(
 		@ApplicationContext Context context, CustomMarker customMarker,
 		HourMinutesAxisValueFormatter hourMinutesAxisValueFormatter,
-		MeasurementAxisValueFormatter dataEntityAxisValueFormatter
+		AxisValueFormatter dataEntityAxisValueFormatter
 	) {
 		primaryColor = ContextCompat.getColor(context, R.color.colorPrimary);
 		this.customMarker = customMarker;

@@ -7,7 +7,7 @@
     <string name="default_speed_data_entity_unit">[m/s]</string>
     <string name="altitude">Altitude</string>
     <string name="speed">Speed</string>
-    <string name="log_book">Log book</string>
+    <string name="gpx_charts">Gpx charts</string>
     <string name="audio_spectrum_opengl">Audio DSP OpenGL</string>
     <string name="audio_spectrum_android_view">Audio DSP Android View</string>
     <string name="load">Load</string>

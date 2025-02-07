@@ -35,7 +35,7 @@ public class MainMenuFragment extends Fragment {
 
         viewModel = new ViewModelProvider(this).get(MainMenuViewModel.class);
         viewModel.setMenuItems(Arrays.asList(
-                new MenuItem(getString(R.string.log_book), R.id.gpxChartsFragment),
+                new MenuItem(getString(R.string.gpx_charts), R.id.gpxChartsFragment),
                 new MenuItem(getString(R.string.audio_spectrum_opengl), R.id.openGLSpectrumFragment),
                 new MenuItem(getString(R.string.audio_spectrum_android_view), R.id.androidViewSpectrumFragment)
         ));

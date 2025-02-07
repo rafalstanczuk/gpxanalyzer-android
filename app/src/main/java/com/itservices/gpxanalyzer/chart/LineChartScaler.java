@@ -40,7 +40,7 @@ public class LineChartScaler {
 	public void scale(DataEntitiesLineChart lineChart) {
 		double r = dataEntityCurveStatisticResults.getMaxValue() - dataEntityCurveStatisticResults.getMinValue();
 		double o = r * 0.1f;
-		minY = (dataEntityCurveStatisticResults.getMinValue() - 2.0f * o);
+		minY = (dataEntityCurveStatisticResults.getMinValue() - o);
 
 		List<Double> valYStatisticsList =
 				Arrays.asList(
@@ -86,9 +86,9 @@ public class LineChartScaler {
 			leftAxis.setAxisMinimum((float) (minY - offset));
 
 			if (PrecisionUtil.isGreaterEqual((float) maxStatisticsY, (float) maxY, PrecisionUtil.NDIG_PREC_COMP)) {
-				leftAxis.setAxisMaximum((float) (maxY + 2.0f * offset));
+				leftAxis.setAxisMaximum((float) (maxStatisticsY + 2.0f * offset));
 			} else {
-				leftAxis.setAxisMaximum((float) maxY);
+				leftAxis.setAxisMaximum((float) (maxY + 2.0f * offset));
 			}
 		}
 	}

@@ -35,6 +35,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class DataEntitiesLineChart extends LineChart {
 
+	@Inject
 	DataEntityInfoLayoutView dataEntityInfoLayoutView;
 
 	@Inject
@@ -106,7 +107,6 @@ public class DataEntitiesLineChart extends LineChart {
 	}
 
 	private void initMeasurementInfoLayoutView() {
-		dataEntityInfoLayoutView = new DataEntityInfoLayoutView(getContext());
 		dataEntityInfoLayoutView.setDrawingCacheEnabled(true);
 
 		try {
@@ -134,10 +134,9 @@ public class DataEntitiesLineChart extends LineChart {
 	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
 		super.onLayout(changed, left, top, right, bottom);
 
-		dataEntityInfoLayoutView.layout(getWidth() / 2 +
-				(int) (getContext().getResources().getDisplayMetrics().density * 20.0f),
-			(int) (getContext().getResources().getDisplayMetrics().density * 20.0f), getWidth(),
-			getHeight()
+		dataEntityInfoLayoutView.layout(
+				90 ,getHeight() / 20,
+				getWidth(),	getHeight()
 		);
 	}
 

@@ -8,6 +8,10 @@ import android.widget.TextView;
 
 import com.itservices.gpxanalyzer.R;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.qualifiers.ApplicationContext;
+
 public class DataEntityInfoLayoutView extends LinearLayout {
 
 	private TextView textViewTime;
@@ -17,7 +21,8 @@ public class DataEntityInfoLayoutView extends LinearLayout {
 	//private TextView textViewValue2;
 	//private TextView textViewValue2Unit;
 
-	public DataEntityInfoLayoutView(Context context) {
+	@Inject
+	public DataEntityInfoLayoutView(@ApplicationContext Context context) {
 		super(context);
 		inflateView(context);
 	}
@@ -71,9 +76,4 @@ public class DataEntityInfoLayoutView extends LinearLayout {
 	public void setValue2Unit(String valueUnit) {
 		textViewValue2Unit.setText(valueUnit);
 	}*/
-
-	@Override
-	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-		super.onLayout(changed, left, top, right, bottom);
-	}
 }
