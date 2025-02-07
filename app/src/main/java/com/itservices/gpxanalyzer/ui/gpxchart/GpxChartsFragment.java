@@ -41,23 +41,52 @@ public class GpxChartsFragment extends Fragment {
                 gpxChartsViewModel.loadData(requireContext(), R.raw.skiing20250121t091423)
         );
 
-        gpxChartsViewModel.bindHeightTimeChart(binding.heightTimeLineChart, (MainActivity) requireActivity());
-        binding.heightTimeAutoscalingButton.setOnClickListener(view ->
-                gpxChartsViewModel.resetTimeScale(binding.heightTimeLineChart)
-        );
+        bindHeightTimeChartUI();
 
+        bindVelocityTimeChartUI();
+
+        observeRequestStatus();
+
+        return binding.getRoot();
+    }
+
+    private void observeRequestStatus() {
+        gpxChartsViewModel.getRequestStatusLiveData().observe(getViewLifecycleOwner(), requestStatus -> {
+            binding.loadButton.setEnabled( gpxChartsViewModel.getButtonEnabled(requestStatus) );
+            binding.heightTimeAutoscalingButton.setEnabled( gpxChartsViewModel.getButtonEnabled(requestStatus) );
+            binding.heightTimeZoomInButton.setEnabled( gpxChartsViewModel.getButtonEnabled(requestStatus) );
+            binding.heightTimeZoomOutButton.setEnabled( gpxChartsViewModel.getButtonEnabled(requestStatus) );
+
+            binding.velocityTimeAutoscalingButton.setEnabled( gpxChartsViewModel.getButtonEnabled(requestStatus) );
+            binding.velocityTimeZoomInButton.setEnabled( gpxChartsViewModel.getButtonEnabled(requestStatus) );
+            binding.velocityTimeZoomOutButton.setEnabled( gpxChartsViewModel.getButtonEnabled(requestStatus) );
+        });
+    }
+
+    private void bindVelocityTimeChartUI() {
         gpxChartsViewModel.bindVelocityTimeChart(binding.velocityTimeLineChart, (MainActivity) requireActivity());
         binding.velocityTimeAutoscalingButton.setOnClickListener(view ->
                 gpxChartsViewModel.resetTimeScale(binding.velocityTimeLineChart)
         );
+        binding.velocityTimeZoomInButton.setOnClickListener(view ->
+                gpxChartsViewModel.zoomIn(binding.velocityTimeLineChart)
+        );
+        binding.velocityTimeZoomOutButton.setOnClickListener(view ->
+                gpxChartsViewModel.zoomOut(binding.velocityTimeLineChart)
+        );
+    }
 
-        gpxChartsViewModel.getRequestStatusLiveData().observe(getViewLifecycleOwner(), requestStatus -> {
-            binding.loadButton.setEnabled( gpxChartsViewModel.getButtonEnabled(requestStatus) );
-            binding.heightTimeAutoscalingButton.setEnabled( gpxChartsViewModel.getButtonEnabled(requestStatus) );
-            binding.velocityTimeAutoscalingButton.setEnabled( gpxChartsViewModel.getButtonEnabled(requestStatus) );
-        });
-
-        return binding.getRoot();
+    private void bindHeightTimeChartUI() {
+        gpxChartsViewModel.bindHeightTimeChart(binding.heightTimeLineChart, (MainActivity) requireActivity());
+        binding.heightTimeAutoscalingButton.setOnClickListener(view ->
+                gpxChartsViewModel.resetTimeScale(binding.heightTimeLineChart)
+        );
+        binding.heightTimeZoomInButton.setOnClickListener(view ->
+                gpxChartsViewModel.zoomIn(binding.heightTimeLineChart)
+        );
+        binding.heightTimeZoomOutButton.setOnClickListener(view ->
+                gpxChartsViewModel.zoomOut(binding.heightTimeLineChart)
+        );
     }
 
     @Override

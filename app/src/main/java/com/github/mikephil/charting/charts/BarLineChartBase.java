@@ -696,11 +696,21 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
      */
     public void zoomToCenter(float scaleX, float scaleY) {
 
-        MPPointF center = getCenterOffsets();
+        MPPointF center = mViewPortHandler.getContentCenter();
 
-        Matrix save = mZoomMatrixBuffer;
-        mViewPortHandler.zoom(scaleX, scaleY, center.x, -center.y, save);
-        mViewPortHandler.refresh(save, this, false);
+        mViewPortHandler.zoom(scaleX, scaleY, center.x, -center.y, mZoomMatrixBuffer);
+        mViewPortHandler.refresh(mZoomMatrixBuffer, this, false);
+
+        MPPointF.recycleInstance(center);
+
+        // Range might have changed, which means that Y-axis labels
+        // could have changed in size, affecting Y-axis size.
+        // So we need to recalculate offsets.
+        calculateOffsets();
+        postInvalidate();
+
+
+
     }
 
     /**

@@ -136,8 +136,8 @@ public class GpxChartsViewModel extends ViewModel {
                     }
 
                     @Override
-                    public void onNext(RequestStatus baseEntry) {
-                        requestStatusMutableLiveData.postValue(baseEntry);
+                    public void onNext(RequestStatus newStatus) {
+                        requestStatusMutableLiveData.postValue(newStatus);
                     }
 
                     @Override
@@ -160,8 +160,8 @@ public class GpxChartsViewModel extends ViewModel {
                     }
 
                     @Override
-                    public void onNext(Integer integer) {
-                        percentageProcessingProgressLiveData.postValue(integer);
+                    public void onNext(Integer percent) {
+                        percentageProcessingProgressLiveData.postValue(percent);
                     }
 
                     @Override
@@ -176,5 +176,13 @@ public class GpxChartsViewModel extends ViewModel {
 
     public void resetTimeScale(DataEntitiesLineChart dataEntitiesLineChart) {
         dataEntitiesLineChart.resetTimeScale();
+    }
+
+    public void zoomIn(DataEntitiesLineChart dataEntitiesLineChart) {
+        dataEntitiesLineChart.zoomToCenter(1.4f,1.0f);
+    }
+
+    public void zoomOut(DataEntitiesLineChart dataEntitiesLineChart) {
+        dataEntitiesLineChart.zoomToCenter(0.6f,1.0f);
     }
 }

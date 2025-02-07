@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
+
         <variable
             name="viewModel"
             type="com.itservices.gpxanalyzer.ui.gpxchart.GpxChartsViewModel" />
@@ -19,7 +20,7 @@
             android:text="@string/load"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/percentageProgressTextView"
@@ -40,10 +41,10 @@
             android:id="@+id/percentageProgressBarChart"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
             android:layout_height="15dp"
-            android:layout_marginTop="5dp"
+            android:layout_marginStart="@dimen/margin_small"
+            android:layout_marginTop="@dimen/margin_very_small"
+            android:layout_marginEnd="@dimen/margin_small"
             android:max="100"
             android:progress="@{viewModel.percentageProcessingProgressLiveData}"
             android:progressDrawable="@drawable/loading_data_progressbar"
@@ -58,7 +59,7 @@
             android:text="@{viewModel.requestStatusLiveData.name()}"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="@android:color/black"
-            android:textSize="10dp"
+            android:textSize="10sp"
             app:layout_constraintBottom_toBottomOf="@id/percentageProgressBarChart"
             app:layout_constraintEnd_toEndOf="@id/percentageProgressBarChart"
             app:layout_constraintStart_toStartOf="@id/percentageProgressBarChart"
@@ -73,19 +74,6 @@
             app:layout_constraintHeight_percent="@{viewModel.dataEntityChartPercentageHeight}"
             app:layout_constraintTop_toBottomOf="@id/percentageProgressBarChart">
 
-            <Button
-                android:id="@+id/heightTimeAutoscalingButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingBottom="@dimen/margin_very_small"
-                android:translationZ="100dp"
-                android:text="@string/reset_t_h"
-                android:textSize="11sp"
-                android:scaleX="0.6"
-                android:scaleY="0.6"
-                app:layout_constraintTop_toTopOf="@id/height_time_chart_Layout"
-                app:layout_constraintEnd_toEndOf="parent"/>
-
             <com.itservices.gpxanalyzer.chart.DataEntitiesLineChart
                 android:id="@+id/height_time_lineChart"
                 android:layout_width="0dp"
@@ -93,6 +81,53 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/height_zoom_in_zoom_out_buttons_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_small"
+                app:layout_constraintEnd_toEndOf="@+id/height_time_lineChart"
+                app:layout_constraintTop_toTopOf="@+id/height_time_lineChart">
+
+                <Button
+                    android:id="@+id/height_time_zoom_in_button"
+                    android:layout_width="50dp"
+                    android:layout_height="40dp"
+                    android:text="+"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:alpha="0.5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Button
+                    android:id="@+id/height_time_zoom_out_button"
+                    android:layout_width="50dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="@dimen/margin_small"
+                    android:text="-"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:alpha="0.5"
+                    app:layout_constraintEnd_toStartOf="@+id/height_time_autoscaling_button"
+                    app:layout_constraintStart_toEndOf="@id/height_time_zoom_in_button"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Button
+                    android:id="@+id/height_time_autoscaling_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="@dimen/margin_medium"
+                    android:text="@string/reset"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:alpha="0.5"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/height_time_zoom_out_button"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -104,18 +139,6 @@
             app:layout_constraintHeight_percent="@{viewModel.dataEntityChartPercentageHeight}"
             app:layout_constraintTop_toBottomOf="@id/height_time_chart_Layout">
 
-            <Button
-                android:id="@+id/velocityTimeAutoscalingButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingBottom="@dimen/margin_very_small"
-                android:translationZ="100dp"
-                android:text="@string/reset_t_h"
-                android:scaleX="0.6"
-                android:scaleY="0.6"
-                android:textSize="11sp"
-                app:layout_constraintTop_toTopOf="@id/velocity_time_chart_Layout"
-                app:layout_constraintEnd_toEndOf="parent"/>
 
             <com.itservices.gpxanalyzer.chart.DataEntitiesLineChart
                 android:id="@+id/velocity_time_lineChart"
@@ -124,6 +147,53 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/velocity_zoom_in_zoom_out_buttons_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_small"
+                app:layout_constraintEnd_toEndOf="@+id/velocity_time_lineChart"
+                app:layout_constraintTop_toTopOf="@+id/velocity_time_lineChart">
+
+                <Button
+                    android:id="@+id/velocity_time_zoom_in_button"
+                    android:layout_width="50dp"
+                    android:layout_height="40dp"
+                    android:text="+"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:alpha="0.5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Button
+                    android:id="@+id/velocity_time_zoom_out_button"
+                    android:layout_width="50dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="@dimen/margin_small"
+                    android:text="-"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:alpha="0.5"
+                    app:layout_constraintEnd_toStartOf="@+id/velocity_time_autoscaling_button"
+                    app:layout_constraintStart_toEndOf="@id/velocity_time_zoom_in_button"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Button
+                    android:id="@+id/velocity_time_autoscaling_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="@dimen/margin_medium"
+                    android:text="@string/reset"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:alpha="0.5"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/velocity_time_zoom_out_button"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

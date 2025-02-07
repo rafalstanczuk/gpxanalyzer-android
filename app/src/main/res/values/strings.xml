@@ -11,5 +11,5 @@
     <string name="audio_spectrum_opengl">Audio DSP OpenGL</string>
     <string name="audio_spectrum_android_view">Audio DSP Android View</string>
     <string name="load">Load</string>
-    <string name="reset_t_h">Reset t[h]</string>
+    <string name="reset">Reset</string>
 </resources>
