@@ -1,6 +1,8 @@
 
 package com.github.mikephil.charting.charts;
 
+import android.animation.Animator;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -13,6 +15,9 @@ import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.animation.DecelerateInterpolator;
+
+import androidx.annotation.NonNull;
 
 import com.github.mikephil.charting.components.XAxis.XAxisPosition;
 import com.github.mikephil.charting.components.YAxis;
@@ -711,6 +716,70 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
 
 
 
+    }
+
+    public void animateFitScreen(long duration) {
+        animateZoomToCenter(0.0001f,0.0001f, duration,
+                new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(@NonNull Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(@NonNull Animator animation) {
+                        fitScreen();
+                    }
+
+                    @Override
+                    public void onAnimationCancel(@NonNull Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(@NonNull Animator animation) {
+
+                    }
+                }
+        );
+    }
+
+    public void animateZoomToCenter(final float targetScaleX, final float targetScaleY, long duration, Animator.AnimatorListener animatorListener) {
+
+        final float startScaleX = 1.0f;//mViewPortHandler.getScaleX();
+        final float startScaleY = 1.0f;//mViewPortHandler.getScaleY();
+
+        // 2. Create a ValueAnimator going from fraction=0 to fraction=1
+        ValueAnimator animator = ValueAnimator.ofFloat(0f, 1f);
+        animator.setDuration(duration);
+        animator.setInterpolator(new DecelerateInterpolator());
+
+        // 3. Update the zoom on each frame
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                float fraction = (float) animation.getAnimatedValue();
+
+                //Log.d(BarLineChartBase.class.getSimpleName(), "onAnimationUpdate() called with: fraction = [" + fraction + "]");
+
+                // Interpolate between the start and target scales
+                float currentScaleX = startScaleX + (targetScaleX - startScaleX) * fraction;
+                float currentScaleY = startScaleY + (targetScaleY - startScaleY) * fraction;
+
+
+                //Log.d(BarLineChartBase.class.getSimpleName(), "onAnimationUpdate() called with: currentScaleX = [" + currentScaleX + "]");
+
+                // Call your zoomToCenter function with the interpolated scales
+                zoomToCenter(currentScaleX, currentScaleY);
+            }
+        });
+
+
+        if (animatorListener != null) {
+            animator.addListener(animatorListener);
+        }
+        // 4. Start the animation
+        animator.start();
     }
 
     /**

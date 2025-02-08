@@ -274,11 +274,19 @@ public class DataEntitiesLineChart extends LineChart {
 		lineChartScaler.scale(this);
 	}
 
-	public void resetTimeScale() {
+	public void animateFitScreen(long duration) {
 		assert mainActivity != null;
 
-		mainActivity.runOnUiThread(
-				DataEntitiesLineChart.this::fitScreen
+		mainActivity.runOnUiThread( () ->
+				DataEntitiesLineChart.super.animateFitScreen(duration)
 		);
 	}
+	public void animateZoomToCenter(final float targetScaleX, final float targetScaleY, long duration) {
+		assert mainActivity != null;
+
+		mainActivity.runOnUiThread( () ->
+				DataEntitiesLineChart.super.animateZoomToCenter(targetScaleX, targetScaleY, duration, null)
+		);
+	}
+
 }
