@@ -175,14 +175,14 @@ public class GpxChartsViewModel extends ViewModel {
     }
 
     public void resetTimeScale(DataEntitiesLineChart dataEntitiesLineChart) {
-        dataEntitiesLineChart.resetTimeScale();
+        dataEntitiesLineChart.animateFitScreen(1000);
     }
 
     public void zoomIn(DataEntitiesLineChart dataEntitiesLineChart) {
-        dataEntitiesLineChart.zoomToCenter(1.4f,1.0f);
+        dataEntitiesLineChart.animateZoomToCenter(1.1f,1.0f, 200);
     }
 
     public void zoomOut(DataEntitiesLineChart dataEntitiesLineChart) {
-        dataEntitiesLineChart.zoomToCenter(0.6f,1.0f);
+        dataEntitiesLineChart.animateZoomToCenter(0.90f,1.0f, 200);
     }
 }
