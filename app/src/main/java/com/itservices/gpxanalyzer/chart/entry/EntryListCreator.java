@@ -1,15 +1,15 @@
 package com.itservices.gpxanalyzer.chart.entry;
 
 import com.github.mikephil.charting.data.Entry;
+import com.itservices.gpxanalyzer.chart.legend.PaletteColorDeterminer;
 import com.itservices.gpxanalyzer.data.DataEntity;
 import com.itservices.gpxanalyzer.data.gpx.StatisticResults;
-import com.itservices.gpxanalyzer.chart.legend.PaletteColorDeterminer;
 
 import java.util.ArrayList;
 import java.util.Vector;
 
 public class EntryListCreator {
-    public static ArrayList<Entry> createSingleMeasurementEntryList(
+    public static ArrayList<Entry> createSingleDataEntityEntryList(
             StatisticResults statisticResults, PaletteColorDeterminer paletteColorDeterminer
     ) {
         Vector<DataEntity> dataEntityVector = statisticResults.getDataEntityVector();
@@ -27,14 +27,14 @@ public class EntryListCreator {
             double value = dataEntity.getValueList().get( dataEntity.getPrimaryDataIndex() );
 
             scaledEntries.add(
-                    SingleMeasurementEntry.create(paletteColorDeterminer, statisticResults, i,
+                    SingleDataEntityEntry.create(paletteColorDeterminer, statisticResults, i,
                             (float) value
                     ));
         }
         return scaledEntries;
     }
 
-    public static ArrayList<Entry> createCurveMeasurementEntryList(
+    public static ArrayList<Entry> createCurveDataEntityEntryList(
             StatisticResults statisticResults, PaletteColorDeterminer paletteColorDeterminer
     ) {
         Vector<DataEntity> dataEntityVector = statisticResults.getDataEntityVector();
@@ -51,7 +51,7 @@ public class EntryListCreator {
             DataEntity dataEntity = dataEntityVector.get(i);
             double value = dataEntity.getValueList().get( dataEntity.getPrimaryDataIndex() );
 
-            scaledEntries.add(CurveMeasurementEntry.create(paletteColorDeterminer, statisticResults, i, (float) value));
+            scaledEntries.add(CurveDataEntityEntry.create(paletteColorDeterminer, statisticResults, i, (float) value));
         }
 
         return scaledEntries;

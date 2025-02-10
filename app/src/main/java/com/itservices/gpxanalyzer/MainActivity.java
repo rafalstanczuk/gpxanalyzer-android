@@ -2,7 +2,6 @@ package com.itservices.gpxanalyzer;
 
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.NavGraph;
@@ -25,6 +24,8 @@ public class MainActivity extends AppCompatActivity {
 
         NavHostFragment navHostFragment =
                 (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
+
+        assert navHostFragment != null;
         NavController navController = navHostFragment.getNavController();
 
         NavInflater navInflater = navController.getNavInflater();
@@ -34,31 +35,8 @@ public class MainActivity extends AppCompatActivity {
 
         navController.setGraph(graph);
 
-        //bottomNav = findViewById(R.id.bottom_navigation);
-        //setBottomNavigationMenu(bottomNav);
-        //NavigationUI.setupWithNavController(bottomNav, navController);
-        ///////////////////////////////
-
-        // listen to destination changes
         navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
 
         });
-
-
-
-
     }
-
-    private void setBottomNavigationMenu(@NonNull BottomNavigationView bottomNavigationView) {
-        bottomNavigationView.getMenu().clear();
-/*
-        String settingsLanguage = Settings.sharedInstance(getApplicationContext()).getLanguage();
-
-        if (settingsLanguage.equals("de")) {
-            bottomNavigationView.inflateMenu(R.menu.bottom_navigation_menu_de);
-        } else {
-            bottomNavigationView.inflateMenu(R.menu.bottom_navigation_menu_en);
-        }*/
-    }
-
 }

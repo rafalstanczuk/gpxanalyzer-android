@@ -67,131 +67,102 @@
 
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/height_time_chart_Layout"
+            android:id="@+id/altitude_time_chart_Layout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             app:layout_constraintHeight_default="percent"
             app:layout_constraintHeight_percent="@{viewModel.dataEntityChartPercentageHeight}"
             app:layout_constraintTop_toBottomOf="@id/percentageProgressBarChart">
 
-            <com.itservices.gpxanalyzer.chart.DataEntitiesLineChart
-                android:id="@+id/height_time_lineChart"
+            <com.itservices.gpxanalyzer.chart.DataEntityLineChart
+                android:id="@+id/altitude_time_lineChart"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
+
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/height_zoom_in_zoom_out_buttons_layout"
+                android:id="@+id/altitude_properties_control_constraintlayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/margin_small"
-                app:layout_constraintEnd_toEndOf="@+id/height_time_lineChart"
-                app:layout_constraintTop_toTopOf="@+id/height_time_lineChart">
+                android:layout_marginTop="@dimen/margin_small"
+                android:layout_marginEnd="@dimen/margin_very_small"
+                app:layout_constraintEnd_toStartOf="@+id/altitude_scale_control_constraintlayout"
+                app:layout_constraintTop_toTopOf="parent">
 
-                <Button
-                    android:id="@+id/height_time_zoom_in_button"
-                    android:layout_width="50dp"
-                    android:layout_height="40dp"
-                    android:text="+"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    android:alpha="0.5"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <Button
-                    android:id="@+id/height_time_zoom_out_button"
-                    android:layout_width="50dp"
-                    android:layout_height="40dp"
-                    android:layout_marginStart="@dimen/margin_small"
-                    android:text="-"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    android:alpha="0.5"
-                    app:layout_constraintEnd_toStartOf="@+id/height_time_autoscaling_button"
-                    app:layout_constraintStart_toEndOf="@id/height_time_zoom_in_button"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <Button
-                    android:id="@+id/height_time_autoscaling_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:layout_marginStart="@dimen/margin_medium"
-                    android:text="@string/reset"
-                    android:textSize="11sp"
-                    android:textStyle="bold"
-                    android:alpha="0.5"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/height_time_zoom_out_button"
-                    app:layout_constraintTop_toTopOf="parent" />
+                <include
+                    android:id="@+id/altitude_properties_control_layout"
+                    layout="@layout/properties_control_layout" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/altitude_scale_control_constraintlayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_small"
+                android:layout_marginEnd="@dimen/margin_small"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <include
+                    android:id="@+id/altitude_scale_control_layout"
+                    layout="@layout/scale_control_layout"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/velocity_time_chart_Layout"
+            android:id="@+id/speed_time_chart_Layout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             app:layout_constraintHeight_default="percent"
             app:layout_constraintHeight_percent="@{viewModel.dataEntityChartPercentageHeight}"
-            app:layout_constraintTop_toBottomOf="@id/height_time_chart_Layout">
+            app:layout_constraintTop_toBottomOf="@id/altitude_time_chart_Layout">
 
 
-            <com.itservices.gpxanalyzer.chart.DataEntitiesLineChart
-                android:id="@+id/velocity_time_lineChart"
+            <com.itservices.gpxanalyzer.chart.DataEntityLineChart
+                android:id="@+id/speed_time_lineChart"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
+
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/velocity_zoom_in_zoom_out_buttons_layout"
+                android:id="@+id/speed_properties_control_constraintlayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_small"
+                android:layout_marginEnd="@dimen/margin_very_small"
+                app:layout_constraintEnd_toStartOf="@+id/speed_scale_control_constraintlayout"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <include
+                    android:id="@+id/speed_properties_control_layout"
+                    layout="@layout/properties_control_layout" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/speed_scale_control_constraintlayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_small"
                 android:layout_marginEnd="@dimen/margin_small"
-                app:layout_constraintEnd_toEndOf="@+id/velocity_time_lineChart"
-                app:layout_constraintTop_toTopOf="@+id/velocity_time_lineChart">
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
-                <Button
-                    android:id="@+id/velocity_time_zoom_in_button"
-                    android:layout_width="50dp"
-                    android:layout_height="40dp"
-                    android:text="+"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    android:alpha="0.5"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <Button
-                    android:id="@+id/velocity_time_zoom_out_button"
-                    android:layout_width="50dp"
-                    android:layout_height="40dp"
-                    android:layout_marginStart="@dimen/margin_small"
-                    android:text="-"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    android:alpha="0.5"
-                    app:layout_constraintEnd_toStartOf="@+id/velocity_time_autoscaling_button"
-                    app:layout_constraintStart_toEndOf="@id/velocity_time_zoom_in_button"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <Button
-                    android:id="@+id/velocity_time_autoscaling_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:layout_marginStart="@dimen/margin_medium"
-                    android:text="@string/reset"
-                    android:textSize="11sp"
-                    android:textStyle="bold"
-                    android:alpha="0.5"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/velocity_time_zoom_out_button"
-                    app:layout_constraintTop_toTopOf="parent" />
+                <include
+                    android:id="@+id/speed_scale_control_layout"
+                    layout="@layout/scale_control_layout"
+                    app:layout_constraintEnd_toEndOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

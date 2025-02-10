@@ -12,4 +12,5 @@
     <string name="audio_spectrum_android_view">Audio DSP Android View</string>
     <string name="load">Load</string>
     <string name="reset">Reset</string>
+    <string name="dots">Dots</string>
 </resources>

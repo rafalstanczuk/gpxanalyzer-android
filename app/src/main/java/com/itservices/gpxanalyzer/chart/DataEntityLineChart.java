@@ -1,6 +1,6 @@
 package com.itservices.gpxanalyzer.chart;
 
-import static com.itservices.gpxanalyzer.chart.entry.CurveMeasurementEntry.CURVE_MEASUREMENT;
+import static com.itservices.gpxanalyzer.chart.entry.CurveDataEntityEntry.CURVE_DATA_ENTITY;
 import static com.itservices.gpxanalyzer.utils.common.FormatNumberUtil.getFormattedTime;
 
 import android.content.Context;
@@ -18,7 +18,7 @@ import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.listener.BarLineChartTouchListener;
 import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.itservices.gpxanalyzer.MainActivity;
-import com.itservices.gpxanalyzer.chart.entry.BaseEntry;
+import com.itservices.gpxanalyzer.chart.entry.BaseDataEntityEntry;
 import com.itservices.gpxanalyzer.chart.legend.PaletteColorDeterminer;
 import com.itservices.gpxanalyzer.chart.settings.LineChartSettings;
 import com.itservices.gpxanalyzer.chart.settings.background.GridBackgroundDrawer;
@@ -33,7 +33,10 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class DataEntitiesLineChart extends LineChart {
+public class DataEntityLineChart extends LineChart {
+
+	@Inject
+	LineChartSettings settings;
 
 	@Inject
 	DataEntityInfoLayoutView dataEntityInfoLayoutView;
@@ -45,30 +48,29 @@ public class DataEntitiesLineChart extends LineChart {
 	GridBackgroundDrawer gridBackgroundDrawer;
 
 	@Inject
-	LineChartScaler lineChartScaler;
+	LineChartScaler scaler;
 
 	@Inject
 	LimitLinesBoundaries limitLinesBoundaries;
 
 	@Nullable
 	private MainActivity mainActivity;
-	private LineChartSettings lineChartSettings;
 
-	public DataEntitiesLineChart(Context context) {
+	public DataEntityLineChart(Context context) {
 		super(context);
-		initMeasurementInfoLayoutView();
+		initDataEntityInfoLayoutView();
 	}
 
-	public DataEntitiesLineChart(Context context, AttributeSet attrs) {
+	public DataEntityLineChart(Context context, AttributeSet attrs) {
 		super(context, attrs);
 
-		initMeasurementInfoLayoutView();
+		initDataEntityInfoLayoutView();
 	}
 
-	public DataEntitiesLineChart(Context context, AttributeSet attrs, int defStyle) {
+	public DataEntityLineChart(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 
-		initMeasurementInfoLayoutView();
+		initDataEntityInfoLayoutView();
 	}
 
 	public void bindActivity(@NonNull MainActivity requireActivity) {
@@ -76,7 +78,7 @@ public class DataEntitiesLineChart extends LineChart {
 	}
 
 	public static int getDataSetIndexForEntryWithTimeInt(
-			DataEntitiesLineChart lineChart, long entryTimeInt
+			DataEntityLineChart lineChart, long entryTimeInt
 	) {
 		int dataSetIndexToHighlight = 0;
 
@@ -89,12 +91,12 @@ public class DataEntitiesLineChart extends LineChart {
 
 			for (Entry entryLineData : lineDataSet.getEntries()) {
 
-				if (!(entryLineData instanceof BaseEntry)) {
+				if (!(entryLineData instanceof BaseDataEntityEntry)) {
 					break;
 				}
 
 
-				long timeInt = ((BaseEntry) entryLineData).getDataEntity().getTimestampMillis();
+				long timeInt = ((BaseDataEntityEntry) entryLineData).getDataEntity().getTimestampMillis();
 
 				if (timeInt == entryTimeInt) {
 					dataSetIndexToHighlight = dataSetIndex;
@@ -106,7 +108,7 @@ public class DataEntitiesLineChart extends LineChart {
 		return dataSetIndexToHighlight;
 	}
 
-	private void initMeasurementInfoLayoutView() {
+	private void initDataEntityInfoLayoutView() {
 		dataEntityInfoLayoutView.setDrawingCacheEnabled(true);
 
 		try {
@@ -149,12 +151,10 @@ public class DataEntitiesLineChart extends LineChart {
 		);
 	}
 
-	public void initChart(LineChartSettings lineChartSettings) {
-		StaticChartHighlighter<DataEntitiesLineChart> staticChartHighlighter = new StaticChartHighlighter<>(
+	public void initChart() {
+		StaticChartHighlighter<DataEntityLineChart> staticChartHighlighter = new StaticChartHighlighter<>(
 				this, (BarLineChartTouchListener) mChartTouchListener);
 		setHighlighter(staticChartHighlighter);
-
-		this.lineChartSettings = lineChartSettings;
 
 		clear();
 		setData(new LineData());
@@ -171,19 +171,19 @@ public class DataEntitiesLineChart extends LineChart {
 	public void highlightCenterValueInTranslation() {
 		Entry entry = getEntryByTouchPoint(getWidth() / 2.0f, getHeight() / 2.0f);
 
-		if (entry instanceof BaseEntry) {
-			BaseEntry baseEntry = (BaseEntry) entry;
+		if (entry instanceof BaseDataEntityEntry) {
+			BaseDataEntityEntry baseDataEntityEntry = (BaseDataEntityEntry) entry;
 
-			long entryTimeInt = baseEntry.getDataEntity().getTimestampMillis();
+			long entryTimeInt = baseDataEntityEntry.getDataEntity().getTimestampMillis();
 			int dataSetIndexToHighlight = getDataSetIndexForEntryWithTimeInt(
 				this, entryTimeInt);
 
-			highlightValue(baseEntry.getX(), baseEntry.getY(), dataSetIndexToHighlight, true);
+			highlightValue(baseDataEntityEntry.getX(), baseDataEntityEntry.getY(), dataSetIndexToHighlight, true);
 		}
 	}
 
 	public void setHighlightedEntry(Entry selectedEntry) {
-		if (!(selectedEntry instanceof BaseEntry)) {
+		if (!(selectedEntry instanceof BaseDataEntityEntry)) {
 			return;
 		}
 
@@ -191,9 +191,9 @@ public class DataEntitiesLineChart extends LineChart {
 
 		// isFullyZoomedOut() 		
 
-		determineSettingsMeasurementCurveLineHighlightIndicator(chartGesture);
+		determineSettingsDataEntityCurveLineHighlightIndicator(chartGesture);
 
-		DataEntity dataEntity = ( (BaseEntry)selectedEntry).getDataEntity();
+		DataEntity dataEntity = ( (BaseDataEntityEntry)selectedEntry).getDataEntity();
 
 		assert mainActivity != null;
 
@@ -217,14 +217,14 @@ public class DataEntitiesLineChart extends LineChart {
 		});
 	}
 
-	private void determineSettingsMeasurementCurveLineHighlightIndicator(
+	private void determineSettingsDataEntityCurveLineHighlightIndicator(
 		ChartTouchListener.ChartGesture chartGesture
 	) {
 		if (getLineData()==null) {
 			return;
 		}
 
-		LineDataSet dataEntityCurveLineDataSet = ((LineDataSet) getLineData().getDataSetByLabel(CURVE_MEASUREMENT, false));
+		LineDataSet dataEntityCurveLineDataSet = ((LineDataSet) getLineData().getDataSetByLabel(CURVE_DATA_ENTITY, false));
 
 		if (dataEntityCurveLineDataSet != null) {
 
@@ -260,33 +260,37 @@ public class DataEntitiesLineChart extends LineChart {
 
 	public void loadChartSettings() {
 		limitLinesBoundaries.initLimitLines(paletteColorDeterminer);
-		lineChartScaler.setLimitLinesBoundaries(limitLinesBoundaries);
-		lineChartSettings.setLimitLinesBoundaries(limitLinesBoundaries);
+		scaler.setLimitLinesBoundaries(limitLinesBoundaries);
+		settings.setLimitLinesBoundaries(limitLinesBoundaries);
 
-		lineChartSettings.setChartSettingsFor(this);
+		settings.setChartSettingsFor(this);
 	}
 
-	public LineChartScaler getLineChartScaler() {
-		return lineChartScaler;
+	public LineChartScaler getScaler() {
+		return scaler;
 	}
 
 	public void scale() {
-		lineChartScaler.scale(this);
+		scaler.scale(this);
 	}
 
 	public void animateFitScreen(long duration) {
 		assert mainActivity != null;
 
 		mainActivity.runOnUiThread( () ->
-				DataEntitiesLineChart.super.animateFitScreen(duration)
+				DataEntityLineChart.super.animateFitScreen(duration)
 		);
 	}
 	public void animateZoomToCenter(final float targetScaleX, final float targetScaleY, long duration) {
 		assert mainActivity != null;
 
 		mainActivity.runOnUiThread( () ->
-				DataEntitiesLineChart.super.animateZoomToCenter(targetScaleX, targetScaleY, duration, null)
+				DataEntityLineChart.super.animateZoomToCenter(targetScaleX, targetScaleY, duration, null)
 		);
+	}
+
+	public LineChartSettings getSettings(){
+		return settings;
 	}
 
 }

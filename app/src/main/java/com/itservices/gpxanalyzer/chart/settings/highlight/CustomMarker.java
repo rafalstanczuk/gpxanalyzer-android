@@ -18,9 +18,9 @@ import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.utils.MPPointF;
 import com.itservices.gpxanalyzer.R;
-import com.itservices.gpxanalyzer.chart.DataEntitiesLineChart;
-import com.itservices.gpxanalyzer.chart.entry.CurveMeasurementEntry;
-import com.itservices.gpxanalyzer.chart.entry.SingleMeasurementEntry;
+import com.itservices.gpxanalyzer.chart.DataEntityLineChart;
+import com.itservices.gpxanalyzer.chart.entry.CurveDataEntityEntry;
+import com.itservices.gpxanalyzer.chart.entry.SingleDataEntityEntry;
 import com.itservices.gpxanalyzer.data.DataEntity;
 import com.itservices.gpxanalyzer.utils.common.FormatNumberUtil;
 
@@ -67,32 +67,32 @@ public class CustomMarker extends MarkerView {
 
     @Override
     public void refreshContent(Entry entry, Highlight highlight) {
-        DataEntitiesLineChart chartView = (DataEntitiesLineChart) getChartView();
+        DataEntityLineChart chartView = (DataEntityLineChart) getChartView();
 
         ChartTouchListener.ChartGesture chartGesture = chartView.getChartTouchListener()
                 .getLastGesture();
 
-        if (entry instanceof CurveMeasurementEntry) {
-            CurveMeasurementEntry curveMeasurementEntry = (CurveMeasurementEntry) entry;
-            DataEntity dataEntity = curveMeasurementEntry.getDataEntity();
+        if (entry instanceof CurveDataEntityEntry) {
+            CurveDataEntityEntry curveDataEntityEntry = (CurveDataEntityEntry) entry;
+            DataEntity dataEntity = curveDataEntityEntry.getDataEntity();
 
             SpannableStringBuilder timeLine = getSpannableStringBuilder(
                     FormatNumberUtil.getFormattedTime(dataEntity.getTimestampMillis()), " h"
             );
             SpannableStringBuilder valueLine = getSpannableStringBuilder(
-                    String.valueOf((int) curveMeasurementEntry.getY()), " " + dataEntity.getUnitList().get( dataEntity.getPrimaryDataIndex() ));
+                    String.valueOf((int) curveDataEntityEntry.getY()), " " + dataEntity.getUnitList().get( dataEntity.getPrimaryDataIndex() ));
 
             markerTextViewTime.setText(timeLine, TextView.BufferType.SPANNABLE);
             markerTextViewValue.setText(valueLine, TextView.BufferType.SPANNABLE);
-        } else if (entry instanceof SingleMeasurementEntry) {
-            SingleMeasurementEntry singleMeasurementEntry = (SingleMeasurementEntry) entry;
-            DataEntity dataEntity = singleMeasurementEntry.getDataEntity();
+        } else if (entry instanceof SingleDataEntityEntry) {
+            SingleDataEntityEntry singleDataEntityEntry = (SingleDataEntityEntry) entry;
+            DataEntity dataEntity = singleDataEntityEntry.getDataEntity();
 
             SpannableStringBuilder timeLine = getSpannableStringBuilder(
                     FormatNumberUtil.getFormattedTime(dataEntity.getTimestampMillis()), " h"
             );
             SpannableStringBuilder valueLine = getSpannableStringBuilder(
-                    String.valueOf((int) singleMeasurementEntry.getY()), " " + dataEntity.getUnitList().get( dataEntity.getPrimaryDataIndex() ));
+                    String.valueOf((int) singleDataEntityEntry.getY()), " " + dataEntity.getUnitList().get( dataEntity.getPrimaryDataIndex() ));
 
             markerTextViewTime.setText(timeLine, TextView.BufferType.SPANNABLE);
             markerTextViewValue.setText(valueLine, TextView.BufferType.SPANNABLE);
@@ -103,7 +103,7 @@ public class CustomMarker extends MarkerView {
 
     @Override
     public void draw(Canvas canvas, float posX, float posY) {
-        DataEntitiesLineChart chartView = (DataEntitiesLineChart) getChartView();
+        DataEntityLineChart chartView = (DataEntityLineChart) getChartView();
 
         ChartTouchListener.ChartGesture chartGesture = chartView.getChartTouchListener()
                 .getLastGesture();

@@ -25,11 +25,11 @@ public class LineChartScaler {
 	LineChartScaler() {
 	}
 
-	public void setMeasurementCurveStatisticResults(StatisticResults dataEntityCurveStatisticResults) {
+	public void setDataEntityCurveStatisticResults(StatisticResults dataEntityCurveStatisticResults) {
 		this.dataEntityCurveStatisticResults = dataEntityCurveStatisticResults;
 	}
 
-	public void setMeasurementSingleStatisticResults(StatisticResults dataEntitySingleStatisticResults) {
+	public void setDataEntitySingleStatisticResults(StatisticResults dataEntitySingleStatisticResults) {
 		this.dataEntitySingleStatisticResults = dataEntitySingleStatisticResults;
 	}
 
@@ -37,7 +37,7 @@ public class LineChartScaler {
 		this.limitLinesBoundaries = limitLinesBoundaries;
 	}
 
-	public void scale(DataEntitiesLineChart lineChart) {
+	public void scale(DataEntityLineChart lineChart) {
 		double r = dataEntityCurveStatisticResults.getMaxValue() - dataEntityCurveStatisticResults.getMinValue();
 		double o = r * 0.1f;
 		minY = (dataEntityCurveStatisticResults.getMinValue() - o);

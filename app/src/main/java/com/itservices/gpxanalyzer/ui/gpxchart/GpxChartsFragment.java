@@ -28,22 +28,22 @@ public class GpxChartsFragment extends Fragment {
         gpxChartsViewModel.setOrientation(getResources().getConfiguration().orientation);
     }
 
-	@Override
-	public View onCreateView(
-			@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState
-	) {
+    @Override
+    public View onCreateView(
+            @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState
+    ) {
 
-		binding = FragmentGpxChartsBinding.inflate(inflater, container, false);
-		binding.setViewModel(gpxChartsViewModel);
-		binding.setLifecycleOwner(getViewLifecycleOwner());
+        binding = FragmentGpxChartsBinding.inflate(inflater, container, false);
+        binding.setViewModel(gpxChartsViewModel);
+        binding.setLifecycleOwner(getViewLifecycleOwner());
 
         binding.loadButton.setOnClickListener(view ->
                 gpxChartsViewModel.loadData(requireContext(), R.raw.skiing20250121t091423)
         );
 
-        bindHeightTimeChartUI();
+        bindAltitudeTimeChartUI();
 
-        bindVelocityTimeChartUI();
+        bindSpeedTimeChartUI();
 
         observeRequestStatus();
 
@@ -52,41 +52,49 @@ public class GpxChartsFragment extends Fragment {
 
     private void observeRequestStatus() {
         gpxChartsViewModel.getRequestStatusLiveData().observe(getViewLifecycleOwner(), requestStatus -> {
-            binding.loadButton.setEnabled( gpxChartsViewModel.getButtonEnabled(requestStatus) );
-            binding.heightTimeAutoscalingButton.setEnabled( gpxChartsViewModel.getButtonEnabled(requestStatus) );
-            binding.heightTimeZoomInButton.setEnabled( gpxChartsViewModel.getButtonEnabled(requestStatus) );
-            binding.heightTimeZoomOutButton.setEnabled( gpxChartsViewModel.getButtonEnabled(requestStatus) );
+            binding.loadButton.setEnabled(gpxChartsViewModel.getButtonEnabled(requestStatus));
+            binding.altitudeScaleControlLayout.timeAutoscalingButton.setEnabled(gpxChartsViewModel.getButtonEnabled(requestStatus));
+            binding.altitudeScaleControlLayout.timeZoomInButton.setEnabled(gpxChartsViewModel.getButtonEnabled(requestStatus));
+            binding.altitudeScaleControlLayout.timeZoomOutButton.setEnabled(gpxChartsViewModel.getButtonEnabled(requestStatus));
 
-            binding.velocityTimeAutoscalingButton.setEnabled( gpxChartsViewModel.getButtonEnabled(requestStatus) );
-            binding.velocityTimeZoomInButton.setEnabled( gpxChartsViewModel.getButtonEnabled(requestStatus) );
-            binding.velocityTimeZoomOutButton.setEnabled( gpxChartsViewModel.getButtonEnabled(requestStatus) );
+            binding.speedScaleControlLayout.timeAutoscalingButton.setEnabled(gpxChartsViewModel.getButtonEnabled(requestStatus));
+            binding.speedScaleControlLayout.timeZoomInButton.setEnabled(gpxChartsViewModel.getButtonEnabled(requestStatus));
+            binding.speedScaleControlLayout.timeZoomOutButton.setEnabled(gpxChartsViewModel.getButtonEnabled(requestStatus));
         });
     }
 
-    private void bindVelocityTimeChartUI() {
-        gpxChartsViewModel.bindVelocityTimeChart(binding.velocityTimeLineChart, (MainActivity) requireActivity());
-        binding.velocityTimeAutoscalingButton.setOnClickListener(view ->
-                gpxChartsViewModel.resetTimeScale(binding.velocityTimeLineChart)
+    private void bindSpeedTimeChartUI() {
+        gpxChartsViewModel.bindSpeedTimeChart(binding.speedPropertiesControlLayout, binding.speedTimeLineChart, (MainActivity) requireActivity());
+        binding.speedScaleControlLayout.timeAutoscalingButton.setOnClickListener(view ->
+                gpxChartsViewModel.resetTimeScale(binding.speedTimeLineChart)
         );
-        binding.velocityTimeZoomInButton.setOnClickListener(view ->
-                gpxChartsViewModel.zoomIn(binding.velocityTimeLineChart)
+        binding.speedScaleControlLayout.timeZoomInButton.setOnClickListener(view ->
+                gpxChartsViewModel.zoomIn(binding.speedTimeLineChart)
         );
-        binding.velocityTimeZoomOutButton.setOnClickListener(view ->
-                gpxChartsViewModel.zoomOut(binding.velocityTimeLineChart)
+        binding.speedScaleControlLayout.timeZoomOutButton.setOnClickListener(view ->
+                gpxChartsViewModel.zoomOut(binding.speedTimeLineChart)
         );
+
+        binding.speedPropertiesControlLayout.onOffColorizedCirclesCheckBox
+                .setOnCheckedChangeListener((buttonView, isChecked) -> gpxChartsViewModel.setSpeedDrawIconEnabled(isChecked)
+                );
     }
 
-    private void bindHeightTimeChartUI() {
-        gpxChartsViewModel.bindHeightTimeChart(binding.heightTimeLineChart, (MainActivity) requireActivity());
-        binding.heightTimeAutoscalingButton.setOnClickListener(view ->
-                gpxChartsViewModel.resetTimeScale(binding.heightTimeLineChart)
+    private void bindAltitudeTimeChartUI() {
+        gpxChartsViewModel.bindAltitudeTimeChart(binding.altitudePropertiesControlLayout, binding.altitudeTimeLineChart, (MainActivity) requireActivity());
+        binding.altitudeScaleControlLayout.timeAutoscalingButton.setOnClickListener(view ->
+                gpxChartsViewModel.resetTimeScale(binding.altitudeTimeLineChart)
         );
-        binding.heightTimeZoomInButton.setOnClickListener(view ->
-                gpxChartsViewModel.zoomIn(binding.heightTimeLineChart)
+        binding.altitudeScaleControlLayout.timeZoomInButton.setOnClickListener(view ->
+                gpxChartsViewModel.zoomIn(binding.altitudeTimeLineChart)
         );
-        binding.heightTimeZoomOutButton.setOnClickListener(view ->
-                gpxChartsViewModel.zoomOut(binding.heightTimeLineChart)
+        binding.altitudeScaleControlLayout.timeZoomOutButton.setOnClickListener(view ->
+                gpxChartsViewModel.zoomOut(binding.altitudeTimeLineChart)
         );
+
+        binding.altitudePropertiesControlLayout.onOffColorizedCirclesCheckBox
+                .setOnCheckedChangeListener((buttonView, isChecked) -> gpxChartsViewModel.setAltitudeDrawIconEnabled(isChecked)
+                );
     }
 
     @Override

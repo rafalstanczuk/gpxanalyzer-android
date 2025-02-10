@@ -5,13 +5,15 @@ import static com.itservices.gpxanalyzer.chart.RequestStatus.DEFAULT;
 import android.content.Context;
 import android.content.res.Configuration;
 
+import androidx.annotation.UiThread;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.itservices.gpxanalyzer.MainActivity;
-import com.itservices.gpxanalyzer.chart.DataEntitiesLineChart;
+import com.itservices.gpxanalyzer.chart.DataEntityLineChart;
 import com.itservices.gpxanalyzer.chart.RequestStatus;
+import com.itservices.gpxanalyzer.databinding.PropertiesControlLayoutBinding;
 import com.itservices.gpxanalyzer.usecase.MultipleSyncedGpxChartUseCase;
 
 import java.util.Objects;
@@ -40,6 +42,7 @@ public class GpxChartsViewModel extends ViewModel {
     MultipleSyncedGpxChartUseCase multipleSyncedGpxChartUseCase;
 
     private final PublishSubject<Integer> orientationPublishSubject = PublishSubject.create();
+
 
     private final MutableLiveData<RequestStatus> requestStatusMutableLiveData = new MutableLiveData<>(DEFAULT);
     private final MutableLiveData<Integer> percentageProcessingProgressLiveData = new MutableLiveData<>(0);
@@ -85,12 +88,20 @@ public class GpxChartsViewModel extends ViewModel {
         multipleSyncedGpxChartUseCase.disposeAll();
     }
 
-    public void bindHeightTimeChart(DataEntitiesLineChart heightTimeLineChart, MainActivity requireActivity) {
-        multipleSyncedGpxChartUseCase.bindHeightTimeChart(heightTimeLineChart, requireActivity);
+    public void bindAltitudeTimeChart(PropertiesControlLayoutBinding propertiesControlLayoutBinding, DataEntityLineChart altitudeTimeLineChart, MainActivity requireActivity) {
+        altitudeTimeLineChart.getSettings().setDrawIconsEnabled(
+                propertiesControlLayoutBinding.onOffColorizedCirclesCheckBox.isChecked()
+        );
+
+        multipleSyncedGpxChartUseCase.bindAltitudeTimeChart(altitudeTimeLineChart, requireActivity);
     }
 
-    public void bindVelocityTimeChart(DataEntitiesLineChart velocityTimeLineChart, MainActivity requireActivity) {
-        multipleSyncedGpxChartUseCase.bindVelocityTimeChart(velocityTimeLineChart, requireActivity);
+    public void bindSpeedTimeChart(PropertiesControlLayoutBinding propertiesControlLayoutBinding, DataEntityLineChart speedTimeLineChart, MainActivity requireActivity) {
+        speedTimeLineChart.getSettings().setDrawIconsEnabled(
+                propertiesControlLayoutBinding.onOffColorizedCirclesCheckBox.isChecked()
+        );
+
+        multipleSyncedGpxChartUseCase.bindSpeedTimeChart(speedTimeLineChart, requireActivity);
     }
 
     public void loadData(Context requireContext, int rawGpxDataId) {
@@ -174,15 +185,25 @@ public class GpxChartsViewModel extends ViewModel {
                 });
     }
 
-    public void resetTimeScale(DataEntitiesLineChart dataEntitiesLineChart) {
+    public void resetTimeScale(DataEntityLineChart dataEntitiesLineChart) {
         dataEntitiesLineChart.animateFitScreen(1000);
     }
 
-    public void zoomIn(DataEntitiesLineChart dataEntitiesLineChart) {
-        dataEntitiesLineChart.animateZoomToCenter(1.1f,1.0f, 200);
+    public void zoomIn(DataEntityLineChart dataEntitiesLineChart) {
+        dataEntitiesLineChart.animateZoomToCenter(1.1f, 1.0f, 200);
     }
 
-    public void zoomOut(DataEntitiesLineChart dataEntitiesLineChart) {
-        dataEntitiesLineChart.animateZoomToCenter(0.90f,1.0f, 200);
+    public void zoomOut(DataEntityLineChart dataEntitiesLineChart) {
+        dataEntitiesLineChart.animateZoomToCenter(0.90f, 1.0f, 200);
+    }
+
+    @UiThread
+    public void setAltitudeDrawIconEnabled(boolean isChecked) {
+        multipleSyncedGpxChartUseCase.getAltitudeTimeChartController().setDrawIconsEnabled(isChecked);
+    }
+
+    @UiThread
+    public void setSpeedDrawIconEnabled(boolean isChecked) {
+        multipleSyncedGpxChartUseCase.getSpeedTimeChartController().setDrawIconsEnabled(isChecked);
     }
 }

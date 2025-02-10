@@ -4,11 +4,10 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.highlight.Highlight;
-import com.itservices.gpxanalyzer.chart.entry.CurveMeasurementEntry;
+import com.itservices.gpxanalyzer.chart.entry.CurveDataEntityEntry;
 import com.itservices.gpxanalyzer.chart.entry.EntryListCreator;
-import com.itservices.gpxanalyzer.chart.entry.SingleMeasurementEntry;
+import com.itservices.gpxanalyzer.chart.entry.SingleDataEntityEntry;
 import com.itservices.gpxanalyzer.chart.legend.PaletteColorDeterminer;
-import com.itservices.gpxanalyzer.chart.settings.LineChartSettings;
 import com.itservices.gpxanalyzer.data.gpx.StatisticResults;
 
 import java.util.ArrayList;
@@ -17,19 +16,12 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-/**
- * Responsible for:
- *  - Creating LineDataSets from StatisticResults
- *  - Applying chart styling (delegates to LineChartSettings)
- *  - Updating chart scale (delegates to LineChartScaler)
- *  - Checking preconditions, setting data, re-applying highlights
- */
 public class ChartProvider {
 
-    private static final List<String> DEFAULT_TARGET_MATCHED_LINE_LABEL_DATA_TO_SHOW_WITH_MEASUREMENT_BOUNDARIES =
-            Arrays.asList(CurveMeasurementEntry.CURVE_MEASUREMENT);
+    private static final List<String> DEFAULT_TARGET_MATCHED_LINE_LABEL_DATA_TO_SHOW_WITH_DATA_ENTITY_BOUNDARIES =
+            Arrays.asList(CurveDataEntityEntry.CURVE_DATA_ENTITY);
 
-    private DataEntitiesLineChart dataEntitiesLineChart;
+    private DataEntityLineChart chart;
 
     @Inject
     public ChartProvider() {
@@ -38,41 +30,41 @@ public class ChartProvider {
     public LineDataSet createCurveDataEntityDataSet(StatisticResults curveResults) {
         if (curveResults == null) return null;
 
-        PaletteColorDeterminer paletteColorDeterminer = dataEntitiesLineChart.getPaletteColorDeterminer();
+        PaletteColorDeterminer paletteColorDeterminer = chart.getPaletteColorDeterminer();
         paletteColorDeterminer.initPalette(curveResults);
 
         ArrayList<Entry> entries =
-                EntryListCreator.createCurveMeasurementEntryList(curveResults, paletteColorDeterminer);
+                EntryListCreator.createCurveDataEntityEntryList(curveResults, paletteColorDeterminer);
 
         // needed for scaling
-        dataEntitiesLineChart.getLineChartScaler().setMeasurementCurveStatisticResults(curveResults);
+        chart.getScaler().setDataEntityCurveStatisticResults(curveResults);
 
         if (!entries.isEmpty()) {
-            return CurveMeasurementEntry.createCurveMeasurementLineDataSet(entries);
+            return CurveDataEntityEntry.createCurveDataEntityLineDataSet(entries, chart.getSettings());
         }
         return null;
     }
 
-    public LineDataSet createSingleDataEntityDataSet(StatisticResults singleResults) {
-        if (singleResults == null) return null;
+    public LineDataSet createSingleDataEntityDataSet(StatisticResults statisticResults) {
+        if (statisticResults == null) return null;
 
-        PaletteColorDeterminer paletteColorDeterminer = dataEntitiesLineChart.getPaletteColorDeterminer();
+        PaletteColorDeterminer paletteColorDeterminer = chart.getPaletteColorDeterminer();
 
         ArrayList<Entry> entries =
-                EntryListCreator.createSingleMeasurementEntryList(singleResults, paletteColorDeterminer);
+                EntryListCreator.createSingleDataEntityEntryList(statisticResults, paletteColorDeterminer);
 
         // needed for scaling
-        dataEntitiesLineChart.getLineChartScaler().setMeasurementSingleStatisticResults(singleResults);
+        chart.getScaler().setDataEntitySingleStatisticResults(statisticResults);
 
-        return SingleMeasurementEntry.createSingleMeasurementLineDataSet(entries);
+        return SingleDataEntityEntry.createSingleDataEntityLineDataSet(entries);
     }
 
     /**
      * Initialize the chart with empty data + styling.
      */
-    public void initChart(DataEntitiesLineChart lineChart, LineChartSettings lineChartSettings) {
-        this.dataEntitiesLineChart = lineChart;
-        lineChart.initChart(lineChartSettings);
+    public void initChart(DataEntityLineChart chart) {
+        this.chart = chart;
+        chart.initChart();
     }
 
     /**
@@ -91,21 +83,21 @@ public class ChartProvider {
             lineData.addDataSet(ds);
         }
 
-        dataEntitiesLineChart.clear();
-        dataEntitiesLineChart.loadChartSettings();
-        dataEntitiesLineChart.setData(lineData);
-        dataEntitiesLineChart.scale();
-        dataEntitiesLineChart.highlightValue(highlight, true);
-        dataEntitiesLineChart.invalidate();
+        chart.clear();
+        chart.setData(lineData);
+        chart.loadChartSettings();
+        chart.scale();
+        chart.highlightValue(highlight, true);
+        chart.invalidate();
 
         return RequestStatus.DONE;
     }
 
     private boolean isDataSetAmountValidToShow(final List<LineDataSet> dataSets) {
         int currentMatchedCount = 0;
-        int requiredCount = DEFAULT_TARGET_MATCHED_LINE_LABEL_DATA_TO_SHOW_WITH_MEASUREMENT_BOUNDARIES.size();
+        int requiredCount = DEFAULT_TARGET_MATCHED_LINE_LABEL_DATA_TO_SHOW_WITH_DATA_ENTITY_BOUNDARIES.size();
 
-        for (String requiredLabel : DEFAULT_TARGET_MATCHED_LINE_LABEL_DATA_TO_SHOW_WITH_MEASUREMENT_BOUNDARIES) {
+        for (String requiredLabel : DEFAULT_TARGET_MATCHED_LINE_LABEL_DATA_TO_SHOW_WITH_DATA_ENTITY_BOUNDARIES) {
             for (LineDataSet ds : dataSets) {
                 if (ds.getLabel().contentEquals(requiredLabel)) {
                     currentMatchedCount++;
@@ -115,7 +107,8 @@ public class ChartProvider {
         return (currentMatchedCount == requiredCount);
     }
 
-    public DataEntitiesLineChart getMeasurementLineChart() {
-        return dataEntitiesLineChart;
+    public DataEntityLineChart getChart() {
+        return chart;
     }
+
 }

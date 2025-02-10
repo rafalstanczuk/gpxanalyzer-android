@@ -14,8 +14,7 @@ import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.itservices.gpxanalyzer.MainActivity;
-import com.itservices.gpxanalyzer.chart.entry.BaseEntry;
-import com.itservices.gpxanalyzer.chart.settings.LineChartSettings;
+import com.itservices.gpxanalyzer.chart.entry.BaseDataEntityEntry;
 import com.itservices.gpxanalyzer.data.DataEntity;
 import com.itservices.gpxanalyzer.data.gpx.StatisticResults;
 
@@ -32,7 +31,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     private List<LineDataSet> currentLineDataSetList = new ArrayList<>();
     private Highlight currentHighlight;
     private final ChartProvider chartProvider;
-    private final PublishSubject<BaseEntry> baseEntrySelectionPublishSubject = PublishSubject.create();
+    private final PublishSubject<BaseDataEntityEntry> baseEntrySelectionPublishSubject = PublishSubject.create();
 
     @Inject
     public ChartController(ChartProvider chartProvider) {
@@ -43,14 +42,14 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
      * Initialize the chart with no data (just styling).
      */
     @UiThread
-    public void bindChart(@NonNull DataEntitiesLineChart lineChartBindings, @NonNull LineChartSettings lineChartSettings, @NonNull MainActivity mainActivity) {
-        lineChartBindings.bindActivity(mainActivity);
-        chartProvider.initChart(lineChartBindings, lineChartSettings);
+    public void bindChart(@NonNull DataEntityLineChart chartBindings, @NonNull MainActivity mainActivity) {
+        chartBindings.bindActivity(mainActivity);
+        chartProvider.initChart(chartBindings);
         // clear any existing LiveData sets
         clearLineDataSets();
 
-        lineChartBindings.setOnChartValueSelectedListener(this);
-        lineChartBindings.setOnChartGestureListener(this);
+        chartBindings.setOnChartValueSelectedListener(this);
+        chartBindings.setOnChartGestureListener(this);
     }
 
     @UiThread
@@ -118,15 +117,15 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
         }
     }
 
-    public Observable<BaseEntry> getSelection() {
+    public Observable<BaseDataEntityEntry> getSelection() {
         return baseEntrySelectionPublishSubject;
     }
 
     private void setSelectionEntry(Entry entry, boolean publishSelection) {
-        chartProvider.getMeasurementLineChart().setHighlightedEntry(entry);
+        chartProvider.getChart().setHighlightedEntry(entry);
 
-        if (publishSelection && (entry instanceof BaseEntry) ) {
-            baseEntrySelectionPublishSubject.onNext((BaseEntry) entry);
+        if (publishSelection && (entry instanceof BaseDataEntityEntry) ) {
+            baseEntrySelectionPublishSubject.onNext((BaseDataEntityEntry) entry);
         }
     }
 
@@ -136,10 +135,10 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
 
 
     public void manualSelectEntry(long selectedTimeMillis) {
-        manualSelectEntryOnSelectedTime(chartProvider.getMeasurementLineChart(), selectedTimeMillis, true,false);
+        manualSelectEntryOnSelectedTime(chartProvider.getChart(), selectedTimeMillis, true,false);
     }
 
-    private void manualSelectEntryOnSelectedTime(DataEntitiesLineChart lineChart, long selectedTimeMillis, boolean centerViewToSelection, boolean callListeners) {
+    private void manualSelectEntryOnSelectedTime(DataEntityLineChart lineChart, long selectedTimeMillis, boolean centerViewToSelection, boolean callListeners) {
 
         lineChart.getChartTouchListener()
                 .setLastGesture( ChartTouchListener.ChartGesture.NONE );
@@ -160,12 +159,14 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
             LineDataSet lineDataSet = (LineDataSet) iLineDataSet;
 
             for (Entry entry : lineDataSet.getEntries()) {
-                if (!(entry instanceof BaseEntry)) break;
-                DataEntity dataEntity = ((BaseEntry) entry).getDataEntity();
+                if (!(entry instanceof BaseDataEntityEntry)) break;
+                DataEntity dataEntity = ((BaseDataEntityEntry) entry).getDataEntity();
                 long timeInt = dataEntity.getTimestampMillis();
                 if (timeInt == selectedTimeMillis) {
                     setSelectionEntry(entry, false);
                     lineChart.highlightValue(entry.getX(), entry.getY(), dataSetIndex, callListeners);
+
+                    setSelectionHighlight(lineChart.getHighlighted()[0]);
 
                     if(centerViewToSelection) {
                         lineChart.centerViewTo(entry.getX(), entry.getY(), YAxis.AxisDependency.LEFT);
@@ -176,9 +177,9 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
         }
     }
 
-    private void resetMarkerAndClearSelection(DataEntitiesLineChart lineChart) {
+    private void resetMarkerAndClearSelection(DataEntityLineChart lineChart) {
         currentHighlight = null;
-        chartProvider.getMeasurementLineChart().setHighlightedEntry(null);
+        chartProvider.getChart().setHighlightedEntry(null);
 
         manualSelectEntryOnSelectedTime(lineChart, -1, false, true);
     }
@@ -204,7 +205,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     }
 
     @Override
-    public void onChartFling(MotionEvent me1, MotionEvent me2, float velocityX, float velocityY) {
+    public void onChartFling(MotionEvent me1, MotionEvent me2, float speedX, float speedY) {
     }
 
     @Override
@@ -213,7 +214,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
 
     @Override
     public void onChartTranslate(MotionEvent me, float dX, float dY) {
-        chartProvider.getMeasurementLineChart().highlightCenterValueInTranslation();
+        chartProvider.getChart().highlightCenterValueInTranslation();
     }
 
     @Override
@@ -224,6 +225,12 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
 
     @Override
     public void onNothingSelected() {
-        resetMarkerAndClearSelection(chartProvider.getMeasurementLineChart());
+        resetMarkerAndClearSelection(chartProvider.getChart());
+    }
+
+    @UiThread
+    public void setDrawIconsEnabled(boolean isChecked) {
+        chartProvider.getChart().getSettings().setDrawIconsEnabled(isChecked);
+        tryToUpdateDataChart();
     }
 }

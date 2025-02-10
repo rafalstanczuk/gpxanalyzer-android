@@ -17,17 +17,17 @@ import com.itservices.gpxanalyzer.utils.ui.IconsUtil;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-public class SingleMeasurementEntry extends BaseEntry {
-	public static final String MEASUREMENT = "MEASUREMENT";
-	public static boolean SHOW_COLOR_SINGLE_MEASUREMENT_RANGE_CIRCLES_ICONS = true;
+public class SingleDataEntityEntry extends BaseDataEntityEntry {
+	public static final String SINGLE_DATA_ENTITY = "SINGLE_DATA_ENTITY";
+	public static boolean SHOW_COLOR_SINGLE_DATA_ENTITY_RANGE_CIRCLES_ICONS = true;
 
-	SingleMeasurementEntry(
+	SingleDataEntityEntry(
 			DataEntity dataEntity, float x, float y, Drawable icon, StatisticResults statisticResults
 	) {
 		super(dataEntity, x, y, icon, statisticResults);
 	}
 
-	public static SingleMeasurementEntry create(
+	public static SingleDataEntityEntry create(
 			PaletteColorDeterminer paletteColorDeterminer,
 			StatisticResults statisticResults,
 			float x, float y
@@ -38,7 +38,7 @@ public class SingleMeasurementEntry extends BaseEntry {
 			int colorInt = paletteColorDeterminer.getBoundaryFrom(y).getColor();
 			drawableIcon = IconsUtil.getDrawableIconForAreaColorId(colorInt, 10, false);
 		} catch (Exception ex) {
-			Log.e("MeasurementCurveEntry", "create: ", ex);
+			Log.e("DataEntityCurveEntry", "create: ", ex);
 		}
 
 		DataEntity dataEntity = statisticResults.getDataEntityVector().elementAt((int) x);
@@ -48,15 +48,15 @@ public class SingleMeasurementEntry extends BaseEntry {
 
 		float timeConcat = HourMinutesAxisValueFormatter.combineIntoFloatTime(calendar);
 
-		return new SingleMeasurementEntry(
-				dataEntity, timeConcat, y, SHOW_COLOR_SINGLE_MEASUREMENT_RANGE_CIRCLES_ICONS ? drawableIcon : null,
+		return new SingleDataEntityEntry(
+				dataEntity, timeConcat, y, SHOW_COLOR_SINGLE_DATA_ENTITY_RANGE_CIRCLES_ICONS ? drawableIcon : null,
 				statisticResults
 		);
 	}
 
 	@NonNull
-	public static LineDataSet createSingleMeasurementLineDataSet(ArrayList<Entry> entries) {
-		LineDataSet updatedDataSet = new LineDataSet(entries, MEASUREMENT);
+	public static LineDataSet createSingleDataEntityLineDataSet(ArrayList<Entry> entries) {
+		LineDataSet updatedDataSet = new LineDataSet(entries, SINGLE_DATA_ENTITY);
 
 		updatedDataSet.setLineWidth(0.0f);
 		updatedDataSet.setDrawIcons(true);

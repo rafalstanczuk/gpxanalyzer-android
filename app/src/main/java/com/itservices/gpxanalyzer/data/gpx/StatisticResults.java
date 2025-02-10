@@ -17,12 +17,12 @@ public class StatisticResults {
     private int primaryDataIndex = DEFAULT_PRIMARY_DATA_INDEX;
 
     public StatisticResults(Vector<DataEntity> dataEntityVector) {
-        setMeasurements(dataEntityVector);
+        setDataEntityVector(dataEntityVector);
     }
 
     public StatisticResults(Vector<DataEntity> dataEntityVector, int primaryDataIndex) {
         this.primaryDataIndex = primaryDataIndex;
-        setMeasurements(dataEntityVector);
+        setDataEntityVector(dataEntityVector);
     }
 
     public void setPrimaryDataIndex(int primaryDataIndex) {
@@ -55,7 +55,7 @@ public class StatisticResults {
         return dataEntityVector;
     }
 
-    public void setMeasurements(Vector<DataEntity> dataEntityVector) {
+    public void setDataEntityVector(Vector<DataEntity> dataEntityVector) {
         clear();
 
         this.dataEntityVector = copyDataEntityVector(dataEntityVector);

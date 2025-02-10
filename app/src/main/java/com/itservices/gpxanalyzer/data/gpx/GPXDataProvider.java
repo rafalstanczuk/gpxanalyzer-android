@@ -33,7 +33,7 @@ public class GPXDataProvider {
     private static List<String> NAME_LIST = new ArrayList<>();
     private static List<String> UNIT_LIST = new ArrayList<>();
     @Inject
-    public GPXParser mParser;
+    public GPXParser parser;
 
     private final PublishSubject<Integer> percentageProgressSubject = PublishSubject.create();
 
@@ -50,32 +50,32 @@ public class GPXDataProvider {
     public Observable<Vector<DataEntity>> provide(Context context, int rawId) {
         return Observable.fromCallable(() -> {
             InputStream inputStream = context.getResources().openRawResource(rawId);
-            return loadDataEntities(inputStream, DataEntity.DEFAULT_PRIMARY_DATA_INDEX);
+            return loadDataEntity(inputStream, DataEntity.DEFAULT_PRIMARY_DATA_INDEX);
         });
     }
 
     public Observable<Vector<DataEntity>> provide(InputStream inputStream) {
-        return Observable.fromCallable(() -> loadDataEntities(inputStream, DataEntity.DEFAULT_PRIMARY_DATA_INDEX));
+        return Observable.fromCallable(() -> loadDataEntity(inputStream, DataEntity.DEFAULT_PRIMARY_DATA_INDEX));
     }
 
     public Observable<Vector<DataEntity>> provide(Context context, int rawId, int primaryDataIndex) {
         return Observable.fromCallable(() -> {
             InputStream inputStream = context.getResources().openRawResource(rawId);
-            return loadDataEntities(inputStream, primaryDataIndex);
+            return loadDataEntity(inputStream, primaryDataIndex);
         });
     }
 
     public Observable<Vector<DataEntity>> provide(InputStream inputStream, int primaryDataIndex) {
-        return Observable.fromCallable(() -> loadDataEntities(inputStream, primaryDataIndex));
+        return Observable.fromCallable(() -> loadDataEntity(inputStream, primaryDataIndex));
     }
 
     @NonNull
-    private Vector<DataEntity> loadDataEntities(InputStream inputStream, int primaryDataIndex) {
+    private Vector<DataEntity> loadDataEntity(InputStream inputStream, int primaryDataIndex) {
         Vector<DataEntity> gpxPointList = new Vector<>();
 
         Gpx parsedGpx = null;
         try {
-            parsedGpx = mParser.parse(inputStream);
+            parsedGpx = parser.parse(inputStream);
         } catch (IOException | XmlPullParserException e) {
             e.printStackTrace();
         }

@@ -10,9 +10,9 @@ import com.github.mikephil.charting.interfaces.datasets.IDataSet;
 import com.github.mikephil.charting.listener.BarLineChartTouchListener;
 import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.utils.MPPointD;
-import com.itservices.gpxanalyzer.chart.DataEntitiesLineChart;
-import com.itservices.gpxanalyzer.chart.entry.BaseEntry;
-import com.itservices.gpxanalyzer.chart.entry.CurveMeasurementEntry;
+import com.itservices.gpxanalyzer.chart.DataEntityLineChart;
+import com.itservices.gpxanalyzer.chart.entry.BaseDataEntityEntry;
+import com.itservices.gpxanalyzer.chart.entry.CurveDataEntityEntry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,9 +36,9 @@ public class StaticChartHighlighter<T extends BarLineScatterCandleBubbleDataProv
 
 		ArrayList<Highlight> highlights = new ArrayList<>();
 
-		if (((DataEntitiesLineChart) mChart).isFullyZoomedOut()) {
+		if (((DataEntityLineChart) mChart).isFullyZoomedOut()) {
 			highlights = getHighlightsForClassEntries(
-				BaseEntry.class, set, dataSetIndex, xVal, rounding);
+				BaseDataEntityEntry.class, set, dataSetIndex, xVal, rounding);
 		} else {
 
 			switch (chartGesture) {
@@ -51,13 +51,13 @@ public class StaticChartHighlighter<T extends BarLineScatterCandleBubbleDataProv
 				case LONG_PRESS:
 				case SINGLE_TAP:
 					highlights = getHighlightsForClassEntries(
-						BaseEntry.class, set, dataSetIndex, xVal, rounding);
+						BaseDataEntityEntry.class, set, dataSetIndex, xVal, rounding);
 					break;
 
 				case FLING:
 				case DRAG:
 					highlights = getHighlightsForClassEntries(
-						CurveMeasurementEntry.class, set, dataSetIndex, xVal, rounding);
+						CurveDataEntityEntry.class, set, dataSetIndex, xVal, rounding);
 					break;
 			}
 		}

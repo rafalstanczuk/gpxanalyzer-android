@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.itservices.gpxanalyzer.chart.settings.LineChartSettings;
 import com.itservices.gpxanalyzer.chart.settings.axis.HourMinutesAxisValueFormatter;
 import com.itservices.gpxanalyzer.data.DataEntity;
 import com.itservices.gpxanalyzer.data.gpx.StatisticResults;
@@ -18,19 +19,19 @@ import com.itservices.gpxanalyzer.utils.ui.IconsUtil;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-public class CurveMeasurementEntry extends BaseEntry {
-	public static final String CURVE_MEASUREMENT = "CURVE_MEASUREMENT";
+public class CurveDataEntityEntry extends BaseDataEntityEntry {
+	public static final String CURVE_DATA_ENTITY = "CURVE_DATA_ENTITY";
 	public static final int FILL_COLOR_UNDER_CURVE = ColorUtil.rgb(0.96f, 0.96f, 0.96f);
 	public static final int FILL_COLOR_ALPHA_UNDER_CURVE = (int) (0.3f * 255.0f);
-	public static boolean SHOW_COLOR_CURVE_MEASUREMENT_RANGE_CIRCLES_ICONS = true;
+	public static boolean SHOW_COLOR_CURVE_DATA_ENTITY_RANGE_CIRCLES_ICONS = true;
 
-	CurveMeasurementEntry(
+	CurveDataEntityEntry(
 			DataEntity dataEntity, float x, float y, Drawable icon, StatisticResults statisticResults
 	) {
 		super(dataEntity, x, y, icon, statisticResults);
 	}
 
-	public static CurveMeasurementEntry create(
+	public static CurveDataEntityEntry create(
 		PaletteColorDeterminer paletteColorDeterminer,
 		StatisticResults statisticResults,
 		float x, float y
@@ -41,7 +42,7 @@ public class CurveMeasurementEntry extends BaseEntry {
 			int colorInt = paletteColorDeterminer.getBoundaryFrom(y).getColor();
 			drawableIcon = IconsUtil.getDrawableIconForAreaColorId(colorInt, 10, false);
 		} catch (Exception ex) {
-			Log.e("MeasurementCurveEntry", "create: ", ex);
+			Log.e("DataEntityCurveEntry", "create: ", ex);
 		}
 
 		DataEntity dataEntity = statisticResults.getDataEntityVector().elementAt((int) x);
@@ -51,16 +52,16 @@ public class CurveMeasurementEntry extends BaseEntry {
 
 		float timeConcat = HourMinutesAxisValueFormatter.combineIntoFloatTime(calendar);
 
-		return new CurveMeasurementEntry(
+		return new CurveDataEntityEntry(
 			dataEntity,
-			timeConcat, y, SHOW_COLOR_CURVE_MEASUREMENT_RANGE_CIRCLES_ICONS ? drawableIcon : null,
+			timeConcat, y, SHOW_COLOR_CURVE_DATA_ENTITY_RANGE_CIRCLES_ICONS ? drawableIcon : null,
 			statisticResults
 		);
 	}
 
 	@NonNull
-	public static LineDataSet createCurveMeasurementLineDataSet(ArrayList<Entry> entries) {
-		LineDataSet dataSet = new LineDataSet(entries, CURVE_MEASUREMENT);
+	public static LineDataSet 	createCurveDataEntityLineDataSet(ArrayList<Entry> entries, LineChartSettings settings) {
+		LineDataSet dataSet = new LineDataSet(entries, CURVE_DATA_ENTITY);
 		dataSet.setMode(LineDataSet.Mode.HORIZONTAL_BEZIER);
 		dataSet.setHighlightEnabled(true);
 
@@ -84,7 +85,7 @@ public class CurveMeasurementEntry extends BaseEntry {
 
 		dataSet.setHighLightColor(Color.BLACK);
 
-		dataSet.setDrawIcons(SHOW_COLOR_CURVE_MEASUREMENT_RANGE_CIRCLES_ICONS);
+		dataSet.setDrawIcons(settings.isDrawIconsEnabled());
 		dataSet.setDrawValues(false);
 
 		return dataSet;

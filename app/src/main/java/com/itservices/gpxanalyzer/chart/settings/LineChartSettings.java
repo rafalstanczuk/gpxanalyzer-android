@@ -10,8 +10,9 @@ import androidx.core.content.ContextCompat;
 
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.LineDataSet;
 import com.itservices.gpxanalyzer.R;
-import com.itservices.gpxanalyzer.chart.DataEntitiesLineChart;
+import com.itservices.gpxanalyzer.chart.DataEntityLineChart;
 import com.itservices.gpxanalyzer.chart.settings.axis.AxisValueFormatter;
 import com.itservices.gpxanalyzer.chart.settings.axis.HourMinutesAxisValueFormatter;
 import com.itservices.gpxanalyzer.chart.settings.background.LimitLinesBoundaries;
@@ -33,6 +34,8 @@ public class LineChartSettings {
 	private boolean drawXLabels = true;
 	private boolean dragDecelerationEnabled = true;
 
+	private boolean drawIconsEnabled = true;
+
 	@Inject
 	LineChartSettings(
 		@ApplicationContext Context context, CustomMarker customMarker,
@@ -46,6 +49,14 @@ public class LineChartSettings {
 
 		paintGridBg.setStyle(Paint.Style.FILL);
 		paintGridBg.setColor(Color.WHITE);
+	}
+
+	public boolean isDrawIconsEnabled() {
+		return drawIconsEnabled;
+	}
+
+	public void setDrawIconsEnabled(boolean drawIconsEnabled) {
+		this.drawIconsEnabled = drawIconsEnabled;
 	}
 
 	public void setLimitLinesBoundaries(LimitLinesBoundaries limitLinesBoundaries) {
@@ -62,7 +73,12 @@ public class LineChartSettings {
 	}
 
 
-	public void setChartSettingsFor(DataEntitiesLineChart lineChart) {
+	public void setChartSettingsFor(DataEntityLineChart lineChart) {
+
+		if( lineChart.getData().getDataSets().size() > 0) {
+			LineDataSet lineDataSet = (LineDataSet) lineChart.getData().getDataSets().get(0);
+			lineDataSet.setDrawIcons(drawIconsEnabled);
+		}
 
 		lineChart.setDragDecelerationEnabled(dragDecelerationEnabled);
 		lineChart.setPaint(paintGridBg, PAINT_GRID_BACKGROUND);
@@ -92,7 +108,7 @@ public class LineChartSettings {
 		setupDescriptions(lineChart);
 	}
 
-	private void setupXAxis(DataEntitiesLineChart lineChart) {
+	private void setupXAxis(DataEntityLineChart lineChart) {
 		XAxis xAxis = lineChart.getXAxis();
 		xAxis.setDrawAxisLine(false);
 		xAxis.setDrawGridLines(false);
@@ -107,7 +123,7 @@ public class LineChartSettings {
 		xAxis.setTextColor(Color.BLACK);
 	}
 
-	private void setupDescriptions(DataEntitiesLineChart lineChart) {
+	private void setupDescriptions(DataEntityLineChart lineChart) {
 		lineChart.getDescription().setEnabled(false);
 		lineChart.getLegend().setEnabled(false);
 /*
@@ -126,14 +142,14 @@ public class LineChartSettings {
 		lineChart.setDescription(description);*/
 	}
 
-	private void setupYAxisRight(DataEntitiesLineChart lineChart) {
+	private void setupYAxisRight(DataEntityLineChart lineChart) {
 		YAxis yAxisRight = lineChart.getAxisRight();
 		yAxisRight.setEnabled(false);
 		yAxisRight.setDrawAxisLine(false);
 		yAxisRight.setDrawGridLines(false);
 	}
 
-	private void setupYAxisLeft(DataEntitiesLineChart lineChart) {
+	private void setupYAxisLeft(DataEntityLineChart lineChart) {
 		YAxis yAxisLeft = lineChart.getAxisLeft();
 		yAxisLeft.setDrawAxisLine(false);
 		yAxisLeft.setDrawGridLines(false);
