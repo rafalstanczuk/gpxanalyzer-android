@@ -8,8 +8,6 @@
     <string name="altitude">Altitude</string>
     <string name="speed">Speed</string>
     <string name="gpx_charts">Gpx charts</string>
-    <string name="audio_spectrum_opengl">Audio DSP OpenGL</string>
-    <string name="audio_spectrum_android_view">Audio DSP Android View</string>
     <string name="load">Load</string>
     <string name="reset">Reset</string>
     <string name="dots">Dots</string>

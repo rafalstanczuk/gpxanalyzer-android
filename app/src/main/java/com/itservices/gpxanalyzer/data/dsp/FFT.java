@@ -1,8 +1,6 @@
 package com.itservices.gpxanalyzer.data.dsp;
 
 
-import com.itservices.gpxanalyzer.audio.audiocapture.AudioCapture;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -26,19 +24,16 @@ public class FFT {
     private double[] sin;
 
     @Inject
-    AudioCapture audioCapture;
-
-    @Inject
     public FFT() {
     }
 
     /**
-     * Initialize the FFT for a particular AudioCapture buffer size.
+     * Initialize the FFT for a particular SignalSamplingProperties buffer size.
      * Ensures the buffer size is a power of two, and sets up twiddle factor tables.
      */
-    public void init(AudioCapture audioCapture) {
+    public void init(SignalSamplingProperties signalSamplingProperties) {
         // Get the buffer size and store it
-        this.n = audioCapture.getBufferSize();
+        this.n = signalSamplingProperties.getBufferSize();
 
         // Compute m = log2(n)
         this.m = (int) (Math.log(n) / Math.log(2));

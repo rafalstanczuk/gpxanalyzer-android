@@ -1,51 +1,90 @@
+import com.android.build.gradle.internal.api.ApkVariantOutputImpl
+
 apply plugin: "com.android.application"
 apply plugin: "dagger.hilt.android.plugin"
 
+// Load version properties from version.properties.
+def versionPropsFile = file("version.properties")
+def versionProps = new Properties()
+versionProps.load(new FileInputStream(versionPropsFile))
+
+// Define your base app name.
+def appName = "GpxAnalyzer"
+
 android {
+    // Set your namespace and SDK versions.
     namespace 'com.itservices.gpxanalyzer'
     compileSdk 33
+
+    // Declare your flavor dimension.
+    flavorDimensions = ["environment"]
 
     defaultConfig {
         applicationId "com.itservices.gpxanalyzer"
         minSdk 24
         targetSdk 33
-        versionCode 1
-        versionName "1.0"
         multiDexEnabled true
+
+        // Use the version values from the properties file.
+        versionCode Integer.parseInt(versionProps['VERSION_CODE'])
+        versionName versionProps['VERSION_NAME']
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    android {
-        lintOptions {
-            checkReleaseBuilds false
-            // Or, if you prefer, you can continue to check for errors in release builds,
-            // but continue the build even when errors are found:
-            abortOnError false
+    // Define product flavors—all flavors must declare a dimension.
+    productFlavors {
+        dev {
+            dimension "environment"
+            applicationIdSuffix ".dev"
+            versionNameSuffix "-dev"
+        }
+        staging {
+            dimension "environment"
+            applicationIdSuffix ".staging"
+            versionNameSuffix "-staging"
+        }
+        prod {
+            dimension "environment"
+            // Production build: no additional suffix.
         }
     }
 
+    // Define your build types.
+    buildTypes {
+        debug {
+            // Optionally override or clear suffixes here.
+            // (For our naming scheme we rely on our custom renaming, so these suffixes won’t be used.)
+            applicationIdSuffix ""
+            versionNameSuffix "-debug"
+            debuggable true
+        }
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            debuggable false
+        }
+    }
+
+    // Lint configuration.
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+
+    // Enable additional build features.
     buildFeatures {
         dataBinding true
         viewBinding true
     }
 
-    buildTypes {
-        release {
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-        debug {
-            applicationIdSuffix ""
-            versionNameSuffix "-debug"
-            debuggable true
-        }
-    }
+    // Java compile options.
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
+    // Packaging options to exclude duplicate resources.
     packagingOptions {
         resources {
             excludes += [
@@ -56,18 +95,79 @@ android {
                     'META-INF/NOTICE',
                     'META-INF/NOTICE.txt'
             ]
-
-            // Alternatively, to pick the first occurrence:
-            // pickFirsts += [
-            //     'META-INF/LICENSE.md',
-            //     'META-INF/LICENSE',
-            //     'META-INF/LICENSE.txt',
-            //     'META-INF/NOTICE.md',
-            //     'META-INF/NOTICE',
-            //     'META-INF/NOTICE.txt'
-            // ]
         }
     }
+
+    // Customize APK file naming.
+    // The desired format is: GpxAnalyzer-vA.B.C-dev-debug.apk
+    android.applicationVariants.configureEach { variant ->
+        variant.outputs.configureEach { output ->
+            def flavorName = variant.flavorName  // e.g., "dev", "staging", or "prod"
+            def buildType = variant.buildType.name // e.g., "debug" or "release"
+            // Use the base version name directly from version.properties
+            def baseVersionName = versionProps['VERSION_NAME']
+
+            // Construct the new name using the base version name only
+            def newName = "${appName}"
+            if (flavorName) {
+                newName += "-${flavorName}"
+            }
+            newName += "-${buildType}-v${baseVersionName}.apk"
+
+            if (output instanceof ApkVariantOutputImpl) {
+                output.outputFileName = newName
+            }
+        }
+    }
+
+    // Customize AAB file naming for release variants.
+    applicationVariants.configureEach { variant ->
+        // For every variant (or restrict this if needed—for example, to release-only)
+        def bundleTaskName = "bundle${variant.name.capitalize()}"
+        tasks.named(bundleTaskName).configure { task ->
+            task.doLast {
+                // Manually compute the expected output directory.
+                // The variant.name is something like "devRelease" (or "prodRelease", etc.)
+                def outputDir = new File(project.buildDir, "outputs/bundle/${variant.name}")
+                if (!outputDir.exists()) {
+                    println "Output directory ${outputDir} does not exist, skipping renaming for ${bundleTaskName}."
+                    return
+                }
+
+                // Look for a file that ends with ".aab" in that directory.
+                def aabFile = outputDir.listFiles()?.find { it.name.endsWith('.aab') }
+                if (!aabFile) {
+                    println "No AAB file found in ${outputDir} for task ${bundleTaskName}. Skipping renaming."
+                    return
+                }
+
+                // Build the new name.
+                // Use the base version from version.properties (e.g., "1.0.0")
+                def baseVersion = versionProps['VERSION_NAME']
+                def flavorName = variant.flavorName ?: ""  // e.g., "dev", "staging", "prod"
+                def buildType = variant.buildType.name       // e.g., "release" or "debug"
+
+                // Desired naming convention: GpxAnalyzer-v1.0.0-dev-debug.aab
+                def newName = "${appName}-v${baseVersion}"
+                if (flavorName) {
+                    newName += "-${flavorName}"
+                }
+                // Include build type if it’s not "release" or if you want it always.
+                if (buildType && buildType != "release") {
+                    newName += "-${buildType}"
+                }
+                newName += ".aab"
+
+                def newFile = new File(aabFile.parent, newName)
+                if (aabFile.renameTo(newFile)) {
+                    println "Renamed AAB to: ${newFile.name}"
+                } else {
+                    println "Failed to rename AAB: ${aabFile.name}"
+                }
+            }
+        }
+    }
+
 }
 
 dependencies {

@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.audio.audiocapture;
+package com.itservices.gpxanalyzer.data.dsp;
 
 import android.util.Pair;
 
@@ -6,24 +6,24 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class AudioSpectrum {
+public class SignalSpectrum {
 
-    private final double[] audioSpectrum;
+    private final double[] signalSpectrum;
     private int sampleRate;
 
-    public AudioSpectrum(double[] audioSpectrum, int sampleRate) {
-        this.audioSpectrum = audioSpectrum;
+    public SignalSpectrum(double[] signalSpectrum, int sampleRate) {
+        this.signalSpectrum = signalSpectrum;
         this.sampleRate = sampleRate;
     }
 
     public double[] getAmplitudeArray() {
-        return audioSpectrum;
+        return signalSpectrum;
     }
 
     /**
      * Static helper method to get a list of pairs (frequency, amplitude).
      */
-    public static List<Pair<Float, Double>> getPositiveFrequencyAmplitudePairList(AudioSpectrum spectrum) {
+    public static List<Pair<Float, Double>> getPositiveFrequencyAmplitudePairList(SignalSpectrum spectrum) {
         List<Pair<Float, Double>> list = new ArrayList<>();
         double[] amplitudeArray = spectrum.getAmplitudeArray();
 
@@ -43,8 +43,8 @@ public class AudioSpectrum {
 
     @Override
     public String toString() {
-        return "AudioSpectrum{" +
-                "audioSpectrum=" + Arrays.toString(audioSpectrum) +
+        return "SignalSpectrum{" +
+                "signalSpectrum=" + Arrays.toString(signalSpectrum) +
                 ", sampleRate=" + sampleRate +
                 '}';
     }
