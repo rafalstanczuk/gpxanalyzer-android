@@ -14,7 +14,7 @@ def appName = "GpxAnalyzer"
 android {
     // Set your namespace and SDK versions.
     namespace 'com.itservices.gpxanalyzer'
-    compileSdk 33
+    compileSdk 34
 
     // Declare your flavor dimension.
     flavorDimensions = ["environment"]

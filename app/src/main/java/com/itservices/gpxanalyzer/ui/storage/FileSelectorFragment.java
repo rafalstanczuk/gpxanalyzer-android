@@ -1,12 +1,7 @@
 package com.itservices.gpxanalyzer.ui.storage;
 
-import android.Manifest;
-import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,20 +12,24 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.databinding.FragmentFileSelectorBinding;
+import com.itservices.gpxanalyzer.utils.PermissionUtils;
 
-import java.util.Objects;
+import java.io.File;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class FileSelectorFragment extends Fragment {
 
     public static final int STORAGE_PERMISSION_REQUEST_CODE = 101;
-    private static final String GPX = ".gpx";
+    public static final String GPX = ".gpx";
 
     private FileSelectorViewModel viewModel;
     private FileAdapter fileAdapter;
@@ -42,28 +41,35 @@ public class FileSelectorFragment extends Fragment {
                 if (uri != null) {
                     Log.d("FileSelector", "File selected: " + uri.toString());
                     // Handle file (for example, copy to internal storage or display)
-                    if (Objects.requireNonNull(uri.getPath()).endsWith(GPX)) {
-                        viewModel.addFile(requireContext(), uri);
-                    } else {
-                        Toast.makeText(requireContext(), "Wrong file format. Select .gpx only ", Toast.LENGTH_SHORT).show();
+
+                    File file = viewModel.addFile(FileSelectorFragment.this.requireActivity(), uri);
+
+                    if (file == null) {
+                        Toast.makeText(FileSelectorFragment.this.requireActivity(), "Wrong file format. Select .gpx only ", Toast.LENGTH_SHORT).show();
                     }
                 } else {
                     Log.d("FileSelector", "No file selected");
                 }
             });
 
-    // Register the Activity Result API to request "MANAGE_EXTERNAL_STORAGE" permission
-    private final ActivityResultLauncher<Intent> manageExternalStorageLauncher =
-            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    if (Environment.isExternalStorageManager()) {
-                        // Permission granted, set up file picker
-                        setupFilePicker();
-                    } else {
-                        Toast.makeText(requireContext(), "Permission denied. Cannot access files.", Toast.LENGTH_SHORT).show();
-                    }
+    private final ActivityResultLauncher<String[]> permissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
+                boolean allGranted = result.values().stream().allMatch(granted -> granted);
+                if (allGranted) {
+                    // Permission granted, set up file picker
+                    setupFilePicker();
+                } else {
+                    // Handle denied permission case
+                    Toast.makeText(requireContext(), "Permission denied. Cannot access files.", Toast.LENGTH_SHORT).show();
                 }
             });
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        viewModel = new ViewModelProvider(this).get(FileSelectorViewModel.class);
+    }
 
     @Nullable
     @Override
@@ -72,7 +78,11 @@ public class FileSelectorFragment extends Fragment {
 
         // Initialize RecyclerView with FileAdapter
         fileAdapter = new FileAdapter(file -> {
+            viewModel.selectFile(file);
             Toast.makeText(requireContext(), "Selected: " + file.getName(), Toast.LENGTH_SHORT).show();
+            Navigation.findNavController(requireView()).navigate(
+                    R.id.mainMenuFragment
+            );
         });
 
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -86,16 +96,21 @@ public class FileSelectorFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         // Check and request storage permissions if needed
-        if (isStoragePermissionGranted()) {
+        if (PermissionUtils.hasFileAccessPermissions(FileSelectorFragment.this.requireActivity())) {
             setupFilePicker();
         } else {
-            requestStoragePermission();
+           // PermissionUtils.requestFilePermissions(FileSelectorFragment.this.requireActivity());
+
+            PermissionUtils.requestMediaPermissions(FileSelectorFragment.this.requireActivity(), permissionLauncher);
         }
     }
 
-    /**
+/*
+    */
+/**
      * Checks if storage permissions are granted.
-     */
+     *//*
+
     private boolean isStoragePermissionGranted() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             // For SDK 24 to 28, standard permission check for READ_EXTERNAL_STORAGE
@@ -108,23 +123,7 @@ public class FileSelectorFragment extends Fragment {
             return ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.MANAGE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
         }
     }
-
-    /**
-     * Requests storage permissions.
-     */
-    private void requestStoragePermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            // For Android 11 (API 30) and above, request MANAGE_EXTERNAL_STORAGE permission using ActivityResult API
-            Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
-            manageExternalStorageLauncher.launch(intent);  // Launch the request for file access permission
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            // For Android 10 (API 29), request standard read permission with scoped storage
-            ActivityCompat.requestPermissions(requireActivity(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION_REQUEST_CODE);
-        } else {
-            // For SDK 24 to 28, request READ_EXTERNAL_STORAGE permission
-            ActivityCompat.requestPermissions(requireActivity(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION_REQUEST_CODE);
-        }
-    }
+*/
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -143,8 +142,6 @@ public class FileSelectorFragment extends Fragment {
      * Sets up the file picker and initializes ViewModel.
      */
     private void setupFilePicker() {
-        viewModel = new ViewModelProvider(this).get(FileSelectorViewModel.class);
-
         // Observe file list
         viewModel.getFiles().observe(getViewLifecycleOwner(), fileAdapter::setFiles);
 

@@ -16,6 +16,8 @@ import com.itservices.gpxanalyzer.data.gpx.parser.domain.TrackSegment;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -53,6 +55,15 @@ public class GPXDataProvider {
             return loadDataEntity(inputStream, DataEntity.DEFAULT_PRIMARY_DATA_INDEX);
         });
     }
+
+    public Observable<Vector<DataEntity>> provide(File file) {
+        return Observable.fromCallable(() -> {
+            try (InputStream inputStream = new FileInputStream(file)) {
+                return loadDataEntity(inputStream, DataEntity.DEFAULT_PRIMARY_DATA_INDEX);
+            }
+        });
+    }
+
 
     public Observable<Vector<DataEntity>> provide(InputStream inputStream) {
         return Observable.fromCallable(() -> loadDataEntity(inputStream, DataEntity.DEFAULT_PRIMARY_DATA_INDEX));
@@ -156,4 +167,5 @@ public class GPXDataProvider {
 
         return location;
     }
+
 }

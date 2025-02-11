@@ -7,17 +7,29 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.itservices.gpxanalyzer.usecase.MultipleSyncedGpxChartUseCase;
 import com.itservices.gpxanalyzer.utils.FileProviderUtils;
 
 import java.io.File;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
+
+@HiltViewModel
 public class FileSelectorViewModel extends ViewModel {
 
+    @Inject
+    MultipleSyncedGpxChartUseCase multipleSyncedGpxChartUseCase;
     private final MutableLiveData<List<File>> filesLiveData = new MutableLiveData<>();
 
     public LiveData<List<File>> getFiles() {
         return filesLiveData;
+    }
+
+    @Inject
+    public FileSelectorViewModel() {
     }
 
     /**
@@ -29,11 +41,15 @@ public class FileSelectorViewModel extends ViewModel {
         filesLiveData.setValue(files);
     }
 
+    public void selectFile(File gpxFile) {
+        multipleSyncedGpxChartUseCase.selectFile(gpxFile);
+    }
+
     /**
      * Adds a file from a given URI.
      * Delegates file handling to FileProviderUtils.
      */
-    public void addFile(Context context, Uri uri) {
+    public File addFile(Context context, Uri uri) {
         File file = FileProviderUtils.copyUriToAppStorage(context, uri);
         if (file != null) {
             List<File> currentFiles = filesLiveData.getValue();
@@ -42,5 +58,7 @@ public class FileSelectorViewModel extends ViewModel {
                 filesLiveData.setValue(currentFiles);
             }
         }
+
+        return file;
     }
 }
