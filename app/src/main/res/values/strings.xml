@@ -11,4 +11,5 @@
     <string name="load">Load</string>
     <string name="reset">Reset</string>
     <string name="dots">Dots</string>
+    <string name="select_file">Select File</string>
 </resources>
