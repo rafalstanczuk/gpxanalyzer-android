@@ -12,4 +12,5 @@
     <string name="reset">Reset</string>
     <string name="dots">Dots</string>
     <string name="select_file">Select File</string>
+    <string name="permission_denied_cannot_access_files">Permission denied. Cannot access files.</string>
 </resources>

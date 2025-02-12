@@ -34,32 +34,6 @@ public class FileSelectorFragment extends Fragment {
     private FileAdapter fileAdapter;
     private FragmentFileSelectorBinding binding;
 
-    // Register the Activity Result API for file selection
-    private final ActivityResultLauncher<String[]> filePickerLauncher =
-            registerForActivityResult(new ActivityResultContracts.OpenDocument(), uri -> {
-                if (uri != null) {
-                    File file = viewModel.addFile(FileSelectorFragment.this.requireActivity(), uri);
-
-                    if (file == null) {
-                        Toast.makeText(FileSelectorFragment.this.requireActivity(), "Wrong file format. Select .gpx only ", Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    Log.d("FileSelector", "No file selected");
-                }
-            });
-
-    private final ActivityResultLauncher<String[]> permissionLauncher =
-            registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
-                boolean allGranted = result.values().stream().allMatch(granted -> granted);
-                if (allGranted) {
-                    // Permission granted, set up file picker
-                    setupFilePicker();
-                } else {
-                    // Handle denied permission case
-                    warningNeedsPermissions(requireContext());
-                }
-            });
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -129,17 +103,40 @@ public class FileSelectorFragment extends Fragment {
         filePickerLauncher.launch(mimeTypes);
     }
 
+    // Register the Activity Result API for file selection
+    private final ActivityResultLauncher<String[]> filePickerLauncher =
+            registerForActivityResult(new ActivityResultContracts.OpenDocument(), uri -> {
+                if (uri != null) {
+                    File file = viewModel.addFile(FileSelectorFragment.this.requireActivity(), uri);
+
+                    if (file == null) {
+                        Toast.makeText(FileSelectorFragment.this.requireActivity(), "Wrong file format. Select .gpx only ", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Log.d("FileSelector", "No file selected");
+                }
+            });
+
+    private final ActivityResultLauncher<String[]> permissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
+                boolean allGranted = result.values().stream().allMatch(granted -> granted);
+                if (allGranted) {
+                    // Permission granted, set up file picker
+                    setupFilePicker();
+                } else {
+                    // Handle denied permission case
+                    warningNeedsPermissions(requireContext());
+                }
+            });
+
+    private void warningNeedsPermissions(Context context) {
+    Navigation.findNavController(requireView()).navigateUp();
+        Toast.makeText(context, R.string.permission_denied_cannot_access_files, Toast.LENGTH_SHORT).show();
+    }
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null; // Avoid memory leaks
     }
-
-    private void warningNeedsPermissions(Context context) {
-    /*Navigation.findNavController(requireView()).navigate(
-            R.id.mainMenuFragment
-    );*/
-        Toast.makeText(context, "Permission denied. Cannot access files.", Toast.LENGTH_SHORT).show();
-    }
-
 }
