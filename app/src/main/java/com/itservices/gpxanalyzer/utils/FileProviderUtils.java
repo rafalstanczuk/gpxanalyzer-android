@@ -1,7 +1,5 @@
 package com.itservices.gpxanalyzer.utils;
 
-import static com.itservices.gpxanalyzer.ui.storage.FileSelectorFragment.GPX;
-
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
@@ -38,13 +36,13 @@ public class FileProviderUtils {
     /**
      * Copies the file from a given URI into the app's private storage.
      */
-    public static File copyUriToAppStorage(Context context, Uri uri) {
+    public static File copyUriToAppStorage(Context context, Uri uri, String fileExtension) {
         ContentResolver contentResolver = context.getContentResolver();
         String fileName = getFileName(contentResolver, uri);
 
         Log.d(FileProviderUtils.class.getSimpleName(), "copyUriToAppStorage() fileName = [" + fileName + "], uri = [" + uri + "]");
         
-        if(!fileName.endsWith(GPX)) {
+        if(!fileName.endsWith(fileExtension)) {
             return null;
         }
 

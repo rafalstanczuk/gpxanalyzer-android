@@ -28,7 +28,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class FileSelectorFragment extends Fragment {
 
-    public static final String GPX = ".gpx";
+    public static final String GPX_FILE_EXTENSION = ".gpx";
 
     private FileSelectorViewModel viewModel;
     private FileAdapter fileAdapter;
@@ -50,9 +50,7 @@ public class FileSelectorFragment extends Fragment {
         fileAdapter = new FileAdapter(file -> {
             viewModel.selectFile(file);
             Toast.makeText(requireContext(), "Selected: " + file.getName(), Toast.LENGTH_SHORT).show();
-            Navigation.findNavController(requireView()).navigate(
-                    R.id.mainMenuFragment
-            );
+            Navigation.findNavController(requireView()).navigateUp();
         });
 
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -83,7 +81,7 @@ public class FileSelectorFragment extends Fragment {
         viewModel.getFiles().observe(getViewLifecycleOwner(), fileAdapter::setFiles);
 
         // Load existing GPX files
-        viewModel.loadFiles(requireContext(), GPX);
+        viewModel.loadFiles(requireContext(), GPX_FILE_EXTENSION);
 
         // Set file picker button click listener
         binding.btnSelectFile.setOnClickListener(v -> {
@@ -107,7 +105,7 @@ public class FileSelectorFragment extends Fragment {
     private final ActivityResultLauncher<String[]> filePickerLauncher =
             registerForActivityResult(new ActivityResultContracts.OpenDocument(), uri -> {
                 if (uri != null) {
-                    File file = viewModel.addFile(FileSelectorFragment.this.requireActivity(), uri);
+                    File file = viewModel.addFile(FileSelectorFragment.this.requireActivity(), uri, GPX_FILE_EXTENSION);
 
                     if (file == null) {
                         Toast.makeText(FileSelectorFragment.this.requireActivity(), "Wrong file format. Select .gpx only ", Toast.LENGTH_SHORT).show();
@@ -130,7 +128,7 @@ public class FileSelectorFragment extends Fragment {
             });
 
     private void warningNeedsPermissions(Context context) {
-    Navigation.findNavController(requireView()).navigateUp();
+        Navigation.findNavController(requireView()).navigateUp();
         Toast.makeText(context, R.string.permission_denied_cannot_access_files, Toast.LENGTH_SHORT).show();
     }
 

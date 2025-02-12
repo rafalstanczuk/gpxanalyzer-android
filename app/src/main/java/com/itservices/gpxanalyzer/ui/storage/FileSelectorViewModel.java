@@ -49,8 +49,8 @@ public class FileSelectorViewModel extends ViewModel {
      * Adds a file from a given URI.
      * Delegates file handling to FileProviderUtils.
      */
-    public File addFile(Context context, Uri uri) {
-        File file = FileProviderUtils.copyUriToAppStorage(context, uri);
+    public File addFile(Context context, Uri uri, String fileExtension) {
+        File file = FileProviderUtils.copyUriToAppStorage(context, uri, fileExtension);
         if (file != null) {
             List<File> currentFiles = filesLiveData.getValue();
             if (currentFiles != null && !currentFiles.contains(file)) {
