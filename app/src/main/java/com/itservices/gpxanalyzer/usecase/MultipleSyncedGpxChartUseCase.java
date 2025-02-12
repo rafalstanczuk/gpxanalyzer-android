@@ -24,6 +24,7 @@ import com.itservices.gpxanalyzer.utils.common.ConcurrentUtil;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Vector;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -45,26 +46,24 @@ public class MultipleSyncedGpxChartUseCase {
     @Inject
     ChartController speedTimeChartController;
 
+    @Inject
+    SelectGpxFileUseCase selectGpxFileUseCase;
+
     private final PublishSubject<RequestStatus> requestStatus = PublishSubject.create();
 
     private Disposable disposable;
-    private File selectedGpxFile = null;
 
     @Inject
     public MultipleSyncedGpxChartUseCase() {}
 
-    public void selectFile(File gpxFile) {
-        this.selectedGpxFile = gpxFile;
-    }
-
-    public void loadData(Context context, int rawResId) {
+    public void loadData(Context context, int defaultRawGpxDataId) {
 
         observeSelectionOn(altitudeTimeChartController.getSelection(), speedTimeChartController);
         observeSelectionOn(speedTimeChartController.getSelection(), altitudeTimeChartController);
 
         requestStatus.onNext(LOADING);
 
-        disposable = provideDataEntityVector(context, rawResId)
+        disposable = provideDataEntityVector(context, defaultRawGpxDataId)
                 .map(gpxData -> {
                     requestStatus.onNext(DATA_LOADED);
                     return gpxData;
@@ -92,7 +91,15 @@ public class MultipleSyncedGpxChartUseCase {
     }
 
     private Observable<Vector<DataEntity>> provideDataEntityVector(Context context, int rawResId) {
-        return (selectedGpxFile != null) ? dataProvider.provide(selectedGpxFile) : dataProvider.provide(context, rawResId);
+        //selectedFile.lastElement().doOnSuccess(file -> );
+        AtomicReference<File> selectedFile = new AtomicReference<>(null);
+
+        selectGpxFileUseCase.getSelectedFile()
+                .lastElement()
+                .doOnSuccess(selectedFile::set)
+                .subscribe();
+
+        return (selectedFile.get() != null) ? dataProvider.provide(selectedFile.get()) : dataProvider.provide(context, rawResId);
     }
 
     private RequestStatus updateSpeedChart(Context context, Vector<DataEntity> gpxData) {

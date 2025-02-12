@@ -103,20 +103,20 @@ public class GpxChartsViewModel extends ViewModel {
         multipleSyncedGpxChartUseCase.bindSpeedTimeChart(speedTimeLineChart, requireActivity);
     }
 
-    public void loadData(Context requireContext, int rawGpxDataId) {
+    public void loadData(Context requireContext, int defaultRawGpxDataId) {
         observeProgressOnLiveData(multipleSyncedGpxChartUseCase.getPercentageProgress());
         observeRequestStatusOnLiveData(multipleSyncedGpxChartUseCase.getRequestStatus());
 
-        observeOrientationChangeToReload(orientationPublishSubject, requireContext, rawGpxDataId);
+        observeOrientationChangeToReload(orientationPublishSubject, requireContext, defaultRawGpxDataId);
 
-        multipleSyncedGpxChartUseCase.loadData(requireContext, rawGpxDataId);
+        multipleSyncedGpxChartUseCase.loadData(requireContext, defaultRawGpxDataId);
     }
 
-    private void observeOrientationChangeToReload(PublishSubject<Integer> orientationPublishSubject, Context requireContext, int rawGpxDataId) {
+    private void observeOrientationChangeToReload(PublishSubject<Integer> orientationPublishSubject, Context requireContext, int defaultRawGpxDataId) {
         orientationPublishSubject
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnNext(orientation -> multipleSyncedGpxChartUseCase.loadData(requireContext, rawGpxDataId))
+                .doOnNext(orientation -> multipleSyncedGpxChartUseCase.loadData(requireContext, defaultRawGpxDataId))
                 .subscribe();
     }
 
