@@ -13,4 +13,7 @@
     <string name="dots">Dots</string>
     <string name="search_for_file">Search for file</string>
     <string name="permission_denied_cannot_access_files">Permission denied. Cannot access files.</string>
+    <string name="wrong_file_format_select_gpx_only">Wrong file format. Select .gpx only!</string>
+    <string name="file_found_now_select_one_from_the_list">File found. \nNow select one from the list.</string>
+    <string name="selected">"Selected: "</string>
 </resources>

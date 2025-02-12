@@ -24,7 +24,6 @@ import com.itservices.gpxanalyzer.utils.common.ConcurrentUtil;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Vector;
-import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -54,7 +53,8 @@ public class MultipleSyncedGpxChartUseCase {
     private Disposable disposable;
 
     @Inject
-    public MultipleSyncedGpxChartUseCase() {}
+    public MultipleSyncedGpxChartUseCase() {
+    }
 
     public void loadData(Context context, int defaultRawGpxDataId) {
 
@@ -81,7 +81,7 @@ public class MultipleSyncedGpxChartUseCase {
 
                     requestStatus.onNext(PROCESSED);
 
-                    return RequestStatus.values()[ Math.min( requestStatusAltitude.ordinal(), requestStatusSpeed.ordinal() ) ];
+                    return RequestStatus.values()[Math.min(requestStatusAltitude.ordinal(), requestStatusSpeed.ordinal())];
 
                 })
                 .subscribe(
@@ -91,22 +91,17 @@ public class MultipleSyncedGpxChartUseCase {
     }
 
     private Observable<Vector<DataEntity>> provideDataEntityVector(Context context, int rawResId) {
-        //selectedFile.lastElement().doOnSuccess(file -> );
-        AtomicReference<File> selectedFile = new AtomicReference<>(null);
 
-        selectGpxFileUseCase.getSelectedFile()
-                .lastElement()
-                .doOnSuccess(selectedFile::set)
-                .subscribe();
+        File selectedFile = selectGpxFileUseCase.getSelectedFile();
 
-        return (selectedFile.get() != null) ? dataProvider.provide(selectedFile.get()) : dataProvider.provide(context, rawResId);
+        return (selectedFile != null) ? dataProvider.provide(selectedFile) : dataProvider.provide(context, rawResId);
     }
 
     private RequestStatus updateSpeedChart(Context context, Vector<DataEntity> gpxData) {
         int speedPrimaryIndex = getNewPrimaryIndexFromNameStringRes(context, R.string.speed);
         StatisticResults statisticResultsSpeed = new StatisticResults(gpxData, speedPrimaryIndex);
 
-        return speedTimeChartController.refreshStatisticResults( statisticResultsSpeed );
+        return speedTimeChartController.refreshStatisticResults(statisticResultsSpeed);
     }
 
     private RequestStatus updateAltitudeChart(Context context, Vector<DataEntity> gpxData) {
@@ -120,13 +115,13 @@ public class MultipleSyncedGpxChartUseCase {
         selection
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.newThread())
-                .doOnNext(baseDataEntityEntry -> chartController.manualSelectEntry( baseDataEntityEntry.getDataEntity().getTimestampMillis() ) )
+                .doOnNext(baseDataEntityEntry -> chartController.manualSelectEntry(baseDataEntityEntry.getDataEntity().getTimestampMillis()))
                 .subscribe();
     }
 
     private static int getNewPrimaryIndexFromNameStringRes(Context context, int id) {
         String speedKeyName = context.getResources().getString(id);
-        final int newPrimaryIndex = Arrays.asList( context.getResources().getStringArray(R.array.gpx_name_unit_array) ).indexOf(speedKeyName);
+        final int newPrimaryIndex = Arrays.asList(context.getResources().getStringArray(R.array.gpx_name_unit_array)).indexOf(speedKeyName);
         return newPrimaryIndex;
     }
 

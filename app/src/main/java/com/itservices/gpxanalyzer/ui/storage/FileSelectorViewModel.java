@@ -1,14 +1,14 @@
 package com.itservices.gpxanalyzer.ui.storage;
 
 import android.content.Context;
-import android.net.Uri;
 
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.itservices.gpxanalyzer.usecase.SelectGpxFileUseCase;
-import com.itservices.gpxanalyzer.utils.FileProviderUtils;
+import com.itservices.gpxanalyzer.utils.common.ConcurrentUtil;
 
 import java.io.File;
 import java.util.List;
@@ -16,6 +16,10 @@ import java.util.List;
 import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 @HiltViewModel
 public class FileSelectorViewModel extends ViewModel {
@@ -23,8 +27,16 @@ public class FileSelectorViewModel extends ViewModel {
     @Inject
     SelectGpxFileUseCase selectGpxFileUseCase;
     private final MutableLiveData<List<File>> filesLiveData = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> isFileFoundLiveData = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> requestPermissionsLiveData = new MutableLiveData<>();
 
-    public LiveData<List<File>> getFiles() {
+    private Disposable disposableLoadLocal;
+    private Disposable disposableIsFileFound;
+
+    private Disposable disposableFileListFound;
+    private Disposable disposableRequestPermissions;
+
+    public LiveData<List<File>> getFoundFileList() {
         return filesLiveData;
     }
 
@@ -32,33 +44,54 @@ public class FileSelectorViewModel extends ViewModel {
     public FileSelectorViewModel() {
     }
 
-    /**
-     * Loads files with the specified extension.
-     * Delegates file loading to FileProviderUtils.
-     */
-    public void loadFiles(Context context, String extension) {
-        List<File> files = FileProviderUtils.getFilesByExtension(context, extension);
-        filesLiveData.setValue(files);
+
+    public void loadLocalFiles(Context context) {
+        ConcurrentUtil.tryToDispose(disposableLoadLocal);
+
+        disposableLoadLocal = selectGpxFileUseCase.loadLocalGpxFiles(context)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(filesLiveData::setValue);
+    }
+
+
+    public LiveData<Boolean> getPermissionsGranted() {
+        return requestPermissionsLiveData;
+    }
+
+    public LiveData<Boolean> getFileFound() {
+        return isFileFoundLiveData;
     }
 
     public void selectFile(File gpxFile) {
         selectGpxFileUseCase.setSelectedFile(gpxFile);
     }
 
-    /**
-     * Adds a file from a given URI.
-     * Delegates file handling to FileProviderUtils.
-     */
-    public File addFile(Context context, Uri uri, String fileExtension) {
-        File file = FileProviderUtils.copyUriToAppStorage(context, uri, fileExtension);
-        if (file != null) {
-            List<File> currentFiles = filesLiveData.getValue();
-            if (currentFiles != null && !currentFiles.contains(file)) {
-                currentFiles.add(file);
-                filesLiveData.setValue(currentFiles);
-            }
-        }
+    public Observable<Boolean> checkAndRequestPermissions(FragmentActivity requireActivity) {
+        return selectGpxFileUseCase.checkAndRequestPermissions(requireActivity);
+    }
 
-        return file;
+    public boolean openFilePicker() {
+        return selectGpxFileUseCase.openFilePicker();
+    }
+
+    public void init() {
+        ConcurrentUtil.tryToDispose(disposableIsFileFound);
+        disposableIsFileFound = selectGpxFileUseCase.getIsGpxFileFound()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(isFileFoundLiveData::setValue);
+
+        ConcurrentUtil.tryToDispose(disposableRequestPermissions);
+        disposableRequestPermissions = selectGpxFileUseCase.getPermissionsGranted()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(requestPermissionsLiveData::setValue);
+
+        ConcurrentUtil.tryToDispose(disposableFileListFound);
+        disposableFileListFound = selectGpxFileUseCase.getGpxFileFoundList()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(filesLiveData::setValue);
     }
 }

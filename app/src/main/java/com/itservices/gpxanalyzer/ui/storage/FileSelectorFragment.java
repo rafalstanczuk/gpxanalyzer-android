@@ -2,14 +2,11 @@ package com.itservices.gpxanalyzer.ui.storage;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -19,26 +16,30 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.databinding.FragmentFileSelectorBinding;
-import com.itservices.gpxanalyzer.utils.PermissionUtils;
+import com.itservices.gpxanalyzer.utils.common.ConcurrentUtil;
 
-import java.io.File;
+import java.util.concurrent.Callable;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 @AndroidEntryPoint
 public class FileSelectorFragment extends Fragment {
 
-    public static final String GPX_FILE_EXTENSION = ".gpx";
-
     private FileSelectorViewModel viewModel;
     private FileAdapter fileAdapter;
     private FragmentFileSelectorBinding binding;
+
+    private Disposable disposable;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         viewModel = new ViewModelProvider(this).get(FileSelectorViewModel.class);
+        viewModel.init();
     }
 
     @Nullable
@@ -46,10 +47,10 @@ public class FileSelectorFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentFileSelectorBinding.inflate(inflater, container, false);
 
-        // Initialize RecyclerView with FileAdapter
         fileAdapter = new FileAdapter(file -> {
             viewModel.selectFile(file);
-            Toast.makeText(requireContext(), "Selected: " + file.getName(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.selected) + file.getName(), Toast.LENGTH_SHORT).show();
+
             Navigation.findNavController(requireView()).navigateUp();
         });
 
@@ -63,72 +64,51 @@ public class FileSelectorFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Check and request storage permissions if needed
-        if (PermissionUtils.hasFileAccessPermissions(FileSelectorFragment.this.requireActivity())) {
-            setupFilePicker();
-        } else {
-            PermissionUtils.requestFileAccessPermissions(permissionLauncher);
-        }
+        viewModel.getPermissionsGranted().observe(getViewLifecycleOwner(), granted -> {
+                    if (!granted)
+                        warningNeedsPermissions(FileSelectorFragment.this.requireActivity());
+                }
+        );
+
+        subscribePermissionRequest(this::initViewModelObservers);
+
+        binding.btnSelectFile.setOnClickListener(
+                v -> subscribePermissionRequest(() -> viewModel.openFilePicker())
+        );
     }
 
-    /**
-     * Sets up the file picker and initializes ViewModel.
-     */
-    private void setupFilePicker() {
-        Log.d(FileSelectorFragment.class.getSimpleName(), "setupFilePicker() called");
+    private boolean initViewModelObservers() {
+        viewModel.getFileFound().observe(getViewLifecycleOwner(), found -> {
+            if (!found) {
+                Toast.makeText(FileSelectorFragment.this.requireActivity(), R.string.wrong_file_format_select_gpx_only, Toast.LENGTH_SHORT).show();
+            }
+        });
 
-        // Observe file list
-        viewModel.getFiles().observe(getViewLifecycleOwner(), files -> {
-            Toast.makeText(getContext(), "File found. \nNow select one from the list.", Toast.LENGTH_SHORT).show();
+        viewModel.getFoundFileList().observe(getViewLifecycleOwner(), files -> {
+            Toast.makeText(FileSelectorFragment.this.requireActivity(), R.string.file_found_now_select_one_from_the_list, Toast.LENGTH_SHORT).show();
             fileAdapter.setFiles(files);
         });
 
-        // Load existing GPX files
-        viewModel.loadFiles(requireContext(), GPX_FILE_EXTENSION);
+        viewModel.loadLocalFiles(requireContext());
 
-        // Set file picker button click listener
-        binding.btnSelectFile.setOnClickListener(v -> {
-            if (PermissionUtils.hasFileAccessPermissions(FileSelectorFragment.this.requireActivity())) {
-                openFilePicker();
-            } else {
-                PermissionUtils.requestFileAccessPermissions(permissionLauncher);
-            }
-        });
+        return true;
     }
 
-    private void openFilePicker() {
-        String[] mimeTypes = new String[]{
-                "*/*"
-        };
-        // Launch the file picker with MIME type filters
-        filePickerLauncher.launch(mimeTypes);
-    }
 
-    // Register the Activity Result API for file selection
-    private final ActivityResultLauncher<String[]> filePickerLauncher =
-            registerForActivityResult(new ActivityResultContracts.OpenDocument(), uri -> {
-                if (uri != null) {
-                    File file = viewModel.addFile(FileSelectorFragment.this.requireActivity(), uri, GPX_FILE_EXTENSION);
+    private void subscribePermissionRequest(Callable<Boolean> onPermissionsGranted) {
+        ConcurrentUtil.tryToDispose(disposable);
 
-                    if (file == null) {
-                        Toast.makeText(FileSelectorFragment.this.requireActivity(), "Wrong file format. Select .gpx only ", Toast.LENGTH_SHORT).show();
+        disposable = viewModel.checkAndRequestPermissions(FileSelectorFragment.this.requireActivity())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(success -> {
+                    if (success) {
+                        onPermissionsGranted.call();
+                    } else {
+                        warningNeedsPermissions(FileSelectorFragment.this.requireActivity());
                     }
-                } else {
-                    Log.d("FileSelector", "No file selected");
-                }
-            });
-
-    private final ActivityResultLauncher<String[]> permissionLauncher =
-            registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
-                boolean allGranted = result.values().stream().allMatch(granted -> granted);
-                if (allGranted) {
-                    // Permission granted, set up file picker
-                    setupFilePicker();
-                } else {
-                    // Handle denied permission case
-                    warningNeedsPermissions(requireContext());
-                }
-            });
+                });
+    }
 
     private void warningNeedsPermissions(Context context) {
         Navigation.findNavController(requireView()).navigateUp();

@@ -8,19 +8,24 @@ import androidx.navigation.NavGraph;
 import androidx.navigation.NavInflater;
 import androidx.navigation.fragment.NavHostFragment;
 
-import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.itservices.gpxanalyzer.usecase.SelectGpxFileUseCase;
+
+import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
 
-    public BottomNavigationView bottomNav;
+    @Inject
+    SelectGpxFileUseCase selectGpxFileUseCase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        selectGpxFileUseCase.registerLauncherOn(this);
 
         NavHostFragment navHostFragment =
                 (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
