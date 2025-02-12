@@ -1,9 +1,6 @@
 package com.itservices.gpxanalyzer.ui.storage;
 
-import static com.itservices.gpxanalyzer.utils.PermissionUtils.STORAGE_PERMISSION_REQUEST_CODE;
-
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -40,12 +37,7 @@ public class FileSelectorFragment extends Fragment {
     // Register the Activity Result API for file selection
     private final ActivityResultLauncher<String[]> filePickerLauncher =
             registerForActivityResult(new ActivityResultContracts.OpenDocument(), uri -> {
-                Log.d("ActivityResultLauncher", "registerForActivityResult");
-
                 if (uri != null) {
-                    Log.d("FileSelector", "File selected: " + uri.toString());
-                    // Handle file (for example, copy to internal storage or display)
-
                     File file = viewModel.addFile(FileSelectorFragment.this.requireActivity(), uri);
 
                     if (file == null) {
@@ -103,7 +95,7 @@ public class FileSelectorFragment extends Fragment {
         if (PermissionUtils.hasFileAccessPermissions(FileSelectorFragment.this.requireActivity())) {
             setupFilePicker();
         } else {
-            PermissionUtils.requestFileAccessPermissions(FileSelectorFragment.this.requireActivity(), permissionLauncher);
+            PermissionUtils.requestFileAccessPermissions(permissionLauncher);
         }
     }
 
@@ -124,23 +116,12 @@ public class FileSelectorFragment extends Fragment {
             if (PermissionUtils.hasFileAccessPermissions(FileSelectorFragment.this.requireActivity())) {
                 openFilePicker();
             } else {
-                PermissionUtils.requestFileAccessPermissions(FileSelectorFragment.this.requireActivity(), permissionLauncher);
+                PermissionUtils.requestFileAccessPermissions(permissionLauncher);
             }
         });
     }
 
-    /**
-     * Opens system file picker to select GPX files using Activity Result API.
-     */
     private void openFilePicker() {
-        Log.d("FileSelectorFragment", "openFilePicker() called");
-        // For Android 9 (API 28) and below, MIME types may need broader filtering.
-/*        String[] mimeTypes = new String[]{
-                "application/gpx+xml",  // GPX format
-                "application/xml",      // General XML format
-                "text/xml"              // XML text format
-        };*/
-
         String[] mimeTypes = new String[]{
                 "*/*"
         };
@@ -153,27 +134,6 @@ public class FileSelectorFragment extends Fragment {
         super.onDestroyView();
         binding = null; // Avoid memory leaks
     }
-
-    @Override
-    public void onRequestPermissionsResult(
-            int requestCode,
-            @NonNull String[] permissions,
-            @NonNull int[] grantResults
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        Log.d("onRequestPermissionsResult", "onRequestPermissionsResult");
-        if (grantResults.length > 0) {
-            if (requestCode == STORAGE_PERMISSION_REQUEST_CODE) {
-                if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                    warningNeedsPermissions(requireContext());
-                } else {
-                    setupFilePicker();
-                }
-            }
-        }
-    }
-
 
     private void warningNeedsPermissions(Context context) {
     /*Navigation.findNavController(requireView()).navigate(
