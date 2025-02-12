@@ -78,7 +78,10 @@ public class FileSelectorFragment extends Fragment {
         Log.d(FileSelectorFragment.class.getSimpleName(), "setupFilePicker() called");
 
         // Observe file list
-        viewModel.getFiles().observe(getViewLifecycleOwner(), fileAdapter::setFiles);
+        viewModel.getFiles().observe(getViewLifecycleOwner(), files -> {
+            Toast.makeText(getContext(), "File found. \nNow select one from the list.", Toast.LENGTH_SHORT).show();
+            fileAdapter.setFiles(files);
+        });
 
         // Load existing GPX files
         viewModel.loadFiles(requireContext(), GPX_FILE_EXTENSION);
