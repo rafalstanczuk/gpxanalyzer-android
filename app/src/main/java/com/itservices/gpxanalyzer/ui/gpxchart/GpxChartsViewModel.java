@@ -2,6 +2,7 @@ package com.itservices.gpxanalyzer.ui.gpxchart;
 
 import static com.itservices.gpxanalyzer.chart.RequestStatus.DEFAULT;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 
@@ -198,12 +199,12 @@ public class GpxChartsViewModel extends ViewModel {
     }
 
     @UiThread
-    public void setAltitudeDrawIconEnabled(boolean isChecked) {
-        multipleSyncedGpxChartUseCase.getAltitudeTimeChartController().setDrawIconsEnabled(isChecked);
+    public void setAltitudeDrawIconEnabled(Activity activity, boolean isChecked) {
+        activity.runOnUiThread(() -> multipleSyncedGpxChartUseCase.getAltitudeTimeChartController().setDrawIconsEnabled(isChecked));
     }
 
     @UiThread
-    public void setSpeedDrawIconEnabled(boolean isChecked) {
-        multipleSyncedGpxChartUseCase.getSpeedTimeChartController().setDrawIconsEnabled(isChecked);
+    public void setSpeedDrawIconEnabled(Activity activity, boolean isChecked) {
+        activity.runOnUiThread(() -> multipleSyncedGpxChartUseCase.getSpeedTimeChartController().setDrawIconsEnabled(isChecked));
     }
 }

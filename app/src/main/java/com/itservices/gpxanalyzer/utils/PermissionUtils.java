@@ -9,16 +9,29 @@ import android.os.Build;
 import android.provider.Settings;
 
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+/**
+ * Requests file access permissions based on the Android version.
+ */
 public class PermissionUtils {
 
     /**
-     * Requests file access permissions based on the Android version.
+     * Requests file-access permissions for Android 7-9, 29, 30, 33 , 34+ (API 24-34 and above).
      */
-    public static void requestFilePermissions(Activity activity) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+    public static void requestFileAccessPermissions(Activity activity, ActivityResultLauncher<String[]> permissionLauncher) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) { // Android 14 (API 34)
+            permissionLauncher.launch(new String[]{
+                    Manifest.permission.READ_MEDIA_IMAGES,
+                    Manifest.permission.READ_MEDIA_VIDEO,
+                    Manifest.permission.READ_MEDIA_AUDIO
+            });
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // Android 13 (API 33)
+            permissionLauncher.launch(new String[]{
+                    Manifest.permission.READ_MEDIA_IMAGES,
+                    Manifest.permission.READ_MEDIA_VIDEO
+            });
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             // API 30+ (Android 11+)
             if (!android.os.Environment.isExternalStorageManager()) {
                 try {
@@ -31,31 +44,22 @@ public class PermissionUtils {
             }
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             // API 29 (Android 10)
-            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
-        } else {
-            // API 24-28 (Android 7-9)
-            ActivityCompat.requestPermissions(activity, new String[]{
+            //ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION_REQUEST_CODE);
+            permissionLauncher.launch(new String[]{
                     Manifest.permission.READ_EXTERNAL_STORAGE,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE
-            }, 1);
-        }
-    }
+            });
+        } else {
+            // API 24-28 (Android 7-9)
+            /*ActivityCompat.requestPermissions(activity, new String[]{
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+            }, STORAGE_PERMISSION_REQUEST_CODE);*/
+            permissionLauncher.launch(new String[]{
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+            });
 
-    /**
-     * Requests media permissions for Android 13+ (API 33 and above).
-     */
-    public static void requestMediaPermissions(Activity activity, ActivityResultLauncher<String[]> permissionLauncher) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) { // Android 14 (API 34)
-            permissionLauncher.launch(new String[]{
-                    Manifest.permission.READ_MEDIA_IMAGES,
-                    Manifest.permission.READ_MEDIA_VIDEO,
-                    Manifest.permission.READ_MEDIA_AUDIO
-            });
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // Android 13 (API 33)
-            permissionLauncher.launch(new String[]{
-                    Manifest.permission.READ_MEDIA_IMAGES,
-                    Manifest.permission.READ_MEDIA_VIDEO
-            });
         }
     }
 

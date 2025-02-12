@@ -1,6 +1,5 @@
 package com.itservices.gpxanalyzer.ui.storage;
 
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -28,7 +27,6 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class FileSelectorFragment extends Fragment {
 
-    public static final int STORAGE_PERMISSION_REQUEST_CODE = 101;
     public static final String GPX = ".gpx";
 
     private FileSelectorViewModel viewModel;
@@ -60,6 +58,9 @@ public class FileSelectorFragment extends Fragment {
                     setupFilePicker();
                 } else {
                     // Handle denied permission case
+                    Navigation.findNavController(requireView()).navigate(
+                            R.id.mainMenuFragment
+                    );
                     Toast.makeText(requireContext(), "Permission denied. Cannot access files.", Toast.LENGTH_SHORT).show();
                 }
             });
@@ -99,42 +100,7 @@ public class FileSelectorFragment extends Fragment {
         if (PermissionUtils.hasFileAccessPermissions(FileSelectorFragment.this.requireActivity())) {
             setupFilePicker();
         } else {
-           // PermissionUtils.requestFilePermissions(FileSelectorFragment.this.requireActivity());
-
-            PermissionUtils.requestMediaPermissions(FileSelectorFragment.this.requireActivity(), permissionLauncher);
-        }
-    }
-
-/*
-    */
-/**
-     * Checks if storage permissions are granted.
-     *//*
-
-    private boolean isStoragePermissionGranted() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            // For SDK 24 to 28, standard permission check for READ_EXTERNAL_STORAGE
-            return ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
-        } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-            // For SDK 29 (Android 10), Scoped Storage permission
-            return ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
-        } else {
-            // For SDK 30+ (Android 11 and above), check for MANAGE_EXTERNAL_STORAGE permission
-            return ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.MANAGE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
-        }
-    }
-*/
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == STORAGE_PERMISSION_REQUEST_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                setupFilePicker(); // Permission granted, set up the file picker
-            } else {
-                Toast.makeText(requireContext(), "Permission denied. Cannot access files.", Toast.LENGTH_SHORT).show();
-            }
+            PermissionUtils.requestFileAccessPermissions(FileSelectorFragment.this.requireActivity(), permissionLauncher);
         }
     }
 
