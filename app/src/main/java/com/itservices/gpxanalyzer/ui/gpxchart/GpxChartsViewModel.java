@@ -23,9 +23,7 @@ import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Observable;
-import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
 
@@ -118,72 +116,24 @@ public class GpxChartsViewModel extends ViewModel {
         orientationPublishSubject
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<Integer>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
-                    }
-
-                    @Override
-                    public void onNext(Integer orientation) {
-                        multipleSyncedGpxChartUseCase.loadData(requireContext, rawGpxDataId);
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                    }
-
-                    @Override
-                    public void onComplete() {
-                    }
-                });
+                .doOnNext(orientation -> multipleSyncedGpxChartUseCase.loadData(requireContext, rawGpxDataId))
+                .subscribe();
     }
 
     private void observeRequestStatusOnLiveData(Observable<RequestStatus> requestStatus) {
         requestStatus
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<RequestStatus>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
-                    }
-
-                    @Override
-                    public void onNext(RequestStatus newStatus) {
-                        requestStatusMutableLiveData.postValue(newStatus);
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                    }
-
-                    @Override
-                    public void onComplete() {
-                    }
-                });
+                .doOnNext(requestStatusMutableLiveData::postValue)
+                .subscribe();
     }
 
     private void observeProgressOnLiveData(Observable<Integer> integerObservable) {
         integerObservable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<Integer>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
-                    }
-
-                    @Override
-                    public void onNext(Integer percent) {
-                        percentageProcessingProgressLiveData.postValue(percent);
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                    }
-
-                    @Override
-                    public void onComplete() {
-                    }
-                });
+                .doOnNext(percentageProcessingProgressLiveData::postValue)
+                .subscribe();
     }
 
     public void resetTimeScale(DataEntityLineChart dataEntitiesLineChart) {

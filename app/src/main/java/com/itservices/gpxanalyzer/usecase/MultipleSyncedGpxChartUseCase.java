@@ -29,7 +29,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.reactivex.Observable;
-import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -114,24 +113,8 @@ public class MultipleSyncedGpxChartUseCase {
         selection
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.newThread())
-                .subscribe(new Observer<BaseDataEntityEntry>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
-                    }
-
-                    @Override
-                    public void onNext(BaseDataEntityEntry baseDataEntityEntry) {
-                        chartController.manualSelectEntry( baseDataEntityEntry.getDataEntity().getTimestampMillis() );
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                    }
-
-                    @Override
-                    public void onComplete() {
-                    }
-                });
+                .doOnNext(baseDataEntityEntry -> chartController.manualSelectEntry( baseDataEntityEntry.getDataEntity().getTimestampMillis() ) )
+                .subscribe();
     }
 
     private static int getNewPrimaryIndexFromNameStringRes(Context context, int id) {
@@ -155,11 +138,6 @@ public class MultipleSyncedGpxChartUseCase {
         lineChart.getSettings().setDragDecelerationEnabled(false);
         speedTimeChartController.bindChart(lineChart, mainActivity);
     }
-
-    /*
-            altitudeChartSettingsDotsMutableLiveData.postValue(lineChart.getMarker().);
-    * 		LineDataSet lineDataSet = (LineDataSet) lineChart.getData().getDataSets().get(0);
-		lineDataSet.setDrawIcons(drawIconsEnabled);*/
 
     public Observable<Integer> getPercentageProgress() {
         return dataProvider.getPercentageProgress();
