@@ -1,5 +1,9 @@
 package com.itservices.gpxanalyzer.ui.storage;
 
+import static com.itservices.gpxanalyzer.utils.PermissionUtils.STORAGE_PERMISSION_REQUEST_CODE;
+
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -36,6 +40,8 @@ public class FileSelectorFragment extends Fragment {
     // Register the Activity Result API for file selection
     private final ActivityResultLauncher<String[]> filePickerLauncher =
             registerForActivityResult(new ActivityResultContracts.OpenDocument(), uri -> {
+                Log.d("ActivityResultLauncher", "registerForActivityResult");
+
                 if (uri != null) {
                     Log.d("FileSelector", "File selected: " + uri.toString());
                     // Handle file (for example, copy to internal storage or display)
@@ -58,10 +64,7 @@ public class FileSelectorFragment extends Fragment {
                     setupFilePicker();
                 } else {
                     // Handle denied permission case
-                    Navigation.findNavController(requireView()).navigate(
-                            R.id.mainMenuFragment
-                    );
-                    Toast.makeText(requireContext(), "Permission denied. Cannot access files.", Toast.LENGTH_SHORT).show();
+                    warningNeedsPermissions(requireContext());
                 }
             });
 
@@ -108,6 +111,8 @@ public class FileSelectorFragment extends Fragment {
      * Sets up the file picker and initializes ViewModel.
      */
     private void setupFilePicker() {
+        Log.d(FileSelectorFragment.class.getSimpleName(), "setupFilePicker() called");
+
         // Observe file list
         viewModel.getFiles().observe(getViewLifecycleOwner(), fileAdapter::setFiles);
 
@@ -115,13 +120,20 @@ public class FileSelectorFragment extends Fragment {
         viewModel.loadFiles(requireContext(), GPX);
 
         // Set file picker button click listener
-        binding.btnSelectFile.setOnClickListener(v -> openFilePicker());
+        binding.btnSelectFile.setOnClickListener(v -> {
+            if (PermissionUtils.hasFileAccessPermissions(FileSelectorFragment.this.requireActivity())) {
+                openFilePicker();
+            } else {
+                PermissionUtils.requestFileAccessPermissions(FileSelectorFragment.this.requireActivity(), permissionLauncher);
+            }
+        });
     }
 
     /**
      * Opens system file picker to select GPX files using Activity Result API.
      */
     private void openFilePicker() {
+        Log.d("FileSelectorFragment", "openFilePicker() called");
         // For Android 9 (API 28) and below, MIME types may need broader filtering.
 /*        String[] mimeTypes = new String[]{
                 "application/gpx+xml",  // GPX format
@@ -141,4 +153,33 @@ public class FileSelectorFragment extends Fragment {
         super.onDestroyView();
         binding = null; // Avoid memory leaks
     }
+
+    @Override
+    public void onRequestPermissionsResult(
+            int requestCode,
+            @NonNull String[] permissions,
+            @NonNull int[] grantResults
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        Log.d("onRequestPermissionsResult", "onRequestPermissionsResult");
+        if (grantResults.length > 0) {
+            if (requestCode == STORAGE_PERMISSION_REQUEST_CODE) {
+                if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                    warningNeedsPermissions(requireContext());
+                } else {
+                    setupFilePicker();
+                }
+            }
+        }
+    }
+
+
+    private void warningNeedsPermissions(Context context) {
+    /*Navigation.findNavController(requireView()).navigate(
+            R.id.mainMenuFragment
+    );*/
+        Toast.makeText(context, "Permission denied. Cannot access files.", Toast.LENGTH_SHORT).show();
+    }
+
 }
