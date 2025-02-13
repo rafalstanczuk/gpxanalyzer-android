@@ -77,6 +77,12 @@ public class DataEntityLineChart extends LineChart {
 		this.mainActivity = requireActivity;
 	}
 
+	@Nullable
+	public MainActivity getActivity() {
+		return mainActivity;
+	}
+
+
 	public static int getDataSetIndexForEntryWithTimeInt(
 			DataEntityLineChart lineChart, long entryTimeInt
 	) {

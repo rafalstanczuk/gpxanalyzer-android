@@ -76,7 +76,7 @@ public class GpxChartsFragment extends Fragment {
         );
 
         binding.speedPropertiesControlLayout.onOffColorizedCirclesCheckBox
-                .setOnCheckedChangeListener((buttonView, isChecked) -> gpxChartsViewModel.setSpeedDrawIconEnabled(isChecked)
+                .setOnCheckedChangeListener((buttonView, isChecked) -> gpxChartsViewModel.setSpeedDrawIconEnabled(requireActivity(), isChecked)
                 );
     }
 
@@ -93,7 +93,7 @@ public class GpxChartsFragment extends Fragment {
         );
 
         binding.altitudePropertiesControlLayout.onOffColorizedCirclesCheckBox
-                .setOnCheckedChangeListener((buttonView, isChecked) -> gpxChartsViewModel.setAltitudeDrawIconEnabled(isChecked)
+                .setOnCheckedChangeListener((buttonView, isChecked) -> gpxChartsViewModel.setAltitudeDrawIconEnabled(requireActivity(), isChecked)
                 );
     }
 

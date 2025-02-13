@@ -15,4 +15,10 @@
         android:label="GpxChartsFragment">
     </fragment>
 
+    <fragment
+        android:id="@+id/fileSelectorFragment"
+        android:name="com.itservices.gpxanalyzer.ui.storage.FileSelectorFragment"
+        android:label="FileSelectorFragment">
+    </fragment>
+
 </navigation>

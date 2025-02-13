@@ -135,7 +135,10 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
 
 
     public void manualSelectEntry(long selectedTimeMillis) {
-        manualSelectEntryOnSelectedTime(chartProvider.getChart(), selectedTimeMillis, true,false);
+        assert chartProvider.getChart().getActivity() != null;
+        chartProvider.getChart().getActivity().runOnUiThread(() -> {
+            manualSelectEntryOnSelectedTime(chartProvider.getChart(), selectedTimeMillis, true,false);
+        });
     }
 
     private void manualSelectEntryOnSelectedTime(DataEntityLineChart lineChart, long selectedTimeMillis, boolean centerViewToSelection, boolean callListeners) {
