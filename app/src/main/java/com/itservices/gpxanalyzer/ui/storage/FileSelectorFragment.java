@@ -16,14 +16,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.databinding.FragmentFileSelectorBinding;
-import com.itservices.gpxanalyzer.utils.common.ConcurrentUtil;
-
-import java.util.concurrent.Callable;
 
 import dagger.hilt.android.AndroidEntryPoint;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 @AndroidEntryPoint
 public class FileSelectorFragment extends Fragment {
@@ -31,8 +25,6 @@ public class FileSelectorFragment extends Fragment {
     private FileSelectorViewModel viewModel;
     private FileAdapter fileAdapter;
     private FragmentFileSelectorBinding binding;
-
-    private Disposable disposable;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -64,20 +56,29 @@ public class FileSelectorFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        viewModel.getPermissionsGranted().observe(getViewLifecycleOwner(), granted -> {
-                    if (!granted)
+        viewModel.getPermissionsGrantedLiveData().observe(getViewLifecycleOwner(), granted -> {
+                    if (!granted) {
                         warningNeedsPermissions(FileSelectorFragment.this.requireActivity());
+                    } else {
+                        initViewModelObservers();
+                    }
                 }
         );
 
-        subscribePermissionRequest(this::initViewModelObservers);
+        viewModel.checkAndRequestPermissions(FileSelectorFragment.this.requireActivity());
 
         binding.btnSelectFile.setOnClickListener(
-                v -> subscribePermissionRequest(() -> viewModel.openFilePicker())
+                v -> {
+                    if (viewModel.getPermissionsGranted()) {
+                        viewModel.openFilePicker();
+                    } else {
+                        viewModel.checkAndRequestPermissions(FileSelectorFragment.this.requireActivity());
+                    }
+                }
         );
     }
 
-    private boolean initViewModelObservers() {
+    private void initViewModelObservers() {
         viewModel.getFileFound().observe(getViewLifecycleOwner(), found -> {
             if (!found) {
                 Toast.makeText(FileSelectorFragment.this.requireActivity(), R.string.wrong_file_format_select_gpx_only, Toast.LENGTH_SHORT).show();
@@ -85,29 +86,15 @@ public class FileSelectorFragment extends Fragment {
         });
 
         viewModel.getFoundFileList().observe(getViewLifecycleOwner(), files -> {
-            Toast.makeText(FileSelectorFragment.this.requireActivity(), R.string.file_found_now_select_one_from_the_list, Toast.LENGTH_SHORT).show();
+            if (!files.isEmpty()) {
+                Toast.makeText(FileSelectorFragment.this.requireActivity(), R.string.file_found_now_select_one_from_the_list, Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(FileSelectorFragment.this.requireActivity(), R.string.the_list_of_gpx_file_to_use_is_empty_click_search_for_file_first, Toast.LENGTH_SHORT).show();
+            }
             fileAdapter.setFiles(files);
         });
 
         viewModel.loadLocalFiles(requireContext());
-
-        return true;
-    }
-
-
-    private void subscribePermissionRequest(Callable<Boolean> onPermissionsGranted) {
-        ConcurrentUtil.tryToDispose(disposable);
-
-        disposable = viewModel.checkAndRequestPermissions(FileSelectorFragment.this.requireActivity())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(success -> {
-                    if (success) {
-                        onPermissionsGranted.call();
-                    } else {
-                        warningNeedsPermissions(FileSelectorFragment.this.requireActivity());
-                    }
-                });
     }
 
     private void warningNeedsPermissions(Context context) {

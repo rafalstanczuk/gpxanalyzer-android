@@ -2,6 +2,7 @@ package com.itservices.gpxanalyzer.ui.storage;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -16,7 +17,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
-import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -36,6 +36,8 @@ public class FileSelectorViewModel extends ViewModel {
     private Disposable disposableFileListFound;
     private Disposable disposableRequestPermissions;
 
+    private Disposable disposableCheckAndRequestPermissions;
+
     public LiveData<List<File>> getFoundFileList() {
         return filesLiveData;
     }
@@ -54,9 +56,13 @@ public class FileSelectorViewModel extends ViewModel {
                         .subscribe(filesLiveData::setValue);
     }
 
-
-    public LiveData<Boolean> getPermissionsGranted() {
+    @NonNull
+    public LiveData<Boolean> getPermissionsGrantedLiveData() {
         return requestPermissionsLiveData;
+    }
+
+    public Boolean getPermissionsGranted() {
+        return requestPermissionsLiveData.getValue() != null ? requestPermissionsLiveData.getValue() : false;
     }
 
     public LiveData<Boolean> getFileFound() {
@@ -67,12 +73,16 @@ public class FileSelectorViewModel extends ViewModel {
         selectGpxFileUseCase.setSelectedFile(gpxFile);
     }
 
-    public Observable<Boolean> checkAndRequestPermissions(FragmentActivity requireActivity) {
-        return selectGpxFileUseCase.checkAndRequestPermissions(requireActivity);
+    public void checkAndRequestPermissions(FragmentActivity requireActivity) {
+        ConcurrentUtil.tryToDispose(disposableRequestPermissions);
+        disposableCheckAndRequestPermissions = selectGpxFileUseCase.checkAndRequestPermissions(requireActivity)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(requestPermissionsLiveData::setValue);
     }
 
-    public boolean openFilePicker() {
-        return selectGpxFileUseCase.openFilePicker();
+    public void openFilePicker() {
+        selectGpxFileUseCase.openFilePicker();
     }
 
     public void init() {

@@ -16,4 +16,5 @@
     <string name="wrong_file_format_select_gpx_only">Wrong file format. Select .gpx only!</string>
     <string name="file_found_now_select_one_from_the_list">File found. \nNow select one from the list.</string>
     <string name="selected">"Selected: "</string>
+    <string name="the_list_of_gpx_file_to_use_is_empty_click_search_for_file_first">The list of gpx file to use is empty.\nClick [Search for file] first!</string>
 </resources>
