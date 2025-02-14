@@ -35,8 +35,8 @@ public class MainActivity extends AppCompatActivity {
 
         NavInflater navInflater = navController.getNavInflater();
         NavGraph graph = navInflater.inflate(R.navigation.nav_graph);
-
-        graph.setStartDestination(R.id.mainMenuFragment);
+/*
+        graph.setStartDestination(R.id.mainMenuFragment);*/
 
         navController.setGraph(graph);
 
