@@ -3,12 +3,15 @@ package com.itservices.gpxanalyzer.chart.legend;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.data.gpx.StatisticResults;
 import com.itservices.gpxanalyzer.utils.common.PrecisionUtil;
+import com.itservices.gpxanalyzer.utils.ui.IconsUtil;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -23,6 +26,7 @@ public class PaletteColorDeterminer {
     private final int paletteNumberOfDivisions;
     private final int[] paletteFromBitmap;
     private Map<Integer, BoundaryColorSpan> paletteMap = new HashMap<>();
+    private Map<Integer, Drawable> drawableMap = new LinkedHashMap<>();
 
     protected StatisticResults statisticResults;
 
@@ -52,6 +56,29 @@ public class PaletteColorDeterminer {
                 paletteNumberOfDivisions,
                 paletteFromBitmap,
                 PaletteDirection.MAX_IS_ZERO_INDEX_Y_PIXEL);
+
+        drawableMap = generateDrawableIconMap(paletteMap);
+    }
+
+    private Map<Integer, Drawable> generateDrawableIconMap(Map<Integer, BoundaryColorSpan> paletteMap) {
+        Map<Integer, Drawable> generatedDrawableMap = new HashMap<>(paletteMap.size());
+
+        paletteMap.forEach( (key, boundary) -> {
+            try {
+                int colorInt = boundary.getColor();
+                Drawable drawableIcon = IconsUtil.getDrawableIconForAreaColorId(colorInt, 10, false);
+                generatedDrawableMap.put(key, drawableIcon);
+            } catch (Exception ex) {
+                Log.e("DataEntityCurveEntry", "create: ", ex);
+            }
+        });
+
+        return generatedDrawableMap;
+    }
+
+    public Drawable getDrawableIconFrom(float value) {
+        BoundaryColorSpan boundaryColorSpan = getBoundaryFrom(value);
+        return drawableMap.get( boundaryColorSpan.getId() );
     }
 
     public Map<Integer, BoundaryColorSpan> getPalette() {

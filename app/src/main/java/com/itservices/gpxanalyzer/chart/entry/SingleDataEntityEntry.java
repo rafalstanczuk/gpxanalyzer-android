@@ -35,8 +35,7 @@ public class SingleDataEntityEntry extends BaseDataEntityEntry {
 		Drawable drawableIcon = null;
 
 		try {
-			int colorInt = paletteColorDeterminer.getBoundaryFrom(y).getColor();
-			drawableIcon = IconsUtil.getDrawableIconForAreaColorId(colorInt, 10, false);
+			drawableIcon = paletteColorDeterminer.getDrawableIconFrom(y);
 		} catch (Exception ex) {
 			Log.e("DataEntityCurveEntry", "create: ", ex);
 		}
