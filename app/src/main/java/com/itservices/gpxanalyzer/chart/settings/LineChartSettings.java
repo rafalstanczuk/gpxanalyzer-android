@@ -42,7 +42,7 @@ public class LineChartSettings {
 		HourMinutesAxisValueFormatter hourMinutesAxisValueFormatter,
 		AxisValueFormatter dataEntityAxisValueFormatter
 	) {
-		primaryColor = ContextCompat.getColor(context, R.color.colorPrimary);
+		primaryColor = ContextCompat.getColor(context, R.color.lightBlue);
 		this.customMarker = customMarker;
 		this.hourMinutesAxisValueFormatter = hourMinutesAxisValueFormatter;
 		this.dataEntityAxisValueFormatter = dataEntityAxisValueFormatter;

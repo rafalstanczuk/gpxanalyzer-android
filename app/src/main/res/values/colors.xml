@@ -8,9 +8,12 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <color name="lightGreenBackground">#00F200</color>
-    <color name="darkGreenBackground">#00E700</color>
-    <color name="lightGrayBackground">#F2F2F2</color>
-    <color name="darkGrayBackground">#E7E7E8</color>
-    <color name="colorPrimary">#13765F</color>
+    <color name="lightGreen">#00F200</color>
+    <color name="darkGreen">#00E700</color>
+    <color name="lightGray">#F2F2F2</color>
+    <color name="darkGray">#E7E7E8</color>
+    <color name="lightBlue">#0000C8</color>
+    <color name="darkBlue">#000084</color>
+    <color name="veryDarkBlue">#000064</color>
+    <color name="veryDarkGray">#646464</color>
 </resources>

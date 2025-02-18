@@ -17,4 +17,15 @@
     <string name="file_found_now_select_one_from_the_list">File found. \nNow select one from the list.</string>
     <string name="selected">"Selected: "</string>
     <string name="the_list_of_gpx_file_to_use_is_empty_click_search_for_file_first">The list of gpx file to use is empty.\nClick [Search for file] first!</string>
+
+    <string name="two_charts_asl_t_v_t">Two charts: ASL(t), v(t)</string>
+    <string name="one_chart_asl_t_v_t">One chart : ASL(t), v(t)</string>
+    <string name="one_chart_asl_t">One chart : ASL(t)</string>
+    <string name="one_chart_v_t">One chart : v(t)</string>
+
+    <string name="two_charts_asl_t_v_t_short">ASL(t) , v(t)</string>
+    <string name="one_chart_asl_t_v_t_short">ASL(t) + v(t)</string>
+    <string name="one_chart_asl_t_short">ASL(t)</string>
+    <string name="one_chart_v_t_short">v(t)</string>
+
 </resources>

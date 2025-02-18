@@ -41,6 +41,8 @@ public class GpxChartsFragment extends Fragment {
                 gpxChartsViewModel.loadData(requireContext(), R.raw.skiing20250121t091423)
         );
 
+        binding.switchSeverityModeButton.setOnClickListener(view -> gpxChartsViewModel.switchSeverityMode() );
+
         bindAltitudeTimeChartUI();
 
         bindSpeedTimeChartUI();

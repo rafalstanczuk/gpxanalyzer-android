@@ -11,6 +11,9 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+
+        android:drawableStart="@drawable/ic_files_fill0"
+        android:drawableTint="@color/white"
         android:text="@string/search_for_file" />
 
     <androidx.recyclerview.widget.RecyclerView

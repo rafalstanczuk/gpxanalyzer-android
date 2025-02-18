@@ -1,16 +1,25 @@
 package com.itservices.gpxanalyzer.ui.main;
 
-public class MenuItem {
-    private final String title;
-    private int destinationFragment;
+import android.graphics.drawable.Drawable;
 
-    public MenuItem(String title, int destinationFragment) {
+public class MenuItem {
+
+    private final Drawable iconId;
+    private final String title;
+    private final int destinationFragment;
+
+    public MenuItem(Drawable iconId, String title, int destinationFragment) {
+        this.iconId = iconId;
         this.title = title;
         this.destinationFragment = destinationFragment;
     }
 
     public String getTitle() {
         return title;
+    }
+
+    public Drawable getIcon() {
+        return iconId;
     }
 
     public int getDestinationFragment() {

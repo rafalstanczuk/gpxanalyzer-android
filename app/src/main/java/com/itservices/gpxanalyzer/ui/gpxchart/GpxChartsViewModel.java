@@ -29,25 +29,51 @@ import io.reactivex.subjects.PublishSubject;
 
 @HiltViewModel
 public class GpxChartsViewModel extends ViewModel {
-    public static final float CHART_PERCENTAGE_HEIGHT_LANDSCAPE = 0.4f;
-    public static final float CHART_PERCENTAGE_HEIGHT_PORTRAIT = 0.4f;
+
     public static final float DEFAULT_MAX_100_PERCENT = 1f;
     public static final float DEFAULT_PERCENT_VALUE = 0.5f;
 
     public final MutableLiveData<Float> chartPercentageHeightLiveData
             = new MutableLiveData<>(DEFAULT_PERCENT_VALUE);
 
+    public final MutableLiveData<Integer> orientationLiveData
+            = new MutableLiveData<>(Configuration.ORIENTATION_PORTRAIT);
+
+
     @Inject
     MultipleSyncedGpxChartUseCase multipleSyncedGpxChartUseCase;
 
     private final PublishSubject<Integer> orientationPublishSubject = PublishSubject.create();
 
+    private final MutableLiveData<ViewMode> viewModeMutableLiveData = new MutableLiveData<>(ViewMode.ASL_T_1);
+
+    private final MutableLiveData<ViewModeSeverity> viewModeSeverityMutableLiveData = new MutableLiveData<>(ViewModeSeverity.TWO_CHARTS);
+    private final MutableLiveData<Integer> viewModeSeverityIconMutableLiveData = new MutableLiveData<>(ViewModeSeverity.TWO_CHARTS.getDrawableIconResId());
 
     private final MutableLiveData<RequestStatus> requestStatusMutableLiveData = new MutableLiveData<>(DEFAULT);
     private final MutableLiveData<Integer> percentageProcessingProgressLiveData = new MutableLiveData<>(0);
 
     @Inject
     public GpxChartsViewModel() {
+    }
+
+    public LiveData<ViewMode> getViewModeMutableLiveData() {
+        return viewModeMutableLiveData;
+    }
+
+    public void switchSeverityMode() {
+        ViewModeSeverity mode = viewModeSeverityMutableLiveData.getValue();
+
+        assert mode != null;
+        viewModeSeverityMutableLiveData.setValue( mode.getNextCyclic() );
+
+        // Reload orientation-based percentage heights
+        assert orientationLiveData.getValue() != null;
+        setOrientation(orientationLiveData.getValue());
+    }
+
+    public LiveData<ViewModeSeverity> getViewModeSeverityLiveData() {
+        return viewModeSeverityMutableLiveData;
     }
 
     public LiveData<Integer> getPercentageProcessingProgressLiveData() {
@@ -70,12 +96,16 @@ public class GpxChartsViewModel extends ViewModel {
     }
 
     public void setOrientation(int orientation) {
+        ViewModeSeverity viewModeSeverity = viewModeSeverityMutableLiveData.getValue();
+        assert viewModeSeverity != null;
+
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            chartPercentageHeightLiveData.setValue(CHART_PERCENTAGE_HEIGHT_LANDSCAPE);
+            chartPercentageHeightLiveData.setValue(viewModeSeverity.getPercentageHeightLandscape());
         } else {
-            chartPercentageHeightLiveData.setValue(CHART_PERCENTAGE_HEIGHT_PORTRAIT);
+            chartPercentageHeightLiveData.setValue(viewModeSeverity.getPercentageHeightPortrait());
         }
 
+        orientationLiveData.setValue(orientation);
         orientationPublishSubject.onNext(orientation);
     }
 

@@ -17,31 +17,28 @@
             android:id="@+id/loadButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_small"
             android:text="@string/load"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/percentageProgressTextView"
+        <ImageButton
+            android:id="@+id/switchSeverityModeButton"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingStart="5dp"
-            android:paddingTop="2dp"
-            android:paddingEnd="10dp"
-            android:text="@{ viewModel.percentageProcessingProgressLiveData.toString() }"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="@android:color/black"
-            android:textSize="11sp"
-            app:layout_constraintBottom_toBottomOf="@id/loadButton"
-            app:layout_constraintStart_toEndOf="@id/loadButton"
-            app:layout_constraintTop_toTopOf="@id/loadButton" />
+            android:layout_height="0dp"
+            android:layout_marginStart="@dimen/margin_small"
+            android:contentDescription="@{ viewModel.getViewModeSeverityLiveData().name}"
+            app:imageResource="@{ viewModel.getViewModeSeverityLiveData().getNextCyclic().getDrawableIconResId  }"
+            android:background="@color/white"
+            app:layout_constraintBottom_toBottomOf="@+id/loadButton"
+            app:layout_constraintStart_toEndOf="@+id/loadButton"
+            app:layout_constraintTop_toTopOf="@+id/loadButton" />
 
         <ProgressBar
             android:id="@+id/percentageProgressBarChart"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
-            android:layout_height="15dp"
+            android:layout_height="5dp"
             android:layout_marginStart="@dimen/margin_small"
             android:layout_marginTop="@dimen/margin_very_small"
             android:layout_marginEnd="@dimen/margin_small"
@@ -52,24 +49,24 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/loadButton" />
 
-        <TextView
-            android:id="@+id/requestStatusTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@{viewModel.requestStatusLiveData.name()}"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="@android:color/black"
-            android:textSize="10sp"
-            app:layout_constraintBottom_toBottomOf="@id/percentageProgressBarChart"
-            app:layout_constraintEnd_toEndOf="@id/percentageProgressBarChart"
-            app:layout_constraintStart_toStartOf="@id/percentageProgressBarChart"
-            app:layout_constraintTop_toTopOf="@id/percentageProgressBarChart" />
-
+        <!--        <TextView
+                    android:id="@+id/requestStatusTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@{viewModel.requestStatusLiveData.name()}"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@android:color/black"
+                    android:textSize="10sp"
+                    app:layout_constraintBottom_toBottomOf="@id/percentageProgressBarChart"
+                    app:layout_constraintEnd_toEndOf="@id/percentageProgressBarChart"
+                    app:layout_constraintStart_toStartOf="@id/percentageProgressBarChart"
+                    app:layout_constraintTop_toTopOf="@id/percentageProgressBarChart" />-->
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/altitude_time_chart_Layout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:visibility="@{viewModel.getViewModeSeverityLiveData().isMoreThanOneVisibility()}"
             app:layout_constraintHeight_default="percent"
             app:layout_constraintHeight_percent="@{viewModel.dataEntityChartPercentageHeight}"
             app:layout_constraintTop_toBottomOf="@id/percentageProgressBarChart">

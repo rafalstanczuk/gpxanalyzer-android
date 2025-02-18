@@ -1,13 +1,48 @@
 package com.itservices.gpxanalyzer.ui.gpxchart;
 
+
+import android.content.Context;
+
+import androidx.annotation.DrawableRes;
+import androidx.annotation.StringRes;
+
+import com.itservices.gpxanalyzer.R;
+
 public enum ViewMode {
-	CURVE,
-	INFO_ONLY_VIEW;
+	ASL_T_1(R.string.one_chart_asl_t_short, R.string.one_chart_asl_t, R.drawable.ic_altitude_fill0),
+	V_T_1(R.string.one_chart_v_t_short, R.string.one_chart_v_t, R.drawable.ic_speed_fill0),
+
+	ASL_V_T_COMBINED(R.string.one_chart_asl_t_v_t, R.string.one_chart_asl_t_v_t_short, R.drawable.ic_altitude_speed_fill0);
+
+	@StringRes
+	private final int idShortName;
+    private final int idLongName;
+	@DrawableRes
+	private final int drawableIconResId;
+
+
+    ViewMode(@StringRes int idShortName, @StringRes int idLongName, @DrawableRes int drawableIconResId){
+        this.idShortName = idShortName;
+        this.idLongName = idLongName;
+        this.drawableIconResId = drawableIconResId;
+    }
 
 	public ViewMode getNextCyclic() {
 		int currOrdinal  = ordinal();
 		int maxOrdinal = values().length-1;
 
 		return currOrdinal==maxOrdinal ? values()[0] : values()[currOrdinal+1];
+	}
+
+	public String getShortName(Context context) {
+		return context.getText(idShortName).toString();
+	}
+    public String getLongName(Context context) {
+        return context.getText(idLongName).toString();
+    }
+
+	@DrawableRes
+	public int getDrawableIconResId() {
+		return drawableIconResId;
 	}
 }
