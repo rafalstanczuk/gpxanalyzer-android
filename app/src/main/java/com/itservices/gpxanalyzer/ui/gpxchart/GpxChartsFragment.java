@@ -35,6 +35,13 @@ public class GpxChartsFragment extends Fragment {
 
         binding = FragmentGpxChartsBinding.inflate(inflater, container, false);
         binding.setViewModel(gpxChartsViewModel);
+
+        binding.speedPropertiesControlLayout.setViewModel(gpxChartsViewModel);
+        binding.speedScaleControlLayout.setViewModel(gpxChartsViewModel);
+
+        binding.altitudePropertiesControlLayout.setViewModel(gpxChartsViewModel);
+        binding.altitudeScaleControlLayout.setViewModel(gpxChartsViewModel);
+
         binding.setLifecycleOwner(getViewLifecycleOwner());
 
         binding.loadButton.setOnClickListener(view ->
@@ -47,22 +54,7 @@ public class GpxChartsFragment extends Fragment {
 
         bindSpeedTimeChartUI();
 
-        observeRequestStatus();
-
         return binding.getRoot();
-    }
-
-    private void observeRequestStatus() {
-        gpxChartsViewModel.getRequestStatusLiveData().observe(getViewLifecycleOwner(), requestStatus -> {
-            binding.loadButton.setEnabled(gpxChartsViewModel.getButtonEnabled(requestStatus));
-            binding.altitudeScaleControlLayout.timeAutoscalingButton.setEnabled(gpxChartsViewModel.getButtonEnabled(requestStatus));
-            binding.altitudeScaleControlLayout.timeZoomInButton.setEnabled(gpxChartsViewModel.getButtonEnabled(requestStatus));
-            binding.altitudeScaleControlLayout.timeZoomOutButton.setEnabled(gpxChartsViewModel.getButtonEnabled(requestStatus));
-
-            binding.speedScaleControlLayout.timeAutoscalingButton.setEnabled(gpxChartsViewModel.getButtonEnabled(requestStatus));
-            binding.speedScaleControlLayout.timeZoomInButton.setEnabled(gpxChartsViewModel.getButtonEnabled(requestStatus));
-            binding.speedScaleControlLayout.timeZoomOutButton.setEnabled(gpxChartsViewModel.getButtonEnabled(requestStatus));
-        });
     }
 
     private void bindSpeedTimeChartUI() {

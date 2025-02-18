@@ -18,6 +18,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/margin_small"
+            android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData()}"
             android:text="@string/load"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -27,9 +28,10 @@
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_marginStart="@dimen/margin_small"
-            android:contentDescription="@{ viewModel.getViewModeSeverityLiveData().name}"
-            app:imageResource="@{ viewModel.getViewModeSeverityLiveData().getNextCyclic().getDrawableIconResId  }"
             android:background="@color/white"
+            android:contentDescription="@{ viewModel.getViewModeSeverityLiveData().name}"
+            android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData()}"
+            app:imageResource="@{ viewModel.getViewModeSeverityLiveData().getNextCyclic().getDrawableIconResId  }"
             app:layout_constraintBottom_toBottomOf="@+id/loadButton"
             app:layout_constraintStart_toEndOf="@+id/loadButton"
             app:layout_constraintTop_toTopOf="@+id/loadButton" />

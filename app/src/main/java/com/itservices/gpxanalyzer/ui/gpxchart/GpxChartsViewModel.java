@@ -51,6 +51,8 @@ public class GpxChartsViewModel extends ViewModel {
     private final MutableLiveData<Integer> viewModeSeverityIconMutableLiveData = new MutableLiveData<>(ViewModeSeverity.TWO_CHARTS.getDrawableIconResId());
 
     private final MutableLiveData<RequestStatus> requestStatusMutableLiveData = new MutableLiveData<>(DEFAULT);
+
+    private final MutableLiveData<Boolean> buttonsEnabledByRequestStatusLiveData = new MutableLiveData<>(true);
     private final MutableLiveData<Integer> percentageProcessingProgressLiveData = new MutableLiveData<>(0);
 
     @Inject
@@ -65,7 +67,7 @@ public class GpxChartsViewModel extends ViewModel {
         ViewModeSeverity mode = viewModeSeverityMutableLiveData.getValue();
 
         assert mode != null;
-        viewModeSeverityMutableLiveData.setValue( mode.getNextCyclic() );
+        viewModeSeverityMutableLiveData.setValue(mode.getNextCyclic());
 
         // Reload orientation-based percentage heights
         assert orientationLiveData.getValue() != null;
@@ -84,7 +86,7 @@ public class GpxChartsViewModel extends ViewModel {
         return requestStatusMutableLiveData;
     }
 
-    public boolean getButtonEnabled(RequestStatus requestStatus) {
+    private boolean getButtonEnabled(RequestStatus requestStatus) {
         switch (Objects.requireNonNull(requestStatus)) {
             case LOADING:
             case DATA_LOADED:
@@ -93,6 +95,10 @@ public class GpxChartsViewModel extends ViewModel {
             default:
                 return true;
         }
+    }
+
+    public LiveData<Boolean> buttonsEnabledByRequestStatusLiveData() {
+        return buttonsEnabledByRequestStatusLiveData;
     }
 
     public void setOrientation(int orientation) {
@@ -154,7 +160,12 @@ public class GpxChartsViewModel extends ViewModel {
         requestStatus
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnNext(requestStatusMutableLiveData::postValue)
+                .doOnNext(request -> {
+                            requestStatusMutableLiveData.postValue(request);
+
+                            buttonsEnabledByRequestStatusLiveData.postValue(getButtonEnabled(request));
+                        }
+                )
                 .subscribe();
     }
 
