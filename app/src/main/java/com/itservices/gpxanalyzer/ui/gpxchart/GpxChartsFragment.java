@@ -36,11 +36,11 @@ public class GpxChartsFragment extends Fragment {
         binding = FragmentGpxChartsBinding.inflate(inflater, container, false);
         binding.setViewModel(gpxChartsViewModel);
 
-        binding.speedPropertiesControlLayout.setViewModel(gpxChartsViewModel);
-        binding.speedScaleControlLayout.setViewModel(gpxChartsViewModel);
+        binding.secondChartPropertiesControlLayout.setViewModel(gpxChartsViewModel);
+        binding.secondChartScaleControlLayout.setViewModel(gpxChartsViewModel);
 
-        binding.altitudePropertiesControlLayout.setViewModel(gpxChartsViewModel);
-        binding.altitudeScaleControlLayout.setViewModel(gpxChartsViewModel);
+        binding.firstChartPropertiesControlLayout.setViewModel(gpxChartsViewModel);
+        binding.firstChartScaleControlLayout.setViewModel(gpxChartsViewModel);
 
         binding.setLifecycleOwner(getViewLifecycleOwner());
 
@@ -50,44 +50,44 @@ public class GpxChartsFragment extends Fragment {
 
         binding.switchSeverityModeButton.setOnClickListener(view -> gpxChartsViewModel.switchSeverityMode() );
 
-        bindAltitudeTimeChartUI();
+        bindFirstChartUI();
 
-        bindSpeedTimeChartUI();
+        bindSecondChartUI();
 
         return binding.getRoot();
     }
 
-    private void bindSpeedTimeChartUI() {
-        gpxChartsViewModel.bindSpeedTimeChart(binding.speedPropertiesControlLayout, binding.speedTimeLineChart, (MainActivity) requireActivity());
-        binding.speedScaleControlLayout.timeAutoscalingButton.setOnClickListener(view ->
-                gpxChartsViewModel.resetTimeScale(binding.speedTimeLineChart)
+    private void bindSecondChartUI() {
+        gpxChartsViewModel.bindSecondChart(binding.secondChartPropertiesControlLayout, binding.secondLineChart, (MainActivity) requireActivity());
+        binding.secondChartScaleControlLayout.timeAutoscalingButton.setOnClickListener(view ->
+                gpxChartsViewModel.resetTimeScale(binding.secondLineChart)
         );
-        binding.speedScaleControlLayout.timeZoomInButton.setOnClickListener(view ->
-                gpxChartsViewModel.zoomIn(binding.speedTimeLineChart)
+        binding.secondChartScaleControlLayout.timeZoomInButton.setOnClickListener(view ->
+                gpxChartsViewModel.zoomIn(binding.secondLineChart)
         );
-        binding.speedScaleControlLayout.timeZoomOutButton.setOnClickListener(view ->
-                gpxChartsViewModel.zoomOut(binding.speedTimeLineChart)
+        binding.secondChartScaleControlLayout.timeZoomOutButton.setOnClickListener(view ->
+                gpxChartsViewModel.zoomOut(binding.secondLineChart)
         );
 
-        binding.speedPropertiesControlLayout.onOffColorizedCirclesCheckBox
-                .setOnCheckedChangeListener((buttonView, isChecked) -> gpxChartsViewModel.setSpeedDrawIconEnabled(requireActivity(), isChecked)
+        binding.secondChartPropertiesControlLayout.onOffColorizedCirclesCheckBox
+                .setOnCheckedChangeListener((buttonView, isChecked) -> gpxChartsViewModel.setSecondChartDrawIconEnabled(requireActivity(), isChecked)
                 );
     }
 
-    private void bindAltitudeTimeChartUI() {
-        gpxChartsViewModel.bindAltitudeTimeChart(binding.altitudePropertiesControlLayout, binding.altitudeTimeLineChart, (MainActivity) requireActivity());
-        binding.altitudeScaleControlLayout.timeAutoscalingButton.setOnClickListener(view ->
-                gpxChartsViewModel.resetTimeScale(binding.altitudeTimeLineChart)
+    private void bindFirstChartUI() {
+        gpxChartsViewModel.bindFirstChart(binding.firstChartPropertiesControlLayout, binding.firstLineChart, (MainActivity) requireActivity());
+        binding.firstChartScaleControlLayout.timeAutoscalingButton.setOnClickListener(view ->
+                gpxChartsViewModel.resetTimeScale(binding.firstLineChart)
         );
-        binding.altitudeScaleControlLayout.timeZoomInButton.setOnClickListener(view ->
-                gpxChartsViewModel.zoomIn(binding.altitudeTimeLineChart)
+        binding.firstChartScaleControlLayout.timeZoomInButton.setOnClickListener(view ->
+                gpxChartsViewModel.zoomIn(binding.firstLineChart)
         );
-        binding.altitudeScaleControlLayout.timeZoomOutButton.setOnClickListener(view ->
-                gpxChartsViewModel.zoomOut(binding.altitudeTimeLineChart)
+        binding.firstChartScaleControlLayout.timeZoomOutButton.setOnClickListener(view ->
+                gpxChartsViewModel.zoomOut(binding.firstLineChart)
         );
 
-        binding.altitudePropertiesControlLayout.onOffColorizedCirclesCheckBox
-                .setOnCheckedChangeListener((buttonView, isChecked) -> gpxChartsViewModel.setAltitudeDrawIconEnabled(requireActivity(), isChecked)
+        binding.firstChartPropertiesControlLayout.onOffColorizedCirclesCheckBox
+                .setOnCheckedChangeListener((buttonView, isChecked) -> gpxChartsViewModel.setFirstChartDrawIconEnabled(requireActivity(), isChecked)
                 );
     }
 

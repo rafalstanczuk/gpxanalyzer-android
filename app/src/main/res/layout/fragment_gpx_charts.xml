@@ -65,7 +65,7 @@
                     app:layout_constraintTop_toTopOf="@id/percentageProgressBarChart" />-->
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/altitude_time_chart_Layout"
+            android:id="@+id/first_chart_layout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:visibility="@{viewModel.getViewModeSeverityLiveData().isMoreThanOneVisibility()}"
@@ -74,7 +74,7 @@
             app:layout_constraintTop_toBottomOf="@id/percentageProgressBarChart">
 
             <com.itservices.gpxanalyzer.chart.DataEntityLineChart
-                android:id="@+id/altitude_time_lineChart"
+                android:id="@+id/first_line_chart"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -83,22 +83,22 @@
 
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/altitude_properties_control_constraintlayout"
+                android:id="@+id/first_chart_properties_control_constraintlayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/margin_small"
                 android:layout_marginEnd="@dimen/margin_very_small"
-                app:layout_constraintEnd_toStartOf="@+id/altitude_scale_control_constraintlayout"
+                app:layout_constraintEnd_toStartOf="@+id/first_chart_scale_control_constraintlayout"
                 app:layout_constraintTop_toTopOf="parent">
 
                 <include
-                    android:id="@+id/altitude_properties_control_layout"
+                    android:id="@+id/first_chart_properties_control_layout"
                     layout="@layout/properties_control_layout" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/altitude_scale_control_constraintlayout"
+                android:id="@+id/first_chart_scale_control_constraintlayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/margin_small"
@@ -107,7 +107,7 @@
                 app:layout_constraintTop_toTopOf="parent">
 
                 <include
-                    android:id="@+id/altitude_scale_control_layout"
+                    android:id="@+id/first_chart_scale_control_layout"
                     layout="@layout/scale_control_layout"
                     app:layout_constraintEnd_toEndOf="parent" />
 
@@ -117,16 +117,16 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/speed_time_chart_Layout"
+            android:id="@+id/second_chart_Layout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             app:layout_constraintHeight_default="percent"
             app:layout_constraintHeight_percent="@{viewModel.dataEntityChartPercentageHeight}"
-            app:layout_constraintTop_toBottomOf="@id/altitude_time_chart_Layout">
+            app:layout_constraintTop_toBottomOf="@id/first_chart_layout">
 
 
             <com.itservices.gpxanalyzer.chart.DataEntityLineChart
-                android:id="@+id/speed_time_lineChart"
+                android:id="@+id/second_line_chart"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -135,22 +135,22 @@
 
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/speed_properties_control_constraintlayout"
+                android:id="@+id/second_chart_properties_control_constraintlayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/margin_small"
                 android:layout_marginEnd="@dimen/margin_very_small"
-                app:layout_constraintEnd_toStartOf="@+id/speed_scale_control_constraintlayout"
+                app:layout_constraintEnd_toStartOf="@+id/second_chart_scale_control_constraintlayout"
                 app:layout_constraintTop_toTopOf="parent">
 
                 <include
-                    android:id="@+id/speed_properties_control_layout"
+                    android:id="@+id/second_chart_properties_control_layout"
                     layout="@layout/properties_control_layout" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/speed_scale_control_constraintlayout"
+                android:id="@+id/second_chart_scale_control_constraintlayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/margin_small"
@@ -159,7 +159,7 @@
                 app:layout_constraintTop_toTopOf="parent">
 
                 <include
-                    android:id="@+id/speed_scale_control_layout"
+                    android:id="@+id/second_chart_scale_control_layout"
                     layout="@layout/scale_control_layout"
                     app:layout_constraintEnd_toEndOf="parent" />
 

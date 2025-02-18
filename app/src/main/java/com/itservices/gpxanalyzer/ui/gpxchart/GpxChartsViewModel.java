@@ -123,20 +123,20 @@ public class GpxChartsViewModel extends ViewModel {
         multipleSyncedGpxChartUseCase.disposeAll();
     }
 
-    public void bindAltitudeTimeChart(PropertiesControlLayoutBinding propertiesControlLayoutBinding, DataEntityLineChart altitudeTimeLineChart, MainActivity requireActivity) {
-        altitudeTimeLineChart.getSettings().setDrawIconsEnabled(
+    public void bindFirstChart(PropertiesControlLayoutBinding propertiesControlLayoutBinding, DataEntityLineChart firstLineChart, MainActivity requireActivity) {
+        firstLineChart.getSettings().setDrawIconsEnabled(
                 propertiesControlLayoutBinding.onOffColorizedCirclesCheckBox.isChecked()
         );
 
-        multipleSyncedGpxChartUseCase.bindAltitudeTimeChart(altitudeTimeLineChart, requireActivity);
+        multipleSyncedGpxChartUseCase.bindFirstChart(firstLineChart, requireActivity);
     }
 
-    public void bindSpeedTimeChart(PropertiesControlLayoutBinding propertiesControlLayoutBinding, DataEntityLineChart speedTimeLineChart, MainActivity requireActivity) {
-        speedTimeLineChart.getSettings().setDrawIconsEnabled(
+    public void bindSecondChart(PropertiesControlLayoutBinding propertiesControlLayoutBinding, DataEntityLineChart secondLineChart, MainActivity requireActivity) {
+        secondLineChart.getSettings().setDrawIconsEnabled(
                 propertiesControlLayoutBinding.onOffColorizedCirclesCheckBox.isChecked()
         );
 
-        multipleSyncedGpxChartUseCase.bindSpeedTimeChart(speedTimeLineChart, requireActivity);
+        multipleSyncedGpxChartUseCase.bindSecondChart(secondLineChart, requireActivity);
     }
 
     public void loadData(Context requireContext, int defaultRawGpxDataId) {
@@ -190,12 +190,12 @@ public class GpxChartsViewModel extends ViewModel {
     }
 
     @UiThread
-    public void setAltitudeDrawIconEnabled(Activity activity, boolean isChecked) {
-        activity.runOnUiThread(() -> multipleSyncedGpxChartUseCase.getAltitudeTimeChartController().setDrawIconsEnabled(isChecked));
+    public void setFirstChartDrawIconEnabled(Activity activity, boolean isChecked) {
+        activity.runOnUiThread(() -> multipleSyncedGpxChartUseCase.getFirstChartController().setDrawIconsEnabled(isChecked));
     }
 
     @UiThread
-    public void setSpeedDrawIconEnabled(Activity activity, boolean isChecked) {
-        activity.runOnUiThread(() -> multipleSyncedGpxChartUseCase.getSpeedTimeChartController().setDrawIconsEnabled(isChecked));
+    public void setSecondChartDrawIconEnabled(Activity activity, boolean isChecked) {
+        activity.runOnUiThread(() -> multipleSyncedGpxChartUseCase.getSecondChartController().setDrawIconsEnabled(isChecked));
     }
 }
