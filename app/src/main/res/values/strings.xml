@@ -29,5 +29,6 @@
     <string name="one_chart_v_t_short">v(t)</string>
     <string name="zoom_in">Zoom In</string>
     <string name="zoom_out">Zoom Out</string>
+    <string name="onOffColorizedCirclesCheckBox">onOffColorizedCirclesCheckBox</string>
 
 </resources>

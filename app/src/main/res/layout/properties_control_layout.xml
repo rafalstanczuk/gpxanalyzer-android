@@ -9,37 +9,36 @@
             type="com.itservices.gpxanalyzer.ui.gpxchart.GpxChartsViewModel" />
     </data>
 
-    <androidx.cardview.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/chart_value_info_card"
-        android:layout_width="wrap_content"
+    <!--    <androidx.cardview.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/chart_value_info_card"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha="0.9"
+            card_view:cardBackgroundColor="@color/lightGray"
+            card_view:cardCornerRadius="@dimen/margin_small"
+            card_view:contentPadding="0dp">-->
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="40dp"
-        android:alpha="0.9"
-        card_view:cardBackgroundColor="@color/lightGray"
-        card_view:cardCornerRadius="@dimen/margin_small"
-        card_view:contentPadding="0dp">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
+        <androidx.appcompat.widget.AppCompatCheckBox
+            android:id="@+id/onOffColorizedCirclesCheckBox"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_margin="@dimen/margin_very_small"
+            android:alpha="0.5"
+            android:button="@drawable/ic_checkbox_dots_selector"
+            android:checked="false"
+            android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData()}"
+            android:textColorHighlight="@color/white"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent">
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <androidx.appcompat.widget.AppCompatCheckBox
-                android:id="@+id/onOffColorizedCirclesCheckBox"
-                android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData()}"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:textColorHighlight="@color/white"
-                android:checked="false"
-                android:text="@string/dots"
-                android:textSize="11sp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </androidx.cardview.widget.CardView>
+    <!--</androidx.cardview.widget.CardView>-->
 
 </layout>
