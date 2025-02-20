@@ -31,4 +31,7 @@
     <string name="zoom_out">Zoom Out</string>
     <string name="onOffColorizedCirclesCheckBox">onOffColorizedCirclesCheckBox</string>
 
+
+    <string name="disabled">disabled</string>
+
 </resources>

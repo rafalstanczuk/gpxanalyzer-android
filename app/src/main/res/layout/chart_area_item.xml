@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="chartAreaItem"
+            type="com.itservices.gpxanalyzer.ui.gpxchart.ChartAreaItem" />
+
+        <variable
+            name="handler"
+            type="com.itservices.gpxanalyzer.ui.gpxchart.ChartAreaItemHandler" />
+
+        <variable
+            name="viewModel"
+            type="com.itservices.gpxanalyzer.ui.gpxchart.ChartAreaListViewModel" />
+    </data>
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/chart_layout"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <!--"@{viewModel.dataEntityChartPercentageHeight}"-->
+
+            <com.itservices.gpxanalyzer.chart.DataEntityLineChart
+                android:id="@+id/line_chart"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:visibility="@{chartAreaItem.visibilityLiveData}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/chart_properties_control_constraintlayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_small"
+                android:layout_marginEnd="@dimen/margin_very_small"
+                app:layout_constraintEnd_toStartOf="@+id/chart_scale_control_constraintlayout"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <include
+                    android:id="@+id/chart_area_item_properties_control_layout"
+                    layout="@layout/chart_area_item_properties_control_layout" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/chart_scale_control_constraintlayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_small"
+                android:layout_marginEnd="@dimen/margin_small"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <include
+                    android:id="@+id/chart_area_item_scale_control_layout"
+                    layout="@layout/chart_area_item_scale_control_layout"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</layout>

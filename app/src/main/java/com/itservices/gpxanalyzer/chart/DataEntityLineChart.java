@@ -7,7 +7,6 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.github.mikephil.charting.charts.LineChart;
@@ -34,9 +33,6 @@ import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class DataEntityLineChart extends LineChart {
-
-	@Inject
-	LineChartSettings settings;
 
 	@Inject
 	DataEntityInfoLayoutView dataEntityInfoLayoutView;
@@ -72,16 +68,6 @@ public class DataEntityLineChart extends LineChart {
 
 		initDataEntityInfoLayoutView();
 	}
-
-	public void bindActivity(@NonNull MainActivity requireActivity) {
-		this.mainActivity = requireActivity;
-	}
-
-	@Nullable
-	public MainActivity getActivity() {
-		return mainActivity;
-	}
-
 
 	public static int getDataSetIndexForEntryWithTimeInt(
 			DataEntityLineChart lineChart, long entryTimeInt
@@ -157,7 +143,7 @@ public class DataEntityLineChart extends LineChart {
 		);
 	}
 
-	public void initChart() {
+	public void initChart(LineChartSettings settings) {
 		StaticChartHighlighter<DataEntityLineChart> staticChartHighlighter = new StaticChartHighlighter<>(
 				this, (BarLineChartTouchListener) mChartTouchListener);
 		setHighlighter(staticChartHighlighter);
@@ -165,7 +151,7 @@ public class DataEntityLineChart extends LineChart {
 		clear();
 		setData(new LineData());
 
-		loadChartSettings();
+		loadChartSettings(settings);
 
 		invalidate();
 	}
@@ -201,11 +187,8 @@ public class DataEntityLineChart extends LineChart {
 
 		DataEntity dataEntity = ( (BaseDataEntityEntry)selectedEntry).getDataEntity();
 
-		assert mainActivity != null;
-
 		int primaryDataIndex = dataEntity.getPrimaryDataIndex();
 
-		mainActivity.runOnUiThread(() -> {
 			dataEntityInfoLayoutView.setTime( getFormattedTime(dataEntity.getTimestampMillis()) );
 			dataEntityInfoLayoutView.setValue1(
 					String.format(Locale.getDefault(), "%.1f", dataEntity.getValueList().get(primaryDataIndex))
@@ -220,7 +203,6 @@ public class DataEntityLineChart extends LineChart {
 			dataEntityInfoLayoutView.setValue2Unit(unit2);*/
 
 			dataEntityInfoLayoutView.invalidate();
-		});
 	}
 
 	private void determineSettingsDataEntityCurveLineHighlightIndicator(
@@ -264,7 +246,7 @@ public class DataEntityLineChart extends LineChart {
 		return paletteColorDeterminer;
 	}
 
-	public void loadChartSettings() {
+	public void loadChartSettings(LineChartSettings settings) {
 		limitLinesBoundaries.initLimitLines(paletteColorDeterminer);
 		scaler.setLimitLinesBoundaries(limitLinesBoundaries);
 		settings.setLimitLinesBoundaries(limitLinesBoundaries);
@@ -280,23 +262,8 @@ public class DataEntityLineChart extends LineChart {
 		scaler.scale(this);
 	}
 
-	public void animateFitScreen(long duration) {
-		assert mainActivity != null;
-
-		mainActivity.runOnUiThread( () ->
-				DataEntityLineChart.super.animateFitScreen(duration)
-		);
-	}
 	public void animateZoomToCenter(final float targetScaleX, final float targetScaleY, long duration) {
-		assert mainActivity != null;
-
-		mainActivity.runOnUiThread( () ->
-				DataEntityLineChart.super.animateZoomToCenter(targetScaleX, targetScaleY, duration, null)
-		);
-	}
-
-	public LineChartSettings getSettings(){
-		return settings;
+		super.animateZoomToCenter(targetScaleX, targetScaleY, duration, null);
 	}
 
 }

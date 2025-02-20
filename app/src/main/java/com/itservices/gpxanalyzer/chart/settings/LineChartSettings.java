@@ -32,7 +32,7 @@ public class LineChartSettings {
 	private final Paint paintGridBg = new Paint();
 	private final int primaryColor;
 	private boolean drawXLabels = true;
-	private boolean dragDecelerationEnabled = true;
+	private boolean dragDecelerationEnabled = false;
 
 	private boolean drawIconsEnabled = true;
 

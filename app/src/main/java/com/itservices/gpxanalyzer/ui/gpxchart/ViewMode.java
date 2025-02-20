@@ -2,6 +2,7 @@ package com.itservices.gpxanalyzer.ui.gpxchart;
 
 
 import android.content.Context;
+import android.view.View;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.StringRes;
@@ -9,10 +10,9 @@ import androidx.annotation.StringRes;
 import com.itservices.gpxanalyzer.R;
 
 public enum ViewMode {
-	ASL_T_1(R.string.one_chart_asl_t_short, R.string.one_chart_asl_t, R.drawable.ic_altitude_fill0),
-	V_T_1(R.string.one_chart_v_t_short, R.string.one_chart_v_t, R.drawable.ic_speed_fill0),
-
-	ASL_V_T_COMBINED(R.string.one_chart_asl_t_v_t, R.string.one_chart_asl_t_v_t_short, R.drawable.ic_altitude_speed_fill0);
+	DISABLED(R.string.disabled, R.string.disabled, R.drawable.ic_visibility_off_fill0, Constants.DEFAULT_DISABLED_VIEW_MODE_KEY_ID),
+	ASL_T_1(R.string.one_chart_asl_t_short, R.string.one_chart_asl_t, R.drawable.ic_altitude_fill0, R.string.altitude ),
+	V_T_1(R.string.one_chart_v_t_short, R.string.one_chart_v_t, R.drawable.ic_speed_fill0, R.string.speed);
 
 	@StringRes
 	private final int idShortName;
@@ -20,11 +20,15 @@ public enum ViewMode {
 	@DrawableRes
 	private final int drawableIconResId;
 
+	@StringRes
+	private final int primaryKeyStringId;
 
-    ViewMode(@StringRes int idShortName, @StringRes int idLongName, @DrawableRes int drawableIconResId){
+
+    ViewMode(@StringRes int idShortName, @StringRes int idLongName, @DrawableRes int drawableIconResId, @StringRes int primaryKeyStringId){
         this.idShortName = idShortName;
         this.idLongName = idLongName;
         this.drawableIconResId = drawableIconResId;
+        this.primaryKeyStringId = primaryKeyStringId;
     }
 
 	public ViewMode getNextCyclic() {
@@ -41,8 +45,16 @@ public enum ViewMode {
         return context.getText(idLongName).toString();
     }
 
+	public int getPrimaryKeyStringId() {
+		return primaryKeyStringId;
+	}
+
 	@DrawableRes
 	public int getDrawableIconResId() {
 		return drawableIconResId;
+	}
+
+	public static class Constants {
+		public static final int DEFAULT_DISABLED_VIEW_MODE_KEY_ID = -1;
 	}
 }

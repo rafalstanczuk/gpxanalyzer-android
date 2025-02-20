@@ -3,6 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
+        <variable
+            name="chartAreaItem"
+            type="com.itservices.gpxanalyzer.ui.gpxchart.ChartAreaItem" />
 
         <variable
             name="viewModel"
@@ -23,7 +26,8 @@
             android:background="@drawable/ic_zoom_in_selector"
             android:backgroundTintMode="add"
             android:contentDescription="@string/zoom_in"
-            android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData()}"
+            android:onClick="@{() -> viewModel.onZoomIn(chartAreaItem)}"
+            android:enabled="@{chartAreaItem.enabledLiveData}"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -36,7 +40,8 @@
             android:background="@drawable/ic_zoom_out_selector"
             android:backgroundTintMode="add"
             android:contentDescription="@string/zoom_out"
-            android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData()}"
+            android:onClick="@{() -> viewModel.onZoomOut(chartAreaItem)}"
+            android:enabled="@{chartAreaItem.enabledLiveData}"
             app:layout_constraintEnd_toStartOf="@+id/time_autoscaling_button"
             app:layout_constraintStart_toEndOf="@id/time_zoom_in_button"
             app:layout_constraintTop_toTopOf="parent" />
@@ -50,7 +55,8 @@
             android:background="@drawable/ic_recenter_selector"
             android:backgroundTintMode="add"
             android:contentDescription="@string/reset"
-            android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData()}"
+            android:onClick="@{() -> viewModel.onAutoScaling(chartAreaItem)}"
+            android:enabled="@{chartAreaItem.enabledLiveData}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/time_zoom_out_button"
             app:layout_constraintTop_toTopOf="parent" />

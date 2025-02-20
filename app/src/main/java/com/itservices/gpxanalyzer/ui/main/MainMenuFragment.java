@@ -38,7 +38,7 @@ public class MainMenuFragment extends Fragment {
         viewModel = new ViewModelProvider(this).get(MainMenuViewModel.class);
         viewModel.setMenuItems(Arrays.asList(
                 new MenuItem(getDrawable(requireContext(), R.drawable.ic_files_fill0),getString(R.string.search_for_file), R.id.fileSelectorFragment),
-                new MenuItem(getDrawable(requireContext(), R.drawable.ic_query_stats_fill0),getString(R.string.gpx_charts), R.id.gpxChartsFragment)
+                new MenuItem(getDrawable(requireContext(), R.drawable.ic_query_stats_fill0),getString(R.string.gpx_charts), R.id.chartAreaListFragment)
         ));
 
         binding.setViewModel(viewModel);
