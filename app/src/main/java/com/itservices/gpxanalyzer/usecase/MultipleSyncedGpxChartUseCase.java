@@ -105,6 +105,10 @@ public class MultipleSyncedGpxChartUseCase {
                 .map(gpxData -> {
                     requestStatus.onNext(DATA_LOADED);
 
+                    /**
+                     * Use selected file once - next time use cached from memory(gpxData or default from rawResId) - don't load twice!
+                     */
+                    selectGpxFileUseCase.setSelectedFile(null);
                     setGpxData(gpxData);
 
                     return gpxData;
@@ -136,14 +140,14 @@ public class MultipleSyncedGpxChartUseCase {
     private Observable<Vector<DataEntity>> provideDataEntityVector(Context context, int rawResId) {
 
         File selectedFile = selectGpxFileUseCase.getSelectedFile();
-
-        return (gpxData != null) ?
-                Observable.just(gpxData)
-                : (
-                (selectedFile != null)
+        /**
+         * Use selected file once - next time use cached from memory(gpxData or default from rawResId) - don't load twice!
+         */
+        return (selectedFile != null)
                         ? dataProvider.provide(selectedFile)
-                        : dataProvider.provide(context, rawResId)
-        );
+                        : (gpxData != null) ?
+                                                Observable.just(gpxData)
+                                            :   dataProvider.provide(context, rawResId);
     }
 
     private RequestStatus updateCharts(Vector<DataEntity> gpxData, List<ChartAreaItem> chartAreaItemList) {
