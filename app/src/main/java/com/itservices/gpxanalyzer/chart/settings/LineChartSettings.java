@@ -34,7 +34,7 @@ public class LineChartSettings {
 	private boolean drawXLabels = true;
 	private boolean dragDecelerationEnabled = false;
 
-	private boolean drawIconsEnabled = true;
+	private boolean drawIconsEnabled = false;
 
 	@Inject
 	LineChartSettings(
@@ -75,7 +75,7 @@ public class LineChartSettings {
 
 	public void setChartSettingsFor(DataEntityLineChart lineChart) {
 
-		if( lineChart.getData().getDataSets().size() > 0) {
+		if(!lineChart.getData().getDataSets().isEmpty()) {
 			LineDataSet lineDataSet = (LineDataSet) lineChart.getData().getDataSets().get(0);
 			lineDataSet.setDrawIcons(drawIconsEnabled);
 		}

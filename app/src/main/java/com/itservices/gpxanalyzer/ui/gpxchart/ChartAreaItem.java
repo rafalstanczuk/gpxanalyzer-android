@@ -19,17 +19,21 @@ public class ChartAreaItem {
 
     private MutableLiveData<Boolean> enabledLiveData = new MutableLiveData<>(true);
 
+    private MutableLiveData<Boolean> isDrawIconsEnabledLiveData = new MutableLiveData<>(false);
+
     @AssistedInject
     public ChartAreaItem(@Assisted ViewMode viewMode,
                          @Assisted("drawX") boolean drawX,
                          @Assisted("drawIconsEnabled") boolean drawIconsEnabled,
-                         ChartController chartController ) {
+                         ChartController chartController) {
         this.chartController = chartController;
-        visibilityLiveData.setValue( getVisibility(viewMode) );
+
+        isDrawIconsEnabledLiveData.setValue(chartController.isDrawIconsEnabled());
+        visibilityLiveData.setValue(getVisibility(viewMode));
         viewModeLiveData.setValue(viewMode);
 
         this.chartController.setDrawIconsEnabled(drawIconsEnabled);
-       this.chartController.setDrawXLabels(drawX);
+        this.chartController.setDrawXLabels(drawX);
     }
 
     public ChartController getChartController() {
@@ -44,13 +48,17 @@ public class ChartAreaItem {
         return visibilityLiveData;
     }
 
+    public boolean isDrawIconsEnabledLiveData() {
+        return chartController.isDrawIconsEnabled();
+    }
+
     public LiveData<Boolean> getEnabledLiveData() {
         return enabledLiveData;
     }
 
     public void setViewMode(ViewMode viewMode) {
-        visibilityLiveData.setValue( getVisibility(viewMode) );
-        enabledLiveData.setValue( getEnabled(viewMode) );
+        visibilityLiveData.setValue(getVisibility(viewMode));
+        enabledLiveData.setValue(getEnabled(viewMode));
 
         viewModeLiveData.setValue(viewMode);
     }
@@ -60,8 +68,9 @@ public class ChartAreaItem {
     }
 
     private int getVisibility(ViewMode viewMode) {
-        return ( viewMode != ViewMode.DISABLED) ? View.VISIBLE : View.GONE;
+        return (viewMode != ViewMode.DISABLED) ? View.VISIBLE : View.GONE;
     }
+
     private boolean getEnabled(ViewMode viewMode) {
         return viewMode != ViewMode.DISABLED;
     }

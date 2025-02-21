@@ -10,9 +10,9 @@ import androidx.annotation.StringRes;
 import com.itservices.gpxanalyzer.R;
 
 public enum ViewMode {
-	DISABLED(R.string.disabled, R.string.disabled, R.drawable.ic_visibility_off_fill0, Constants.DEFAULT_DISABLED_VIEW_MODE_KEY_ID),
-	ASL_T_1(R.string.one_chart_asl_t_short, R.string.one_chart_asl_t, R.drawable.ic_altitude_fill0, R.string.altitude ),
-	V_T_1(R.string.one_chart_v_t_short, R.string.one_chart_v_t, R.drawable.ic_speed_fill0, R.string.speed);
+	DISABLED(R.string.disabled, R.string.disabled, R.drawable.ic_visibility_off_selector, Constants.DEFAULT_DISABLED_VIEW_MODE_KEY_ID),
+	ASL_T_1(R.string.one_chart_asl_t_short, R.string.one_chart_asl_t, R.drawable.ic_altitude_selector, R.string.altitude ),
+	V_T_1(R.string.one_chart_v_t_short, R.string.one_chart_v_t, R.drawable.ic_speed_selector, R.string.speed);
 
 	@StringRes
 	private final int idShortName;
@@ -35,7 +35,7 @@ public enum ViewMode {
 		int currOrdinal  = ordinal();
 		int maxOrdinal = values().length-1;
 
-		return currOrdinal==maxOrdinal ? values()[0] : values()[currOrdinal+1];
+		return currOrdinal==maxOrdinal ? values()[ASL_T_1.ordinal()] : values()[currOrdinal+1];
 	}
 
 	public String getShortName(Context context) {

@@ -78,6 +78,8 @@ public class MultipleSyncedGpxChartUseCase {
     public void loadData(Activity activity, List<ChartAreaItem> chartAreaItemList, int defaultRawGpxDataId) {
         //Log.d(MultipleSyncedGpxChartUseCase.class.getSimpleName(), "loadData() called with: activity = [" + activity + "], chartAreaItemList = [" + chartAreaItemList + "], defaultRawGpxDataId = [" + defaultRawGpxDataId + "]");
 
+        if(chartAreaItemList.isEmpty())
+            return;
 
         ConcurrentUtil.tryToDispose(loadDataDisposable);
 

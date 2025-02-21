@@ -17,6 +17,8 @@ import com.itservices.gpxanalyzer.databinding.FragmentChartAreaListBinding;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -27,6 +29,8 @@ public class ChartAreaListFragment extends Fragment {
     ChartAreaListViewModel viewModel;
     FragmentChartAreaListBinding binding;
 
+    ChartAreaItemAdapter adapter;
+
     @Inject
     ChartAreaItemFactory chartAreaItemFactory;
 
@@ -34,7 +38,8 @@ public class ChartAreaListFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        viewModel = new ViewModelProvider(this).get(ChartAreaListViewModel.class);
+        viewModel = new ViewModelProvider(this.requireActivity()).get(ChartAreaListViewModel.class);
+        viewModel.bind(requireActivity(), R.raw.skiing20250121t091423);
         viewModel.setOrientation(getResources().getConfiguration().orientation);
     }
 
@@ -49,36 +54,58 @@ public class ChartAreaListFragment extends Fragment {
 
         binding.gpxChartsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-        ChartAreaItemAdapter adapter = new ChartAreaItemAdapter(Arrays.asList(
-                chartAreaItemFactory.create(ViewMode.ASL_T_1,  false, false),
-                chartAreaItemFactory.create(ViewMode.V_T_1,  true, false)
-        ), viewModel);
-        binding.gpxChartsRecyclerView.setAdapter(adapter);
 
-        viewModel.setChartAreaItemList(adapter.getItems());
+        if (viewModel.getChartAreaItemListLiveData().getValue()==null || viewModel.getChartAreaItemListLiveData().getValue().isEmpty() ) {
+            List<ChartAreaItem> immutableList = Arrays.asList(
+                    chartAreaItemFactory.create(ViewMode.ASL_T_1, false, false),
+                    chartAreaItemFactory.create(ViewMode.V_T_1, true, false)
+            );
+            List<ChartAreaItem> itemList = new ArrayList<>( immutableList );
+            viewModel.setChartAreaItemList(itemList);
+            viewModel.setDefaultChartAreaItemList(immutableList);
+        } else {
+            adapter = new ChartAreaItemAdapter(viewModel.getChartAreaItemListLiveData().getValue(), viewModel);
+            binding.gpxChartsRecyclerView.setAdapter(adapter);
+        }
 
         binding.loadButton.setOnClickListener(view ->
-                viewModel.loadData(requireActivity(), R.raw.skiing20250121t091423)
+                viewModel.loadData(requireActivity())
         );
 
         binding.switchSeverityModeButton.setOnClickListener(view -> viewModel.switchSeverityMode());
 
+        viewModel.getChartAreaItemListLiveData().observe(getViewLifecycleOwner(), items -> {
+                    adapter = new ChartAreaItemAdapter(items, viewModel);
+                    binding.gpxChartsRecyclerView.setAdapter(adapter);
 
+                    viewModel.switchSeverityViewModeOrReloadAdapter(adapter);
+                }
+        );
 
         viewModel.getOnSwitchViewModeChangedLiveData().observe(getViewLifecycleOwner(),
-                (item -> {viewModel.switchViewMode(adapter, item, requireActivity());} ));
+                (item -> {
+                    viewModel.switchViewMode(adapter, item, requireActivity());
+                }));
 
         viewModel.getOnOnOffColorizedCirclesCheckBoxChangedLiveData().observe(getViewLifecycleOwner(),
-                (pair -> {viewModel.changeOnOffColorizedCircles(adapter, pair, requireActivity());} ));
+                (pair -> {
+                    viewModel.changeOnOffColorizedCircles(adapter, pair, requireActivity());
+                }));
 
         viewModel.getOnZoomInClickedLiveData().observe(getViewLifecycleOwner(),
-                (item -> {viewModel.zoomIn(adapter, item, requireActivity());} ));
+                (item -> {
+                    viewModel.zoomIn(adapter, item, requireActivity());
+                }));
 
         viewModel.getOnZoomOutLiveData().observe(getViewLifecycleOwner(),
-                (item -> {viewModel.zoomOut(adapter, item, requireActivity());} ));
+                (item -> {
+                    viewModel.zoomOut(adapter, item, requireActivity());
+                }));
 
         viewModel.getOnAutoScalingLiveData().observe(getViewLifecycleOwner(),
-                (item -> {viewModel.autoScaling(adapter, item, requireActivity());} ));
+                (item -> {
+                    viewModel.autoScaling(adapter, item, requireActivity());
+                }));
 
         return binding.getRoot();
     }

@@ -8,6 +8,7 @@ import androidx.annotation.UiThread;
 
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
@@ -236,6 +237,18 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
 
         chartProvider.getSettings().setDrawIconsEnabled(isChecked);
         tryToUpdateDataChart();
+    }
+
+    @UiThread
+    public boolean isDrawIconsEnabled() {
+
+        if (chartProvider.getChart()!=null) {
+            LineData lineData = chartProvider.getChart().getData();
+            if (!lineData.getDataSets().isEmpty()) {
+                return lineData.getDataSets().get(0).isDrawIconsEnabled() ;
+            }
+        }
+        return chartProvider.getSettings().isDrawIconsEnabled();
     }
 
     public void animateZoomToCenter(final float targetScaleX, final float targetScaleY, long duration) {
