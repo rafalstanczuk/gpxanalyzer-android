@@ -35,7 +35,7 @@ public class EntryListCreator {
     }
 
     public static ArrayList<Entry> createCurveDataEntityEntryList(
-            StatisticResults statisticResults, PaletteColorDeterminer paletteColorDeterminer
+            StatisticResults statisticResults, PaletteColorDeterminer paletteColorDeterminer, EntryCacheMap entryCacheMap
     ) {
         Vector<DataEntity> dataEntityVector = statisticResults.getDataEntityVector();
 
@@ -51,7 +51,10 @@ public class EntryListCreator {
             DataEntity dataEntity = dataEntityVector.get(i);
             double value = dataEntity.getValueList().get( dataEntity.getPrimaryDataIndex() );
 
-            scaledEntries.add(CurveDataEntityEntry.create(paletteColorDeterminer, statisticResults, i, (float) value));
+            CurveDataEntityEntry entry = CurveDataEntityEntry.create(paletteColorDeterminer, statisticResults, i, (float) value);
+            entryCacheMap.add(dataEntity.getTimestampMillis(), entry);
+
+            scaledEntries.add(entry);
         }
 
         return scaledEntries;
