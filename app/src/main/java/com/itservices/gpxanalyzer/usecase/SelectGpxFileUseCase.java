@@ -116,7 +116,7 @@ public class SelectGpxFileUseCase {
                             }
                         });
             } else {
-                Log.d("FileSelector", "No file selected");
+                //Log.d("FileSelector", "No file selected");
             }
         });
     }

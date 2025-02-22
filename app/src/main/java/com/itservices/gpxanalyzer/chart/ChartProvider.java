@@ -8,6 +8,7 @@ import com.itservices.gpxanalyzer.chart.entry.CurveDataEntityEntry;
 import com.itservices.gpxanalyzer.chart.entry.EntryListCreator;
 import com.itservices.gpxanalyzer.chart.entry.SingleDataEntityEntry;
 import com.itservices.gpxanalyzer.chart.legend.PaletteColorDeterminer;
+import com.itservices.gpxanalyzer.chart.settings.LineChartSettings;
 import com.itservices.gpxanalyzer.data.gpx.StatisticResults;
 
 import java.util.ArrayList;
@@ -20,6 +21,9 @@ public class ChartProvider {
 
     private static final List<String> DEFAULT_TARGET_MATCHED_LINE_LABEL_DATA_TO_SHOW_WITH_DATA_ENTITY_BOUNDARIES =
             Arrays.asList(CurveDataEntityEntry.CURVE_DATA_ENTITY);
+
+    @Inject
+    LineChartSettings settings;
 
     private DataEntityLineChart chart;
 
@@ -40,7 +44,7 @@ public class ChartProvider {
         chart.getScaler().setDataEntityCurveStatisticResults(curveResults);
 
         if (!entries.isEmpty()) {
-            return CurveDataEntityEntry.createCurveDataEntityLineDataSet(entries, chart.getSettings());
+            return CurveDataEntityEntry.createCurveDataEntityLineDataSet(entries, settings);
         }
         return null;
     }
@@ -64,7 +68,7 @@ public class ChartProvider {
      */
     public void initChart(DataEntityLineChart chart) {
         this.chart = chart;
-        chart.initChart();
+        chart.initChart(settings);
     }
 
     /**
@@ -85,7 +89,7 @@ public class ChartProvider {
 
         chart.clear();
         chart.setData(lineData);
-        chart.loadChartSettings();
+        chart.loadChartSettings(settings);
         chart.scale();
         chart.highlightValue(highlight, true);
         chart.invalidate();
@@ -111,4 +115,7 @@ public class ChartProvider {
         return chart;
     }
 
+    public LineChartSettings getSettings() {
+        return settings;
+    }
 }

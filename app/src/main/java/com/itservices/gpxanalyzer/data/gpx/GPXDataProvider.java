@@ -5,6 +5,7 @@ import android.location.Location;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
 
 import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.data.DataEntity;
@@ -13,6 +14,7 @@ import com.itservices.gpxanalyzer.data.gpx.parser.GPXParser;
 import com.itservices.gpxanalyzer.data.gpx.parser.domain.Gpx;
 import com.itservices.gpxanalyzer.data.gpx.parser.domain.TrackPoint;
 import com.itservices.gpxanalyzer.data.gpx.parser.domain.TrackSegment;
+import com.itservices.gpxanalyzer.ui.gpxchart.ViewModeMapper;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -26,23 +28,28 @@ import java.util.List;
 import java.util.Vector;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import dagger.hilt.android.qualifiers.ApplicationContext;
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
 
+@Singleton
 public class GPXDataProvider {
     private static List<String> NAME_LIST = new ArrayList<>();
     private static List<String> UNIT_LIST = new ArrayList<>();
+
     @Inject
     public GPXParser parser;
 
     private final PublishSubject<Integer> percentageProgressSubject = PublishSubject.create();
 
     @Inject
-    public GPXDataProvider(@ApplicationContext Context context) {
+    public GPXDataProvider(@ApplicationContext Context context, ViewModeMapper viewModeMapper) {
         NAME_LIST = Arrays.asList(context.getResources().getStringArray(R.array.gpx_name_unit_array));
         UNIT_LIST = Arrays.asList(context.getResources().getStringArray(R.array.gpx_unit_array));
+
+        viewModeMapper.init(NAME_LIST);
     }
 
     public Observable<Integer> getPercentageProgress() {
@@ -130,7 +137,7 @@ public class GPXDataProvider {
 
             DataEntity dataEntity = createDataEntity(centroidLocation, primaryDataIndex);
 
-            //Log.d("GPXDataProvider", "dataEntity = [" + dataEntity.getTimestampMillis() + "]");
+            ////Log.d("GPXDataProvider", "dataEntity = [" + dataEntity.getTimestampMillis() + "]");
 
             float percentageProgress = 100.0f * ((float) (iTrackPoint + 1) / (float) maxIteration);
 

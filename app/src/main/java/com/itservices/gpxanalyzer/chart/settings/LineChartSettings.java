@@ -32,9 +32,9 @@ public class LineChartSettings {
 	private final Paint paintGridBg = new Paint();
 	private final int primaryColor;
 	private boolean drawXLabels = true;
-	private boolean dragDecelerationEnabled = true;
+	private boolean dragDecelerationEnabled = false;
 
-	private boolean drawIconsEnabled = true;
+	private boolean drawIconsEnabled = false;
 
 	@Inject
 	LineChartSettings(
@@ -42,7 +42,7 @@ public class LineChartSettings {
 		HourMinutesAxisValueFormatter hourMinutesAxisValueFormatter,
 		AxisValueFormatter dataEntityAxisValueFormatter
 	) {
-		primaryColor = ContextCompat.getColor(context, R.color.colorPrimary);
+		primaryColor = ContextCompat.getColor(context, R.color.lightBlue);
 		this.customMarker = customMarker;
 		this.hourMinutesAxisValueFormatter = hourMinutesAxisValueFormatter;
 		this.dataEntityAxisValueFormatter = dataEntityAxisValueFormatter;
@@ -75,7 +75,7 @@ public class LineChartSettings {
 
 	public void setChartSettingsFor(DataEntityLineChart lineChart) {
 
-		if( lineChart.getData().getDataSets().size() > 0) {
+		if(!lineChart.getData().getDataSets().isEmpty()) {
 			LineDataSet lineDataSet = (LineDataSet) lineChart.getData().getDataSets().get(0);
 			lineDataSet.setDrawIcons(drawIconsEnabled);
 		}

@@ -1,5 +1,6 @@
 package com.itservices.gpxanalyzer.chart;
 
+import android.util.Log;
 import android.view.MotionEvent;
 
 import androidx.annotation.NonNull;
@@ -7,13 +8,13 @@ import androidx.annotation.UiThread;
 
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
-import com.itservices.gpxanalyzer.MainActivity;
 import com.itservices.gpxanalyzer.chart.entry.BaseDataEntityEntry;
 import com.itservices.gpxanalyzer.data.DataEntity;
 import com.itservices.gpxanalyzer.data.gpx.StatisticResults;
@@ -30,6 +31,9 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
 
     private List<LineDataSet> currentLineDataSetList = new ArrayList<>();
     private Highlight currentHighlight;
+
+
+
     private final ChartProvider chartProvider;
     private final PublishSubject<BaseDataEntityEntry> baseEntrySelectionPublishSubject = PublishSubject.create();
 
@@ -42,8 +46,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
      * Initialize the chart with no data (just styling).
      */
     @UiThread
-    public void bindChart(@NonNull DataEntityLineChart chartBindings, @NonNull MainActivity mainActivity) {
-        chartBindings.bindActivity(mainActivity);
+    public void bindChart(@NonNull DataEntityLineChart chartBindings) {
         chartProvider.initChart(chartBindings);
         // clear any existing LiveData sets
         clearLineDataSets();
@@ -96,10 +99,9 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
 
         if (current
                 .stream()
-                .noneMatch(a -> newDataSet.getLabel().contentEquals(a.getLabel())) ) {
+                .noneMatch(a -> newDataSet.getLabel().contentEquals(a.getLabel()))) {
             current.add(newDataSet);
         }
-
 
 
         // update the chart
@@ -124,7 +126,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     private void setSelectionEntry(Entry entry, boolean publishSelection) {
         chartProvider.getChart().setHighlightedEntry(entry);
 
-        if (publishSelection && (entry instanceof BaseDataEntityEntry) ) {
+        if (publishSelection && (entry instanceof BaseDataEntityEntry)) {
             baseEntrySelectionPublishSubject.onNext((BaseDataEntityEntry) entry);
         }
     }
@@ -135,16 +137,15 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
 
 
     public void manualSelectEntry(long selectedTimeMillis) {
-        assert chartProvider.getChart().getActivity() != null;
-        chartProvider.getChart().getActivity().runOnUiThread(() -> {
-            manualSelectEntryOnSelectedTime(chartProvider.getChart(), selectedTimeMillis, true,false);
-        });
+        ////Log.d(ChartController.class.getSimpleName(), "manualSelectEntry() called with: selectedTimeMillis = [" + selectedTimeMillis + "]");
+
+        manualSelectEntryOnSelectedTime(chartProvider.getChart(), selectedTimeMillis, true, false);
     }
 
     private void manualSelectEntryOnSelectedTime(DataEntityLineChart lineChart, long selectedTimeMillis, boolean centerViewToSelection, boolean callListeners) {
 
         lineChart.getChartTouchListener()
-                .setLastGesture( ChartTouchListener.ChartGesture.NONE );
+                .setLastGesture(ChartTouchListener.ChartGesture.NONE);
 
         if (selectedTimeMillis < 0) {
             lineChart.highlightValue(null, false);
@@ -171,7 +172,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
 
                     setSelectionHighlight(lineChart.getHighlighted()[0]);
 
-                    if(centerViewToSelection) {
+                    if (centerViewToSelection) {
                         lineChart.centerViewTo(entry.getX(), entry.getY(), YAxis.AxisDependency.LEFT);
                     }
                     return;
@@ -233,7 +234,31 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
 
     @UiThread
     public void setDrawIconsEnabled(boolean isChecked) {
-        chartProvider.getChart().getSettings().setDrawIconsEnabled(isChecked);
+
+        chartProvider.getSettings().setDrawIconsEnabled(isChecked);
         tryToUpdateDataChart();
+    }
+
+    @UiThread
+    public boolean isDrawIconsEnabled() {
+
+        if (chartProvider.getChart()!=null) {
+            LineData lineData = chartProvider.getChart().getData();
+            if (!lineData.getDataSets().isEmpty()) {
+                return lineData.getDataSets().get(0).isDrawIconsEnabled() ;
+            }
+        }
+        return chartProvider.getSettings().isDrawIconsEnabled();
+    }
+
+    public void animateZoomToCenter(final float targetScaleX, final float targetScaleY, long duration) {
+        chartProvider.getChart().animateZoomToCenter(targetScaleX, targetScaleY, duration);
+    }
+
+    public void animateFitScreen(long duration) {
+        chartProvider.getChart().animateFitScreen(duration);
+    }
+    public void setDrawXLabels(boolean drawX) {
+        chartProvider.getSettings().setDrawXLabels(drawX);;
     }
 }

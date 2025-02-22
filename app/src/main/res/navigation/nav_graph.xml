@@ -11,9 +11,9 @@
     </fragment>
 
     <fragment
-        android:id="@+id/gpxChartsFragment"
-        android:name="com.itservices.gpxanalyzer.ui.gpxchart.GpxChartsFragment"
-        android:label="GpxChartsFragment">
+        android:id="@+id/chartAreaListFragment"
+        android:name="com.itservices.gpxanalyzer.ui.gpxchart.ChartAreaListFragment"
+        android:label="ChartAreaListFragment">
     </fragment>
 
     <fragment

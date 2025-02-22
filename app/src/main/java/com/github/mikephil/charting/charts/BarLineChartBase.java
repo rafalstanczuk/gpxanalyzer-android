@@ -760,14 +760,14 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
             public void onAnimationUpdate(ValueAnimator animation) {
                 float fraction = (float) animation.getAnimatedValue();
 
-                //Log.d(BarLineChartBase.class.getSimpleName(), "onAnimationUpdate() called with: fraction = [" + fraction + "]");
+                ////Log.d(BarLineChartBase.class.getSimpleName(), "onAnimationUpdate() called with: fraction = [" + fraction + "]");
 
                 // Interpolate between the start and target scales
                 float currentScaleX = startScaleX + (targetScaleX - startScaleX) * fraction;
                 float currentScaleY = startScaleY + (targetScaleY - startScaleY) * fraction;
 
 
-                //Log.d(BarLineChartBase.class.getSimpleName(), "onAnimationUpdate() called with: currentScaleX = [" + currentScaleX + "]");
+                ////Log.d(BarLineChartBase.class.getSimpleName(), "onAnimationUpdate() called with: currentScaleX = [" + currentScaleX + "]");
 
                 // Call your zoomToCenter function with the interpolated scales
                 zoomToCenter(currentScaleX, currentScaleY);

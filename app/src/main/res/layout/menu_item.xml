@@ -22,7 +22,10 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@{menuItem.title}"
-            app:layout_constraintWidth_percent="0.5"
+            android:textAlignment="textStart"
+            android:drawableStart="@{menuItem.icon}"
+            android:drawableTint="@color/white"
+            app:layout_constraintWidth_percent="0.6"
 
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

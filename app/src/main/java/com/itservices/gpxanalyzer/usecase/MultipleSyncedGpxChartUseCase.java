@@ -5,141 +5,201 @@ import static com.itservices.gpxanalyzer.chart.RequestStatus.LOADING;
 import static com.itservices.gpxanalyzer.chart.RequestStatus.PROCESSED;
 import static com.itservices.gpxanalyzer.chart.RequestStatus.PROCESSING;
 
+import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
-
-import com.itservices.gpxanalyzer.MainActivity;
-import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.chart.ChartController;
-import com.itservices.gpxanalyzer.chart.DataEntityLineChart;
 import com.itservices.gpxanalyzer.chart.RequestStatus;
 import com.itservices.gpxanalyzer.chart.entry.BaseDataEntityEntry;
 import com.itservices.gpxanalyzer.data.DataEntity;
 import com.itservices.gpxanalyzer.data.gpx.GPXDataProvider;
 import com.itservices.gpxanalyzer.data.gpx.StatisticResults;
+import com.itservices.gpxanalyzer.ui.gpxchart.ChartAreaItem;
+import com.itservices.gpxanalyzer.ui.gpxchart.ViewMode;
+import com.itservices.gpxanalyzer.ui.gpxchart.ViewModeMapper;
 import com.itservices.gpxanalyzer.utils.common.ConcurrentUtil;
 
 import java.io.File;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
 
 @Singleton
 public class MultipleSyncedGpxChartUseCase {
+
+    @Inject
+    ViewModeMapper viewModeMapper;
+
     @Inject
     GPXDataProvider dataProvider;
-
-    @Inject
-    ChartController altitudeTimeChartController;
-
-    @Inject
-    ChartController speedTimeChartController;
 
     @Inject
     SelectGpxFileUseCase selectGpxFileUseCase;
 
     private final PublishSubject<RequestStatus> requestStatus = PublishSubject.create();
 
-    private Disposable disposable;
+    private Disposable loadDataDisposable;
+    private CompositeDisposable observeSelectionCompositeDisposable = new CompositeDisposable();
+    private Vector<DataEntity> gpxData;
+    private Activity activity;
+    private int defaultRawGpxDataId;
 
     @Inject
     public MultipleSyncedGpxChartUseCase() {
     }
 
-    public void loadData(Context context, int defaultRawGpxDataId) {
+    private void setGpxData(Vector<DataEntity> gpxData) {
+        this.gpxData = gpxData;
+    }
 
-        observeSelectionOn(altitudeTimeChartController.getSelection(), speedTimeChartController);
-        observeSelectionOn(speedTimeChartController.getSelection(), altitudeTimeChartController);
+    public void switchViewMode(ChartAreaItem chartAreaItem) {
+        //Log.d(MultipleSyncedGpxChartUseCase.class.getSimpleName(), "switchViewMode() called with: chartAreaItem = [" + chartAreaItem + "]");
+
+
+        if (activity==null)
+            return;
+
+        loadData(activity, Collections.singletonList(chartAreaItem), defaultRawGpxDataId);
+    }
+
+    public void loadData(Activity activity, List<ChartAreaItem> chartAreaItemList, int defaultRawGpxDataId) {
+        //Log.d(MultipleSyncedGpxChartUseCase.class.getSimpleName(), "loadData() called with: activity = [" + activity + "], chartAreaItemList = [" + chartAreaItemList + "], defaultRawGpxDataId = [" + defaultRawGpxDataId + "]");
+
+        if(chartAreaItemList.isEmpty())
+            return;
+
+        ConcurrentUtil.tryToDispose(loadDataDisposable);
+
+        this.activity = activity;
+        this.defaultRawGpxDataId = defaultRawGpxDataId;
+
+        ConcurrentUtil.tryToDispose(observeSelectionCompositeDisposable);
+        observeSelectionCompositeDisposable = new CompositeDisposable();
+
+        chartAreaItemList.forEach(first ->
+                chartAreaItemList.forEach(second -> {
+                    if (first != second) {
+                        observeSelectionCompositeDisposable.add(
+                                observeSelectionOn(activity, first.getChartController().getSelection(), second.getChartController())
+                        );
+                    }
+                })
+        );
 
         requestStatus.onNext(LOADING);
 
-        disposable = provideDataEntityVector(context, defaultRawGpxDataId)
+        loadDataDisposable = provideDataEntityVector(activity, defaultRawGpxDataId)
                 .map(gpxData -> {
                     requestStatus.onNext(DATA_LOADED);
+
+                    /**
+                     * Use selected file once - next time use cached from memory(gpxData or default from rawResId) - don't load twice!
+                     */
+                    selectGpxFileUseCase.setSelectedFile(null);
+                    setGpxData(gpxData);
+
                     return gpxData;
                 })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnError(e -> Log.e("loadData", "loadData: doOnError ", e))
-                .map(gpxData -> {
-
-                    requestStatus.onNext(PROCESSING);
-
-                    RequestStatus requestStatusAltitude = updateAltitudeChart(context, gpxData);
-
-                    RequestStatus requestStatusSpeed = updateSpeedChart(context, gpxData);
-
-                    requestStatus.onNext(PROCESSED);
-
-                    return RequestStatus.values()[Math.min(requestStatusAltitude.ordinal(), requestStatusSpeed.ordinal())];
-
-                })
+                .map(gpxData -> processChartUpdates(gpxData, chartAreaItemList))
                 .subscribe(
                         requestStatus::onNext,
                         onError -> Log.e("loadData", "loadData: onError ", onError)
                 );
     }
 
+    private RequestStatus processChartUpdates(Vector<DataEntity> gpxData, List<ChartAreaItem> chartAreaItemList) {
+        requestStatus.onNext(PROCESSING);
+
+        AtomicReference<RequestStatus> finalRequestStatus = new AtomicReference<>();
+
+        // activity.runOnUiThread(() -> {
+        finalRequestStatus.set(updateCharts(gpxData, chartAreaItemList));
+        //       });
+
+        requestStatus.onNext(PROCESSED);
+
+        return finalRequestStatus.get();
+    }
+
     private Observable<Vector<DataEntity>> provideDataEntityVector(Context context, int rawResId) {
 
         File selectedFile = selectGpxFileUseCase.getSelectedFile();
-
-        return (selectedFile != null) ? dataProvider.provide(selectedFile) : dataProvider.provide(context, rawResId);
+        /**
+         * Use selected file once - next time use cached from memory(gpxData or default from rawResId) - don't load twice!
+         */
+        return (selectedFile != null)
+                        ? dataProvider.provide(selectedFile)
+                        : (gpxData != null) ?
+                                                Observable.just(gpxData)
+                                            :   dataProvider.provide(context, rawResId);
     }
 
-    private RequestStatus updateSpeedChart(Context context, Vector<DataEntity> gpxData) {
-        int speedPrimaryIndex = getNewPrimaryIndexFromNameStringRes(context, R.string.speed);
-        StatisticResults statisticResultsSpeed = new StatisticResults(gpxData, speedPrimaryIndex);
+    private RequestStatus updateCharts(Vector<DataEntity> gpxData, List<ChartAreaItem> chartAreaItemList) {
+        List<RequestStatus> requestStatusList = new ArrayList<>();
 
-        return speedTimeChartController.refreshStatisticResults(statisticResultsSpeed);
+        for (ChartAreaItem chartAreaItem : chartAreaItemList) {
+            ViewMode iChartViewMode = chartAreaItem.getViewMode().getValue();
+
+            //Log.d(MultipleSyncedGpxChartUseCase.class.getSimpleName(), "updateCharts() called with: iChartViewMode = [" + iChartViewMode + "], chartAreaItemList = [" + chartAreaItemList + "]");
+
+            if (iChartViewMode != ViewMode.DISABLED) {
+                requestStatusList.add(
+                        updateChart(
+                                chartAreaItem.getChartController(), gpxData, viewModeMapper.mapToPrimaryKeyIndexList(iChartViewMode)
+                        )
+                );
+            }
+        }
+
+        int minOrdinal = requestStatusList.stream()
+                .mapToInt(Enum::ordinal)
+                .min().orElse(0);
+
+        return RequestStatus.values()[minOrdinal];
     }
 
-    private RequestStatus updateAltitudeChart(Context context, Vector<DataEntity> gpxData) {
-        int altitudePrimaryIndex = getNewPrimaryIndexFromNameStringRes(context, R.string.altitude);
-        StatisticResults altitudeStatisticResults = new StatisticResults(gpxData, altitudePrimaryIndex);
+    private RequestStatus updateChart(ChartController chartController, Vector<DataEntity> gpxData, int primaryKeyIndex) {
+        if (primaryKeyIndex == -1)
+            return RequestStatus.DONE;
 
-        return altitudeTimeChartController.refreshStatisticResults(altitudeStatisticResults);
+        return chartController.refreshStatisticResults(new StatisticResults(gpxData, primaryKeyIndex));
     }
 
-    private void observeSelectionOn(Observable<BaseDataEntityEntry> selection, ChartController chartController) {
-        selection
+    private Disposable observeSelectionOn(Activity activity, Observable<BaseDataEntityEntry> selection, ChartController chartController) {
+        //Log.d(MultipleSyncedGpxChartUseCase.class.getSimpleName(), "observeSelectionOn() called with: activity = [" + activity + "], selection = [" + selection + "], chartController = [" + chartController + "]");
+
+        return selection
                 .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.newThread())
-                .doOnNext(baseDataEntityEntry -> chartController.manualSelectEntry(baseDataEntityEntry.getDataEntity().getTimestampMillis()))
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnNext(baseDataEntityEntry ->
+                        activity.runOnUiThread(() -> {
+                            chartController.manualSelectEntry(baseDataEntityEntry.getDataEntity().getTimestampMillis());
+                        })
+                )
                 .subscribe();
     }
 
-    private static int getNewPrimaryIndexFromNameStringRes(Context context, int id) {
-        String speedKeyName = context.getResources().getString(id);
-        final int newPrimaryIndex = Arrays.asList(context.getResources().getStringArray(R.array.gpx_name_unit_array)).indexOf(speedKeyName);
-        return newPrimaryIndex;
-    }
-
     public void disposeAll() {
-        ConcurrentUtil.tryToDispose(disposable);
+        ConcurrentUtil.tryToDispose(loadDataDisposable);
+        ConcurrentUtil.tryToDispose(observeSelectionCompositeDisposable);
     }
 
-    public void bindAltitudeTimeChart(@NonNull DataEntityLineChart lineChart, @NonNull MainActivity mainActivity) {
-        lineChart.getSettings().setDrawXLabels(false);
-        lineChart.getSettings().setDragDecelerationEnabled(false);
-        altitudeTimeChartController.bindChart(lineChart, mainActivity);
-    }
-
-    public void bindSpeedTimeChart(@NonNull DataEntityLineChart lineChart, @NonNull MainActivity mainActivity) {
-        lineChart.getSettings().setDrawXLabels(true);
-        lineChart.getSettings().setDragDecelerationEnabled(false);
-        speedTimeChartController.bindChart(lineChart, mainActivity);
-    }
 
     public Observable<Integer> getPercentageProgress() {
         return dataProvider.getPercentageProgress();
@@ -149,11 +209,4 @@ public class MultipleSyncedGpxChartUseCase {
         return requestStatus;
     }
 
-    public ChartController getAltitudeTimeChartController() {
-        return altitudeTimeChartController;
-    }
-
-    public ChartController getSpeedTimeChartController() {
-        return speedTimeChartController;
-    }
 }

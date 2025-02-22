@@ -41,7 +41,7 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.MenuIt
         return menuItems.size();
     }
 
-    static class MenuItemViewHolder extends RecyclerView.ViewHolder {
+    public static class MenuItemViewHolder extends RecyclerView.ViewHolder {
         private final MenuItemBinding binding;
 
         MenuItemViewHolder(@NonNull MenuItemBinding binding) {

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.itservices.gpxanalyzer.ui.gpxchart.ChartAreaListViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <Button
+            android:id="@+id/loadButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_small"
+            android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData()}"
+            android:text="@string/load"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageButton
+            android:id="@+id/switchSeverityModeButton"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginStart="@dimen/margin_small"
+            android:background="@color/white"
+            android:backgroundTint="@color/white"
+            android:alpha="0.5"
+            android:contentDescription="@{ viewModel.getViewModeSeverityLiveData().name}"
+            android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData()}"
+            app:imageResource="@{ viewModel.getViewModeSeverityLiveData().getNextCyclic().getDrawableIconResId  }"
+            app:layout_constraintBottom_toBottomOf="@+id/loadButton"
+            app:layout_constraintStart_toEndOf="@+id/loadButton"
+            app:layout_constraintTop_toTopOf="@+id/loadButton" />
+
+        <ProgressBar
+            android:id="@+id/percentageProgressBarChart"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:layout_marginStart="@dimen/margin_small"
+            android:layout_marginTop="@dimen/margin_very_small"
+            android:layout_marginEnd="@dimen/margin_small"
+            android:max="100"
+            android:progress="@{viewModel.percentageProcessingLiveData}"
+            android:progressDrawable="@drawable/loading_data_progressbar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/loadButton" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/percentageProgressBarChart">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/gpxChartsRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:listitem="@layout/chart_area_item"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>
