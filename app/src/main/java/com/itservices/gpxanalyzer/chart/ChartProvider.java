@@ -5,6 +5,7 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.itservices.gpxanalyzer.chart.entry.CurveDataEntityEntry;
+import com.itservices.gpxanalyzer.chart.entry.EntryCacheMap;
 import com.itservices.gpxanalyzer.chart.entry.EntryListCreator;
 import com.itservices.gpxanalyzer.chart.entry.SingleDataEntityEntry;
 import com.itservices.gpxanalyzer.chart.legend.PaletteColorDeterminer;
@@ -25,6 +26,9 @@ public class ChartProvider {
     @Inject
     LineChartSettings settings;
 
+    @Inject
+    EntryCacheMap entryCacheMap;
+
     private DataEntityLineChart chart;
 
     @Inject
@@ -37,8 +41,10 @@ public class ChartProvider {
         PaletteColorDeterminer paletteColorDeterminer = chart.getPaletteColorDeterminer();
         paletteColorDeterminer.initPalette(curveResults);
 
+        entryCacheMap.init(curveResults.getDataEntityVector().size());
+
         ArrayList<Entry> entries =
-                EntryListCreator.createCurveDataEntityEntryList(curveResults, paletteColorDeterminer);
+                EntryListCreator.createCurveDataEntityEntryList(curveResults, paletteColorDeterminer, entryCacheMap);
 
         // needed for scaling
         chart.getScaler().setDataEntityCurveStatisticResults(curveResults);
@@ -117,5 +123,9 @@ public class ChartProvider {
 
     public LineChartSettings getSettings() {
         return settings;
+    }
+
+    public EntryCacheMap getEntryCacheMap() {
+        return entryCacheMap;
     }
 }

@@ -33,7 +33,6 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     private Highlight currentHighlight;
 
 
-
     private final ChartProvider chartProvider;
     private final PublishSubject<BaseDataEntityEntry> baseEntrySelectionPublishSubject = PublishSubject.create();
 
@@ -156,27 +155,15 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
             return;
         }
 
-        for (int dataSetIndex = 0; dataSetIndex < lineChart.getData().getDataSets().size(); dataSetIndex++) {
-            ILineDataSet iLineDataSet = lineChart.getData().getDataSets().get(dataSetIndex);
+        Entry entryFound = chartProvider.getEntryCacheMap().get(selectedTimeMillis);
+        if (entryFound != null) {
+            setSelectionEntry(entryFound, false);
+            lineChart.highlightValue(entryFound.getX(), entryFound.getY(), 0, callListeners);
 
-            if (!(iLineDataSet instanceof LineDataSet)) continue;
-            LineDataSet lineDataSet = (LineDataSet) iLineDataSet;
+            setSelectionHighlight(lineChart.getHighlighted()[0]);
 
-            for (Entry entry : lineDataSet.getEntries()) {
-                if (!(entry instanceof BaseDataEntityEntry)) break;
-                DataEntity dataEntity = ((BaseDataEntityEntry) entry).getDataEntity();
-                long timeInt = dataEntity.getTimestampMillis();
-                if (timeInt == selectedTimeMillis) {
-                    setSelectionEntry(entry, false);
-                    lineChart.highlightValue(entry.getX(), entry.getY(), dataSetIndex, callListeners);
-
-                    setSelectionHighlight(lineChart.getHighlighted()[0]);
-
-                    if (centerViewToSelection) {
-                        lineChart.centerViewTo(entry.getX(), entry.getY(), YAxis.AxisDependency.LEFT);
-                    }
-                    return;
-                }
+            if (centerViewToSelection) {
+                lineChart.centerViewTo(entryFound.getX(), entryFound.getY(), YAxis.AxisDependency.LEFT);
             }
         }
     }
@@ -242,10 +229,10 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     @UiThread
     public boolean isDrawIconsEnabled() {
 
-        if (chartProvider.getChart()!=null) {
+        if (chartProvider.getChart() != null) {
             LineData lineData = chartProvider.getChart().getData();
             if (!lineData.getDataSets().isEmpty()) {
-                return lineData.getDataSets().get(0).isDrawIconsEnabled() ;
+                return lineData.getDataSets().get(0).isDrawIconsEnabled();
             }
         }
         return chartProvider.getSettings().isDrawIconsEnabled();
@@ -258,7 +245,9 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     public void animateFitScreen(long duration) {
         chartProvider.getChart().animateFitScreen(duration);
     }
+
     public void setDrawXLabels(boolean drawX) {
-        chartProvider.getSettings().setDrawXLabels(drawX);;
+        chartProvider.getSettings().setDrawXLabels(drawX);
+        ;
     }
 }

@@ -185,8 +185,8 @@ public class MultipleSyncedGpxChartUseCase {
         //Log.d(MultipleSyncedGpxChartUseCase.class.getSimpleName(), "observeSelectionOn() called with: activity = [" + activity + "], selection = [" + selection + "], chartController = [" + chartController + "]");
 
         return selection
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(Schedulers.newThread())
                 .doOnNext(baseDataEntityEntry ->
                         activity.runOnUiThread(() -> {
                             chartController.manualSelectEntry(baseDataEntityEntry.getDataEntity().getTimestampMillis());
