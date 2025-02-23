@@ -1,6 +1,5 @@
 package com.itservices.gpxanalyzer.data.gpx;
 
-import static com.itservices.gpxanalyzer.data.DataEntity.DEFAULT_PRIMARY_DATA_INDEX;
 
 import com.itservices.gpxanalyzer.data.DataEntity;
 
@@ -9,6 +8,7 @@ import java.util.Vector;
 import java.util.stream.Collectors;
 
 public class StatisticResults {
+    public static final int DEFAULT_PRIMARY_DATA_INDEX = 0;
     private double maxValue;
     private double minValue;
 
@@ -16,9 +16,7 @@ public class StatisticResults {
 
     private int primaryDataIndex = DEFAULT_PRIMARY_DATA_INDEX;
 
-    public StatisticResults(Vector<DataEntity> dataEntityVector) {
-        setDataEntityVector(dataEntityVector);
-    }
+    private StatisticResults() {}
 
     public StatisticResults(Vector<DataEntity> dataEntityVector, int primaryDataIndex) {
         this.primaryDataIndex = primaryDataIndex;
@@ -41,10 +39,7 @@ public class StatisticResults {
         DoubleSummaryStatistics stats = dataEntityVector.stream()
                 .collect(
                         Collectors.summarizingDouble(
-                                dataEntity -> {
-                                    dataEntity.setPrimaryDataIndex(primaryDataIndex); // update primary data index
-                                    return dataEntity.getValueList().get(dataEntity.getPrimaryDataIndex());
-                                }
+                                dataEntity -> dataEntity.getValueList().get(primaryDataIndex)
                         )
                 );
         minValue = stats.getMin();
@@ -55,15 +50,17 @@ public class StatisticResults {
         return dataEntityVector;
     }
 
-    public void setDataEntityVector(Vector<DataEntity> dataEntityVector) {
-        clear();
+    public int getPrimaryDataIndex() {
+        return primaryDataIndex;
+    }
 
-        this.dataEntityVector = copyDataEntityVector(dataEntityVector);
+    private void setDataEntityVector(Vector<DataEntity> dataEntityVector) {
+        this.dataEntityVector = dataEntityVector;
 
         compute();
     }
 
-    private static Vector<DataEntity> copyDataEntityVector(Vector<DataEntity> dataEntityVector) {
+    public static Vector<DataEntity> copyDataEntityVector(Vector<DataEntity> dataEntityVector) {
         Vector<DataEntity> newDataEntityVector = new Vector<>();
         dataEntityVector.forEach(dataEntity -> {
             DataEntity newDataEntity = new DataEntity(dataEntity);

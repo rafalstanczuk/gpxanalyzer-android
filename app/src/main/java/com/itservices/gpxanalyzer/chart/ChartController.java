@@ -1,6 +1,5 @@
 package com.itservices.gpxanalyzer.chart;
 
-import android.util.Log;
 import android.view.MotionEvent;
 
 import androidx.annotation.NonNull;
@@ -11,12 +10,10 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.highlight.Highlight;
-import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.itservices.gpxanalyzer.chart.entry.BaseDataEntityEntry;
-import com.itservices.gpxanalyzer.data.DataEntity;
 import com.itservices.gpxanalyzer.data.gpx.StatisticResults;
 
 import java.util.ArrayList;
@@ -64,21 +61,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
 
     @UiThread
     public RequestStatus refreshStatisticResults(StatisticResults statisticResults) {
-        // treat everything as "curve" results
-        return updateCurveDataEntityLineDataSetFrom(statisticResults);
-    }
-
-    @UiThread
-    private RequestStatus updateCurveDataEntityLineDataSetFrom(StatisticResults stats) {
-        LineDataSet ds = chartProvider.createCurveDataEntityDataSet(stats);
-        if (ds != null) {
-            return addOrUpdateDataSet(ds);
-        }
-        return RequestStatus.ERROR_LINE_DATA_SET_NULL;
-    }
-
-    private RequestStatus updateSingleDataEntityDataSetFrom(StatisticResults stats) {
-        LineDataSet ds = chartProvider.createSingleDataEntityDataSet(stats);
+        LineDataSet ds = chartProvider.createCurveDataEntityDataSet(statisticResults);
         if (ds != null) {
             return addOrUpdateDataSet(ds);
         }
@@ -101,7 +84,6 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
                 .noneMatch(a -> newDataSet.getLabel().contentEquals(a.getLabel()))) {
             current.add(newDataSet);
         }
-
 
         // update the chart
         return tryToUpdateDataChart();
@@ -133,7 +115,6 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     private void setSelectionHighlight(Highlight h) {
         currentHighlight = h;
     }
-
 
     public void manualSelectEntry(long selectedTimeMillis) {
         ////Log.d(ChartController.class.getSimpleName(), "manualSelectEntry() called with: selectedTimeMillis = [" + selectedTimeMillis + "]");
@@ -231,7 +212,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
 
         if (chartProvider.getChart() != null) {
             LineData lineData = chartProvider.getChart().getData();
-            if (!lineData.getDataSets().isEmpty()) {
+            if ( lineData != null && !lineData.getDataSets().isEmpty() ) {
                 return lineData.getDataSets().get(0).isDrawIconsEnabled();
             }
         }
@@ -248,6 +229,5 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
 
     public void setDrawXLabels(boolean drawX) {
         chartProvider.getSettings().setDrawXLabels(drawX);
-        ;
     }
 }

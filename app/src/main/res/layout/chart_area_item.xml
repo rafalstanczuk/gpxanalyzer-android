@@ -22,7 +22,6 @@
             android:id="@+id/chart_layout"
             android:layout_width="match_parent"
             android:layout_height="300dp"
-            android:visibility="@{chartAreaItem.visibilityLiveData}"
             app:layout_constraintTop_toTopOf="parent">
 
             <!--"@{viewModel.dataEntityChartPercentageHeight}"-->
@@ -31,7 +30,6 @@
                 android:id="@+id/line_chart"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:visibility="@{chartAreaItem.visibilityLiveData}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />

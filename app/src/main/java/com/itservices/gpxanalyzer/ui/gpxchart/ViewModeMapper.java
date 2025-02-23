@@ -4,7 +4,6 @@ import android.content.Context;
 
 import androidx.annotation.StringRes;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,16 +28,18 @@ public class ViewModeMapper {
 
     public void init(List<String> nameUnitList) {
         for (ViewMode viewMode : ViewMode.values()) {
-            if(viewMode!= ViewMode.DISABLED) {
-                viewModeToPrimaryKeyIndex.put(viewMode,
-                        getNewPrimaryIndexFromNameStringRes(context, nameUnitList, viewMode.getPrimaryKeyStringId())
-                );
-            }
+            viewModeToPrimaryKeyIndex.put(viewMode,
+                    getNewPrimaryIndexFromNameStringRes(context, nameUnitList, viewMode.getPrimaryKeyStringId())
+            );
         }
     }
 
     public int mapToPrimaryKeyIndexList(ViewMode viewMode) {
-        return viewModeToPrimaryKeyIndex.get(viewMode);
+        Integer index = viewModeToPrimaryKeyIndex.get(viewMode);
+
+        assert index != null;
+
+        return index;
     }
 
     private int getNewPrimaryIndexFromNameStringRes(Context context, List<String> nameUnitList, @StringRes int id) {

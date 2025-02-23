@@ -278,10 +278,6 @@ public class ChartAreaListViewModel extends ViewModel {
     public void switchViewMode(ChartAreaItemAdapter adapter, ChartAreaItem item, Activity activity) {
         int indexOfItem = adapter.getItems().indexOf(item);
         switch (requireNonNull(item.getViewMode().getValue())) {
-            case DISABLED -> {
-                adapter.getItems().remove(indexOfItem);
-                adapter.notifyItemRemoved(indexOfItem);
-            }
             case ASL_T_1, V_T_1 -> {
                 adapter.notifyItemChanged(indexOfItem);
             }

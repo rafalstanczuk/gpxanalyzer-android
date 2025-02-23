@@ -24,7 +24,7 @@ public class EntryListCreator {
 
         for (int i = startXIndex; i < endXIndex; i++) {
             DataEntity dataEntity = dataEntityVector.get(i);
-            double value = dataEntity.getValueList().get( dataEntity.getPrimaryDataIndex() );
+            double value = dataEntity.getValueList().get( statisticResults.getPrimaryDataIndex() );
 
             scaledEntries.add(
                     SingleDataEntityEntry.create(paletteColorDeterminer, statisticResults, i,
@@ -49,7 +49,7 @@ public class EntryListCreator {
 
         for (int i = startXIndex; i < endXIndex; i++) {
             DataEntity dataEntity = dataEntityVector.get(i);
-            double value = dataEntity.getValueList().get( dataEntity.getPrimaryDataIndex() );
+            double value = dataEntity.getValueList().get( statisticResults.getPrimaryDataIndex() );
 
             CurveDataEntityEntry entry = CurveDataEntityEntry.create(paletteColorDeterminer, statisticResults, i, (float) value);
             entryCacheMap.add(dataEntity.getTimestampMillis(), entry);
