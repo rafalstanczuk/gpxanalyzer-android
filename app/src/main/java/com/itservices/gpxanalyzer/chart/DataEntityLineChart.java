@@ -187,7 +187,7 @@ public class DataEntityLineChart extends LineChart {
 
 		DataEntity dataEntity = ( (BaseDataEntityEntry)selectedEntry).getDataEntity();
 
-		int primaryDataIndex = dataEntity.getPrimaryDataIndex();
+		int primaryDataIndex = ((BaseDataEntityEntry) selectedEntry).getStatisticResults().getPrimaryDataIndex();
 
 			dataEntityInfoLayoutView.setTime( getFormattedTime(dataEntity.getTimestampMillis()) );
 			dataEntityInfoLayoutView.setValue1(

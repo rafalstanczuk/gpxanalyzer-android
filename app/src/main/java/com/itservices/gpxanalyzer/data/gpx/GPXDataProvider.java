@@ -5,7 +5,6 @@ import android.location.Location;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.StringRes;
 
 import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.data.DataEntity;
@@ -59,36 +58,24 @@ public class GPXDataProvider {
     public Observable<Vector<DataEntity>> provide(Context context, int rawId) {
         return Observable.fromCallable(() -> {
             InputStream inputStream = context.getResources().openRawResource(rawId);
-            return loadDataEntity(inputStream, DataEntity.DEFAULT_PRIMARY_DATA_INDEX);
+            return loadDataEntity(inputStream);
         });
     }
 
     public Observable<Vector<DataEntity>> provide(File file) {
         return Observable.fromCallable(() -> {
             try (InputStream inputStream = new FileInputStream(file)) {
-                return loadDataEntity(inputStream, DataEntity.DEFAULT_PRIMARY_DATA_INDEX);
+                return loadDataEntity(inputStream);
             }
         });
     }
 
-
     public Observable<Vector<DataEntity>> provide(InputStream inputStream) {
-        return Observable.fromCallable(() -> loadDataEntity(inputStream, DataEntity.DEFAULT_PRIMARY_DATA_INDEX));
-    }
-
-    public Observable<Vector<DataEntity>> provide(Context context, int rawId, int primaryDataIndex) {
-        return Observable.fromCallable(() -> {
-            InputStream inputStream = context.getResources().openRawResource(rawId);
-            return loadDataEntity(inputStream, primaryDataIndex);
-        });
-    }
-
-    public Observable<Vector<DataEntity>> provide(InputStream inputStream, int primaryDataIndex) {
-        return Observable.fromCallable(() -> loadDataEntity(inputStream, primaryDataIndex));
+        return Observable.fromCallable(() -> loadDataEntity(inputStream));
     }
 
     @NonNull
-    private Vector<DataEntity> loadDataEntity(InputStream inputStream, int primaryDataIndex) {
+    private Vector<DataEntity> loadDataEntity(InputStream inputStream) {
         Vector<DataEntity> gpxPointList = new Vector<>();
 
         Gpx parsedGpx = null;
@@ -103,7 +90,7 @@ public class GPXDataProvider {
                     .forEach(track ->
                             track.getTrackSegments()
                                     .forEach(segment ->
-                                            addGpxPointsFromSegment(gpxPointList, segment, primaryDataIndex)
+                                            addGpxPointsFromSegment(gpxPointList, segment)
                                     )
                     );
         } else {
@@ -113,7 +100,7 @@ public class GPXDataProvider {
         return gpxPointList;
     }
 
-    private void addGpxPointsFromSegment(Vector<DataEntity> gpxPointList, TrackSegment segment, int primaryDataIndex) {
+    private void addGpxPointsFromSegment(Vector<DataEntity> gpxPointList, TrackSegment segment) {
 
         int maxIteration = segment.getTrackPoints().size() - 1;
 
@@ -135,7 +122,7 @@ public class GPXDataProvider {
             centroidLocation.setSpeed(speed);
             centroidLocation.setTime(LocationCalculatorUtil.computeMeanTime(gpxPointA, gpxPointB));
 
-            DataEntity dataEntity = createDataEntity(centroidLocation, primaryDataIndex);
+            DataEntity dataEntity = createDataEntity(centroidLocation);
 
             ////Log.d("GPXDataProvider", "dataEntity = [" + dataEntity.getTimestampMillis() + "]");
 
@@ -154,8 +141,8 @@ public class GPXDataProvider {
     }
 
     @NonNull
-    private DataEntity createDataEntity(Location location, int primaryDataIndex) {
-        DataEntity dataEntity = new DataEntity(location.getTime(), primaryDataIndex,
+    private DataEntity createDataEntity(Location location) {
+        DataEntity dataEntity = new DataEntity(location.getTime(),
                 Arrays.asList((float) location.getAltitude(), location.getSpeed()),
                 NAME_LIST,
                 UNIT_LIST);

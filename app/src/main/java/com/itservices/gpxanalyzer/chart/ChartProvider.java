@@ -13,15 +13,11 @@ import com.itservices.gpxanalyzer.chart.settings.LineChartSettings;
 import com.itservices.gpxanalyzer.data.gpx.StatisticResults;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
 
 public class ChartProvider {
-
-    private static final List<String> DEFAULT_TARGET_MATCHED_LINE_LABEL_DATA_TO_SHOW_WITH_DATA_ENTITY_BOUNDARIES =
-            Arrays.asList(CurveDataEntityEntry.CURVE_DATA_ENTITY);
 
     @Inject
     LineChartSettings settings;
@@ -35,19 +31,19 @@ public class ChartProvider {
     public ChartProvider() {
     }
 
-    public LineDataSet createCurveDataEntityDataSet(StatisticResults curveResults) {
-        if (curveResults == null) return null;
+    public LineDataSet createCurveDataEntityDataSet(StatisticResults statisticResults) {
+        if (statisticResults == null) return null;
 
         PaletteColorDeterminer paletteColorDeterminer = chart.getPaletteColorDeterminer();
-        paletteColorDeterminer.initPalette(curveResults);
+        paletteColorDeterminer.initPalette(statisticResults);
 
-        entryCacheMap.init(curveResults.getDataEntityVector().size());
+        entryCacheMap.init(statisticResults.getDataEntityVector().size());
 
         ArrayList<Entry> entries =
-                EntryListCreator.createCurveDataEntityEntryList(curveResults, paletteColorDeterminer, entryCacheMap);
+                EntryListCreator.createCurveDataEntityEntryList(statisticResults, paletteColorDeterminer, entryCacheMap);
 
         // needed for scaling
-        chart.getScaler().setDataEntityCurveStatisticResults(curveResults);
+        chart.getScaler().setDataEntityCurveStatisticResults(statisticResults);
 
         if (!entries.isEmpty()) {
             return CurveDataEntityEntry.createCurveDataEntityLineDataSet(entries, settings);
@@ -82,8 +78,10 @@ public class ChartProvider {
      */
     public RequestStatus updateChart(List<LineDataSet> dataSets,
                                      Highlight highlight) {
+        if (chart == null)
+            return RequestStatus.ERROR;
 
-        if (!isDataSetAmountValidToShow(dataSets)) {
+        if (dataSets.isEmpty()) {
             return RequestStatus.ERROR_INVALID_DATA_SET_AMOUNT_TO_SHOW;
         }
 
@@ -101,20 +99,6 @@ public class ChartProvider {
         chart.invalidate();
 
         return RequestStatus.DONE;
-    }
-
-    private boolean isDataSetAmountValidToShow(final List<LineDataSet> dataSets) {
-        int currentMatchedCount = 0;
-        int requiredCount = DEFAULT_TARGET_MATCHED_LINE_LABEL_DATA_TO_SHOW_WITH_DATA_ENTITY_BOUNDARIES.size();
-
-        for (String requiredLabel : DEFAULT_TARGET_MATCHED_LINE_LABEL_DATA_TO_SHOW_WITH_DATA_ENTITY_BOUNDARIES) {
-            for (LineDataSet ds : dataSets) {
-                if (ds.getLabel().contentEquals(requiredLabel)) {
-                    currentMatchedCount++;
-                }
-            }
-        }
-        return (currentMatchedCount == requiredCount);
     }
 
     public DataEntityLineChart getChart() {

@@ -80,7 +80,7 @@ public class CustomMarker extends MarkerView {
                     FormatNumberUtil.getFormattedTime(dataEntity.getTimestampMillis()), " h"
             );
             SpannableStringBuilder valueLine = getSpannableStringBuilder(
-                    String.valueOf((int) curveDataEntityEntry.getY()), " " + dataEntity.getUnitList().get( dataEntity.getPrimaryDataIndex() ));
+                    String.valueOf((int) curveDataEntityEntry.getY()), " " + dataEntity.getUnitList().get( curveDataEntityEntry.getStatisticResults().getPrimaryDataIndex() ));
 
             markerTextViewTime.setText(timeLine, TextView.BufferType.SPANNABLE);
             markerTextViewValue.setText(valueLine, TextView.BufferType.SPANNABLE);
@@ -92,7 +92,7 @@ public class CustomMarker extends MarkerView {
                     FormatNumberUtil.getFormattedTime(dataEntity.getTimestampMillis()), " h"
             );
             SpannableStringBuilder valueLine = getSpannableStringBuilder(
-                    String.valueOf((int) singleDataEntityEntry.getY()), " " + dataEntity.getUnitList().get( dataEntity.getPrimaryDataIndex() ));
+                    String.valueOf((int) singleDataEntityEntry.getY()), " " + dataEntity.getUnitList().get( singleDataEntityEntry.getStatisticResults().getPrimaryDataIndex() ));
 
             markerTextViewTime.setText(timeLine, TextView.BufferType.SPANNABLE);
             markerTextViewValue.setText(valueLine, TextView.BufferType.SPANNABLE);

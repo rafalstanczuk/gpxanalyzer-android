@@ -10,7 +10,7 @@ import androidx.annotation.StringRes;
 import com.itservices.gpxanalyzer.R;
 
 public enum ViewMode {
-	DISABLED(R.string.disabled, R.string.disabled, R.drawable.ic_visibility_off_selector, Constants.DEFAULT_DISABLED_VIEW_MODE_KEY_ID),
+/*	DISABLED(R.string.disabled, R.string.disabled, R.drawable.ic_visibility_off_selector, Constants.DEFAULT_DISABLED_VIEW_MODE_KEY_ID),*/
 	ASL_T_1(R.string.one_chart_asl_t_short, R.string.one_chart_asl_t, R.drawable.ic_altitude_selector, R.string.altitude ),
 	V_T_1(R.string.one_chart_v_t_short, R.string.one_chart_v_t, R.drawable.ic_speed_selector, R.string.speed);
 
