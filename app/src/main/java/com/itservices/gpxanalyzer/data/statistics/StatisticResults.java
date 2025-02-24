@@ -84,12 +84,35 @@ public class StatisticResults {
     public List<TrendBoundaryDataEntity> createTimeBoundaryList() {
         List<TrendBoundaryDataEntity> timeBoundaryList = new ArrayList<>();
 
+        int ihalf = dataEntityVector.size() / 2;
+
+        Vector<DataEntity> dataEntityVectorFirst = new Vector<>();
+        Vector<DataEntity> dataEntityVectorSecond = new Vector<>();
+
+        for(int i=0; i<dataEntityVector.size() ; i++) {
+
+            if (i<ihalf) {
+                dataEntityVectorFirst.add(dataEntityVector.get(i));
+            } else {
+                dataEntityVectorSecond.add(dataEntityVector.get(i));
+            }
+
+        }
+
         timeBoundaryList.add(
                 new TrendBoundaryDataEntity(0,
                         TrendType.UP,
-                        dataEntityVector.firstElement().getTimestampMillis(),
-                        dataEntityVector.lastElement().getTimestampMillis(),
-                        dataEntityVector
+                        dataEntityVectorFirst.firstElement().getTimestampMillis(),
+                        dataEntityVectorFirst.lastElement().getTimestampMillis(),
+                        dataEntityVectorFirst
+                ));
+
+        timeBoundaryList.add(
+                new TrendBoundaryDataEntity(1,
+                        TrendType.DOWN,
+                        dataEntityVectorSecond.firstElement().getTimestampMillis(),
+                        dataEntityVectorSecond.lastElement().getTimestampMillis(),
+                        dataEntityVectorSecond
                 ));
 
         return timeBoundaryList;

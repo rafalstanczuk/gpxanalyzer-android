@@ -17,13 +17,14 @@ public class CurveDataEntityEntry extends BaseDataEntityEntry {
     public static boolean SHOW_COLOR_CURVE_DATA_ENTITY_RANGE_CIRCLES_ICONS = true;
 
     CurveDataEntityEntry(
-            DataEntity dataEntity, float x, float y, Drawable icon, StatisticResults statisticResults
+            DataEntity dataEntity, int dataSetIndex, float x, float y, Drawable icon, StatisticResults statisticResults
     ) {
-        super(dataEntity, x, y, icon, statisticResults);
+        super(dataEntity, dataSetIndex, x, y, icon, statisticResults);
     }
 
     public static CurveDataEntityEntry create(
             DataEntity dataEntity,
+            int dataSetIndex,
             PaletteColorDeterminer paletteColorDeterminer,
             StatisticResults statisticResults
     ) {
@@ -42,6 +43,7 @@ public class CurveDataEntityEntry extends BaseDataEntityEntry {
 
         return new CurveDataEntityEntry(
                 dataEntity,
+                dataSetIndex,
                 floatTime, value, SHOW_COLOR_CURVE_DATA_ENTITY_RANGE_CIRCLES_ICONS ? drawableIcon : null,
                 statisticResults
         );

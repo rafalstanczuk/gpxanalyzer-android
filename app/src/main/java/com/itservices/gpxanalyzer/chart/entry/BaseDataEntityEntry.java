@@ -9,13 +9,16 @@ import com.itservices.gpxanalyzer.data.statistics.StatisticResults;
 public class BaseDataEntityEntry extends Entry {
     protected final DataEntity dataEntity;
     protected final StatisticResults statisticResults;
+    private final int dataSetIndex;
 
     public BaseDataEntityEntry(
             DataEntity dataEntity,
+            int dataSetIndex,
             float x, float y, Drawable icon, StatisticResults statisticResults
     ) {
         super(x, y, icon);
         this.dataEntity = dataEntity;
+        this.dataSetIndex = dataSetIndex;
         this.statisticResults = statisticResults;
 
     }
@@ -34,5 +37,9 @@ public class BaseDataEntityEntry extends Entry {
                 "dataEntity=" + dataEntity +
                 ", statisticResults=" + statisticResults +
                 '}';
+    }
+
+    public int getDataSetIndex() {
+        return dataSetIndex;
     }
 }

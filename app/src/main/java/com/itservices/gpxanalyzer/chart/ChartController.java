@@ -127,10 +127,10 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
             return;
         }
 
-        Entry entryFound = chartProvider.getEntryCacheMap().get(selectedTimeMillis);
+        BaseDataEntityEntry entryFound = (BaseDataEntityEntry)chartProvider.getEntryCacheMap().get(selectedTimeMillis);
         if (entryFound != null) {
             setSelectionEntry(entryFound, false);
-            lineChart.highlightValue(entryFound.getX(), entryFound.getY(), 0, callListeners);
+            lineChart.highlightValue(entryFound.getX(), entryFound.getY(), entryFound.getDataSetIndex(), callListeners);
 
             setSelectionHighlight(lineChart.getHighlighted()[0]);
 

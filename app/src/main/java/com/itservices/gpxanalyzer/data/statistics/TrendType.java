@@ -5,9 +5,9 @@ import static com.itservices.gpxanalyzer.data.statistics.TrendType.Constants.DEF
 import com.itservices.gpxanalyzer.utils.ui.ColorUtil;
 
 public enum TrendType {
-    UP(20, ColorUtil.rgb(0.0f, 0.96f, 0.0f), DEFAULT_FILL_COLOR_ALPHA),
+    UP(20, ColorUtil.rgb(0.0f, 0.96f, 0.0f), 255),
     CONSTANT(5, ColorUtil.rgb(0.96f, 0.96f, 0.96f), DEFAULT_FILL_COLOR_ALPHA),
-    DOWN(20, ColorUtil.rgb(0.96f, 0.0f, 0.0f), DEFAULT_FILL_COLOR_ALPHA);
+    DOWN(20, ColorUtil.rgb(0.96f, 0.0f, 0.0f), 255);
 
     public static class Constants {
         public static final int DEFAULT_FILL_COLOR_ALPHA = (int) (0.3f * 255.0f);

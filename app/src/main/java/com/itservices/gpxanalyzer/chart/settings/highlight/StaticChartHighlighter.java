@@ -38,7 +38,7 @@ public class StaticChartHighlighter<T extends BarLineScatterCandleBubbleDataProv
 
 		if (((DataEntityLineChart) mChart).isFullyZoomedOut()) {
 			highlights = getHighlightsForClassEntries(
-				BaseDataEntityEntry.class, set, dataSetIndex, xVal, rounding);
+					CurveDataEntityEntry.class, set, dataSetIndex, xVal, rounding);
 		} else {
 
 			switch (chartGesture) {
@@ -51,7 +51,7 @@ public class StaticChartHighlighter<T extends BarLineScatterCandleBubbleDataProv
 				case LONG_PRESS:
 				case SINGLE_TAP:
 					highlights = getHighlightsForClassEntries(
-						BaseDataEntityEntry.class, set, dataSetIndex, xVal, rounding);
+							CurveDataEntityEntry.class, set, dataSetIndex, xVal, rounding);
 					break;
 
 				case FLING:
@@ -103,5 +103,11 @@ public class StaticChartHighlighter<T extends BarLineScatterCandleBubbleDataProv
 			}
 		}
 		return highlights;
+	}
+
+	@Override
+	protected float getDistance(float x1, float y1, float x2, float y2) {
+		// Match only closest by x
+		return Math.abs(x1 - x2);
 	}
 }

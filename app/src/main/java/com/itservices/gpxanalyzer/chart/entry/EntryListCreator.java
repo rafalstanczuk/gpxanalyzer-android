@@ -27,7 +27,7 @@ public class EntryListCreator {
             Vector<DataEntity> dataEntityVector = trendBoundaryDataEntity.dataEntityVector();
 
             dataEntityVector.forEach(dataEntity -> {
-                CurveDataEntityEntry entry = CurveDataEntityEntry.create(dataEntity, paletteColorDeterminer, statisticResults);
+                CurveDataEntityEntry entry = CurveDataEntityEntry.create(dataEntity, trendBoundaryDataEntity.id(), paletteColorDeterminer, statisticResults);
 
                 entryCacheMap.add(dataEntity.getTimestampMillis(), entry);
 
