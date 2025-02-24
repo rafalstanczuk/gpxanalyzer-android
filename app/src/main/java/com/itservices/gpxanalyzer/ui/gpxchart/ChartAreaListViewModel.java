@@ -236,17 +236,13 @@ public class ChartAreaListViewModel extends ViewModel {
 
 
     public void onZoomOut(ChartAreaItem item) {
-        // activity.runOnUiThread(() -> {
         item.getChartController().animateZoomToCenter(0.90f, 1.0f, 200);
-        //    });
 
         zoomOutLiveData.postValue(item);
     }
 
     public void onAutoScaling(ChartAreaItem item) {
-        //  activity.runOnUiThread(() -> {
         item.getChartController().animateFitScreen(1000);
-        //  });
 
         autoScalingLiveData.postValue(item);
     }

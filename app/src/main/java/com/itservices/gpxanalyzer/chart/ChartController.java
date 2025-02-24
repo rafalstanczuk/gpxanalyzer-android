@@ -52,7 +52,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     }
 
     @UiThread
-    public RequestStatus tryToUpdateDataChart(List<LineDataSet> dataSets) {
+    private RequestStatus tryToUpdateDataChart(List<LineDataSet> dataSets) {
         if (dataSets == null)
             return RequestStatus.ERROR_DATA_SETS_NULL;
 
