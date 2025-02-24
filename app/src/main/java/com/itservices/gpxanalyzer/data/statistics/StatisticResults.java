@@ -82,6 +82,10 @@ public class StatisticResults {
 
 
     public List<TrendBoundaryDataEntity> createTimeBoundaryList() {
+
+        //TODO: MOCK of the func.  GPXAN-21
+        // TODO: Add filtering/processing for ascending/descending segments detection
+
         List<TrendBoundaryDataEntity> timeBoundaryList = new ArrayList<>();
 
         int ihalf = dataEntityVector.size() / 2;
