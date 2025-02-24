@@ -107,6 +107,9 @@ public class StatisticResults {
                         dataEntityVectorFirst
                 ));
 
+
+        dataEntityVectorSecond.add(0, dataEntityVectorFirst.lastElement());
+
         timeBoundaryList.add(
                 new TrendBoundaryDataEntity(1,
                         TrendType.DOWN,
