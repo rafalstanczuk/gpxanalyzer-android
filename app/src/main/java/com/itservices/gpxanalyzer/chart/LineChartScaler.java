@@ -2,7 +2,7 @@ package com.itservices.gpxanalyzer.chart;
 
 import com.github.mikephil.charting.components.YAxis;
 import com.itservices.gpxanalyzer.chart.settings.background.LimitLinesBoundaries;
-import com.itservices.gpxanalyzer.data.gpx.StatisticResults;
+import com.itservices.gpxanalyzer.data.statistics.StatisticResults;
 import com.itservices.gpxanalyzer.utils.common.PrecisionUtil;
 
 import java.util.Arrays;
@@ -16,8 +16,7 @@ import javax.inject.Inject;
 public class LineChartScaler {
 	private static final double DEFAULT_MIN_Y_VALUE = 0.0;
 	private double minY = DEFAULT_MIN_Y_VALUE;
-	private StatisticResults dataEntityCurveStatisticResults = null;
-	private StatisticResults dataEntitySingleStatisticResults = null;
+	private StatisticResults statisticResults = null;
 
 	private LimitLinesBoundaries limitLinesBoundaries;
 
@@ -25,12 +24,8 @@ public class LineChartScaler {
 	LineChartScaler() {
 	}
 
-	public void setDataEntityCurveStatisticResults(StatisticResults dataEntityCurveStatisticResults) {
-		this.dataEntityCurveStatisticResults = dataEntityCurveStatisticResults;
-	}
-
-	public void setDataEntitySingleStatisticResults(StatisticResults dataEntitySingleStatisticResults) {
-		this.dataEntitySingleStatisticResults = dataEntitySingleStatisticResults;
+	public void setStatisticResults(StatisticResults statisticResults) {
+		this.statisticResults = statisticResults;
 	}
 
 	public void setLimitLinesBoundaries(LimitLinesBoundaries limitLinesBoundaries) {
@@ -38,17 +33,15 @@ public class LineChartScaler {
 	}
 
 	public void scale(DataEntityLineChart lineChart) {
-		double r = dataEntityCurveStatisticResults.getMaxValue() - dataEntityCurveStatisticResults.getMinValue();
+		double r = statisticResults.getMaxValue() - statisticResults.getMinValue();
 		double o = r * 0.1f;
-		minY = (dataEntityCurveStatisticResults.getMinValue() - o);
+		minY = (statisticResults.getMinValue() - o);
 
 		List<Double> valYStatisticsList =
 				Arrays.asList(
 						minY,
-						dataEntitySingleStatisticResults !=null ? dataEntitySingleStatisticResults.getMinValue() : minY,
-						dataEntitySingleStatisticResults !=null ? dataEntitySingleStatisticResults.getMaxValue() : minY,
-						dataEntityCurveStatisticResults!=null ? dataEntityCurveStatisticResults.getMinValue() : minY,
-						dataEntityCurveStatisticResults!=null ? dataEntityCurveStatisticResults.getMaxValue() : minY
+						statisticResults !=null ? statisticResults.getMinValue() : minY,
+						statisticResults !=null ? statisticResults.getMaxValue() : minY
 				);
 
 		List<Double> limitLinesValues =
@@ -60,10 +53,8 @@ public class LineChartScaler {
 		Vector<Double> valYList =
 				new Vector<>(Arrays.asList(
 						minY,
-						dataEntitySingleStatisticResults !=null ? dataEntitySingleStatisticResults.getMinValue() : minY,
-						dataEntitySingleStatisticResults !=null ? dataEntitySingleStatisticResults.getMaxValue() : minY,
-						dataEntityCurveStatisticResults!=null ? dataEntityCurveStatisticResults.getMinValue() : minY,
-						dataEntityCurveStatisticResults!=null ? dataEntityCurveStatisticResults.getMaxValue() : minY
+						statisticResults !=null ? statisticResults.getMinValue() : minY,
+						statisticResults !=null ? statisticResults.getMaxValue() : minY
 				));
 		valYList.addAll(limitLinesValues);
 
@@ -91,11 +82,6 @@ public class LineChartScaler {
 				leftAxis.setAxisMaximum((float) (maxY + 2.0f * offset));
 			}
 		}
-	}
-
-	public StatisticResults getStatisticResults() {
-		return dataEntityCurveStatisticResults!=null ? dataEntityCurveStatisticResults
-				: dataEntitySingleStatisticResults;
 	}
 }
 

@@ -1,6 +1,5 @@
 package com.itservices.gpxanalyzer.chart;
 
-import static com.itservices.gpxanalyzer.chart.entry.CurveDataEntityEntry.CURVE_DATA_ENTITY;
 import static com.itservices.gpxanalyzer.utils.common.FormatNumberUtil.getFormattedTime;
 
 import android.content.Context;
@@ -9,13 +8,16 @@ import android.util.AttributeSet;
 
 import androidx.annotation.Nullable;
 
+import com.github.mikephil.charting.charts.BarLineChartBase;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.interfaces.dataprovider.LineDataProvider;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.listener.BarLineChartTouchListener;
 import com.github.mikephil.charting.listener.ChartTouchListener;
+import com.github.mikephil.charting.renderer.LineChartRenderer;
 import com.itservices.gpxanalyzer.MainActivity;
 import com.itservices.gpxanalyzer.chart.entry.BaseDataEntityEntry;
 import com.itservices.gpxanalyzer.chart.legend.PaletteColorDeterminer;
@@ -25,7 +27,9 @@ import com.itservices.gpxanalyzer.chart.settings.background.LimitLinesBoundaries
 import com.itservices.gpxanalyzer.chart.settings.highlight.StaticChartHighlighter;
 import com.itservices.gpxanalyzer.data.DataEntity;
 
+import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
 
@@ -212,12 +216,16 @@ public class DataEntityLineChart extends LineChart {
 			return;
 		}
 
-		LineDataSet dataEntityCurveLineDataSet = ((LineDataSet) getLineData().getDataSetByLabel(CURVE_DATA_ENTITY, false));
+		//LineDataSet dataEntityCurveLineDataSet = ((LineDataSet) getLineData().getDataSetByLabel(CURVE_DATA_ENTITY, false));
+
+
+		AtomicBoolean shouldDraw = new AtomicBoolean(false);
+		List<ILineDataSet> dataEntityCurveLineDataSet = getLineData().getDataSets();
 
 		if (dataEntityCurveLineDataSet != null) {
 
 			if (isFullyZoomedOut()) {
-				dataEntityCurveLineDataSet.setDrawHorizontalHighlightIndicator(true);
+				shouldDraw.set(true);
 			} else {
 				switch (chartGesture) {
 					case X_ZOOM:
@@ -227,18 +235,22 @@ public class DataEntityLineChart extends LineChart {
 					case DOUBLE_TAP:
 					case LONG_PRESS:
 					case SINGLE_TAP:
-						dataEntityCurveLineDataSet.setDrawHorizontalHighlightIndicator(true);
+						shouldDraw.set(true);
 
 						break;
 
 					case NONE:
 					case FLING:
 					case DRAG:
-						dataEntityCurveLineDataSet.setDrawHorizontalHighlightIndicator(false);
+						shouldDraw.set(false);
 
 						break;
 				}
 			}
+
+			dataEntityCurveLineDataSet.forEach( iLineDataSet -> {
+                ((LineDataSet) iLineDataSet).setDrawHorizontalHighlightIndicator (shouldDraw.get() );
+            });
 		}
 	}
 
@@ -266,4 +278,17 @@ public class DataEntityLineChart extends LineChart {
 		super.animateZoomToCenter(targetScaleX, targetScaleY, duration, null);
 	}
 
+	@Override
+	public LineData getLineData() {
+		return mData;
+	}
+
+	@Override
+	protected void onDetachedFromWindow() {
+		// releases the bitmap in the renderer to avoid oom error
+		if (mRenderer != null && mRenderer instanceof LineChartRenderer) {
+			((LineChartRenderer) mRenderer).releaseBitmap();
+		}
+		super.onDetachedFromWindow();
+	}
 }

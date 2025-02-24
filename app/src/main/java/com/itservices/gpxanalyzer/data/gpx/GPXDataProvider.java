@@ -122,7 +122,7 @@ public class GPXDataProvider {
             centroidLocation.setSpeed(speed);
             centroidLocation.setTime(LocationCalculatorUtil.computeMeanTime(gpxPointA, gpxPointB));
 
-            DataEntity dataEntity = createDataEntity(centroidLocation);
+            DataEntity dataEntity = createDataEntity(iTrackPoint, centroidLocation);
 
             ////Log.d("GPXDataProvider", "dataEntity = [" + dataEntity.getTimestampMillis() + "]");
 
@@ -141,8 +141,8 @@ public class GPXDataProvider {
     }
 
     @NonNull
-    private DataEntity createDataEntity(Location location) {
-        DataEntity dataEntity = new DataEntity(location.getTime(),
+    private DataEntity createDataEntity(int iTrackPoint, Location location) {
+        DataEntity dataEntity = new DataEntity(iTrackPoint, location.getTime(),
                 Arrays.asList((float) location.getAltitude(), location.getSpeed()),
                 NAME_LIST,
                 UNIT_LIST);

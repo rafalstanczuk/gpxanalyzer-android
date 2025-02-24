@@ -14,7 +14,7 @@ import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.itservices.gpxanalyzer.chart.entry.BaseDataEntityEntry;
-import com.itservices.gpxanalyzer.data.gpx.StatisticResults;
+import com.itservices.gpxanalyzer.data.statistics.StatisticResults;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,29 +61,20 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
 
     @UiThread
     public RequestStatus refreshStatisticResults(StatisticResults statisticResults) {
-        LineDataSet ds = chartProvider.createCurveDataEntityDataSet(statisticResults);
-        if (ds != null) {
-            return addOrUpdateDataSet(ds);
+
+        List<LineDataSet> newLineDataSetList = chartProvider.createCurveDataEntityDataSet(statisticResults);
+        if (newLineDataSetList != null) {
+            return addOrUpdateDataSetList(newLineDataSetList);
         }
         return RequestStatus.ERROR_LINE_DATA_SET_NULL;
     }
 
     @UiThread
-    private RequestStatus addOrUpdateDataSet(LineDataSet newDataSet) {
-        if (newDataSet == null)
+    private RequestStatus addOrUpdateDataSetList(List<LineDataSet> newLineDataSetList) {
+        if (newLineDataSetList == null)
             return RequestStatus.ERROR_NEW_DATA_SET_NULL;
 
-        if (currentLineDataSetList == null) {
-            currentLineDataSetList = new ArrayList<>();
-        }
-
-        List<LineDataSet> current = currentLineDataSetList;
-
-        if (current
-                .stream()
-                .noneMatch(a -> newDataSet.getLabel().contentEquals(a.getLabel()))) {
-            current.add(newDataSet);
-        }
+        currentLineDataSetList = newLineDataSetList;
 
         // update the chart
         return tryToUpdateDataChart();

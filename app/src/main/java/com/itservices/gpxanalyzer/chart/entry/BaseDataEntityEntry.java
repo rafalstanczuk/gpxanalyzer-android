@@ -4,7 +4,7 @@ import android.graphics.drawable.Drawable;
 
 import com.github.mikephil.charting.data.Entry;
 import com.itservices.gpxanalyzer.data.DataEntity;
-import com.itservices.gpxanalyzer.data.gpx.StatisticResults;
+import com.itservices.gpxanalyzer.data.statistics.StatisticResults;
 
 public class BaseDataEntityEntry extends Entry {
     protected final DataEntity dataEntity;

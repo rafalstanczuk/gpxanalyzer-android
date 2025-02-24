@@ -16,7 +16,7 @@ import com.itservices.gpxanalyzer.chart.RequestStatus;
 import com.itservices.gpxanalyzer.chart.entry.BaseDataEntityEntry;
 import com.itservices.gpxanalyzer.data.DataEntity;
 import com.itservices.gpxanalyzer.data.gpx.GPXDataProvider;
-import com.itservices.gpxanalyzer.data.gpx.StatisticResults;
+import com.itservices.gpxanalyzer.data.statistics.StatisticResults;
 import com.itservices.gpxanalyzer.ui.gpxchart.ChartAreaItem;
 import com.itservices.gpxanalyzer.ui.gpxchart.ViewMode;
 import com.itservices.gpxanalyzer.ui.gpxchart.ViewModeMapper;

@@ -1,9 +1,11 @@
-package com.itservices.gpxanalyzer.data.gpx;
+package com.itservices.gpxanalyzer.data.statistics;
 
 
 import com.itservices.gpxanalyzer.data.DataEntity;
 
+import java.util.ArrayList;
 import java.util.DoubleSummaryStatistics;
+import java.util.List;
 import java.util.Vector;
 import java.util.stream.Collectors;
 
@@ -77,4 +79,20 @@ public class StatisticResults {
     public double getMinValue() {
         return minValue;
     }
+
+
+    public List<TrendBoundaryDataEntity> createTimeBoundaryList() {
+        List<TrendBoundaryDataEntity> timeBoundaryList = new ArrayList<>();
+
+        timeBoundaryList.add(
+                new TrendBoundaryDataEntity(0,
+                        TrendType.UP,
+                        dataEntityVector.firstElement().getTimestampMillis(),
+                        dataEntityVector.lastElement().getTimestampMillis(),
+                        dataEntityVector
+                ));
+
+        return timeBoundaryList;
+    }
+
 }

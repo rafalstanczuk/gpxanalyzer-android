@@ -3,12 +3,14 @@ package com.itservices.gpxanalyzer.data;
 import java.util.List;
 
 public class DataEntity {
+    private final int id;
     private final long timestampMillis;
     private final List<Float> valueList;
     private final List<String> nameList;
     private final List<String> unitList;
 
-    public DataEntity(long timestampMillis, List<Float> valueList, List<String> nameList, List<String> unitList) {
+    public DataEntity(int id, long timestampMillis, List<Float> valueList, List<String> nameList, List<String> unitList) {
+        this.id = id;
         this.timestampMillis = timestampMillis;
         this.valueList = valueList;
         this.nameList = nameList;
@@ -16,6 +18,7 @@ public class DataEntity {
     }
 
     public DataEntity(DataEntity dataEntity) {
+        this.id = dataEntity.getId();
         this.timestampMillis = dataEntity.getTimestampMillis();
         this.valueList = dataEntity.getValueList();
         this.nameList = dataEntity.getNameList();
@@ -47,5 +50,9 @@ public class DataEntity {
                 ", nameList=" + nameList +
                 ", unitList=" + unitList +
                 '}';
+    }
+
+    public int getId() {
+        return id;
     }
 }

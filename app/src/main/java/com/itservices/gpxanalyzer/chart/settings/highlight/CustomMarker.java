@@ -20,7 +20,6 @@ import com.github.mikephil.charting.utils.MPPointF;
 import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.chart.DataEntityLineChart;
 import com.itservices.gpxanalyzer.chart.entry.CurveDataEntityEntry;
-import com.itservices.gpxanalyzer.chart.entry.SingleDataEntityEntry;
 import com.itservices.gpxanalyzer.data.DataEntity;
 import com.itservices.gpxanalyzer.utils.common.FormatNumberUtil;
 
@@ -81,18 +80,6 @@ public class CustomMarker extends MarkerView {
             );
             SpannableStringBuilder valueLine = getSpannableStringBuilder(
                     String.valueOf((int) curveDataEntityEntry.getY()), " " + dataEntity.getUnitList().get( curveDataEntityEntry.getStatisticResults().getPrimaryDataIndex() ));
-
-            markerTextViewTime.setText(timeLine, TextView.BufferType.SPANNABLE);
-            markerTextViewValue.setText(valueLine, TextView.BufferType.SPANNABLE);
-        } else if (entry instanceof SingleDataEntityEntry) {
-            SingleDataEntityEntry singleDataEntityEntry = (SingleDataEntityEntry) entry;
-            DataEntity dataEntity = singleDataEntityEntry.getDataEntity();
-
-            SpannableStringBuilder timeLine = getSpannableStringBuilder(
-                    FormatNumberUtil.getFormattedTime(dataEntity.getTimestampMillis()), " h"
-            );
-            SpannableStringBuilder valueLine = getSpannableStringBuilder(
-                    String.valueOf((int) singleDataEntityEntry.getY()), " " + dataEntity.getUnitList().get( singleDataEntityEntry.getStatisticResults().getPrimaryDataIndex() ));
 
             markerTextViewTime.setText(timeLine, TextView.BufferType.SPANNABLE);
             markerTextViewValue.setText(valueLine, TextView.BufferType.SPANNABLE);
