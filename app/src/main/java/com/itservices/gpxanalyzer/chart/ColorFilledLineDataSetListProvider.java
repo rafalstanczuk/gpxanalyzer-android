@@ -12,16 +12,16 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-public class ColorFilledLineDataSetListCreator {
+public class ColorFilledLineDataSetListProvider {
 
 
     private List<LineDataSet> dataSetList = new ArrayList<>();
 
     @Inject
-    public ColorFilledLineDataSetListCreator() {
+    public ColorFilledLineDataSetListProvider() {
     }
 
-    List<LineDataSet> createAndGetList(List<TrendBoundaryEntry> trendBoundaryEntryList, LineChartSettings settings) {
+    List<LineDataSet> createAndProvide(List<TrendBoundaryEntry> trendBoundaryEntryList, LineChartSettings settings) {
         dataSetList = trendBoundaryEntryList.stream()
                 .map(boundaryEntry -> {
                     LineDataSet lineDataSet = new LineDataSet( boundaryEntry.entryList(), boundaryEntry.getLabel() );
@@ -55,7 +55,7 @@ public class ColorFilledLineDataSetListCreator {
         return !dataSetList.isEmpty();
     }
 
-    public List<LineDataSet> getList() {
+    public List<LineDataSet> provide() {
         return dataSetList;
     }
 }

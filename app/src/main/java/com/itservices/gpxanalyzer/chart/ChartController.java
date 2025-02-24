@@ -52,42 +52,30 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     }
 
     @UiThread
-    public RequestStatus tryToUpdateDataChart() {
-        List<LineDataSet> dataSets = currentLineDataSetList;
-        if (dataSets == null) return RequestStatus.ERROR_DATA_SETS_NULL;
+    public RequestStatus tryToUpdateDataChart(List<LineDataSet> dataSets) {
+        if (dataSets == null)
+            return RequestStatus.ERROR_DATA_SETS_NULL;
 
         return chartProvider.updateChart(dataSets, currentHighlight);
     }
 
     @UiThread
     public RequestStatus refreshStatisticResults(StatisticResults statisticResults) {
-
-        List<LineDataSet> newLineDataSetList = chartProvider.createCurveDataEntityDataSet(statisticResults);
+        List<LineDataSet> newLineDataSetList = chartProvider.createLineDataSetList(statisticResults);
         if (newLineDataSetList != null) {
-            return addOrUpdateDataSetList(newLineDataSetList);
+            currentLineDataSetList = newLineDataSetList;
+
+            return tryToUpdateDataChart(currentLineDataSetList);
         }
         return RequestStatus.ERROR_LINE_DATA_SET_NULL;
-    }
-
-    @UiThread
-    private RequestStatus addOrUpdateDataSetList(List<LineDataSet> newLineDataSetList) {
-        if (newLineDataSetList == null)
-            return RequestStatus.ERROR_NEW_DATA_SET_NULL;
-
-        currentLineDataSetList = newLineDataSetList;
-
-        // update the chart
-        return tryToUpdateDataChart();
     }
 
     private void clearLineDataSets() {
         List<LineDataSet> sets = currentLineDataSetList;
         if (sets != null) {
             sets.clear();
-            currentLineDataSetList = sets;
-
             // update the chart
-            tryToUpdateDataChart();
+            tryToUpdateDataChart(sets);
         }
     }
 
@@ -195,7 +183,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     public void setDrawIconsEnabled(boolean isChecked) {
 
         chartProvider.getSettings().setDrawIconsEnabled(isChecked);
-        tryToUpdateDataChart();
+        tryToUpdateDataChart(currentLineDataSetList);
     }
 
     @UiThread

@@ -12,7 +12,6 @@ import com.github.mikephil.charting.listener.BarLineChartTouchListener;
 import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.utils.MPPointD;
 import com.itservices.gpxanalyzer.chart.DataEntityLineChart;
-import com.itservices.gpxanalyzer.chart.entry.BaseDataEntityEntry;
 import com.itservices.gpxanalyzer.chart.entry.CurveDataEntityEntry;
 
 import java.util.ArrayList;

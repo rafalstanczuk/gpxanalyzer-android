@@ -1,6 +1,6 @@
 package com.itservices.gpxanalyzer.data.statistics;
 
-import com.itservices.gpxanalyzer.data.DataEntity;
+import com.itservices.gpxanalyzer.data.entity.DataEntity;
 
 import java.util.Vector;
 

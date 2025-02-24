@@ -20,7 +20,8 @@ import com.github.mikephil.charting.utils.MPPointF;
 import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.chart.DataEntityLineChart;
 import com.itservices.gpxanalyzer.chart.entry.CurveDataEntityEntry;
-import com.itservices.gpxanalyzer.data.DataEntity;
+import com.itservices.gpxanalyzer.data.entity.DataEntity;
+import com.itservices.gpxanalyzer.databinding.CustomMarkerViewBinding;
 import com.itservices.gpxanalyzer.utils.common.FormatNumberUtil;
 
 import javax.inject.Inject;

@@ -24,7 +24,7 @@ import com.itservices.gpxanalyzer.chart.settings.LineChartSettings;
 import com.itservices.gpxanalyzer.chart.settings.background.GridBackgroundDrawer;
 import com.itservices.gpxanalyzer.chart.settings.background.LimitLinesBoundaries;
 import com.itservices.gpxanalyzer.chart.settings.highlight.StaticChartHighlighter;
-import com.itservices.gpxanalyzer.data.DataEntity;
+import com.itservices.gpxanalyzer.data.entity.DataEntity;
 
 import java.util.List;
 import java.util.Locale;

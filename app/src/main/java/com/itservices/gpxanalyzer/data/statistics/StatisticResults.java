@@ -1,11 +1,9 @@
 package com.itservices.gpxanalyzer.data.statistics;
 
 
-import com.itservices.gpxanalyzer.data.DataEntity;
+import com.itservices.gpxanalyzer.data.entity.DataEntity;
 
-import java.util.ArrayList;
 import java.util.DoubleSummaryStatistics;
-import java.util.List;
 import java.util.Vector;
 import java.util.stream.Collectors;
 
@@ -78,51 +76,6 @@ public class StatisticResults {
 
     public double getMinValue() {
         return minValue;
-    }
-
-
-    public List<TrendBoundaryDataEntity> createTimeBoundaryList() {
-
-        //TODO: MOCK of the func.  GPXAN-21
-        // TODO: Add filtering/processing for ascending/descending segments detection
-
-        List<TrendBoundaryDataEntity> timeBoundaryList = new ArrayList<>();
-
-        int ihalf = dataEntityVector.size() / 2;
-
-        Vector<DataEntity> dataEntityVectorFirst = new Vector<>();
-        Vector<DataEntity> dataEntityVectorSecond = new Vector<>();
-
-        for(int i=0; i<dataEntityVector.size() ; i++) {
-
-            if (i<ihalf) {
-                dataEntityVectorFirst.add(dataEntityVector.get(i));
-            } else {
-                dataEntityVectorSecond.add(dataEntityVector.get(i));
-            }
-
-        }
-
-        timeBoundaryList.add(
-                new TrendBoundaryDataEntity(0,
-                        TrendType.UP,
-                        dataEntityVectorFirst.firstElement().getTimestampMillis(),
-                        dataEntityVectorFirst.lastElement().getTimestampMillis(),
-                        dataEntityVectorFirst
-                ));
-
-
-        dataEntityVectorSecond.add(0, dataEntityVectorFirst.lastElement());
-
-        timeBoundaryList.add(
-                new TrendBoundaryDataEntity(1,
-                        TrendType.DOWN,
-                        dataEntityVectorSecond.firstElement().getTimestampMillis(),
-                        dataEntityVectorSecond.lastElement().getTimestampMillis(),
-                        dataEntityVectorSecond
-                ));
-
-        return timeBoundaryList;
     }
 
 }

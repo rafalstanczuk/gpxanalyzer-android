@@ -4,10 +4,11 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.itservices.gpxanalyzer.chart.entry.EntryCacheMap;
-import com.itservices.gpxanalyzer.chart.entry.EntryListCreator;
+import com.itservices.gpxanalyzer.chart.entry.TrendBoundaryEntryProvider;
 import com.itservices.gpxanalyzer.chart.entry.TrendBoundaryEntry;
 import com.itservices.gpxanalyzer.chart.legend.PaletteColorDeterminer;
 import com.itservices.gpxanalyzer.chart.settings.LineChartSettings;
+import com.itservices.gpxanalyzer.data.provider.TrendBoundaryDataEntityProvider;
 import com.itservices.gpxanalyzer.data.statistics.StatisticResults;
 import com.itservices.gpxanalyzer.data.statistics.TrendBoundaryDataEntity;
 
@@ -24,7 +25,7 @@ public class ChartProvider {
     EntryCacheMap entryCacheMap;
 
     @Inject
-    ColorFilledLineDataSetListCreator colorFilledLineDataSetListCreator;
+    ColorFilledLineDataSetListProvider colorFilledLineDataSetListCreator;
 
     private DataEntityLineChart chart;
 
@@ -32,7 +33,7 @@ public class ChartProvider {
     public ChartProvider() {
     }
 
-    public List<LineDataSet> createCurveDataEntityDataSet(StatisticResults statisticResults) {
+    public List<LineDataSet> createLineDataSetList(StatisticResults statisticResults) {
         if (statisticResults == null) return null;
 
         PaletteColorDeterminer paletteColorDeterminer = chart.getPaletteColorDeterminer();
@@ -42,7 +43,7 @@ public class ChartProvider {
         chart.getScaler().setStatisticResults(statisticResults);
 
         if ( colorFilledLineDataSetListCreator.hasList() ) {
-            return colorFilledLineDataSetListCreator.getList();
+            return colorFilledLineDataSetListCreator.provide();
         }
 
         entryCacheMap.init(statisticResults.getDataEntityVector().size());
@@ -50,13 +51,13 @@ public class ChartProvider {
         /**
          * Time consuming computing
          */
-        List<TrendBoundaryDataEntity> trendBoundaryDataEntityList = statisticResults.createTimeBoundaryList();
+        List<TrendBoundaryDataEntity> trendBoundaryDataEntityList = TrendBoundaryDataEntityProvider.provide( statisticResults );
 
         List<TrendBoundaryEntry> createTrendBoundaryEntryList =
-                EntryListCreator.createTrendBoundaryEntryList(statisticResults, trendBoundaryDataEntityList, paletteColorDeterminer, entryCacheMap);
+                TrendBoundaryEntryProvider.provide(statisticResults, trendBoundaryDataEntityList, paletteColorDeterminer, entryCacheMap);
 
         if (!createTrendBoundaryEntryList.isEmpty()) {
-            return colorFilledLineDataSetListCreator.createAndGetList( createTrendBoundaryEntryList, settings);
+            return colorFilledLineDataSetListCreator.createAndProvide( createTrendBoundaryEntryList, settings);
         }
 
         return null;

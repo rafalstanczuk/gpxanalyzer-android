@@ -74,7 +74,7 @@ public class FileSelectorViewModel extends ViewModel {
     }
 
     public void checkAndRequestPermissions(FragmentActivity requireActivity) {
-        ConcurrentUtil.tryToDispose(disposableRequestPermissions);
+        ConcurrentUtil.tryToDispose(disposableCheckAndRequestPermissions);
         disposableCheckAndRequestPermissions = selectGpxFileUseCase.checkAndRequestPermissions(requireActivity)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

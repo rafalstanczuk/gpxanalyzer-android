@@ -4,16 +4,13 @@ import android.graphics.drawable.Drawable;
 import android.util.Log;
 
 import com.itservices.gpxanalyzer.chart.settings.axis.HourMinutesAxisValueFormatter;
-import com.itservices.gpxanalyzer.data.DataEntity;
+import com.itservices.gpxanalyzer.data.entity.DataEntity;
 import com.itservices.gpxanalyzer.data.statistics.StatisticResults;
 import com.itservices.gpxanalyzer.chart.legend.PaletteColorDeterminer;
-import com.itservices.gpxanalyzer.utils.ui.ColorUtil;
 
 import java.util.Calendar;
 
 public class CurveDataEntityEntry extends BaseDataEntityEntry {
-    public static final int FILL_COLOR_UNDER_CURVE = ColorUtil.rgb(0.96f, 0.96f, 0.96f);
-    public static final int FILL_COLOR_ALPHA_UNDER_CURVE = (int) (0.3f * 255.0f);
     public static boolean SHOW_COLOR_CURVE_DATA_ENTITY_RANGE_CIRCLES_ICONS = true;
 
     CurveDataEntityEntry(

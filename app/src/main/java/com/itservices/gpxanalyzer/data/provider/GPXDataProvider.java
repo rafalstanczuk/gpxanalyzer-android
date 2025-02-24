@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.data.gpx;
+package com.itservices.gpxanalyzer.data.provider;
 
 import android.content.Context;
 import android.location.Location;
@@ -7,7 +7,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.itservices.gpxanalyzer.R;
-import com.itservices.gpxanalyzer.data.DataEntity;
+import com.itservices.gpxanalyzer.data.entity.DataEntity;
 import com.itservices.gpxanalyzer.data.gpx.calculation.LocationCalculatorUtil;
 import com.itservices.gpxanalyzer.data.gpx.parser.GPXParser;
 import com.itservices.gpxanalyzer.data.gpx.parser.domain.Gpx;
@@ -27,13 +27,11 @@ import java.util.List;
 import java.util.Vector;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import dagger.hilt.android.qualifiers.ApplicationContext;
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
 
-@Singleton
 public class GPXDataProvider {
     private static List<String> NAME_LIST = new ArrayList<>();
     private static List<String> UNIT_LIST = new ArrayList<>();
