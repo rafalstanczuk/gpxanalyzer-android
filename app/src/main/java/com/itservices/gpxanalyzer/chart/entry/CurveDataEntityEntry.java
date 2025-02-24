@@ -48,36 +48,4 @@ public class CurveDataEntityEntry extends BaseDataEntityEntry {
                 statisticResults
         );
     }
-
-/*	@NonNull
-	public static LineDataSet 	createCurveDataEntityLineDataSet(ArrayList<Entry> entries, LineChartSettings settings) {
-		LineDataSet dataSet = new LineDataSet(entries, CURVE_DATA_ENTITY);
-		dataSet.setMode(LineDataSet.Mode.HORIZONTAL_BEZIER);
-		dataSet.setHighlightEnabled(true);
-
-		dataSet.setDrawCircles(false);
-		dataSet.setLineWidth(1.0f);
-
-		//For static line feature marker purpose!
-		dataSet.setDrawHorizontalHighlightIndicator(false);
-*//*
-		dataSet.setCircleRadius(5f);
-		dataSet.setDrawCircleHole(false);*//*
-
-		dataSet.setColor(Color.BLACK);
-		//dataSet.setCircleColor(Color.BLUE);
-
-		dataSet.setDrawFilled(true);
-		dataSet.setFillColor(FILL_COLOR_UNDER_CURVE); aaaaaaa
-		dataSet.setFillAlpha(FILL_COLOR_ALPHA_UNDER_CURVE); aaaaaaaa
-
-		//dataSet.setDrawFilled(true);
-
-		dataSet.setHighLightColor(Color.BLACK);
-
-		dataSet.setDrawIcons(settings.isDrawIconsEnabled());
-		dataSet.setDrawValues(false);
-
-		return dataSet;
-	}*/
 }

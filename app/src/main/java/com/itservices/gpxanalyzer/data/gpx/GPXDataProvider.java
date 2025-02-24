@@ -124,10 +124,7 @@ public class GPXDataProvider {
 
             DataEntity dataEntity = createDataEntity(iTrackPoint, centroidLocation);
 
-            ////Log.d("GPXDataProvider", "dataEntity = [" + dataEntity.getTimestampMillis() + "]");
-
             float percentageProgress = 100.0f * ((float) (iTrackPoint + 1) / (float) maxIteration);
-
 
             int intPercentageProgress = (int) percentageProgress;
 

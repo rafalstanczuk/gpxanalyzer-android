@@ -100,7 +100,6 @@ public class ChartAreaListViewModel extends ViewModel {
 
         createOnSeverityMode(newMode);
 
-
         // Reload orientation-based percentage heights
         assert orientationLiveData.getValue() != null;
         setOrientation(orientationLiveData.getValue());
@@ -166,8 +165,6 @@ public class ChartAreaListViewModel extends ViewModel {
     }
 
     private void observeReloadEventToReload(PublishSubject<Boolean> reloadEvent, Activity activity, int defaultRawGpxDataId) {
-        ////Log.d(ChartAreaListViewModel.class.getSimpleName(), "observeReloadEventToReload() called with: reloadEvent = [" + reloadEvent + "], activity = [" + activity + "], defaultRawGpxDataId = [" + defaultRawGpxDataId + "]");
-
         ConcurrentUtil.tryToDispose(observeReloadEventDisposable);
         observeReloadEventDisposable = reloadEvent
                 .subscribeOn(Schedulers.io())
@@ -178,14 +175,11 @@ public class ChartAreaListViewModel extends ViewModel {
     }
 
     private void observeRequestStatusOnLiveData(Observable<RequestStatus> requestStatus) {
-        ////Log.d(ChartAreaListViewModel.class.getSimpleName(), "observeRequestStatusOnLiveData() called with: requestStatus = [" + requestStatus + "]");
-
         ConcurrentUtil.tryToDispose(observeRequestStatusDisposable);
         observeRequestStatusDisposable = requestStatus
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext(request -> {
-                            //Log.d(ChartAreaListViewModel.class.getSimpleName(), "observeRequestStatusOnLiveData() called with: requestStatus = [" + request.name() + "]");
                             requestStatusLiveData.postValue(request);
 
                             buttonsEnabledLiveData.postValue(getButtonEnabled(request));
@@ -216,10 +210,7 @@ public class ChartAreaListViewModel extends ViewModel {
 
     public void onOnOffColorizedCirclesCheckBoxChanged(ChartAreaItem item, boolean isChecked) {
 
-
-        //activity.runOnUiThread(() -> {
         item.getChartController().setDrawIconsEnabled(isChecked);
-        //});
 
         onOnOffColorizedCirclesCheckBoxChangedLiveData.postValue(Pair.create(item, isChecked));
     }
@@ -238,9 +229,7 @@ public class ChartAreaListViewModel extends ViewModel {
 
 
     public void onZoomIn(ChartAreaItem item) {
-        // activity.runOnUiThread(() -> {
         item.getChartController().animateZoomToCenter(1.1f, 1.0f, 200);
-        //  });
 
         zoomInLiveData.postValue(item);
     }

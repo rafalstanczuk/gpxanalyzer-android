@@ -40,8 +40,6 @@ public class FileProviderUtils {
         ContentResolver contentResolver = context.getContentResolver();
         String fileName = getFileName(contentResolver, uri);
 
-        //Log.d(FileProviderUtils.class.getSimpleName(), "copyUriToAppStorage() fileName = [" + fileName + "], uri = [" + uri + "]");
-        
         if(!fileName.endsWith(fileExtension)) {
             return null;
         }

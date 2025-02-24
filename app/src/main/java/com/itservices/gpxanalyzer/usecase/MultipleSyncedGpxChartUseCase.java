@@ -67,8 +67,6 @@ public class MultipleSyncedGpxChartUseCase {
     }
 
     public void switchViewMode(ChartAreaItem chartAreaItem) {
-        //Log.d(MultipleSyncedGpxChartUseCase.class.getSimpleName(), "switchViewMode() called with: chartAreaItem = [" + chartAreaItem + "]");
-
 
         if (activity == null)
             return;
@@ -77,9 +75,7 @@ public class MultipleSyncedGpxChartUseCase {
     }
 
     public void loadData(Activity activity, List<ChartAreaItem> chartAreaItemList, int defaultRawGpxDataId) {
-        //Log.d(MultipleSyncedGpxChartUseCase.class.getSimpleName(), "loadData() called with: activity = [" + activity + "], chartAreaItemList = [" + chartAreaItemList + "], defaultRawGpxDataId = [" + defaultRawGpxDataId + "]");
-
-        if (chartAreaItemList.isEmpty())
+         if (chartAreaItemList.isEmpty())
             return;
 
         ConcurrentUtil.tryToDispose(loadDataDisposable);
@@ -186,8 +182,6 @@ public class MultipleSyncedGpxChartUseCase {
     }
 
     private Disposable observeSelectionOn(Activity activity, Observable<BaseDataEntityEntry> selection, ChartController chartController) {
-        //Log.d(MultipleSyncedGpxChartUseCase.class.getSimpleName(), "observeSelectionOn() called with: activity = [" + activity + "], selection = [" + selection + "], chartController = [" + chartController + "]");
-
         return selection
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(Schedulers.newThread())

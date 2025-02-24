@@ -108,8 +108,6 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     }
 
     public void manualSelectEntry(long selectedTimeMillis) {
-        ////Log.d(ChartController.class.getSimpleName(), "manualSelectEntry() called with: selectedTimeMillis = [" + selectedTimeMillis + "]");
-
         manualSelectEntryOnSelectedTime(chartProvider.getChart(), selectedTimeMillis, true, false);
     }
 
@@ -127,12 +125,14 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
             return;
         }
 
-        BaseDataEntityEntry entryFound = (BaseDataEntityEntry)chartProvider.getEntryCacheMap().get(selectedTimeMillis);
+        BaseDataEntityEntry entryFound = (BaseDataEntityEntry) chartProvider.getEntryCacheMap().get(selectedTimeMillis);
         if (entryFound != null) {
             setSelectionEntry(entryFound, false);
             lineChart.highlightValue(entryFound.getX(), entryFound.getY(), entryFound.getDataSetIndex(), callListeners);
 
-            setSelectionHighlight(lineChart.getHighlighted()[0]);
+            if (lineChart.getHighlighted() != null) {
+                setSelectionHighlight(lineChart.getHighlighted()[0]);
+            }
 
             if (centerViewToSelection) {
                 lineChart.centerViewTo(entryFound.getX(), entryFound.getY(), YAxis.AxisDependency.LEFT);
@@ -203,7 +203,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
 
         if (chartProvider.getChart() != null) {
             LineData lineData = chartProvider.getChart().getData();
-            if ( lineData != null && !lineData.getDataSets().isEmpty() ) {
+            if (lineData != null && !lineData.getDataSets().isEmpty()) {
                 return lineData.getDataSets().get(0).isDrawIconsEnabled();
             }
         }

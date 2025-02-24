@@ -175,8 +175,6 @@ public class DataEntityLineChart extends LineChart {
 
 		ChartTouchListener.ChartGesture chartGesture = getChartTouchListener().getLastGesture();
 
-		// isFullyZoomedOut() 		
-
 		determineSettingsDataEntityCurveLineHighlightIndicator(chartGesture);
 
 		DataEntity dataEntity = ( (BaseDataEntityEntry)selectedEntry).getDataEntity();
@@ -205,9 +203,6 @@ public class DataEntityLineChart extends LineChart {
 		if (getLineData()==null) {
 			return;
 		}
-
-		//LineDataSet dataEntityCurveLineDataSet = ((LineDataSet) getLineData().getDataSetByLabel(CURVE_DATA_ENTITY, false));
-
 
 		AtomicBoolean shouldDraw = new AtomicBoolean(false);
 		List<ILineDataSet> dataEntityCurveLineDataSet = getLineData().getDataSets();

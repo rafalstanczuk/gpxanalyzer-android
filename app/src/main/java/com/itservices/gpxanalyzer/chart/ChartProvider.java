@@ -38,14 +38,14 @@ public class ChartProvider {
         PaletteColorDeterminer paletteColorDeterminer = chart.getPaletteColorDeterminer();
         paletteColorDeterminer.initPalette(statisticResults);
 
-        entryCacheMap.init(statisticResults.getDataEntityVector().size());
-
         // needed for scaling
         chart.getScaler().setStatisticResults(statisticResults);
 
         if ( colorFilledLineDataSetListCreator.hasList() ) {
             return colorFilledLineDataSetListCreator.getList();
         }
+
+        entryCacheMap.init(statisticResults.getDataEntityVector().size());
 
         /**
          * Time consuming computing

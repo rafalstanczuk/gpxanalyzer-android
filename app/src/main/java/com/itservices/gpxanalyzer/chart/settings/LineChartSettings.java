@@ -118,8 +118,7 @@ public class LineChartSettings {
         xAxis.setGranularity(GRANULARITY);
         xAxis.setLabelCount(12, false);
         xAxis.setValueFormatter(hourMinutesAxisValueFormatter);
-        //xAxis.setAxisMinimum(HourMinutesAxisValueFormatter.MIN_X_SCALED_TIME);
-        //xAxis.setAxisMaximum(HourMinutesAxisValueFormatter.MAX_X_SCALED_TIME);
+
         xAxis.setLabelRotationAngle(-45.0f);
         xAxis.setTextColor(Color.BLACK);
     }

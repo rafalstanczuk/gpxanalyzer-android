@@ -59,7 +59,6 @@ public class LineChartScaler {
 		valYList.addAll(limitLinesValues);
 
 		//combinedChart.setAutoScaleMinMaxEnabled(true);
-
 		//lineChart.setVisibleXRangeMinimum(0);
 
 		double minY = valYList.stream().min(Comparator.naturalOrder()).get();
