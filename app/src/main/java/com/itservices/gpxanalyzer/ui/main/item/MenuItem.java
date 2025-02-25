@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.ui.main;
+package com.itservices.gpxanalyzer.ui.main.item;
 
 import android.graphics.drawable.Drawable;
 

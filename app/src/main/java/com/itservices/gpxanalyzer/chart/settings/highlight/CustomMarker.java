@@ -3,11 +3,13 @@ package com.itservices.gpxanalyzer.chart.settings.highlight;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.StyleSpan;
+import android.view.LayoutInflater;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -33,15 +35,16 @@ public class CustomMarker extends MarkerView {
 
     private static final int layoutResource = R.layout.custom_marker_view;
 
-    private final TextView markerTextViewTime;
-    private final TextView markerTextViewValue;
+    CustomMarkerViewBinding binding;
 
     @Inject
     public CustomMarker(@ApplicationContext Context context) {
-        super(context, layoutResource);
+        super(context);
 
-        markerTextViewTime = findViewById(R.id.markerTextViewTime);
-        markerTextViewValue = findViewById(R.id.markerTextViewValue);
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(
+                Context.LAYOUT_INFLATER_SERVICE);
+        binding = CustomMarkerViewBinding.inflate(inflater, this, true);
+
     }
 
     @NonNull
@@ -62,7 +65,7 @@ public class CustomMarker extends MarkerView {
 
     @Override
     public MPPointF getOffset() {
-        return new MPPointF(getHeight() * 0.1f, getHeight() * 0.1f);
+        return new MPPointF(getWidth() * 0.05f, getHeight() * 0.1f);
     }
 
     @Override
@@ -82,8 +85,8 @@ public class CustomMarker extends MarkerView {
             SpannableStringBuilder valueLine = getSpannableStringBuilder(
                     String.valueOf((int) curveDataEntityEntry.getY()), " " + dataEntity.getUnitList().get( curveDataEntityEntry.getStatisticResults().getPrimaryDataIndex() ));
 
-            markerTextViewTime.setText(timeLine, TextView.BufferType.SPANNABLE);
-            markerTextViewValue.setText(valueLine, TextView.BufferType.SPANNABLE);
+            binding.markerTextViewTime.setText(timeLine, TextView.BufferType.SPANNABLE);
+            binding.markerTextViewValue.setText(valueLine, TextView.BufferType.SPANNABLE);
         }
 
         super.refreshContent(entry, highlight);
@@ -96,6 +99,13 @@ public class CustomMarker extends MarkerView {
         ChartTouchListener.ChartGesture chartGesture = chartView.getChartTouchListener()
                 .getLastGesture();
 
+
+        RectF contentRect = getChartView().getViewPortHandler().getContentRect();
+
+        MPPointF pointFCenter = getChartView().getViewPortHandler().getContentCenter();
+
+
+
 /*		if (chartView.isFullyZoomedOut() ) {
 			//drawMarker(posX, posY, canvas);
 		} else {*/
@@ -106,7 +116,7 @@ public class CustomMarker extends MarkerView {
             case LONG_PRESS:
             case SINGLE_TAP: {
 
-                drawMarker(posX, posY, canvas);
+                drawMarker(posX, (contentRect.top + contentRect.bottom)*0.25f, canvas);
 
                 break;
             }
@@ -116,6 +126,7 @@ public class CustomMarker extends MarkerView {
             case PINCH_ZOOM:
             case FLING:
             case DRAG:
+                drawMarker(posX, (contentRect.top + contentRect.bottom)*0.25f, canvas);
                 break;
         }
         //}

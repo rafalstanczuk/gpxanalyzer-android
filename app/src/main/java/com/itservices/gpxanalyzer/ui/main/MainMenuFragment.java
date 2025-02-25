@@ -16,6 +16,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.databinding.FragmentMainMenuBinding;
+import com.itservices.gpxanalyzer.ui.main.item.MenuItem;
+import com.itservices.gpxanalyzer.ui.main.item.MenuItemAdapter;
 
 import java.util.ArrayList;
 import java.util.Arrays;

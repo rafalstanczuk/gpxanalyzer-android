@@ -1,24 +1,25 @@
 package com.itservices.gpxanalyzer.ui.gpxchart;
 
 import android.os.Bundle;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.databinding.FragmentChartAreaListBinding;
+import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItem;
+import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItemAdapter;
+import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItemFactory;
+import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.ViewMode;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 import javax.inject.Inject;
 

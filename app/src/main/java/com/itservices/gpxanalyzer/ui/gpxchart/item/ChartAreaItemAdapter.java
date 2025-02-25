@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.ui.gpxchart;
+package com.itservices.gpxanalyzer.ui.gpxchart.item;
 
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.databinding.ChartAreaItemBinding;
+import com.itservices.gpxanalyzer.ui.gpxchart.ChartAreaListViewModel;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.ui.gpxchart;
+package com.itservices.gpxanalyzer.ui.gpxchart.viewmode;
 
 import android.content.Context;
 

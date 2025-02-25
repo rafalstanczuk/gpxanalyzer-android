@@ -13,7 +13,7 @@ import com.itservices.gpxanalyzer.data.gpx.parser.GPXParser;
 import com.itservices.gpxanalyzer.data.gpx.parser.domain.Gpx;
 import com.itservices.gpxanalyzer.data.gpx.parser.domain.TrackPoint;
 import com.itservices.gpxanalyzer.data.gpx.parser.domain.TrackSegment;
-import com.itservices.gpxanalyzer.ui.gpxchart.ViewModeMapper;
+import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.ViewModeMapper;
 
 import org.xmlpull.v1.XmlPullParserException;
 

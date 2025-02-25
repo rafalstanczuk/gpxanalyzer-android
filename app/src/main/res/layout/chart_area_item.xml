@@ -6,11 +6,11 @@
 
         <variable
             name="chartAreaItem"
-            type="com.itservices.gpxanalyzer.ui.gpxchart.ChartAreaItem" />
+            type="com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItem" />
 
         <variable
             name="handler"
-            type="com.itservices.gpxanalyzer.ui.gpxchart.ChartAreaItemHandler" />
+            type="com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItemHandler" />
 
         <variable
             name="viewModel"
