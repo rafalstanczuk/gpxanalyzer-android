@@ -15,9 +15,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
 
-            android:paddingStart="5dp"
-            android:paddingTop="10dp"
-            android:paddingEnd="5dp"
+            android:layout_marginTop="@dimen/margin_medium_small"
+            android:layout_marginStart="@dimen/margin_very_small"
+            android:layout_marginEnd="@dimen/margin_very_small"
 
             android:text="Time"
             android:textAppearance="?android:attr/textAppearanceSmall"
@@ -31,10 +31,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
 
-            android:paddingStart="5dp"
-            android:paddingTop="5dp"
-            android:paddingEnd="5dp"
-            android:paddingBottom="10dp"
+            android:layout_marginTop="@dimen/margin_very_small"
+            android:layout_marginStart="@dimen/margin_very_small"
+            android:layout_marginEnd="@dimen/margin_very_small"
 
             android:text="Value"
             android:textAppearance="?android:attr/textAppearanceSmall"
@@ -42,6 +41,39 @@
             android:textSize="11sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/markerTextViewTime" />
+
+        <TextView
+            android:id="@+id/markerTextViewDeltaAsl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:paddingStart="@dimen/margin_very_small"
+            android:paddingEnd="@dimen/margin_very_small"
+            android:layout_marginTop="@dimen/margin_very_small"
+            android:layout_marginStart="@dimen/margin_very_small"
+            android:layout_marginEnd="@dimen/margin_very_small"
+
+
+            android:text="+/-ASL"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@android:color/black"
+            android:textSize="11sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/markerTextViewValue" />
+
+        <ImageView
+            android:id="@+id/trendTypeImageView"
+            android:layout_width="20dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/margin_very_small"
+            android:contentDescription="trendTypeImageView"
+            app:layout_constraintTop_toTopOf="@id/markerTextViewDeltaAsl"
+            app:layout_constraintBottom_toBottomOf="@id/markerTextViewDeltaAsl"
+            app:layout_constraintStart_toEndOf="@id/markerTextViewDeltaAsl"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:src="@drawable/ic_trending_flat_fill0"
+            />
+
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

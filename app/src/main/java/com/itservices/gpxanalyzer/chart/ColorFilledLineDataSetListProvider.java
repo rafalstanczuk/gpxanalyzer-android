@@ -5,6 +5,7 @@ import android.graphics.Color;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.itservices.gpxanalyzer.chart.entry.TrendBoundaryEntry;
 import com.itservices.gpxanalyzer.chart.settings.LineChartSettings;
+import com.itservices.gpxanalyzer.data.provider.TrendStatistics;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +25,7 @@ public class ColorFilledLineDataSetListProvider {
     List<LineDataSet> createAndProvide(List<TrendBoundaryEntry> trendBoundaryEntryList, LineChartSettings settings) {
         dataSetList = trendBoundaryEntryList.stream()
                 .map(boundaryEntry -> {
-                    LineDataSet lineDataSet = new LineDataSet( boundaryEntry.entryList(), boundaryEntry.getLabel() );
+                    LineDataSet lineDataSet = new LineDataSet(boundaryEntry.entryList(), boundaryEntry.getLabel());
 
                     lineDataSet.setMode(LineDataSet.Mode.HORIZONTAL_BEZIER);
                     lineDataSet.setHighlightEnabled(true);
@@ -40,8 +41,10 @@ public class ColorFilledLineDataSetListProvider {
                     lineDataSet.setDrawValues(false);
 
                     lineDataSet.setDrawFilled(true);
-                    lineDataSet.setFillColor(boundaryEntry.trendType().getFillColor());
-                    lineDataSet.setFillAlpha(boundaryEntry.trendType().getFillAlpha());
+
+                    TrendStatistics trendStatistics = boundaryEntry.trendBoundaryDataEntity().trendStatistics();
+                    lineDataSet.setFillColor(trendStatistics.trendType().getFillColor());
+                    lineDataSet.setFillAlpha(trendStatistics.trendType().getFillAlpha());
 
                     return lineDataSet;
                 })

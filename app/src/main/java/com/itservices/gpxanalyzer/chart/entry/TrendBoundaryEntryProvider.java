@@ -25,7 +25,7 @@ public class TrendBoundaryEntryProvider {
             Vector<DataEntity> dataEntityVector = trendBoundaryDataEntity.dataEntityVector();
 
             dataEntityVector.forEach(dataEntity -> {
-                CurveDataEntityEntry entry = CurveDataEntityEntry.create(dataEntity, trendBoundaryDataEntity.id(), paletteColorDeterminer, statisticResults);
+                CurveDataEntityEntry entry = CurveDataEntityEntry.create(dataEntity, trendBoundaryDataEntity, paletteColorDeterminer, statisticResults);
 
                 entryCacheMap.add(dataEntity.getTimestampMillis(), entry);
 
@@ -34,10 +34,7 @@ public class TrendBoundaryEntryProvider {
 
             trendBoundaryEntryList.add(
                     new TrendBoundaryEntry(
-                            trendBoundaryDataEntity.id(),
-                            trendBoundaryDataEntity.trendType(),
-                            trendBoundaryDataEntity.beginTimestamp(),
-                            trendBoundaryDataEntity.endTimestamp(),
+                            trendBoundaryDataEntity,
                             entryArrayList)
             );
 

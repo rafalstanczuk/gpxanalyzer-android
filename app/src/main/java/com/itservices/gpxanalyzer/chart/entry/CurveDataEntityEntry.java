@@ -7,22 +7,25 @@ import com.itservices.gpxanalyzer.chart.settings.axis.HourMinutesAxisValueFormat
 import com.itservices.gpxanalyzer.data.entity.DataEntity;
 import com.itservices.gpxanalyzer.data.statistics.StatisticResults;
 import com.itservices.gpxanalyzer.chart.legend.PaletteColorDeterminer;
+import com.itservices.gpxanalyzer.data.statistics.TrendBoundaryDataEntity;
 
 import java.util.Calendar;
 
 public class CurveDataEntityEntry extends BaseDataEntityEntry {
     public static boolean SHOW_COLOR_CURVE_DATA_ENTITY_RANGE_CIRCLES_ICONS = true;
+    private final TrendBoundaryDataEntity trendBoundaryDataEntity;
 
     CurveDataEntityEntry(
-            DataEntity dataEntity, int dataSetIndex, float x, float y, Drawable icon, StatisticResults statisticResults
+            DataEntity dataEntity, TrendBoundaryDataEntity trendBoundaryDataEntity, float x, float y, Drawable icon, StatisticResults statisticResults
     ) {
-        super(dataEntity, dataSetIndex, x, y, icon, statisticResults);
+        super(dataEntity, trendBoundaryDataEntity.id(), x, y, icon, statisticResults);
+
+        this.trendBoundaryDataEntity = trendBoundaryDataEntity;
     }
 
     public static CurveDataEntityEntry create(
             DataEntity dataEntity,
-            int dataSetIndex,
-            PaletteColorDeterminer paletteColorDeterminer,
+            TrendBoundaryDataEntity trendBoundaryDataEntity, PaletteColorDeterminer paletteColorDeterminer,
             StatisticResults statisticResults
     ) {
         Drawable drawableIcon = null;
@@ -40,9 +43,13 @@ public class CurveDataEntityEntry extends BaseDataEntityEntry {
 
         return new CurveDataEntityEntry(
                 dataEntity,
-                dataSetIndex,
+                trendBoundaryDataEntity,
                 floatTime, value, SHOW_COLOR_CURVE_DATA_ENTITY_RANGE_CIRCLES_ICONS ? drawableIcon : null,
                 statisticResults
         );
+    }
+
+    public TrendBoundaryDataEntity getTrendBoundaryDataEntity() {
+        return trendBoundaryDataEntity;
     }
 }

@@ -23,8 +23,10 @@ import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.chart.DataEntityLineChart;
 import com.itservices.gpxanalyzer.chart.entry.CurveDataEntityEntry;
 import com.itservices.gpxanalyzer.data.entity.DataEntity;
+import com.itservices.gpxanalyzer.data.statistics.TrendType;
 import com.itservices.gpxanalyzer.databinding.CustomMarkerViewBinding;
 import com.itservices.gpxanalyzer.utils.common.FormatNumberUtil;
+import com.itservices.gpxanalyzer.utils.ui.ColorUtil;
 
 import javax.inject.Inject;
 
@@ -82,11 +84,36 @@ public class CustomMarker extends MarkerView {
             SpannableStringBuilder timeLine = getSpannableStringBuilder(
                     FormatNumberUtil.getFormattedTime(dataEntity.getTimestampMillis()), " h"
             );
+
+            String unitString = dataEntity.getUnitList().get( curveDataEntityEntry.getStatisticResults().getPrimaryDataIndex() );
+
             SpannableStringBuilder valueLine = getSpannableStringBuilder(
-                    String.valueOf((int) curveDataEntityEntry.getY()), " " + dataEntity.getUnitList().get( curveDataEntityEntry.getStatisticResults().getPrimaryDataIndex() ));
+                    String.valueOf((int) curveDataEntityEntry.getY()), " " + unitString);
 
             binding.markerTextViewTime.setText(timeLine, TextView.BufferType.SPANNABLE);
             binding.markerTextViewValue.setText(valueLine, TextView.BufferType.SPANNABLE);
+
+            TrendType trendType = curveDataEntityEntry.getTrendBoundaryDataEntity().trendStatistics().trendType();
+
+            String text = "";
+                    switch (trendType) {
+                case UP -> {
+                    text = "+";
+                }
+                case CONSTANT -> {
+                    text = "";
+                }
+                case DOWN -> {
+                    text = "-";
+                }
+            }
+            text+= curveDataEntityEntry.getTrendBoundaryDataEntity().trendStatistics().deltaAsl();
+
+
+            binding.markerTextViewDeltaAsl.setText(getSpannableStringBuilder(text, " " + unitString));
+            binding.markerTextViewDeltaAsl.setBackgroundColor( ColorUtil.setAlphaInIntColor(trendType.getFillColor(), 128) );
+
+            binding.trendTypeImageView.setImageResource(trendType.getDrawableId());
         }
 
         super.refreshContent(entry, highlight);
