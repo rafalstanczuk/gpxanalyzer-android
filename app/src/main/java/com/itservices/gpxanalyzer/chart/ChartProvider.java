@@ -32,7 +32,6 @@ public class ChartProvider {
 
     private DataEntityLineChart chart;
 
-
     private List<LineDataSet> currentLineDataSetList = new ArrayList<>();
     private Highlight currentHighlight;
 
@@ -40,18 +39,20 @@ public class ChartProvider {
     public ChartProvider() {
     }
 
+    /**
+     * Initialize the chart with empty data + styling.
+     */
+    public void initChart(DataEntityLineChart chart) {
+        this.chart = chart;
+        chart.initChart(settings);
+
+        clearLineDataSets();
+    }
+
     public void setSelectionHighlight(Highlight h) {
         currentHighlight = h;
     }
 
-    private void clearLineDataSets() {
-        List<LineDataSet> sets = currentLineDataSetList;
-        if (sets != null) {
-            sets.clear();
-            // update the chart
-            tryToUpdateDataChart();
-        }
-    }
     @UiThread
     public RequestStatus updateChartData(StatisticResults statisticResults) {
         List<LineDataSet> newLineDataSetList = createLineDataSetList(statisticResults);
@@ -71,6 +72,27 @@ public class ChartProvider {
         return updateChart(currentLineDataSetList, currentHighlight);
     }
 
+    public DataEntityLineChart getChart() {
+        return chart;
+    }
+
+    public LineChartSettings getSettings() {
+        return settings;
+    }
+
+    public EntryCacheMap getEntryCacheMap() {
+        return entryCacheMap;
+    }
+
+    private void clearLineDataSets() {
+        List<LineDataSet> sets = currentLineDataSetList;
+        if (sets != null) {
+            sets.clear();
+            // update the chart
+            tryToUpdateDataChart();
+        }
+    }
+
     private List<LineDataSet> createLineDataSetList(StatisticResults statisticResults) {
         if (statisticResults == null) return null;
 
@@ -80,7 +102,7 @@ public class ChartProvider {
         // needed for scaling
         chart.getScaler().setStatisticResults(statisticResults);
 
-        if ( colorFilledLineDataSetListCreator.hasList() ) {
+        if (colorFilledLineDataSetListCreator.hasList()) {
             return colorFilledLineDataSetListCreator.provide();
         }
 
@@ -89,33 +111,23 @@ public class ChartProvider {
         /**
          * Time consuming computing
          */
-        List<TrendBoundaryDataEntity> trendBoundaryDataEntityList = TrendBoundaryDataEntityProvider.provide( statisticResults );
+        List<TrendBoundaryDataEntity> trendBoundaryDataEntityList = TrendBoundaryDataEntityProvider.provide(statisticResults);
 
         List<TrendBoundaryEntry> createTrendBoundaryEntryList =
                 TrendBoundaryEntryProvider.provide(statisticResults, trendBoundaryDataEntityList, paletteColorDeterminer, entryCacheMap);
 
         if (!createTrendBoundaryEntryList.isEmpty()) {
-            return colorFilledLineDataSetListCreator.createAndProvide( createTrendBoundaryEntryList, settings);
+            return colorFilledLineDataSetListCreator.createAndProvide(createTrendBoundaryEntryList, settings);
         }
 
         return null;
     }
 
     /**
-     * Initialize the chart with empty data + styling.
-     */
-    public void initChart(DataEntityLineChart chart) {
-        this.chart = chart;
-        chart.initChart(settings);
-
-        clearLineDataSets();
-    }
-
-    /**
      * Combine the given datasets, apply styling and scaling, highlight if needed.
      */
     private RequestStatus updateChart(List<LineDataSet> dataSets,
-                                     Highlight highlight) {
+                                      Highlight highlight) {
         if (chart == null)
             return RequestStatus.ERROR;
 
@@ -137,17 +149,5 @@ public class ChartProvider {
         chart.invalidate();
 
         return RequestStatus.DONE;
-    }
-
-    public DataEntityLineChart getChart() {
-        return chart;
-    }
-
-    public LineChartSettings getSettings() {
-        return settings;
-    }
-
-    public EntryCacheMap getEntryCacheMap() {
-        return entryCacheMap;
     }
 }
