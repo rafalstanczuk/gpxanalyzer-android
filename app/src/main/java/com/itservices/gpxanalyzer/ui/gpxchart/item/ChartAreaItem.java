@@ -1,10 +1,11 @@
-package com.itservices.gpxanalyzer.ui.gpxchart;
+package com.itservices.gpxanalyzer.ui.gpxchart.item;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.itservices.gpxanalyzer.chart.ChartController;
 import com.itservices.gpxanalyzer.data.statistics.StatisticResults;
+import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.ViewMode;
 
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;

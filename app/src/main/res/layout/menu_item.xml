@@ -5,11 +5,11 @@
     <data>
         <variable
             name="menuItem"
-            type="com.itservices.gpxanalyzer.ui.main.MenuItem" />
+            type="com.itservices.gpxanalyzer.ui.main.item.MenuItem" />
 
         <variable
             name="handler"
-            type="com.itservices.gpxanalyzer.ui.main.MenuItemHandler" />
+            type="com.itservices.gpxanalyzer.ui.main.item.MenuItemHandler" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

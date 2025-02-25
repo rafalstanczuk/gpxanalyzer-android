@@ -1,4 +1,6 @@
-package com.itservices.gpxanalyzer.ui.gpxchart;
+package com.itservices.gpxanalyzer.ui.gpxchart.item;
+
+import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.ViewMode;
 
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;

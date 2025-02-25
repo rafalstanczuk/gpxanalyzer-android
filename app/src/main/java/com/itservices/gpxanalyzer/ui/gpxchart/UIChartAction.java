@@ -1,6 +1,8 @@
 package com.itservices.gpxanalyzer.ui.gpxchart;
 
 
+import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItem;
+
 import javax.annotation.Nullable;
 
 public record UIChartAction(ChartAreaItem item,

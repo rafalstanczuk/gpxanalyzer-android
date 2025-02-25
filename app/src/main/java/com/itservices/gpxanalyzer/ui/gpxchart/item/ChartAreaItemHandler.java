@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.ui.gpxchart;
+package com.itservices.gpxanalyzer.ui.gpxchart.item;
 
 public interface ChartAreaItemHandler {
     void onOnOffColorizedCirclesCheckBoxChanged(ChartAreaItem item, boolean isChecked);

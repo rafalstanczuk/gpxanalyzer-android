@@ -44,7 +44,7 @@ public class TrendBoundaryDataEntityProvider {
 
         trendBoundaryDataEntities.add(
                 new TrendBoundaryDataEntity(0,
-                        TrendType.UP,
+                        new TrendStatistics(TrendType.UP, 20),
                         dataEntityVectorFirst.firstElement().getTimestampMillis(),
                         dataEntityVectorFirst.lastElement().getTimestampMillis(),
                         dataEntityVectorFirst
@@ -55,7 +55,7 @@ public class TrendBoundaryDataEntityProvider {
 
         trendBoundaryDataEntities.add(
                 new TrendBoundaryDataEntity(1,
-                        TrendType.DOWN,
+                        new TrendStatistics(TrendType.DOWN, 40),
                         dataEntityVectorSecond.firstElement().getTimestampMillis(),
                         dataEntityVectorSecond.lastElement().getTimestampMillis(),
                         dataEntityVectorSecond

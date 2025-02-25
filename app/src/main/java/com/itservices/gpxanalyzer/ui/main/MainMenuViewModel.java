@@ -4,6 +4,8 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.itservices.gpxanalyzer.ui.main.item.MenuItem;
+import com.itservices.gpxanalyzer.ui.main.item.MenuItemHandler;
 import com.itservices.gpxanalyzer.utils.SingleLiveEvent;
 
 import java.util.List;

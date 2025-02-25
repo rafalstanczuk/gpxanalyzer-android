@@ -37,8 +37,8 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class DataEntityLineChart extends LineChart {
 
-	@Inject
-	DataEntityInfoLayoutView dataEntityInfoLayoutView;
+/*	@Inject
+	DataEntityInfoLayoutView dataEntityInfoLayoutView;*/
 
 	@Inject
 	PaletteColorDeterminer paletteColorDeterminer;
@@ -73,12 +73,12 @@ public class DataEntityLineChart extends LineChart {
 	}
 
 	private void initDataEntityInfoLayoutView() {
-		dataEntityInfoLayoutView.setDrawingCacheEnabled(true);
+		//dataEntityInfoLayoutView.setDrawingCacheEnabled(true);
 
-		try {
+/*		try {
 			this.addView(dataEntityInfoLayoutView);
 		} catch (Exception ignored) {
-		}
+		}*/
 	}
 
 	@Override
@@ -100,19 +100,19 @@ public class DataEntityLineChart extends LineChart {
 	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
 		super.onLayout(changed, left, top, right, bottom);
 
-		dataEntityInfoLayoutView.layout(
+/*		dataEntityInfoLayoutView.layout(
 				90 ,getHeight() / 20,
 				getWidth(),	getHeight()
-		);
+		);*/
 	}
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-
+/*
 		dataEntityInfoLayoutView.measure(dataEntityInfoLayoutView.getMeasuredWidth(),
 			dataEntityInfoLayoutView.getMeasuredHeight()
-		);
+		);*/
 	}
 
 	public void initChart(LineChartSettings settings) {
@@ -177,7 +177,7 @@ public class DataEntityLineChart extends LineChart {
 
 		determineSettingsDataEntityCurveLineHighlightIndicator(chartGesture);
 
-		DataEntity dataEntity = ( (BaseDataEntityEntry)selectedEntry).getDataEntity();
+	/*	DataEntity dataEntity = ( (BaseDataEntityEntry)selectedEntry).getDataEntity();
 
 		int primaryDataIndex = ((BaseDataEntityEntry) selectedEntry).getStatisticResults().getPrimaryDataIndex();
 
@@ -188,13 +188,13 @@ public class DataEntityLineChart extends LineChart {
 			String unit1 = dataEntity.getUnitList().get(primaryDataIndex);
 			dataEntityInfoLayoutView.setValue1Unit(unit1);
 
-		/*	dataEntityInfoLayoutView.setValue2(
+		*//*	dataEntityInfoLayoutView.setValue2(
 					String.format(Locale.getDefault(), "%.2f", dataEntity.getValueList().get(1))
 			);
 			String unit2 = dataEntity.getUnitList().get(1);
-			dataEntityInfoLayoutView.setValue2Unit(unit2);*/
+			dataEntityInfoLayoutView.setValue2Unit(unit2);*//*
 
-			dataEntityInfoLayoutView.invalidate();
+			dataEntityInfoLayoutView.invalidate();*/
 	}
 
 	private void determineSettingsDataEntityCurveLineHighlightIndicator(
@@ -210,7 +210,7 @@ public class DataEntityLineChart extends LineChart {
 		if (dataEntityCurveLineDataSet != null) {
 
 			if (isFullyZoomedOut()) {
-				shouldDraw.set(true);
+				shouldDraw.set(false);
 			} else {
 				switch (chartGesture) {
 					case X_ZOOM:
@@ -220,7 +220,7 @@ public class DataEntityLineChart extends LineChart {
 					case DOUBLE_TAP:
 					case LONG_PRESS:
 					case SINGLE_TAP:
-						shouldDraw.set(true);
+						shouldDraw.set(false);
 
 						break;
 

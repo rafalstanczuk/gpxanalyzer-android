@@ -37,6 +37,11 @@ public class MarkerView extends RelativeLayout implements IMarker {
         setupLayoutResource(layoutResource);
     }
 
+    public MarkerView(Context context) {
+        super(context);
+
+    }
+
     /**
      * Sets the layout resource for a custom MarkerView.
      *

@@ -1,8 +1,7 @@
-package com.itservices.gpxanalyzer.ui.gpxchart;
+package com.itservices.gpxanalyzer.ui.gpxchart.viewmode;
 
 
 import android.content.Context;
-import android.view.View;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.StringRes;

@@ -17,9 +17,9 @@ import com.itservices.gpxanalyzer.chart.entry.BaseDataEntityEntry;
 import com.itservices.gpxanalyzer.data.entity.DataEntity;
 import com.itservices.gpxanalyzer.data.provider.GPXDataProvider;
 import com.itservices.gpxanalyzer.data.statistics.StatisticResults;
-import com.itservices.gpxanalyzer.ui.gpxchart.ChartAreaItem;
-import com.itservices.gpxanalyzer.ui.gpxchart.ViewMode;
-import com.itservices.gpxanalyzer.ui.gpxchart.ViewModeMapper;
+import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItem;
+import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.ViewMode;
+import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.ViewModeMapper;
 import com.itservices.gpxanalyzer.utils.common.ConcurrentUtil;
 
 import java.io.File;

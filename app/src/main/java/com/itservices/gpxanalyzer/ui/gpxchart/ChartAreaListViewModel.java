@@ -13,6 +13,10 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.itservices.gpxanalyzer.chart.RequestStatus;
+import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItem;
+import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItemAdapter;
+import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.ViewMode;
+import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.ViewModeSeverity;
 import com.itservices.gpxanalyzer.usecase.MultipleSyncedGpxChartUseCase;
 import com.itservices.gpxanalyzer.utils.SingleLiveEvent;
 import com.itservices.gpxanalyzer.utils.common.ConcurrentUtil;
