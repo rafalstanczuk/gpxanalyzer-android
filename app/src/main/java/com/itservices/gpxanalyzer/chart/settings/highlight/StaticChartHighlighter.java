@@ -2,6 +2,7 @@ package com.itservices.gpxanalyzer.chart.settings.highlight;
 
 import com.github.mikephil.charting.data.DataSet;
 import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.highlight.ChartHighlighter;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.highlight.IHighlighter;
@@ -11,7 +12,6 @@ import com.github.mikephil.charting.listener.BarLineChartTouchListener;
 import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.utils.MPPointD;
 import com.itservices.gpxanalyzer.chart.DataEntityLineChart;
-import com.itservices.gpxanalyzer.chart.entry.BaseDataEntityEntry;
 import com.itservices.gpxanalyzer.chart.entry.CurveDataEntityEntry;
 
 import java.util.ArrayList;
@@ -38,7 +38,7 @@ public class StaticChartHighlighter<T extends BarLineScatterCandleBubbleDataProv
 
 		if (((DataEntityLineChart) mChart).isFullyZoomedOut()) {
 			highlights = getHighlightsForClassEntries(
-				BaseDataEntityEntry.class, set, dataSetIndex, xVal, rounding);
+					CurveDataEntityEntry.class, (LineDataSet) set, dataSetIndex, xVal, rounding);
 		} else {
 
 			switch (chartGesture) {
@@ -51,13 +51,13 @@ public class StaticChartHighlighter<T extends BarLineScatterCandleBubbleDataProv
 				case LONG_PRESS:
 				case SINGLE_TAP:
 					highlights = getHighlightsForClassEntries(
-						BaseDataEntityEntry.class, set, dataSetIndex, xVal, rounding);
+							CurveDataEntityEntry.class, (LineDataSet)set, dataSetIndex, xVal, rounding);
 					break;
 
 				case FLING:
 				case DRAG:
 					highlights = getHighlightsForClassEntries(
-						CurveDataEntityEntry.class, set, dataSetIndex, xVal, rounding);
+						CurveDataEntityEntry.class, (LineDataSet) set, dataSetIndex, xVal, rounding);
 					break;
 			}
 		}
@@ -66,11 +66,10 @@ public class StaticChartHighlighter<T extends BarLineScatterCandleBubbleDataProv
 	}
 
 	private ArrayList<Highlight> getHighlightsForClassEntries(
-		Class<?> entryClass, IDataSet set, int dataSetIndex, float xVal, DataSet.Rounding rounding
+		Class<?> entryClass, LineDataSet set, int dataSetIndex, float xVal, DataSet.Rounding rounding
 	) {
 		ArrayList<Highlight> highlights = new ArrayList<>();
 
-		//noinspection unchecked
 		List<Entry> rawEntries = set.getEntriesForXValue(xVal);
 
 		List<Entry> entries = new ArrayList<>();
@@ -85,7 +84,7 @@ public class StaticChartHighlighter<T extends BarLineScatterCandleBubbleDataProv
 			// Try to find closest x-value and take all entries for that x-value
 			final Entry closest = set.getEntryForXValue(xVal, Float.NaN, rounding);
 			if (closest != null && (entryClass.isInstance(closest))) {
-				//noinspection unchecked
+
 				entries = set.getEntriesForXValue(closest.getX());
 			}
 		}
@@ -103,5 +102,11 @@ public class StaticChartHighlighter<T extends BarLineScatterCandleBubbleDataProv
 			}
 		}
 		return highlights;
+	}
+
+	@Override
+	protected float getDistance(float x1, float y1, float x2, float y2) {
+		// Match only closest by x
+		return Math.abs(x1 - x2);
 	}
 }

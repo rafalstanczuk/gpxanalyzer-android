@@ -18,9 +18,6 @@ public class DataEntityInfoLayoutView extends LinearLayout {
 	private TextView textViewValue1;
 	private TextView textViewValue1Unit;
 
-	//private TextView textViewValue2;
-	//private TextView textViewValue2Unit;
-
 	@Inject
 	public DataEntityInfoLayoutView(@ApplicationContext Context context) {
 		super(context);
@@ -52,9 +49,6 @@ public class DataEntityInfoLayoutView extends LinearLayout {
 		textViewTime = findViewById(R.id.textViewTime);
 		textViewValue1 = findViewById(R.id.textViewValue1);
 		textViewValue1Unit = findViewById(R.id.textViewValue1Unit);
-
-		//textViewValue2 = findViewById(R.id.textViewValue2);
-		//textViewValue2Unit = findViewById(R.id.textViewValue2Unit);
 	}
 
 	public void setTime(String time) {

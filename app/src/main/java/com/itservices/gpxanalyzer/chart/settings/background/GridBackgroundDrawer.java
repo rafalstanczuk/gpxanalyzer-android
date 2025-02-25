@@ -8,6 +8,7 @@ import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.utils.MPPointF;
+import com.itservices.gpxanalyzer.chart.DataEntityLineChart;
 import com.itservices.gpxanalyzer.chart.legend.BoundaryColorSpan;
 import com.itservices.gpxanalyzer.chart.legend.PaletteColorDeterminer;
 import com.itservices.gpxanalyzer.utils.ui.ColorUtil;
@@ -23,13 +24,13 @@ public class GridBackgroundDrawer {
     @Inject
     public GridBackgroundDrawer() { }
 
-    public void drawGridBackground(LineChart lineChart, PaletteColorDeterminer paletteColorDeterminer, Canvas canvas) {
+    public void drawGridBackground(DataEntityLineChart lineChart, PaletteColorDeterminer paletteColorDeterminer, Canvas canvas) {
         for (Map.Entry<Integer, BoundaryColorSpan> entry : paletteColorDeterminer.getPalette().entrySet()) {
             drawRectArea(canvas, entry.getValue(), lineChart);
         }
     }
 
-    private void drawRectArea(Canvas canvas, BoundaryColorSpan boundaryColorSpan, LineChart lineChart) {
+    private void drawRectArea(Canvas canvas, BoundaryColorSpan boundaryColorSpan, DataEntityLineChart lineChart) {
         int colorForAreaId = ColorUtil.setAlphaInIntColor(boundaryColorSpan.getColor(), BACKGROUND_BOUNDARIES_AREA_COLOR_ALPHA);
 
         MPPointF leftMin = lineChart.getPosition(

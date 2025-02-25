@@ -14,9 +14,9 @@ import androidx.annotation.NonNull;
 import com.itservices.gpxanalyzer.chart.ChartController;
 import com.itservices.gpxanalyzer.chart.RequestStatus;
 import com.itservices.gpxanalyzer.chart.entry.BaseDataEntityEntry;
-import com.itservices.gpxanalyzer.data.DataEntity;
-import com.itservices.gpxanalyzer.data.gpx.GPXDataProvider;
-import com.itservices.gpxanalyzer.data.gpx.StatisticResults;
+import com.itservices.gpxanalyzer.data.entity.DataEntity;
+import com.itservices.gpxanalyzer.data.provider.GPXDataProvider;
+import com.itservices.gpxanalyzer.data.statistics.StatisticResults;
 import com.itservices.gpxanalyzer.ui.gpxchart.ChartAreaItem;
 import com.itservices.gpxanalyzer.ui.gpxchart.ViewMode;
 import com.itservices.gpxanalyzer.ui.gpxchart.ViewModeMapper;
@@ -67,8 +67,6 @@ public class MultipleSyncedGpxChartUseCase {
     }
 
     public void switchViewMode(ChartAreaItem chartAreaItem) {
-        //Log.d(MultipleSyncedGpxChartUseCase.class.getSimpleName(), "switchViewMode() called with: chartAreaItem = [" + chartAreaItem + "]");
-
 
         if (activity == null)
             return;
@@ -77,9 +75,7 @@ public class MultipleSyncedGpxChartUseCase {
     }
 
     public void loadData(Activity activity, List<ChartAreaItem> chartAreaItemList, int defaultRawGpxDataId) {
-        //Log.d(MultipleSyncedGpxChartUseCase.class.getSimpleName(), "loadData() called with: activity = [" + activity + "], chartAreaItemList = [" + chartAreaItemList + "], defaultRawGpxDataId = [" + defaultRawGpxDataId + "]");
-
-        if (chartAreaItemList.isEmpty())
+         if (chartAreaItemList.isEmpty())
             return;
 
         ConcurrentUtil.tryToDispose(loadDataDisposable);
@@ -182,18 +178,16 @@ public class MultipleSyncedGpxChartUseCase {
     }
 
     private RequestStatus updateChart(ChartController chartController, StatisticResults statisticResults) {
-        return chartController.refreshStatisticResults(statisticResults);
+        return chartController.updateChartData(statisticResults);
     }
 
     private Disposable observeSelectionOn(Activity activity, Observable<BaseDataEntityEntry> selection, ChartController chartController) {
-        //Log.d(MultipleSyncedGpxChartUseCase.class.getSimpleName(), "observeSelectionOn() called with: activity = [" + activity + "], selection = [" + selection + "], chartController = [" + chartController + "]");
-
         return selection
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(Schedulers.newThread())
                 .doOnNext(baseDataEntityEntry ->
                         activity.runOnUiThread(() -> {
-                            chartController.manualSelectEntry(baseDataEntityEntry.getDataEntity().getTimestampMillis());
+                            chartController.select(baseDataEntityEntry.getDataEntity().getTimestampMillis());
                         })
                 )
                 .subscribe();

@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.data.gpx;
+package com.itservices.gpxanalyzer.data.provider;
 
 import android.content.Context;
 import android.location.Location;
@@ -7,7 +7,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.itservices.gpxanalyzer.R;
-import com.itservices.gpxanalyzer.data.DataEntity;
+import com.itservices.gpxanalyzer.data.entity.DataEntity;
 import com.itservices.gpxanalyzer.data.gpx.calculation.LocationCalculatorUtil;
 import com.itservices.gpxanalyzer.data.gpx.parser.GPXParser;
 import com.itservices.gpxanalyzer.data.gpx.parser.domain.Gpx;
@@ -27,13 +27,11 @@ import java.util.List;
 import java.util.Vector;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import dagger.hilt.android.qualifiers.ApplicationContext;
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
 
-@Singleton
 public class GPXDataProvider {
     private static List<String> NAME_LIST = new ArrayList<>();
     private static List<String> UNIT_LIST = new ArrayList<>();
@@ -122,12 +120,9 @@ public class GPXDataProvider {
             centroidLocation.setSpeed(speed);
             centroidLocation.setTime(LocationCalculatorUtil.computeMeanTime(gpxPointA, gpxPointB));
 
-            DataEntity dataEntity = createDataEntity(centroidLocation);
-
-            ////Log.d("GPXDataProvider", "dataEntity = [" + dataEntity.getTimestampMillis() + "]");
+            DataEntity dataEntity = createDataEntity(iTrackPoint, centroidLocation);
 
             float percentageProgress = 100.0f * ((float) (iTrackPoint + 1) / (float) maxIteration);
-
 
             int intPercentageProgress = (int) percentageProgress;
 
@@ -141,8 +136,8 @@ public class GPXDataProvider {
     }
 
     @NonNull
-    private DataEntity createDataEntity(Location location) {
-        DataEntity dataEntity = new DataEntity(location.getTime(),
+    private DataEntity createDataEntity(int iTrackPoint, Location location) {
+        DataEntity dataEntity = new DataEntity(iTrackPoint, location.getTime(),
                 Arrays.asList((float) location.getAltitude(), location.getSpeed()),
                 NAME_LIST,
                 UNIT_LIST);

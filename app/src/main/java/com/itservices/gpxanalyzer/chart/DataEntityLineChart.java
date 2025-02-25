@@ -1,6 +1,5 @@
 package com.itservices.gpxanalyzer.chart;
 
-import static com.itservices.gpxanalyzer.chart.entry.CurveDataEntityEntry.CURVE_DATA_ENTITY;
 import static com.itservices.gpxanalyzer.utils.common.FormatNumberUtil.getFormattedTime;
 
 import android.content.Context;
@@ -16,6 +15,8 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.listener.BarLineChartTouchListener;
 import com.github.mikephil.charting.listener.ChartTouchListener;
+import com.github.mikephil.charting.renderer.LineChartRenderer;
+import com.github.mikephil.charting.utils.MPPointF;
 import com.itservices.gpxanalyzer.MainActivity;
 import com.itservices.gpxanalyzer.chart.entry.BaseDataEntityEntry;
 import com.itservices.gpxanalyzer.chart.legend.PaletteColorDeterminer;
@@ -23,9 +24,11 @@ import com.itservices.gpxanalyzer.chart.settings.LineChartSettings;
 import com.itservices.gpxanalyzer.chart.settings.background.GridBackgroundDrawer;
 import com.itservices.gpxanalyzer.chart.settings.background.LimitLinesBoundaries;
 import com.itservices.gpxanalyzer.chart.settings.highlight.StaticChartHighlighter;
-import com.itservices.gpxanalyzer.data.DataEntity;
+import com.itservices.gpxanalyzer.data.entity.DataEntity;
 
+import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
 
@@ -67,37 +70,6 @@ public class DataEntityLineChart extends LineChart {
 		super(context, attrs, defStyle);
 
 		initDataEntityInfoLayoutView();
-	}
-
-	public static int getDataSetIndexForEntryWithTimeInt(
-			DataEntityLineChart lineChart, long entryTimeInt
-	) {
-		int dataSetIndexToHighlight = 0;
-
-		for (int dataSetIndex = 0;
-			dataSetIndex < lineChart.getData().getDataSets().size(); dataSetIndex++) {
-
-			ILineDataSet iLineDataSet = lineChart.getData().getDataSets().get(dataSetIndex);
-
-			LineDataSet lineDataSet = (LineDataSet) iLineDataSet;
-
-			for (Entry entryLineData : lineDataSet.getEntries()) {
-
-				if (!(entryLineData instanceof BaseDataEntityEntry)) {
-					break;
-				}
-
-
-				long timeInt = ((BaseDataEntityEntry) entryLineData).getDataEntity().getTimestampMillis();
-
-				if (timeInt == entryTimeInt) {
-					dataSetIndexToHighlight = dataSetIndex;
-
-					break;
-				}
-			}
-		}
-		return dataSetIndexToHighlight;
 	}
 
 	private void initDataEntityInfoLayoutView() {
@@ -161,16 +133,38 @@ public class DataEntityLineChart extends LineChart {
 	}
 
 	public void highlightCenterValueInTranslation() {
-		Entry entry = getEntryByTouchPoint(getWidth() / 2.0f, getHeight() / 2.0f);
+
+/*
+		Rect rectf = new Rect();
+		getLocalVisibleRect(rectf);
+
+				rectf.centerX(),
+				rectf.centerY()
+
+*/
+
+
+/*		MPPointF center = mViewPortHandler.getContentCenter();
+		Entry entry = getEntryByTouchPoint(
+				center.getX(),
+				center.getY()
+		);*/
+
+/*		float centerX = ( getLowestVisibleX() + getHighestVisibleX() )/ 2.0f;
+
+		long timestampLow = combineIntoCalendarTime( getLowestVisibleX() ).getTime().getTime();
+		long timestampHigh = combineIntoCalendarTime( getHighestVisibleX() ).getTime().getTime();*/
+		MPPointF pointFCenter = mViewPortHandler.getContentCenter();
+
+		Entry entry = getEntryByTouchPoint(
+				pointFCenter.getX(),
+				pointFCenter.getY()
+		);
 
 		if (entry instanceof BaseDataEntityEntry) {
 			BaseDataEntityEntry baseDataEntityEntry = (BaseDataEntityEntry) entry;
 
-			long entryTimeInt = baseDataEntityEntry.getDataEntity().getTimestampMillis();
-			int dataSetIndexToHighlight = getDataSetIndexForEntryWithTimeInt(
-				this, entryTimeInt);
-
-			highlightValue(baseDataEntityEntry.getX(), baseDataEntityEntry.getY(), dataSetIndexToHighlight, true);
+			highlightValue(baseDataEntityEntry.getX(), baseDataEntityEntry.getY(), baseDataEntityEntry.getDataSetIndex(), true);
 		}
 	}
 
@@ -180,8 +174,6 @@ public class DataEntityLineChart extends LineChart {
 		}
 
 		ChartTouchListener.ChartGesture chartGesture = getChartTouchListener().getLastGesture();
-
-		// isFullyZoomedOut() 		
 
 		determineSettingsDataEntityCurveLineHighlightIndicator(chartGesture);
 
@@ -212,12 +204,13 @@ public class DataEntityLineChart extends LineChart {
 			return;
 		}
 
-		LineDataSet dataEntityCurveLineDataSet = ((LineDataSet) getLineData().getDataSetByLabel(CURVE_DATA_ENTITY, false));
+		AtomicBoolean shouldDraw = new AtomicBoolean(false);
+		List<ILineDataSet> dataEntityCurveLineDataSet = getLineData().getDataSets();
 
 		if (dataEntityCurveLineDataSet != null) {
 
 			if (isFullyZoomedOut()) {
-				dataEntityCurveLineDataSet.setDrawHorizontalHighlightIndicator(true);
+				shouldDraw.set(true);
 			} else {
 				switch (chartGesture) {
 					case X_ZOOM:
@@ -227,18 +220,22 @@ public class DataEntityLineChart extends LineChart {
 					case DOUBLE_TAP:
 					case LONG_PRESS:
 					case SINGLE_TAP:
-						dataEntityCurveLineDataSet.setDrawHorizontalHighlightIndicator(true);
+						shouldDraw.set(true);
 
 						break;
 
 					case NONE:
 					case FLING:
 					case DRAG:
-						dataEntityCurveLineDataSet.setDrawHorizontalHighlightIndicator(false);
+						shouldDraw.set(false);
 
 						break;
 				}
 			}
+
+			dataEntityCurveLineDataSet.forEach( iLineDataSet -> {
+                ((LineDataSet) iLineDataSet).setDrawHorizontalHighlightIndicator (shouldDraw.get() );
+            });
 		}
 	}
 
@@ -266,4 +263,17 @@ public class DataEntityLineChart extends LineChart {
 		super.animateZoomToCenter(targetScaleX, targetScaleY, duration, null);
 	}
 
+	@Override
+	public LineData getLineData() {
+		return mData;
+	}
+
+	@Override
+	protected void onDetachedFromWindow() {
+		// releases the bitmap in the renderer to avoid oom error
+		if (mRenderer != null && mRenderer instanceof LineChartRenderer) {
+			((LineChartRenderer) mRenderer).releaseBitmap();
+		}
+		super.onDetachedFromWindow();
+	}
 }

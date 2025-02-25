@@ -56,7 +56,6 @@ public class LocationCalculatorUtil {
         return (long) (0.5 * (double)(gpxPointA.getTime() + gpxPointB.getTime()));
     }
 
-
     /**
      * Calculates the speed between two geographical points in meters per second (m/s).
      *
