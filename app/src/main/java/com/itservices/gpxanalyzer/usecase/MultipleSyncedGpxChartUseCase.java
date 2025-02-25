@@ -178,7 +178,7 @@ public class MultipleSyncedGpxChartUseCase {
     }
 
     private RequestStatus updateChart(ChartController chartController, StatisticResults statisticResults) {
-        return chartController.refreshStatisticResults(statisticResults);
+        return chartController.updateChartData(statisticResults);
     }
 
     private Disposable observeSelectionOn(Activity activity, Observable<BaseDataEntityEntry> selection, ChartController chartController) {
@@ -187,7 +187,7 @@ public class MultipleSyncedGpxChartUseCase {
                 .observeOn(Schedulers.newThread())
                 .doOnNext(baseDataEntityEntry ->
                         activity.runOnUiThread(() -> {
-                            chartController.manualSelectEntry(baseDataEntityEntry.getDataEntity().getTimestampMillis());
+                            chartController.select(baseDataEntityEntry.getDataEntity().getTimestampMillis());
                         })
                 )
                 .subscribe();

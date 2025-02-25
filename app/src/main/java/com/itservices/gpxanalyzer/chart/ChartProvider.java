@@ -1,5 +1,7 @@
 package com.itservices.gpxanalyzer.chart;
 
+import androidx.annotation.UiThread;
+
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.highlight.Highlight;
@@ -12,6 +14,7 @@ import com.itservices.gpxanalyzer.data.provider.TrendBoundaryDataEntityProvider;
 import com.itservices.gpxanalyzer.data.statistics.StatisticResults;
 import com.itservices.gpxanalyzer.data.statistics.TrendBoundaryDataEntity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -29,11 +32,46 @@ public class ChartProvider {
 
     private DataEntityLineChart chart;
 
+
+    private List<LineDataSet> currentLineDataSetList = new ArrayList<>();
+    private Highlight currentHighlight;
+
     @Inject
     public ChartProvider() {
     }
 
-    public List<LineDataSet> createLineDataSetList(StatisticResults statisticResults) {
+    public void setSelectionHighlight(Highlight h) {
+        currentHighlight = h;
+    }
+
+    private void clearLineDataSets() {
+        List<LineDataSet> sets = currentLineDataSetList;
+        if (sets != null) {
+            sets.clear();
+            // update the chart
+            tryToUpdateDataChart();
+        }
+    }
+    @UiThread
+    public RequestStatus updateChartData(StatisticResults statisticResults) {
+        List<LineDataSet> newLineDataSetList = createLineDataSetList(statisticResults);
+        if (newLineDataSetList != null) {
+            currentLineDataSetList = newLineDataSetList;
+
+            return tryToUpdateDataChart();
+        }
+        return RequestStatus.ERROR_LINE_DATA_SET_NULL;
+    }
+
+    @UiThread
+    public RequestStatus tryToUpdateDataChart() {
+        if (currentLineDataSetList == null)
+            return RequestStatus.ERROR_DATA_SETS_NULL;
+
+        return updateChart(currentLineDataSetList, currentHighlight);
+    }
+
+    private List<LineDataSet> createLineDataSetList(StatisticResults statisticResults) {
         if (statisticResults == null) return null;
 
         PaletteColorDeterminer paletteColorDeterminer = chart.getPaletteColorDeterminer();
@@ -69,12 +107,14 @@ public class ChartProvider {
     public void initChart(DataEntityLineChart chart) {
         this.chart = chart;
         chart.initChart(settings);
+
+        clearLineDataSets();
     }
 
     /**
      * Combine the given datasets, apply styling and scaling, highlight if needed.
      */
-    public RequestStatus updateChart(List<LineDataSet> dataSets,
+    private RequestStatus updateChart(List<LineDataSet> dataSets,
                                      Highlight highlight) {
         if (chart == null)
             return RequestStatus.ERROR;

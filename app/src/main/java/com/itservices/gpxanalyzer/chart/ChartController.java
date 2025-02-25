@@ -8,7 +8,6 @@ import androidx.annotation.UiThread;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
-import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.listener.OnChartGestureListener;
@@ -16,19 +15,12 @@ import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.itservices.gpxanalyzer.chart.entry.BaseDataEntityEntry;
 import com.itservices.gpxanalyzer.data.statistics.StatisticResults;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
 
 public class ChartController implements OnChartValueSelectedListener, OnChartGestureListener {
-
-    private List<LineDataSet> currentLineDataSetList = new ArrayList<>();
-    private Highlight currentHighlight;
-
 
     private final ChartProvider chartProvider;
     private final PublishSubject<BaseDataEntityEntry> baseEntrySelectionPublishSubject = PublishSubject.create();
@@ -44,43 +36,81 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     @UiThread
     public void bindChart(@NonNull DataEntityLineChart chartBindings) {
         chartProvider.initChart(chartBindings);
-        // clear any existing LiveData sets
-        clearLineDataSets();
 
         chartBindings.setOnChartValueSelectedListener(this);
         chartBindings.setOnChartGestureListener(this);
     }
 
     @UiThread
-    private RequestStatus tryToUpdateDataChart(List<LineDataSet> dataSets) {
-        if (dataSets == null)
-            return RequestStatus.ERROR_DATA_SETS_NULL;
+    public void setDrawIconsEnabled(boolean isChecked) {
 
-        return chartProvider.updateChart(dataSets, currentHighlight);
+        chartProvider.getSettings().setDrawIconsEnabled(isChecked);
+        chartProvider.tryToUpdateDataChart();
     }
 
     @UiThread
-    public RequestStatus refreshStatisticResults(StatisticResults statisticResults) {
-        List<LineDataSet> newLineDataSetList = chartProvider.createLineDataSetList(statisticResults);
-        if (newLineDataSetList != null) {
-            currentLineDataSetList = newLineDataSetList;
+    public boolean isDrawIconsEnabled() {
 
-            return tryToUpdateDataChart(currentLineDataSetList);
+        if (chartProvider.getChart() != null) {
+            LineData lineData = chartProvider.getChart().getData();
+            if (lineData != null && !lineData.getDataSets().isEmpty()) {
+                return lineData.getDataSets().get(0).isDrawIconsEnabled();
+            }
         }
-        return RequestStatus.ERROR_LINE_DATA_SET_NULL;
+        return chartProvider.getSettings().isDrawIconsEnabled();
     }
 
-    private void clearLineDataSets() {
-        List<LineDataSet> sets = currentLineDataSetList;
-        if (sets != null) {
-            sets.clear();
-            // update the chart
-            tryToUpdateDataChart(sets);
-        }
+    public void animateZoomToCenter(final float targetScaleX, final float targetScaleY, long duration) {
+        chartProvider.getChart().animateZoomToCenter(targetScaleX, targetScaleY, duration);
+    }
+
+    public void animateFitScreen(long duration) {
+        chartProvider.getChart().animateFitScreen(duration);
+    }
+
+    public void setDrawXLabels(boolean drawX) {
+        chartProvider.getSettings().setDrawXLabels(drawX);
+    }
+
+    public RequestStatus updateChartData(StatisticResults statisticResults) {
+        return chartProvider.updateChartData(statisticResults);
     }
 
     public Observable<BaseDataEntityEntry> getSelection() {
         return baseEntrySelectionPublishSubject;
+    }
+
+    public void select(long selectedTimeMillis) {
+        manualSelectEntryOnSelectedTime(chartProvider.getChart(), selectedTimeMillis, true, false);
+    }
+
+    private void manualSelectEntryOnSelectedTime(DataEntityLineChart chart, long selectedTimeMillis, boolean centerViewToSelection, boolean callListeners) {
+
+        chart.getChartTouchListener()
+                .setLastGesture(ChartTouchListener.ChartGesture.NONE);
+
+        if (selectedTimeMillis < 0) {
+            chart.highlightValue(null, false);
+            chart.invalidate();
+            return;
+        }
+        if (chart.getData() == null) {
+            return;
+        }
+
+        BaseDataEntityEntry entryFound = (BaseDataEntityEntry) chartProvider.getEntryCacheMap().get(selectedTimeMillis);
+        if (entryFound != null) {
+            setSelectionEntry(entryFound, callListeners);
+            chart.highlightValue(entryFound.getX(), entryFound.getY(), entryFound.getDataSetIndex(), callListeners);
+
+            if (chart.getHighlighted() != null) {
+                chartProvider.setSelectionHighlight(chart.getHighlighted()[0]);
+            }
+
+            if (centerViewToSelection) {
+                chart.centerViewTo(entryFound.getX(), entryFound.getY(), YAxis.AxisDependency.LEFT);
+            }
+        }
     }
 
     private void setSelectionEntry(Entry entry, boolean publishSelection) {
@@ -91,48 +121,11 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
         }
     }
 
-    private void setSelectionHighlight(Highlight h) {
-        currentHighlight = h;
-    }
-
-    public void manualSelectEntry(long selectedTimeMillis) {
-        manualSelectEntryOnSelectedTime(chartProvider.getChart(), selectedTimeMillis, true, false);
-    }
-
-    private void manualSelectEntryOnSelectedTime(DataEntityLineChart lineChart, long selectedTimeMillis, boolean centerViewToSelection, boolean callListeners) {
-
-        lineChart.getChartTouchListener()
-                .setLastGesture(ChartTouchListener.ChartGesture.NONE);
-
-        if (selectedTimeMillis < 0) {
-            lineChart.highlightValue(null, false);
-            lineChart.invalidate();
-            return;
-        }
-        if (lineChart.getData() == null) {
-            return;
-        }
-
-        BaseDataEntityEntry entryFound = (BaseDataEntityEntry) chartProvider.getEntryCacheMap().get(selectedTimeMillis);
-        if (entryFound != null) {
-            setSelectionEntry(entryFound, false);
-            lineChart.highlightValue(entryFound.getX(), entryFound.getY(), entryFound.getDataSetIndex(), callListeners);
-
-            if (lineChart.getHighlighted() != null) {
-                setSelectionHighlight(lineChart.getHighlighted()[0]);
-            }
-
-            if (centerViewToSelection) {
-                lineChart.centerViewTo(entryFound.getX(), entryFound.getY(), YAxis.AxisDependency.LEFT);
-            }
-        }
-    }
-
-    private void resetMarkerAndClearSelection(DataEntityLineChart lineChart) {
-        currentHighlight = null;
+    private void resetMarkerAndClearSelection(DataEntityLineChart chart) {
+        chartProvider.setSelectionHighlight(null);
         chartProvider.getChart().setHighlightedEntry(null);
 
-        manualSelectEntryOnSelectedTime(lineChart, -1, false, true);
+        manualSelectEntryOnSelectedTime(chart, -1, false, true);
     }
 
     @Override
@@ -171,7 +164,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     @Override
     public void onValueSelected(Entry e, Highlight h) {
         setSelectionEntry(e, true);
-        setSelectionHighlight(h);
+        chartProvider.setSelectionHighlight(h);
     }
 
     @Override
@@ -179,34 +172,4 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
         resetMarkerAndClearSelection(chartProvider.getChart());
     }
 
-    @UiThread
-    public void setDrawIconsEnabled(boolean isChecked) {
-
-        chartProvider.getSettings().setDrawIconsEnabled(isChecked);
-        tryToUpdateDataChart(currentLineDataSetList);
-    }
-
-    @UiThread
-    public boolean isDrawIconsEnabled() {
-
-        if (chartProvider.getChart() != null) {
-            LineData lineData = chartProvider.getChart().getData();
-            if (lineData != null && !lineData.getDataSets().isEmpty()) {
-                return lineData.getDataSets().get(0).isDrawIconsEnabled();
-            }
-        }
-        return chartProvider.getSettings().isDrawIconsEnabled();
-    }
-
-    public void animateZoomToCenter(final float targetScaleX, final float targetScaleY, long duration) {
-        chartProvider.getChart().animateZoomToCenter(targetScaleX, targetScaleY, duration);
-    }
-
-    public void animateFitScreen(long duration) {
-        chartProvider.getChart().animateFitScreen(duration);
-    }
-
-    public void setDrawXLabels(boolean drawX) {
-        chartProvider.getSettings().setDrawXLabels(drawX);
-    }
 }
