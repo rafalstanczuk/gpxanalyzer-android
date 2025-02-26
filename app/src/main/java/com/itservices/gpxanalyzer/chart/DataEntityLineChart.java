@@ -24,10 +24,9 @@ import com.itservices.gpxanalyzer.chart.settings.LineChartSettings;
 import com.itservices.gpxanalyzer.chart.settings.background.GridBackgroundDrawer;
 import com.itservices.gpxanalyzer.chart.settings.background.LimitLinesBoundaries;
 import com.itservices.gpxanalyzer.chart.settings.highlight.StaticChartHighlighter;
-import com.itservices.gpxanalyzer.data.entity.DataEntity;
+import com.itservices.gpxanalyzer.data.statistics.StatisticResults;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
@@ -246,17 +245,10 @@ public class DataEntityLineChart extends LineChart {
 	public void loadChartSettings(LineChartSettings settings) {
 		limitLinesBoundaries.initLimitLines(paletteColorDeterminer);
 		scaler.setLimitLinesBoundaries(limitLinesBoundaries);
+		scaler.scale(this);
 		settings.setLimitLinesBoundaries(limitLinesBoundaries);
 
 		settings.setChartSettingsFor(this);
-	}
-
-	public LineChartScaler getScaler() {
-		return scaler;
-	}
-
-	public void scale() {
-		scaler.scale(this);
 	}
 
 	public void animateZoomToCenter(final float targetScaleX, final float targetScaleY, long duration) {
@@ -275,5 +267,10 @@ public class DataEntityLineChart extends LineChart {
 			((LineChartRenderer) mRenderer).releaseBitmap();
 		}
 		super.onDetachedFromWindow();
+	}
+
+	public void setStatisticResults(StatisticResults statisticResults) {
+		paletteColorDeterminer.setStatisticResults(statisticResults);
+		scaler.setStatisticResults(statisticResults);
 	}
 }

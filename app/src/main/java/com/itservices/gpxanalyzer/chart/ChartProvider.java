@@ -6,33 +6,24 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.itservices.gpxanalyzer.chart.entry.EntryCacheMap;
-import com.itservices.gpxanalyzer.chart.entry.TrendBoundaryEntryProvider;
-import com.itservices.gpxanalyzer.chart.entry.TrendBoundaryEntry;
-import com.itservices.gpxanalyzer.chart.legend.PaletteColorDeterminer;
+import com.itservices.gpxanalyzer.chart.linedataset.ColorFilledLineDataSetListProvider;
 import com.itservices.gpxanalyzer.chart.settings.LineChartSettings;
-import com.itservices.gpxanalyzer.data.provider.TrendBoundaryDataEntityProvider;
 import com.itservices.gpxanalyzer.data.statistics.StatisticResults;
-import com.itservices.gpxanalyzer.data.statistics.TrendBoundaryDataEntity;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
-public class ChartProvider {
+class ChartProvider {
 
     @Inject
     LineChartSettings settings;
 
     @Inject
-    EntryCacheMap entryCacheMap;
-
-    @Inject
-    ColorFilledLineDataSetListProvider colorFilledLineDataSetListCreator;
+    ColorFilledLineDataSetListProvider lineDataSetListProvider;
 
     private DataEntityLineChart chart;
 
-    private List<LineDataSet> currentLineDataSetList = new ArrayList<>();
     private Highlight currentHighlight;
 
     @Inject
@@ -55,21 +46,19 @@ public class ChartProvider {
 
     @UiThread
     public RequestStatus updateChartData(StatisticResults statisticResults) {
-        List<LineDataSet> newLineDataSetList = createLineDataSetList(statisticResults);
-        if (newLineDataSetList != null) {
-            currentLineDataSetList = newLineDataSetList;
 
-            return tryToUpdateDataChart();
+        chart.setStatisticResults(statisticResults);
+
+        List<LineDataSet> newLineDataSetList = lineDataSetListProvider.provide(statisticResults, settings, chart.getPaletteColorDeterminer());
+        if (newLineDataSetList != null) {
+            return updateChart(lineDataSetListProvider.provide(), currentHighlight);
         }
         return RequestStatus.ERROR_LINE_DATA_SET_NULL;
     }
 
     @UiThread
-    public RequestStatus tryToUpdateDataChart() {
-        if (currentLineDataSetList == null)
-            return RequestStatus.ERROR_DATA_SETS_NULL;
-
-        return updateChart(currentLineDataSetList, currentHighlight);
+    public void tryToUpdateDataChart() {
+        updateChart(lineDataSetListProvider.provide(), currentHighlight);
     }
 
     public DataEntityLineChart getChart() {
@@ -81,11 +70,11 @@ public class ChartProvider {
     }
 
     public EntryCacheMap getEntryCacheMap() {
-        return entryCacheMap;
+        return lineDataSetListProvider.getTrendBoundaryEntryProvider().getEntryCacheMap();
     }
 
     private void clearLineDataSets() {
-        List<LineDataSet> sets = currentLineDataSetList;
+        List<LineDataSet> sets = lineDataSetListProvider.provide();
         if (sets != null) {
             sets.clear();
             // update the chart
@@ -93,35 +82,6 @@ public class ChartProvider {
         }
     }
 
-    private List<LineDataSet> createLineDataSetList(StatisticResults statisticResults) {
-        if (statisticResults == null) return null;
-
-        PaletteColorDeterminer paletteColorDeterminer = chart.getPaletteColorDeterminer();
-        paletteColorDeterminer.initPalette(statisticResults);
-
-        // needed for scaling
-        chart.getScaler().setStatisticResults(statisticResults);
-
-        if (colorFilledLineDataSetListCreator.hasList()) {
-            return colorFilledLineDataSetListCreator.provide();
-        }
-
-        entryCacheMap.init(statisticResults.getDataEntityVector().size());
-
-        /**
-         * Time consuming computing
-         */
-        List<TrendBoundaryDataEntity> trendBoundaryDataEntityList = TrendBoundaryDataEntityProvider.provide(statisticResults);
-
-        List<TrendBoundaryEntry> createTrendBoundaryEntryList =
-                TrendBoundaryEntryProvider.provide(statisticResults, trendBoundaryDataEntityList, paletteColorDeterminer, entryCacheMap);
-
-        if (!createTrendBoundaryEntryList.isEmpty()) {
-            return colorFilledLineDataSetListCreator.createAndProvide(createTrendBoundaryEntryList, settings);
-        }
-
-        return null;
-    }
 
     /**
      * Combine the given datasets, apply styling and scaling, highlight if needed.
@@ -131,11 +91,10 @@ public class ChartProvider {
         if (chart == null)
             return RequestStatus.ERROR;
 
-        if (dataSets.isEmpty()) {
+        if (dataSets == null) {
             return RequestStatus.ERROR_INVALID_DATA_SET_AMOUNT_TO_SHOW;
         }
 
-        // combine all data sets into one lineData
         LineData lineData = new LineData();
         for (LineDataSet ds : dataSets) {
             lineData.addDataSet(ds);
@@ -144,7 +103,6 @@ public class ChartProvider {
         chart.clear();
         chart.setData(lineData);
         chart.loadChartSettings(settings);
-        chart.scale();
         chart.highlightValue(highlight, true);
         chart.invalidate();
 

@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.chart;
+package com.itservices.gpxanalyzer.chart.extras;
 
 import android.content.Context;
 import android.util.AttributeSet;

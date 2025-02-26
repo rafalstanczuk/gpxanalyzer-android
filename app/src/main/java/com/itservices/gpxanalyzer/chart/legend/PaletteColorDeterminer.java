@@ -47,7 +47,7 @@ public class PaletteColorDeterminer {
         return paletteFromBitmap;
     }
 
-    public void initPalette(StatisticResults statisticResults) {
+    public void setStatisticResults(StatisticResults statisticResults) {
         this.statisticResults = statisticResults;
 
         paletteMap = generatePalette(

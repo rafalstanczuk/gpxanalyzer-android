@@ -10,11 +10,28 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import javax.inject.Inject;
+
 public class TrendBoundaryEntryProvider {
 
-    public static List<TrendBoundaryEntry> provide(
-            StatisticResults statisticResults, List<TrendBoundaryDataEntity> trendBoundaryList, PaletteColorDeterminer paletteColorDeterminer, EntryCacheMap entryCacheMap
+
+    @Inject
+    EntryCacheMap entryCacheMap;
+
+
+    @Inject
+    public TrendBoundaryEntryProvider() {
+
+    }
+
+    public final EntryCacheMap getEntryCacheMap() {
+        return entryCacheMap;
+    }
+
+    public List<TrendBoundaryEntry> provide(
+            StatisticResults statisticResults, List<TrendBoundaryDataEntity> trendBoundaryList, PaletteColorDeterminer paletteColorDeterminer
     ) {
+        entryCacheMap.init(statisticResults.getDataEntityVector().size());
 
         List<TrendBoundaryEntry> trendBoundaryEntryList = new ArrayList<>();
 
