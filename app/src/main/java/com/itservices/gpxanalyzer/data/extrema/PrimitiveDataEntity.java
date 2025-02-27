@@ -5,10 +5,10 @@ final class PrimitiveDataEntity {
 
     private final long index;
     private long timestamp;
-    private float value;
+    private double value;
     private float accuracy;
 
-    public PrimitiveDataEntity(long index, long timestamp, float value, float accuracy) {
+    public PrimitiveDataEntity(long index, long timestamp, double value, float accuracy) {
         this.index = index;
         this.timestamp = timestamp;
         this.value = value;
@@ -32,7 +32,7 @@ final class PrimitiveDataEntity {
         return timestamp;
     }
 
-    public float getValue() {
+    public double getValue() {
         return value;
     }
 
@@ -44,7 +44,7 @@ final class PrimitiveDataEntity {
         this.timestamp = timestamp;
     }
 
-    public void setValue(float value) {
+    public void setValue(double value) {
         this.value = value;
     }
 

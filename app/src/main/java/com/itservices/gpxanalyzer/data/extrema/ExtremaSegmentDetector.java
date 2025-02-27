@@ -21,7 +21,7 @@ final class ExtremaSegmentDetector {
     }
 
     // If value changes are < ±0.01, treat derivative as zero (lower EPSILON to catch subtler slopes)
-    private static final double EPSILON = 0.00000000001;
+    private static final double EPSILON = 0.000000000001;
 
     // If accuracy is worse than 50, skip
     public static final float DEFAULT_MAX_VALUE_ACCURACY = 50.0f;
@@ -227,7 +227,7 @@ final class ExtremaSegmentDetector {
                 usedWeightSum += w;
             }
             double smoothedValue = weightedSum / usedWeightSum;
-            smoothedList.get(i).setValue((float) smoothedValue);
+            smoothedList.get(i).setValue(smoothedValue);
         }
         return smoothedList;
     }
