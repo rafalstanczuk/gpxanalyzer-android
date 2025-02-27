@@ -27,11 +27,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
@@ -53,6 +55,9 @@ public class MultipleSyncedGpxChartUseCase {
     private final PublishSubject<RequestStatus> requestStatus = PublishSubject.create();
 
     private Disposable loadDataDisposable;
+
+    private Disposable chartUpdateDisposable;
+
     private CompositeDisposable observeSelectionCompositeDisposable = new CompositeDisposable();
     private Vector<DataEntity> gpxData;
     private Activity activity;
@@ -75,7 +80,7 @@ public class MultipleSyncedGpxChartUseCase {
     }
 
     public void loadData(Activity activity, List<ChartAreaItem> chartAreaItemList, int defaultRawGpxDataId) {
-         if (chartAreaItemList.isEmpty())
+        if (chartAreaItemList.isEmpty())
             return;
 
         ConcurrentUtil.tryToDispose(loadDataDisposable);
@@ -102,11 +107,10 @@ public class MultipleSyncedGpxChartUseCase {
                 .map(this::updateGpxDataCache)
                 .map(gpxData -> updateStatisticsForItemList(chartAreaItemList, gpxData))
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                .observeOn(Schedulers.newThread())
                 .doOnError(e -> Log.e("loadData", "loadData: doOnError ", e))
-                .map(this::processChartUpdates)
                 .subscribe(
-                        requestStatus::onNext,
+                        this::processChartUpdates,
                         onError -> Log.e("loadData", "loadData: onError ", onError)
                 );
     }
@@ -135,14 +139,31 @@ public class MultipleSyncedGpxChartUseCase {
         return chartAreaItemList;
     }
 
-    private RequestStatus processChartUpdates(List<ChartAreaItem> chartAreaItemList) {
+    private void processChartUpdates(List<ChartAreaItem> chartAreaItemList) {
         requestStatus.onNext(PROCESSING);
 
-        RequestStatus finalRequestStatus = updateCharts(chartAreaItemList);
+        List<RequestStatus> updateChartStatusList = new ArrayList<>();
 
-        requestStatus.onNext(PROCESSED);
+        chartAreaItemList.forEach(item -> {
+            chartUpdateDisposable = updateChart(item.getChartController(), item.getStatisticResults())
+                    .observeOn(Schedulers.io())
+                    .subscribe(updateChartStatus -> {
+                                updateChartStatusList.add(updateChartStatus);
 
-        return finalRequestStatus;
+                                if (updateChartStatusList.size() == chartAreaItemList.size()) {
+                                    requestStatus.onNext(PROCESSED);
+                                }
+                            }
+                    );
+        });
+
+/*        int minOrdinal =
+                requestStatusList.stream()
+                        .mapToInt(Enum::ordinal)
+                        .min()
+                        .orElse(0);
+
+        return RequestStatus.values()[minOrdinal];*/
     }
 
     private Observable<Vector<DataEntity>> provideDataEntityVector(Context context, int rawResId) {
@@ -158,26 +179,8 @@ public class MultipleSyncedGpxChartUseCase {
                 : dataProvider.provide(context, rawResId);
     }
 
-    private RequestStatus updateCharts(List<ChartAreaItem> chartAreaItemList) {
-        List<RequestStatus> requestStatusList = new ArrayList<>();
 
-        for (ChartAreaItem chartAreaItem : chartAreaItemList) {
-
-            requestStatusList.add(
-                    updateChart(
-                            chartAreaItem.getChartController(), chartAreaItem.getStatisticResults()
-                    )
-            );
-        }
-
-        int minOrdinal = requestStatusList.stream()
-                .mapToInt(Enum::ordinal)
-                .min().orElse(0);
-
-        return RequestStatus.values()[minOrdinal];
-    }
-
-    private RequestStatus updateChart(ChartController chartController, StatisticResults statisticResults) {
+    private Single<RequestStatus> updateChart(ChartController chartController, StatisticResults statisticResults) {
         return chartController.updateChartData(statisticResults);
     }
 

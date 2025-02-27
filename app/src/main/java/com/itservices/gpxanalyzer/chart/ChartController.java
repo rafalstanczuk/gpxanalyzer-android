@@ -18,6 +18,7 @@ import com.itservices.gpxanalyzer.data.statistics.StatisticResults;
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.subjects.PublishSubject;
 
 public class ChartController implements OnChartValueSelectedListener, OnChartGestureListener {
@@ -72,7 +73,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
         chartProvider.getSettings().setDrawXLabels(drawX);
     }
 
-    public RequestStatus updateChartData(StatisticResults statisticResults) {
+    public Single<RequestStatus> updateChartData(StatisticResults statisticResults) {
         return chartProvider.updateChartData(statisticResults);
     }
 

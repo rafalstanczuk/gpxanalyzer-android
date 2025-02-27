@@ -1,10 +1,15 @@
 package com.itservices.gpxanalyzer.data.gpx.calculation;
 
 import android.util.Pair;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class ExtremaSegmentDetector {
+
+    private List<PrimitiveDataEntity> filtered;
+    private List<PrimitiveDataEntity> smoothed;
+    private List<Extremum> extrema;
 
     // Window function types
     public enum WindowType {
@@ -39,22 +44,26 @@ public class ExtremaSegmentDetector {
     // PUBLIC DETECTION METHODS
     // --------------------------------------------------------------------------
 
-    public static List<Pair<Long, Long>> detectAscendingSegments(
+    public void preprocessAndFindExtrema(
             final List<PrimitiveDataEntity> originalData,
-            double minAscendingAmplitude,
-            double minAscendingDerivative,
             float maxValueAccuracy,
             double[] windowWeights
     ) {
         // 1) Preprocess by accuracy
-        List<PrimitiveDataEntity> filtered = preProcessPrimitiveDataEntity(originalData, maxValueAccuracy);
-        if (filtered.size() < 3) return new ArrayList<>();
+        filtered = preProcessPrimitiveDataEntity(originalData, maxValueAccuracy);
 
         // 2) Smooth
-        List<PrimitiveDataEntity> smoothed = applyMovingFilter(filtered, windowWeights);
+        smoothed = applyMovingFilter(filtered, windowWeights);
 
         // 3) Find local minima / maxima
-        List<Extremum> extrema = findLocalExtrema(smoothed);
+        extrema = findLocalExtrema(smoothed);
+    }
+
+    public List<Pair<Long, Long>> detectAscendingSegments(
+            double minAscendingAmplitude,
+            double minAscendingDerivative
+    ) {
+        if (filtered.size() < 3 || smoothed == null || extrema == null) return new ArrayList<>();
 
         // 4) Ascending segments (MIN -> next valid MAX)
         return findAscendingSegmentsFromExtrema(
@@ -62,22 +71,11 @@ public class ExtremaSegmentDetector {
         );
     }
 
-    public static List<Pair<Long, Long>> detectDescendingSegments(
-            final List<PrimitiveDataEntity> originalData,
+    public List<Pair<Long, Long>> detectDescendingSegments(
             double minDescendingAmplitude,
-            double minDescendingDerivative,
-            float maxValueAccuracy,
-            double[] windowWeights
+            double minDescendingDerivative
     ) {
-        // 1) Preprocess
-        List<PrimitiveDataEntity> filtered = preProcessPrimitiveDataEntity(originalData, maxValueAccuracy);
-        if (filtered.size() < 3) return new ArrayList<>();
-
-        // 2) Smooth
-        List<PrimitiveDataEntity> smoothed = applyMovingFilter(filtered, windowWeights);
-
-        // 3) Extrema
-        List<Extremum> extrema = findLocalExtrema(smoothed);
+        if (filtered.size() < 3 || smoothed == null || extrema == null) return new ArrayList<>();
 
         // 4) Descending segments (MAX -> next valid MIN)
         return findDescendingSegmentsFromExtrema(

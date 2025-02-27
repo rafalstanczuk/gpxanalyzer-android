@@ -11,12 +11,21 @@ import com.itservices.gpxanalyzer.data.provider.TrendBoundaryDataEntityProvider;
 import com.itservices.gpxanalyzer.data.provider.TrendStatistics;
 import com.itservices.gpxanalyzer.data.statistics.StatisticResults;
 import com.itservices.gpxanalyzer.data.statistics.TrendBoundaryDataEntity;
+import com.itservices.gpxanalyzer.utils.common.ConcurrentUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+
+import io.reactivex.Observable;
+import io.reactivex.Scheduler;
+import io.reactivex.Single;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.PublishSubject;
 
 public class ColorFilledLineDataSetListProvider {
 
@@ -25,6 +34,8 @@ public class ColorFilledLineDataSetListProvider {
     TrendBoundaryEntryProvider trendBoundaryEntryProvider;
 
     private List<LineDataSet> dataSetList = new ArrayList<>();
+
+    private Disposable providerDisposable;
 
     @Inject
     public ColorFilledLineDataSetListProvider() {
@@ -38,26 +49,23 @@ public class ColorFilledLineDataSetListProvider {
         return dataSetList;
     }
 
-    public List<LineDataSet> provide(StatisticResults statisticResults, LineChartSettings settings, PaletteColorDeterminer paletteColorDeterminer) {
-        if (statisticResults == null) return null;
+    public Single<List<LineDataSet>> provide(StatisticResults statisticResults, LineChartSettings settings, PaletteColorDeterminer paletteColorDeterminer) {
+        if (statisticResults == null)
+            return Single.just(dataSetList);
 
-        if (!dataSetList.isEmpty()) {
-            return dataSetList;
-        }
-
-        /**
-         * Time consuming computing
-         */
-        List<TrendBoundaryDataEntity> trendBoundaryDataEntityList = TrendBoundaryDataEntityProvider.provide(statisticResults);
-
-        List<TrendBoundaryEntry> createTrendBoundaryEntryList =
-                trendBoundaryEntryProvider.provide(statisticResults, trendBoundaryDataEntityList, paletteColorDeterminer);
-
-        if (!createTrendBoundaryEntryList.isEmpty()) {
-            return createAndProvide(createTrendBoundaryEntryList, settings);
-        }
-
-        return null;
+        return  !dataSetList.isEmpty() ?
+                Single.just(dataSetList)
+                    :
+                TrendBoundaryDataEntityProvider
+                .provide(statisticResults)
+                .observeOn(Schedulers.computation())
+                .subscribeOn(Schedulers.computation())
+                .map(trendBoundaryDataEntityList -> trendBoundaryEntryProvider.provide(statisticResults, trendBoundaryDataEntityList, paletteColorDeterminer))
+                .map(createTrendBoundaryEntryList -> createAndProvide(createTrendBoundaryEntryList, settings))
+                .map(data -> {
+                    dataSetList = data;
+                    return data;
+                });
     }
 
     private List<LineDataSet> createAndProvide(List<TrendBoundaryEntry> trendBoundaryEntryList, LineChartSettings settings) {

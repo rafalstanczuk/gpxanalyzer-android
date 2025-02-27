@@ -14,6 +14,10 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+
 class ChartProvider {
 
     @Inject
@@ -45,15 +49,21 @@ class ChartProvider {
     }
 
     @UiThread
-    public RequestStatus updateChartData(StatisticResults statisticResults) {
+    public Single<RequestStatus> updateChartData(StatisticResults statisticResults) {
 
         chart.setStatisticResults(statisticResults);
 
-        List<LineDataSet> newLineDataSetList = lineDataSetListProvider.provide(statisticResults, settings, chart.getPaletteColorDeterminer());
-        if (newLineDataSetList != null) {
-            return updateChart(lineDataSetListProvider.provide(), currentHighlight);
-        }
-        return RequestStatus.ERROR_LINE_DATA_SET_NULL;
+        return lineDataSetListProvider
+                .provide(statisticResults, settings, chart.getPaletteColorDeterminer())
+                .observeOn(AndroidSchedulers.mainThread())
+                .map(newLineDataSetList -> {
+
+                    if (newLineDataSetList != null) {
+                        return updateChart(lineDataSetListProvider.provide(), currentHighlight);
+                    }
+                    return RequestStatus.ERROR_LINE_DATA_SET_NULL;
+                })
+                .observeOn(Schedulers.io());
     }
 
     @UiThread
