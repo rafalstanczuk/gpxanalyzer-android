@@ -14,7 +14,7 @@ public class ExtremaSegmentDetector {
     }
 
     // If value changes are < ±0.01, treat derivative as zero (lower EPSILON to catch subtler slopes)
-    private static final double EPSILON = 0.000000001;
+    private static final double EPSILON = 0.00000000001;
 
     // If accuracy is worse than 50, skip
     public static final float DEFAULT_MAX_VALUE_ACCURACY = 50.0f;

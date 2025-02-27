@@ -33,7 +33,7 @@ public class TrendBoundaryDataEntityProvider {
         // TODO: Add filtering/processing for ascending/descending segments detection
 
         List<PrimitiveDataEntity> primitiveList = DataPrimitiveMapper.mapFrom( statisticResults );
-        double[] triWeights = ExtremaSegmentDetector.generateWindowFunction(3, ExtremaSegmentDetector.WindowType.GAUSSIAN, 0);
+        double[] triWeights = ExtremaSegmentDetector.generateWindowFunction(7, ExtremaSegmentDetector.WindowType.GAUSSIAN, 0);
         double minAscAmp = 30;
         double minAscDerivative = 0.001;
         double minDescAmp = 30;
