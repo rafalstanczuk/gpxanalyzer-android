@@ -6,13 +6,15 @@ public class DataEntity {
     private final int id;
     private final long timestampMillis;
     private final List<Float> valueList;
+    private final List<Float> valueAccuracyList;
     private final List<String> nameList;
     private final List<String> unitList;
 
-    public DataEntity(int id, long timestampMillis, List<Float> valueList, List<String> nameList, List<String> unitList) {
+    public DataEntity(int id, long timestampMillis, List<Float> valueList, List<Float> valueAccuracyList, List<String> nameList, List<String> unitList) {
         this.id = id;
         this.timestampMillis = timestampMillis;
         this.valueList = valueList;
+        this.valueAccuracyList = valueAccuracyList;
         this.nameList = nameList;
         this.unitList = unitList;
     }
@@ -23,6 +25,7 @@ public class DataEntity {
         this.valueList = dataEntity.getValueList();
         this.nameList = dataEntity.getNameList();
         this.unitList = dataEntity.getUnitList();
+        this.valueAccuracyList = dataEntity.getValueAccuracyList();
     }
 
     public long getTimestampMillis() {
@@ -39,6 +42,10 @@ public class DataEntity {
 
     public List<String> getUnitList() {
         return unitList;
+    }
+
+    public List<Float> getValueAccuracyList() {
+        return valueAccuracyList;
     }
 
 

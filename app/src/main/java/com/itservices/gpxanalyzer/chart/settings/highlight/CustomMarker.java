@@ -107,7 +107,7 @@ public class CustomMarker extends MarkerView {
                     text = "-";
                 }
             }
-            text+= curveDataEntityEntry.getTrendBoundaryDataEntity().trendStatistics().deltaAsl();
+            text+= curveDataEntityEntry.getTrendBoundaryDataEntity().trendStatistics().deltaVal();
 
 
             binding.markerTextViewDeltaAsl.setText(getSpannableStringBuilder(text, " " + unitString));

@@ -139,6 +139,7 @@ public class GPXDataProvider {
     private DataEntity createDataEntity(int iTrackPoint, Location location) {
         DataEntity dataEntity = new DataEntity(iTrackPoint, location.getTime(),
                 Arrays.asList((float) location.getAltitude(), location.getSpeed()),
+                Arrays.asList(0.1f, 0.1f),
                 NAME_LIST,
                 UNIT_LIST);
 

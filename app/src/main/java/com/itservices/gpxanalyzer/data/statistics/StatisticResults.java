@@ -1,22 +1,29 @@
 package com.itservices.gpxanalyzer.data.statistics;
 
 
+import com.itservices.gpxanalyzer.chart.entry.EntryCacheMap;
 import com.itservices.gpxanalyzer.data.entity.DataEntity;
+import com.itservices.gpxanalyzer.data.entity.DataEntityCacheMap;
 
 import java.util.DoubleSummaryStatistics;
 import java.util.Vector;
 import java.util.stream.Collectors;
+
+import javax.inject.Inject;
 
 public class StatisticResults {
     public static final int DEFAULT_PRIMARY_DATA_INDEX = 0;
     private double maxValue;
     private double minValue;
 
+    private final DataEntityCacheMap dataEntityCacheMap = new DataEntityCacheMap();
+
     private Vector<DataEntity> dataEntityVector = new Vector<>();
 
     private int primaryDataIndex = DEFAULT_PRIMARY_DATA_INDEX;
 
-    private StatisticResults() {}
+    private StatisticResults() {
+    }
 
     public StatisticResults(Vector<DataEntity> dataEntityVector, int primaryDataIndex) {
         this.primaryDataIndex = primaryDataIndex;
@@ -39,7 +46,11 @@ public class StatisticResults {
         DoubleSummaryStatistics stats = dataEntityVector.stream()
                 .collect(
                         Collectors.summarizingDouble(
-                                dataEntity -> dataEntity.getValueList().get(primaryDataIndex)
+                                dataEntity -> {
+                                    dataEntityCacheMap.add(dataEntity.getTimestampMillis(), dataEntity);
+
+                                    return dataEntity.getValueList().get(primaryDataIndex);
+                                }
                         )
                 );
         minValue = stats.getMin();
@@ -56,6 +67,8 @@ public class StatisticResults {
 
     private void setDataEntityVector(Vector<DataEntity> dataEntityVector) {
         this.dataEntityVector = dataEntityVector;
+
+        dataEntityCacheMap.init(dataEntityVector.size() + 1);
 
         compute();
     }
@@ -78,4 +91,11 @@ public class StatisticResults {
         return minValue;
     }
 
+    public DataEntityCacheMap getDataEntityCacheMap() {
+        return dataEntityCacheMap;
+    }
+
+    public float getValue(int index) {
+        return dataEntityVector.get(index).getValueList().get(primaryDataIndex);
+    }
 }

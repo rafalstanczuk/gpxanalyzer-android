@@ -12,4 +12,13 @@ public record TrendBoundaryDataEntity(int id,
     public String getLabel() {
         return String.valueOf(id);
     }
+
+    @Override
+    public String toString() {
+        return "\nTrendBoundaryDataEntity{" +
+                "id=" + id +
+                ", trendStatistics=" + trendStatistics +
+                ", beginTimestamp=" + beginTimestamp +
+                ", endTimestamp=" + endTimestamp +'}';
+    }
 }

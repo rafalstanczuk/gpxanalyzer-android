@@ -4,6 +4,6 @@ import com.itservices.gpxanalyzer.data.statistics.TrendType;
 
 public record TrendStatistics(
         TrendType trendType,
-        float deltaAsl
+        float deltaVal
 ) {
 }
