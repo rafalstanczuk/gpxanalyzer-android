@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.chart.settings;
+package com.itservices.gpxanalyzer.chart;
 
 import static com.github.mikephil.charting.charts.Chart.PAINT_GRID_BACKGROUND;
 
@@ -11,7 +11,6 @@ import androidx.core.content.ContextCompat;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.itservices.gpxanalyzer.R;
-import com.itservices.gpxanalyzer.chart.DataEntityLineChart;
 import com.itservices.gpxanalyzer.chart.settings.axis.AxisValueFormatter;
 import com.itservices.gpxanalyzer.chart.settings.axis.HourMinutesAxisValueFormatter;
 import com.itservices.gpxanalyzer.chart.settings.background.LimitLinesBoundaries;

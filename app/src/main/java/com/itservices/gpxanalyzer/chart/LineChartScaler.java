@@ -2,7 +2,7 @@ package com.itservices.gpxanalyzer.chart;
 
 import com.github.mikephil.charting.components.YAxis;
 import com.itservices.gpxanalyzer.chart.settings.background.LimitLinesBoundaries;
-import com.itservices.gpxanalyzer.data.statistics.StatisticResults;
+import com.itservices.gpxanalyzer.data.StatisticResults;
 import com.itservices.gpxanalyzer.utils.common.PrecisionUtil;
 
 import java.util.Arrays;

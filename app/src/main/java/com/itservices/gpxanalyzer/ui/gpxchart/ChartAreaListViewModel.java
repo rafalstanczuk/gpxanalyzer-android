@@ -1,6 +1,6 @@
 package com.itservices.gpxanalyzer.ui.gpxchart;
 
-import static com.itservices.gpxanalyzer.chart.RequestStatus.DEFAULT;
+import static com.itservices.gpxanalyzer.data.RequestStatus.DEFAULT;
 
 import static java.util.Objects.requireNonNull;
 
@@ -12,7 +12,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.itservices.gpxanalyzer.chart.RequestStatus;
+import com.itservices.gpxanalyzer.data.RequestStatus;
 import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItem;
 import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItemAdapter;
 import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.ViewMode;

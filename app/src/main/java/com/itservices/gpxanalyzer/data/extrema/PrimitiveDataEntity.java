@@ -1,12 +1,15 @@
-package com.itservices.gpxanalyzer.data.gpx.calculation;
+package com.itservices.gpxanalyzer.data.extrema;
 
-public class PrimitiveDataEntity {
+final class PrimitiveDataEntity {
 
+
+    private final long index;
     private long timestamp;
     private float value;
     private float accuracy;
 
-    public PrimitiveDataEntity(long timestamp, float value, float accuracy) {
+    public PrimitiveDataEntity(long index, long timestamp, float value, float accuracy) {
+        this.index = index;
         this.timestamp = timestamp;
         this.value = value;
         this.accuracy = accuracy;
@@ -14,10 +17,15 @@ public class PrimitiveDataEntity {
 
     public static PrimitiveDataEntity copy(PrimitiveDataEntity entity) {
         return new PrimitiveDataEntity(
+                entity.getIndex(),
                 entity.getTimestamp(),
                 entity.getValue(),
                 entity.getAccuracy()
         );
+    }
+
+    private long getIndex() {
+        return index;
     }
 
     public long getTimestamp() {

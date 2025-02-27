@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.data.gpx.calculation;
+package com.itservices.gpxanalyzer.utils.location;
 
 import android.location.Location;
 
@@ -13,7 +13,7 @@ public class LocationCalculatorUtil {
      * @param locations Location
      * @return Centroid Location object
      */
-    public static Location calculateCentroidManual(List<Location> locations) {
+    public static Location calculateCentroid(List<Location> locations) {
         if (locations == null || locations.isEmpty()) {
             throw new IllegalArgumentException("Location list is null or empty");
         }
@@ -28,7 +28,7 @@ public class LocationCalculatorUtil {
             double lon = loc.getLongitude();
             double alt = loc.hasAltitude() ? loc.getAltitude() : 0.0;
 
-            double[] ecef = ECEFConverterManual.geodeticToECEF(lat, lon, alt);
+            double[] ecef = ECEFConverter.geodeticToECEF(lat, lon, alt);
             sumX += ecef[0];
             sumY += ecef[1];
             sumZ += ecef[2];
@@ -38,7 +38,7 @@ public class LocationCalculatorUtil {
         double centroidY = sumY / count;
         double centroidZ = sumZ / count;
 
-        double[] centroidGeodetic = ECEFConverterManual.ecefToGeodetic(centroidX, centroidY, centroidZ);
+        double[] centroidGeodetic = ECEFConverter.ecefToGeodetic(centroidX, centroidY, centroidZ);
 
         double centroidLat = centroidGeodetic[0];
         double centroidLon = centroidGeodetic[1];

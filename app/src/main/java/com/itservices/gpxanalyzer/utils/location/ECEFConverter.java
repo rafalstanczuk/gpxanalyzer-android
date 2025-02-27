@@ -1,6 +1,6 @@
-package com.itservices.gpxanalyzer.data.gpx.calculation;
+package com.itservices.gpxanalyzer.utils.location;
 
-public class ECEFConverterManual {
+public class ECEFConverter {
     // WGS84 ellipsoid constants
     private static final double a = 6378137.0;            // Semi-major axis [meters]
     private static final double b = 6356752.314245;       // Semi-minor axis [meters]

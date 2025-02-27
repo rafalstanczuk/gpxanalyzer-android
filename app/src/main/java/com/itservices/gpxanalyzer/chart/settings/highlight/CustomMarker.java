@@ -22,8 +22,8 @@ import com.github.mikephil.charting.utils.MPPointF;
 import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.chart.DataEntityLineChart;
 import com.itservices.gpxanalyzer.chart.entry.CurveDataEntityEntry;
-import com.itservices.gpxanalyzer.data.entity.DataEntity;
-import com.itservices.gpxanalyzer.data.statistics.TrendType;
+import com.itservices.gpxanalyzer.data.DataEntity;
+import com.itservices.gpxanalyzer.data.TrendType;
 import com.itservices.gpxanalyzer.databinding.CustomMarkerViewBinding;
 import com.itservices.gpxanalyzer.utils.common.FormatNumberUtil;
 import com.itservices.gpxanalyzer.utils.ui.ColorUtil;
@@ -82,10 +82,10 @@ public class CustomMarker extends MarkerView {
             DataEntity dataEntity = curveDataEntityEntry.getDataEntity();
 
             SpannableStringBuilder timeLine = getSpannableStringBuilder(
-                    FormatNumberUtil.getFormattedTime(dataEntity.getTimestampMillis()), " h"
+                    FormatNumberUtil.getFormattedTime(dataEntity.timestampMillis()), " h"
             );
 
-            String unitString = dataEntity.getUnitList().get( curveDataEntityEntry.getStatisticResults().getPrimaryDataIndex() );
+            String unitString = dataEntity.unitList().get( curveDataEntityEntry.getStatisticResults().getPrimaryDataIndex() );
 
             SpannableStringBuilder valueLine = getSpannableStringBuilder(
                     String.valueOf((int) curveDataEntityEntry.getY()), " " + unitString);

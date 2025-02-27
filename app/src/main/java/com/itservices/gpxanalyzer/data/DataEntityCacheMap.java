@@ -1,9 +1,9 @@
-package com.itservices.gpxanalyzer.data.entity;
+package com.itservices.gpxanalyzer.data;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class DataEntityCacheMap {
+final class DataEntityCacheMap {
 
     private Map<Long, DataEntity> dataEntityMap = new HashMap<>();
 

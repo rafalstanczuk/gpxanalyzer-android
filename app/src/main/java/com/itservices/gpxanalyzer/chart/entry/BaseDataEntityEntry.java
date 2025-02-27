@@ -3,8 +3,8 @@ package com.itservices.gpxanalyzer.chart.entry;
 import android.graphics.drawable.Drawable;
 
 import com.github.mikephil.charting.data.Entry;
-import com.itservices.gpxanalyzer.data.entity.DataEntity;
-import com.itservices.gpxanalyzer.data.statistics.StatisticResults;
+import com.itservices.gpxanalyzer.data.DataEntity;
+import com.itservices.gpxanalyzer.data.StatisticResults;
 
 public class BaseDataEntityEntry extends Entry {
     protected final DataEntity dataEntity;

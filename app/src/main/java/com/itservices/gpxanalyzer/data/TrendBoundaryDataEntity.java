@@ -1,7 +1,6 @@
-package com.itservices.gpxanalyzer.data.statistics;
+package com.itservices.gpxanalyzer.data;
 
-import com.itservices.gpxanalyzer.data.entity.DataEntity;
-import com.itservices.gpxanalyzer.data.provider.TrendStatistics;
+import androidx.annotation.NonNull;
 
 import java.util.Vector;
 
@@ -13,12 +12,13 @@ public record TrendBoundaryDataEntity(int id,
         return String.valueOf(id);
     }
 
+    @NonNull
     @Override
     public String toString() {
-        return "\nTrendBoundaryDataEntity{" +
+        return "TrendBoundaryDataEntity{" +
                 "id=" + id +
-                ", trendStatistics=" + trendStatistics +
+                ", trendStatistics=" + trendStatistics.toString() +
                 ", beginTimestamp=" + beginTimestamp +
-                ", endTimestamp=" + endTimestamp +'}';
+                ", endTimestamp=" + endTimestamp +"}\n";
     }
 }

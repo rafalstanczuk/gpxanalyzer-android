@@ -13,7 +13,8 @@ import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.itservices.gpxanalyzer.chart.entry.BaseDataEntityEntry;
-import com.itservices.gpxanalyzer.data.statistics.StatisticResults;
+import com.itservices.gpxanalyzer.data.RequestStatus;
+import com.itservices.gpxanalyzer.data.StatisticResults;
 
 import javax.inject.Inject;
 
@@ -23,12 +24,13 @@ import io.reactivex.subjects.PublishSubject;
 
 public class ChartController implements OnChartValueSelectedListener, OnChartGestureListener {
 
-    private final ChartProvider chartProvider;
+    @Inject
+    ChartProvider chartProvider;
+
     private final PublishSubject<BaseDataEntityEntry> baseEntrySelectionPublishSubject = PublishSubject.create();
 
     @Inject
-    public ChartController(ChartProvider chartProvider) {
-        this.chartProvider = chartProvider;
+    public ChartController() {
     }
 
     /**

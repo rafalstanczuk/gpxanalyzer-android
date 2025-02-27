@@ -1,9 +1,9 @@
 package com.itservices.gpxanalyzer.usecase;
 
-import static com.itservices.gpxanalyzer.chart.RequestStatus.DATA_LOADED;
-import static com.itservices.gpxanalyzer.chart.RequestStatus.LOADING;
-import static com.itservices.gpxanalyzer.chart.RequestStatus.PROCESSED;
-import static com.itservices.gpxanalyzer.chart.RequestStatus.PROCESSING;
+import static com.itservices.gpxanalyzer.data.RequestStatus.DATA_LOADED;
+import static com.itservices.gpxanalyzer.data.RequestStatus.LOADING;
+import static com.itservices.gpxanalyzer.data.RequestStatus.PROCESSED;
+import static com.itservices.gpxanalyzer.data.RequestStatus.PROCESSING;
 
 import android.app.Activity;
 import android.content.Context;
@@ -12,11 +12,11 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.itservices.gpxanalyzer.chart.ChartController;
-import com.itservices.gpxanalyzer.chart.RequestStatus;
+import com.itservices.gpxanalyzer.data.RequestStatus;
 import com.itservices.gpxanalyzer.chart.entry.BaseDataEntityEntry;
-import com.itservices.gpxanalyzer.data.entity.DataEntity;
-import com.itservices.gpxanalyzer.data.provider.GPXDataProvider;
-import com.itservices.gpxanalyzer.data.statistics.StatisticResults;
+import com.itservices.gpxanalyzer.data.DataEntity;
+import com.itservices.gpxanalyzer.data.gpx.GPXDataProvider;
+import com.itservices.gpxanalyzer.data.StatisticResults;
 import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItem;
 import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.ViewMode;
 import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.ViewModeMapper;
@@ -27,14 +27,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -190,7 +188,7 @@ public class MultipleSyncedGpxChartUseCase {
                 .observeOn(Schedulers.newThread())
                 .doOnNext(baseDataEntityEntry ->
                         activity.runOnUiThread(() -> {
-                            chartController.select(baseDataEntityEntry.getDataEntity().getTimestampMillis());
+                            chartController.select(baseDataEntityEntry.getDataEntity().timestampMillis());
                         })
                 )
                 .subscribe();

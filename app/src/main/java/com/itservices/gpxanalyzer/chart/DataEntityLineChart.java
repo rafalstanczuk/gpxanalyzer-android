@@ -1,7 +1,5 @@
 package com.itservices.gpxanalyzer.chart;
 
-import static com.itservices.gpxanalyzer.utils.common.FormatNumberUtil.getFormattedTime;
-
 import android.content.Context;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
@@ -20,11 +18,10 @@ import com.github.mikephil.charting.utils.MPPointF;
 import com.itservices.gpxanalyzer.MainActivity;
 import com.itservices.gpxanalyzer.chart.entry.BaseDataEntityEntry;
 import com.itservices.gpxanalyzer.chart.legend.PaletteColorDeterminer;
-import com.itservices.gpxanalyzer.chart.settings.LineChartSettings;
 import com.itservices.gpxanalyzer.chart.settings.background.GridBackgroundDrawer;
 import com.itservices.gpxanalyzer.chart.settings.background.LimitLinesBoundaries;
 import com.itservices.gpxanalyzer.chart.settings.highlight.StaticChartHighlighter;
-import com.itservices.gpxanalyzer.data.statistics.StatisticResults;
+import com.itservices.gpxanalyzer.data.StatisticResults;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;

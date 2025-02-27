@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.chart.linedataset;
+package com.itservices.gpxanalyzer.chart;
 
 import android.graphics.Color;
 
@@ -6,12 +6,9 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.itservices.gpxanalyzer.chart.entry.TrendBoundaryEntry;
 import com.itservices.gpxanalyzer.chart.entry.TrendBoundaryEntryProvider;
 import com.itservices.gpxanalyzer.chart.legend.PaletteColorDeterminer;
-import com.itservices.gpxanalyzer.chart.settings.LineChartSettings;
-import com.itservices.gpxanalyzer.data.provider.TrendBoundaryDataEntityProvider;
-import com.itservices.gpxanalyzer.data.provider.TrendStatistics;
-import com.itservices.gpxanalyzer.data.statistics.StatisticResults;
-import com.itservices.gpxanalyzer.data.statistics.TrendBoundaryDataEntity;
-import com.itservices.gpxanalyzer.utils.common.ConcurrentUtil;
+import com.itservices.gpxanalyzer.data.extrema.TrendBoundaryExtremaProvider;
+import com.itservices.gpxanalyzer.data.TrendStatistics;
+import com.itservices.gpxanalyzer.data.StatisticResults;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,15 +16,11 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import io.reactivex.Observable;
-import io.reactivex.Scheduler;
 import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
-import io.reactivex.subjects.PublishSubject;
 
-public class ColorFilledLineDataSetListProvider {
+class ColorFilledLineDataSetListProvider {
 
 
     @Inject
@@ -56,7 +49,7 @@ public class ColorFilledLineDataSetListProvider {
         return  !dataSetList.isEmpty() ?
                 Single.just(dataSetList)
                     :
-                TrendBoundaryDataEntityProvider
+                TrendBoundaryExtremaProvider
                 .provide(statisticResults)
                 .observeOn(Schedulers.computation())
                 .subscribeOn(Schedulers.computation())

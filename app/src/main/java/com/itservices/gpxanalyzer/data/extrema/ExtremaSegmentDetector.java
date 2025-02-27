@@ -1,11 +1,13 @@
-package com.itservices.gpxanalyzer.data.gpx.calculation;
+package com.itservices.gpxanalyzer.data.extrema;
 
 import android.util.Pair;
+
+import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ExtremaSegmentDetector {
+final class ExtremaSegmentDetector {
 
     private List<PrimitiveDataEntity> filtered;
     private List<PrimitiveDataEntity> smoothed;
@@ -40,6 +42,35 @@ public class ExtremaSegmentDetector {
         }
     }
 
+    // Container for a final segment: (startTime, endTime, trendType)
+    public static class Segment {
+        public final int startIndex;
+        public final int endIndex;
+        public final long startTime;
+        public final long endTime;
+        public final SegmentTrendType type;
+
+        Segment(int startIndex, int endIndex, long startTime, long endTime, SegmentTrendType type) {
+            this.startIndex = startIndex;
+            this.endIndex = endIndex;
+            this.startTime = startTime;
+            this.endTime   = endTime;
+            this.type      = type;
+        }
+
+
+        @NonNull
+        @Override
+        public String toString() {
+            return "Segment{" +
+                    "startIndex=" + startIndex +
+                    ", endIndex=" + endIndex +
+                    ", startTime=" + startTime +
+                    ", endTime=" + endTime +
+                    ", type=" + type +
+                    '}';
+        }
+    }
     // --------------------------------------------------------------------------
     // PUBLIC DETECTION METHODS
     // --------------------------------------------------------------------------
@@ -59,28 +90,79 @@ public class ExtremaSegmentDetector {
         extrema = findLocalExtrema(smoothed);
     }
 
-    public List<Pair<Long, Long>> detectAscendingSegments(
-            double minAscendingAmplitude,
-            double minAscendingDerivative
+    // --------------------------------------------------------------------------
+    // SINGLE-PASS DETECTION OF ASC/DESC
+    // --------------------------------------------------------------------------
+    /**
+     * Detects both ascending (MIN->MAX) and descending (MAX->MIN) segments
+     * in one pass through the extrema list, preventing overlaps.
+     *
+     * @param minAscAmp             Minimum amplitude for ascending
+     * @param minAscDerivative      Minimum derivative for ascending
+     * @param minDescAmp            Minimum amplitude for descending
+     * @param minDescDerivative     Minimum derivative for descending
+     * @return A single list of non-overlapping segments (UP or DOWN).
+     */
+    public List<Segment> detectSegmentsOneRun(
+            double minAscAmp,
+            double minAscDerivative,
+            double minDescAmp,
+            double minDescDerivative
     ) {
-        if (filtered.size() < 3 || smoothed == null || extrema == null) return new ArrayList<>();
 
-        // 4) Ascending segments (MIN -> next valid MAX)
-        return findAscendingSegmentsFromExtrema(
-                smoothed, extrema, minAscendingAmplitude, minAscendingDerivative
-        );
-    }
+        // 4) Build segments from consecutive pairs of extrema
+        List<Segment> segments = new ArrayList<>();
 
-    public List<Pair<Long, Long>> detectDescendingSegments(
-            double minDescendingAmplitude,
-            double minDescendingDerivative
-    ) {
-        if (filtered.size() < 3 || smoothed == null || extrema == null) return new ArrayList<>();
+        for (int i = 0; i < extrema.size() - 1; i++) {
+            Extremum e1 = extrema.get(i);
+            Extremum e2 = extrema.get(i + 1);
 
-        // 4) Descending segments (MAX -> next valid MIN)
-        return findDescendingSegmentsFromExtrema(
-                smoothed, extrema, minDescendingAmplitude, minDescendingDerivative
-        );
+            // e1 must come before e2 in time
+            if (e2.index <= e1.index) {
+                continue;
+            }
+
+            // Get the start/end points
+            PrimitiveDataEntity p1 = smoothed.get(e1.index);
+            PrimitiveDataEntity p2 = smoothed.get(e2.index);
+
+            double amplitude = Math.abs(p2.getValue() - p1.getValue());
+            long dtMillis = p2.getTimestamp() - p1.getTimestamp();
+            if (dtMillis <= 0) {
+                continue;
+            }
+            double dtSec = dtMillis / 1000.0;
+            double avgDerivative = amplitude / dtSec;
+
+            // Check if (MIN -> MAX)
+            if (e1.type == ExtremaType.MIN && e2.type == ExtremaType.MAX) {
+                // ascending candidate
+                if ((p2.getValue() > p1.getValue()) &&
+                        (amplitude >= minAscAmp) &&
+                        (avgDerivative >= minAscDerivative)) {
+
+                    segments.add(new Segment(e1.index, e2.index, p1.getTimestamp(), p2.getTimestamp(), SegmentTrendType.UP));
+                }/* else {
+                    segments.add(new Segment(e1.index, e2.index, p1.getTimestamp(), p2.getTimestamp(), SegmentTrendType.CONSTANT));
+                }*/
+            }
+            // or (MAX -> MIN)
+            else if (e1.type == ExtremaType.MAX && e2.type == ExtremaType.MIN) {
+                // descending candidate
+                if ((p1.getValue() > p2.getValue()) &&
+                        (amplitude >= minDescAmp) &&
+                        (avgDerivative >= minDescDerivative)) {
+
+                    segments.add(new Segment(e1.index, e2.index, p1.getTimestamp(), p2.getTimestamp(), SegmentTrendType.DOWN));
+                }/* else {
+                    segments.add(new Segment(e1.index, e2.index, p1.getTimestamp(), p2.getTimestamp(), SegmentTrendType.CONSTANT));
+                }*/
+            }
+        }
+
+        // Because this uses consecutive pairs of extrema in chronological order,
+        // none of these segments overlap in time.
+        return segments;
     }
 
     // --------------------------------------------------------------------------

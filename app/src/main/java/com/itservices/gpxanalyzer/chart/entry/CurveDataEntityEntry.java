@@ -4,10 +4,10 @@ import android.graphics.drawable.Drawable;
 import android.util.Log;
 
 import com.itservices.gpxanalyzer.chart.settings.axis.HourMinutesAxisValueFormatter;
-import com.itservices.gpxanalyzer.data.entity.DataEntity;
-import com.itservices.gpxanalyzer.data.statistics.StatisticResults;
+import com.itservices.gpxanalyzer.data.DataEntity;
+import com.itservices.gpxanalyzer.data.StatisticResults;
 import com.itservices.gpxanalyzer.chart.legend.PaletteColorDeterminer;
-import com.itservices.gpxanalyzer.data.statistics.TrendBoundaryDataEntity;
+import com.itservices.gpxanalyzer.data.TrendBoundaryDataEntity;
 
 import java.util.Calendar;
 
@@ -31,9 +31,9 @@ public class CurveDataEntityEntry extends BaseDataEntityEntry {
         Drawable drawableIcon = null;
 
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(dataEntity.getTimestampMillis());
+        calendar.setTimeInMillis(dataEntity.timestampMillis());
         float floatTime = HourMinutesAxisValueFormatter.combineIntoFloatTime(calendar);
-        float value = dataEntity.getValueList().get(statisticResults.getPrimaryDataIndex());
+        float value = dataEntity.valueList().get(statisticResults.getPrimaryDataIndex());
 
         try {
             drawableIcon = paletteColorDeterminer.getDrawableIconFrom(value);

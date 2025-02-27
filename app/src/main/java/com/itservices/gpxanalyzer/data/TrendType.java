@@ -1,6 +1,6 @@
-package com.itservices.gpxanalyzer.data.statistics;
+package com.itservices.gpxanalyzer.data;
 
-import static com.itservices.gpxanalyzer.data.statistics.TrendType.Constants.DEFAULT_FILL_COLOR_ALPHA;
+import static com.itservices.gpxanalyzer.data.TrendType.Constants.DEFAULT_FILL_COLOR_ALPHA;
 
 import androidx.annotation.DrawableRes;
 

@@ -6,9 +6,8 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.itservices.gpxanalyzer.chart.entry.EntryCacheMap;
-import com.itservices.gpxanalyzer.chart.linedataset.ColorFilledLineDataSetListProvider;
-import com.itservices.gpxanalyzer.chart.settings.LineChartSettings;
-import com.itservices.gpxanalyzer.data.statistics.StatisticResults;
+import com.itservices.gpxanalyzer.data.RequestStatus;
+import com.itservices.gpxanalyzer.data.StatisticResults;
 
 import java.util.List;
 

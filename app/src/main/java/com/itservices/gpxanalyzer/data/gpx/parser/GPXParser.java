@@ -31,7 +31,7 @@ import com.itservices.gpxanalyzer.data.gpx.parser.domain.TrackPoint;
 import com.itservices.gpxanalyzer.data.gpx.parser.domain.TrackSegment;
 import com.itservices.gpxanalyzer.data.gpx.parser.domain.WayPoint;
 
-public class GPXParser {
+public final class GPXParser {
 
     static private final String TAG_GPX = "gpx";
     static private final String TAG_VERSION = "version";
