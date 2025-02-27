@@ -27,7 +27,7 @@ public final class TrendBoundaryExtremaProvider {
         return Single.fromCallable(() -> {
 
             List<PrimitiveDataEntity> primitiveList = DataPrimitiveMapper.mapFrom(statisticResults);
-            double[] windowFunctionWeights = ExtremaSegmentDetector.generateWindowFunction(5, ExtremaSegmentDetector.WindowType.GAUSSIAN, 0);
+            double[] windowFunctionWeights = ExtremaSegmentDetector.generateWindowFunction(9, ExtremaSegmentDetector.WindowType.GAUSSIAN, 0.2);
 
 
             double dMinMax = statisticResults.getMaxValue() - statisticResults.getMinValue();
