@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.data.extrema;
+package com.itservices.gpxanalyzer.data.extrema.detector;
 
 import com.itservices.gpxanalyzer.data.TrendType;
 

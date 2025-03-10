@@ -1,11 +1,11 @@
-package com.itservices.gpxanalyzer.data.extrema;
+package com.itservices.gpxanalyzer.data.extrema.detector;
 
 import com.itservices.gpxanalyzer.data.StatisticResults;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-final class DataPrimitiveMapper {
+public final class DataPrimitiveMapper {
 
     public static List<PrimitiveDataEntity> mapFrom(StatisticResults statisticResults) {
         int primaryDataIndex = statisticResults.getPrimaryDataIndex();

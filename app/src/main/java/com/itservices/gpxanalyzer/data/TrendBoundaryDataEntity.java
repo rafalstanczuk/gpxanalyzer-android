@@ -6,7 +6,7 @@ import java.util.Vector;
 
 public record TrendBoundaryDataEntity(int id,
                                       TrendStatistics trendStatistics,
-                                      long beginTimestamp, long endTimestamp, Vector<DataEntity> dataEntityVector) {
+                                      Vector<DataEntity> dataEntityVector) {
 
     public String getLabel() {
         return String.valueOf(id);
@@ -18,7 +18,7 @@ public record TrendBoundaryDataEntity(int id,
         return "TrendBoundaryDataEntity{" +
                 "id=" + id +
                 ", trendStatistics=" + trendStatistics.toString() +
-                ", beginTimestamp=" + beginTimestamp +
-                ", endTimestamp=" + endTimestamp +"}\n";
+                ", beginTimestamp=" + dataEntityVector.firstElement().timestampMillis() +
+                ", endTimestamp=" + dataEntityVector.lastElement().timestampMillis() +"}\n";
     }
 }

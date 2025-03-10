@@ -1,13 +1,11 @@
-package com.itservices.gpxanalyzer.data.extrema;
+package com.itservices.gpxanalyzer.data.extrema.detector;
 
 import android.util.Pair;
-
-import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
-final class ExtremaSegmentDetector {
+public final class ExtremaSegmentDetector {
 
     private List<PrimitiveDataEntity> filtered;
     private List<PrimitiveDataEntity> smoothed;
@@ -32,45 +30,12 @@ final class ExtremaSegmentDetector {
     }
 
     // Container for an extremum (local min or local max)
-    private static class Extremum {
-        int index;         // index in the smoothed data
-        ExtremaType type;  // MIN or MAX
-
-        Extremum(int index, ExtremaType type) {
-            this.index = index;
-            this.type = type;
-        }
+    private record Extremum(int index,         // index in the smoothed data
+                            ExtremaType type // MIN or MAX
+    ) {
     }
 
-    // Container for a final segment: (startTime, endTime, trendType)
-    public static class Segment {
-        public final int startIndex;
-        public final int endIndex;
-        public final long startTime;
-        public final long endTime;
-        public final SegmentTrendType type;
 
-        Segment(int startIndex, int endIndex, long startTime, long endTime, SegmentTrendType type) {
-            this.startIndex = startIndex;
-            this.endIndex = endIndex;
-            this.startTime = startTime;
-            this.endTime   = endTime;
-            this.type      = type;
-        }
-
-
-        @NonNull
-        @Override
-        public String toString() {
-            return "Segment{" +
-                    "startIndex=" + startIndex +
-                    ", endIndex=" + endIndex +
-                    ", startTime=" + startTime +
-                    ", endTime=" + endTime +
-                    ", type=" + type +
-                    '}';
-        }
-    }
     // --------------------------------------------------------------------------
     // PUBLIC DETECTION METHODS
     // --------------------------------------------------------------------------
@@ -93,21 +58,17 @@ final class ExtremaSegmentDetector {
     // --------------------------------------------------------------------------
     // SINGLE-PASS DETECTION OF ASC/DESC
     // --------------------------------------------------------------------------
+
     /**
      * Detects both ascending (MIN->MAX) and descending (MAX->MIN) segments
      * in one pass through the extrema list, preventing overlaps.
      *
-     * @param minAscAmp             Minimum amplitude for ascending
-     * @param minAscDerivative      Minimum derivative for ascending
-     * @param minDescAmp            Minimum amplitude for descending
-     * @param minDescDerivative     Minimum derivative for descending
+     * @param segmentThresholds
      * @return A single list of non-overlapping segments (UP or DOWN).
+     * @see SegmentThresholds
      */
     public List<Segment> detectSegmentsOneRun(
-            double minAscAmp,
-            double minAscDerivative,
-            double minDescAmp,
-            double minDescDerivative
+            SegmentThresholds segmentThresholds
     ) {
 
         // 4) Build segments from consecutive pairs of extrema
@@ -138,8 +99,8 @@ final class ExtremaSegmentDetector {
             if (e1.type == ExtremaType.MIN && e2.type == ExtremaType.MAX) {
                 // ascending candidate
                 if ((p2.getValue() > p1.getValue()) &&
-                        (amplitude >= minAscAmp) &&
-                        (avgDerivative >= minAscDerivative)) {
+                        (amplitude >= segmentThresholds.minAscAmp()) &&
+                        (avgDerivative >= segmentThresholds.minAscDerivative())) {
 
                     segments.add(new Segment(e1.index, e2.index, p1.getTimestamp(), p2.getTimestamp(), SegmentTrendType.UP));
                 }/* else {
@@ -150,8 +111,8 @@ final class ExtremaSegmentDetector {
             else if (e1.type == ExtremaType.MAX && e2.type == ExtremaType.MIN) {
                 // descending candidate
                 if ((p1.getValue() > p2.getValue()) &&
-                        (amplitude >= minDescAmp) &&
-                        (avgDerivative >= minDescDerivative)) {
+                        (amplitude >= segmentThresholds.minDescAmp()) &&
+                        (avgDerivative >= segmentThresholds.minDescDerivative())) {
 
                     segments.add(new Segment(e1.index, e2.index, p1.getTimestamp(), p2.getTimestamp(), SegmentTrendType.DOWN));
                 }/* else {

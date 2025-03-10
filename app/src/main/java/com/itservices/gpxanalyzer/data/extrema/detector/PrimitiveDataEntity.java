@@ -1,6 +1,6 @@
-package com.itservices.gpxanalyzer.data.extrema;
+package com.itservices.gpxanalyzer.data.extrema.detector;
 
-final class PrimitiveDataEntity {
+public final class PrimitiveDataEntity {
 
 
     private final long index;
