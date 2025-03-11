@@ -6,7 +6,8 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.itservices.gpxanalyzer.chart.entry.TrendBoundaryEntry;
 import com.itservices.gpxanalyzer.chart.entry.TrendBoundaryEntryProvider;
 import com.itservices.gpxanalyzer.chart.legend.PaletteColorDeterminer;
-import com.itservices.gpxanalyzer.data.extrema.TrendBoundaryProvider;
+import com.itservices.gpxanalyzer.data.extrema.ExtremaSegmentListProvider;
+import com.itservices.gpxanalyzer.data.extrema.TrendBoundaryMapper;
 import com.itservices.gpxanalyzer.data.TrendStatistics;
 import com.itservices.gpxanalyzer.data.StatisticResults;
 
@@ -46,8 +47,9 @@ class LineDataSetListProvider {
         return  !dataSetList.isEmpty() ?
                 Single.just(dataSetList)
                     :
-                TrendBoundaryProvider
-                .provide(statisticResults)
+                ExtremaSegmentListProvider
+                        .provide(statisticResults)
+                .map(segmentList -> TrendBoundaryMapper.mapFrom(statisticResults, segmentList))
                 .observeOn(Schedulers.computation())
                 .subscribeOn(Schedulers.computation())
                 .map(trendBoundaryDataEntityList -> trendBoundaryEntryProvider.provide(statisticResults, trendBoundaryDataEntityList, paletteColorDeterminer))

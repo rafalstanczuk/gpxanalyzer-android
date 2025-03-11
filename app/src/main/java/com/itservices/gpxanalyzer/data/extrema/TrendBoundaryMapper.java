@@ -9,12 +9,7 @@ import com.itservices.gpxanalyzer.data.TrendType;
 import com.itservices.gpxanalyzer.data.DataEntity;
 import com.itservices.gpxanalyzer.data.StatisticResults;
 import com.itservices.gpxanalyzer.data.TrendBoundaryDataEntity;
-import com.itservices.gpxanalyzer.data.extrema.detector.DataPrimitiveMapper;
-import com.itservices.gpxanalyzer.data.extrema.detector.ExtremaSegmentDetector;
-import com.itservices.gpxanalyzer.data.extrema.detector.PrimitiveDataEntity;
 import com.itservices.gpxanalyzer.data.extrema.detector.Segment;
-import com.itservices.gpxanalyzer.data.extrema.detector.SegmentThresholds;
-import com.itservices.gpxanalyzer.data.extrema.detector.SegmentTrendType;
 import com.itservices.gpxanalyzer.data.extrema.detector.TrendTypeMapper;
 
 import java.util.ArrayList;
@@ -23,33 +18,15 @@ import java.util.Vector;
 
 import javax.annotation.Nullable;
 
-import io.reactivex.Single;
+public final class TrendBoundaryMapper {
 
-public final class TrendBoundaryProvider {
-    private static double[] windowFunctionWeights = ExtremaSegmentDetector.generateWindowFunction(9, ExtremaSegmentDetector.WindowType.GAUSSIAN, 0.2);
-
-    public static List<TrendBoundaryDataEntity> provide(StatisticResults statisticResults, TrendType trendTypeToHighlight) {
+    public static List<TrendBoundaryDataEntity> mapFrom(StatisticResults statisticResults, TrendType trendTypeToHighlight) {
         List<TrendBoundaryDataEntity> trendBoundaryDataEntities = new ArrayList<>();
 
         return trendBoundaryDataEntities;
     }
 
-    public static Single<List<TrendBoundaryDataEntity>> provide(StatisticResults statisticResults) {
-        return Single.fromCallable(() -> {
-
-            List<PrimitiveDataEntity> primitiveList = DataPrimitiveMapper.mapFrom(statisticResults);
-
-            ExtremaSegmentDetector segmentDetector = new ExtremaSegmentDetector();
-            segmentDetector.preprocessAndFindExtrema(primitiveList, ExtremaSegmentDetector.DEFAULT_MAX_VALUE_ACCURACY, windowFunctionWeights);
-
-            // TODO: parameters can be changed by USER  !!!
-            SegmentThresholds segmentThresholds = getSegmentThresholds(statisticResults);
-
-            List<Segment> extremumSegmentList
-                    = segmentDetector.detectSegmentsOneRun(segmentThresholds);
-
-            extremumSegmentList
-                    = segmentDetector.addMissingSegments(extremumSegmentList, SegmentTrendType.CONSTANT);
+    public static List<TrendBoundaryDataEntity> mapFrom(StatisticResults statisticResults, List<Segment> extremaSegmentList) {
 
             Vector<DataEntity> dataEntityVector = statisticResults.getDataEntityVector();
 
@@ -61,15 +38,15 @@ public final class TrendBoundaryProvider {
 
             int testN = 0;
 
-            Log.d(TrendBoundaryProvider.class.getSimpleName(), "statisticResults.getDataEntityVector().size(): " + statisticResults.getDataEntityVector().size());
+            Log.d(TrendBoundaryMapper.class.getSimpleName(), "statisticResults.getDataEntityVector().size(): " + statisticResults.getDataEntityVector().size());
 
-            for (Segment segment : extremumSegmentList) {
+            for (Segment segment : extremaSegmentList) {
                 Vector<DataEntity> segmentDataEntityVector = mapIntoSegmentDataEntityVector(segment, dataEntityVector);
 
                 TrendType trendType = TrendTypeMapper.map(segment.type());
 
                 TrendBoundaryDataEntity trendBoundaryDataEntity = null;
-                int index = extremumSegmentList.indexOf(segment);
+                int index = extremaSegmentList.indexOf(segment);
 
                 switch (trendType) {
                     case UP -> {
@@ -88,16 +65,15 @@ public final class TrendBoundaryProvider {
 
                 trendBoundaryDataEntities.add(trendBoundaryDataEntity);
 
-                testN +=trendBoundaryDataEntity.dataEntityVector().size();
+                testN += trendBoundaryDataEntity.dataEntityVector().size();
 
-                Log.d(TrendBoundaryProvider.class.getSimpleName(), trendBoundaryDataEntity.toString());
+                Log.d(TrendBoundaryMapper.class.getSimpleName(), trendBoundaryDataEntity.toString());
             }
 
 
-            Log.d(TrendBoundaryProvider.class.getSimpleName(), "testN: " + (testN));
+            Log.d(TrendBoundaryMapper.class.getSimpleName(), "testN: " + (testN));
 
             return trendBoundaryDataEntities;
-        });
     }
 
     private static float getDeltaVal(StatisticResults statisticResults, Vector<DataEntity> segmentDataEntityVector) {
@@ -107,18 +83,10 @@ public final class TrendBoundaryProvider {
         return Math.abs(
                 statisticResults.getValue(dataEntityStart)
                         -
-                statisticResults.getValue(dataEntityEnd)
+                        statisticResults.getValue(dataEntityEnd)
         );
     }
 
-    @NonNull
-    private static SegmentThresholds getSegmentThresholds(StatisticResults statisticResults) {
-        double dMinMax = statisticResults.getDeltaMinMax();
-
-        // TODO: parameters can be changed by USER  !!!
-        SegmentThresholds segmentThresholds = new SegmentThresholds(dMinMax / 5, 0.001, dMinMax / 5, 0.001);
-        return segmentThresholds;
-    }
 
     private static TrendBoundaryDataEntity getTrendBoundaryDataEntity(
             int id,
