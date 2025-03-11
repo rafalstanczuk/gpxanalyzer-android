@@ -12,7 +12,7 @@ import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
-import com.itservices.gpxanalyzer.chart.entry.BaseDataEntityEntry;
+import com.itservices.gpxanalyzer.chart.entry.BaseEntry;
 import com.itservices.gpxanalyzer.data.RequestStatus;
 import com.itservices.gpxanalyzer.data.StatisticResults;
 
@@ -27,7 +27,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     @Inject
     ChartProvider chartProvider;
 
-    private final PublishSubject<BaseDataEntityEntry> baseEntrySelectionPublishSubject = PublishSubject.create();
+    private final PublishSubject<BaseEntry> baseEntrySelectionPublishSubject = PublishSubject.create();
 
     @Inject
     public ChartController() {
@@ -79,7 +79,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
         return chartProvider.updateChartData(statisticResults);
     }
 
-    public Observable<BaseDataEntityEntry> getSelection() {
+    public Observable<BaseEntry> getSelection() {
         return baseEntrySelectionPublishSubject;
     }
 
@@ -101,7 +101,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
             return;
         }
 
-        BaseDataEntityEntry entryFound = (BaseDataEntityEntry) chartProvider.getEntryCacheMap().get(selectedTimeMillis);
+        BaseEntry entryFound = (BaseEntry) chartProvider.getEntryCacheMap().get(selectedTimeMillis);
         if (entryFound != null) {
             setSelectionEntry(entryFound, callListeners);
             chart.highlightValue(entryFound.getX(), entryFound.getY(), entryFound.getDataSetIndex(), callListeners);
@@ -119,8 +119,8 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     private void setSelectionEntry(Entry entry, boolean publishSelection) {
         chartProvider.getChart().setHighlightedEntry(entry);
 
-        if (publishSelection && (entry instanceof BaseDataEntityEntry)) {
-            baseEntrySelectionPublishSubject.onNext((BaseDataEntityEntry) entry);
+        if (publishSelection && (entry instanceof BaseEntry)) {
+            baseEntrySelectionPublishSubject.onNext((BaseEntry) entry);
         }
     }
 

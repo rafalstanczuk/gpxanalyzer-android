@@ -21,7 +21,7 @@ import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.utils.MPPointF;
 import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.chart.DataEntityLineChart;
-import com.itservices.gpxanalyzer.chart.entry.CurveDataEntityEntry;
+import com.itservices.gpxanalyzer.chart.entry.CurveEntry;
 import com.itservices.gpxanalyzer.data.DataEntity;
 import com.itservices.gpxanalyzer.data.TrendType;
 import com.itservices.gpxanalyzer.databinding.CustomMarkerViewBinding;
@@ -77,15 +77,14 @@ public class CustomMarker extends MarkerView {
         ChartTouchListener.ChartGesture chartGesture = chartView.getChartTouchListener()
                 .getLastGesture();
 
-        if (entry instanceof CurveDataEntityEntry) {
-            CurveDataEntityEntry curveDataEntityEntry = (CurveDataEntityEntry) entry;
+        if (entry instanceof CurveEntry curveDataEntityEntry) {
             DataEntity dataEntity = curveDataEntityEntry.getDataEntity();
 
             SpannableStringBuilder timeLine = getSpannableStringBuilder(
                     FormatNumberUtil.getFormattedTime(dataEntity.timestampMillis()), " h"
             );
 
-            String unitString = dataEntity.unitList().get( curveDataEntityEntry.getStatisticResults().getPrimaryDataIndex() );
+            String unitString = dataEntity.unitList().get(curveDataEntityEntry.getStatisticResults().getPrimaryDataIndex());
 
             SpannableStringBuilder valueLine = getSpannableStringBuilder(
                     String.valueOf((int) curveDataEntityEntry.getY()), " " + unitString);
@@ -96,7 +95,7 @@ public class CustomMarker extends MarkerView {
             TrendType trendType = curveDataEntityEntry.getTrendBoundaryDataEntity().trendStatistics().trendType();
 
             String text = "";
-                    switch (trendType) {
+            switch (trendType) {
                 case UP -> {
                     text = "+";
                 }
@@ -107,11 +106,11 @@ public class CustomMarker extends MarkerView {
                     text = "-";
                 }
             }
-            text+= curveDataEntityEntry.getTrendBoundaryDataEntity().trendStatistics().deltaVal();
+            text += curveDataEntityEntry.getTrendBoundaryDataEntity().trendStatistics().deltaVal();
 
 
             binding.markerTextViewDeltaAsl.setText(getSpannableStringBuilder(text, " " + unitString));
-            binding.markerTextViewDeltaAsl.setBackgroundColor( ColorUtil.setAlphaInIntColor(trendType.getFillColor(), 128) );
+            binding.markerTextViewDeltaAsl.setBackgroundColor(ColorUtil.setAlphaInIntColor(trendType.getFillColor(), 128));
 
             binding.trendTypeImageView.setImageResource(trendType.getDrawableId());
         }
@@ -143,7 +142,7 @@ public class CustomMarker extends MarkerView {
             case LONG_PRESS:
             case SINGLE_TAP: {
 
-                drawMarker(posX, (contentRect.top + contentRect.bottom)*0.25f, canvas);
+                drawMarker(posX, (contentRect.top + contentRect.bottom) * 0.25f, canvas);
 
                 break;
             }
@@ -153,7 +152,7 @@ public class CustomMarker extends MarkerView {
             case PINCH_ZOOM:
             case FLING:
             case DRAG:
-                drawMarker(posX, (contentRect.top + contentRect.bottom)*0.25f, canvas);
+                drawMarker(posX, (contentRect.top + contentRect.bottom) * 0.25f, canvas);
                 break;
         }
         //}

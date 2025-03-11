@@ -11,11 +11,11 @@ import com.itservices.gpxanalyzer.data.TrendBoundaryDataEntity;
 
 import java.util.Calendar;
 
-public class CurveDataEntityEntry extends BaseDataEntityEntry {
+public class CurveEntry extends BaseEntry {
     public static boolean SHOW_COLOR_CURVE_DATA_ENTITY_RANGE_CIRCLES_ICONS = true;
     private final TrendBoundaryDataEntity trendBoundaryDataEntity;
 
-    CurveDataEntityEntry(
+    CurveEntry(
             DataEntity dataEntity, TrendBoundaryDataEntity trendBoundaryDataEntity, float x, float y, Drawable icon, StatisticResults statisticResults
     ) {
         super(dataEntity, trendBoundaryDataEntity.id(), x, y, icon, statisticResults);
@@ -23,7 +23,7 @@ public class CurveDataEntityEntry extends BaseDataEntityEntry {
         this.trendBoundaryDataEntity = trendBoundaryDataEntity;
     }
 
-    public static CurveDataEntityEntry create(
+    public static CurveEntry create(
             DataEntity dataEntity,
             TrendBoundaryDataEntity trendBoundaryDataEntity, PaletteColorDeterminer paletteColorDeterminer,
             StatisticResults statisticResults
@@ -41,7 +41,7 @@ public class CurveDataEntityEntry extends BaseDataEntityEntry {
             Log.e("DataEntityCurveEntry", "create: ", ex);
         }
 
-        return new CurveDataEntityEntry(
+        return new CurveEntry(
                 dataEntity,
                 trendBoundaryDataEntity,
                 floatTime, value, SHOW_COLOR_CURVE_DATA_ENTITY_RANGE_CIRCLES_ICONS ? drawableIcon : null,

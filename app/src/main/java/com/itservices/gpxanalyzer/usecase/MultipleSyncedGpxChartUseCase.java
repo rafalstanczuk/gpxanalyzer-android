@@ -12,8 +12,8 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.itservices.gpxanalyzer.chart.ChartController;
+import com.itservices.gpxanalyzer.chart.entry.BaseEntry;
 import com.itservices.gpxanalyzer.data.RequestStatus;
-import com.itservices.gpxanalyzer.chart.entry.BaseDataEntityEntry;
 import com.itservices.gpxanalyzer.data.DataEntity;
 import com.itservices.gpxanalyzer.data.gpx.GPXDataProvider;
 import com.itservices.gpxanalyzer.data.StatisticResults;
@@ -174,13 +174,13 @@ public class MultipleSyncedGpxChartUseCase {
         return chartController.updateChartData(statisticResults);
     }
 
-    private Disposable observeSelectionOn(Activity activity, Observable<BaseDataEntityEntry> selection, ChartController chartController) {
+    private Disposable observeSelectionOn(Activity activity, Observable<BaseEntry> selection, ChartController chartController) {
         return selection
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(Schedulers.newThread())
-                .doOnNext(baseDataEntityEntry ->
+                .doOnNext(baseEntry ->
                         activity.runOnUiThread(() -> {
-                            chartController.select(baseDataEntityEntry.getDataEntity().timestampMillis());
+                            chartController.select(baseEntry.getDataEntity().timestampMillis());
                         })
                 )
                 .subscribe();

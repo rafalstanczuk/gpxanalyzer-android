@@ -6,12 +6,12 @@ import com.github.mikephil.charting.data.Entry;
 import com.itservices.gpxanalyzer.data.DataEntity;
 import com.itservices.gpxanalyzer.data.StatisticResults;
 
-public class BaseDataEntityEntry extends Entry {
+public class BaseEntry extends Entry {
     protected final DataEntity dataEntity;
     protected final StatisticResults statisticResults;
     private final int dataSetIndex;
 
-    public BaseDataEntityEntry(
+    public BaseEntry(
             DataEntity dataEntity,
             int dataSetIndex,
             float x, float y, Drawable icon, StatisticResults statisticResults
@@ -33,7 +33,7 @@ public class BaseDataEntityEntry extends Entry {
 
     @Override
     public String toString() {
-        return "BaseDataEntityEntry{" +
+        return "BaseEntry{" +
                 "dataEntity=" + dataEntity +
                 ", statisticResults=" + statisticResults +
                 '}';

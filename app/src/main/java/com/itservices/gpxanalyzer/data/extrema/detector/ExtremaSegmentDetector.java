@@ -2,8 +2,11 @@ package com.itservices.gpxanalyzer.data.extrema.detector;
 
 import android.util.Pair;
 
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public final class ExtremaSegmentDetector {
 
@@ -11,7 +14,7 @@ public final class ExtremaSegmentDetector {
     private List<PrimitiveDataEntity> smoothed;
     private List<Extremum> extrema;
 
-    public List<Segment> addMissingSegments(List<Segment> extremumSegmentList, SegmentTrendType segmentTrendType) {
+    public List<Segment> addMissingSegments(List<Segment> extremumSegmentList, SegmentThresholds segmentThresholds) {
 
         List<Segment> newExtremumSegmentList = new ArrayList<>();
         if (extremumSegmentList.isEmpty()) {
@@ -24,11 +27,9 @@ public final class ExtremaSegmentDetector {
             Segment prevSegment = extremumSegmentList.get(i - 1);
             Segment segment = extremumSegmentList.get(i);
 
-            if (prevSegment.endIndex() != segment.startIndex()) {
-                Segment missingSegment =
-                        new Segment(prevSegment.endIndex(), segment.startIndex(),
-                                prevSegment.endTime(), segment.startTime(),
-                                segmentTrendType);
+            if (prevSegment.endTime() != segment.startTime()) {
+
+                Segment missingSegment = getMissingSegment(segment, prevSegment, segmentThresholds);
 
                 newExtremumSegmentList.add(missingSegment);
             }
@@ -39,6 +40,29 @@ public final class ExtremaSegmentDetector {
         return newExtremumSegmentList;
     }
 
+    @NonNull
+    private static Segment getMissingSegment(Segment segment, Segment prevSegment, SegmentThresholds segmentThresholds) {
+        double deltaValMissing = segment.startVal() - prevSegment.endVal();
+
+        SegmentTrendType segmentTrendType = SegmentTrendType.CONSTANT;
+
+        if (deltaValMissing > 0.0) {
+            if (Math.abs(deltaValMissing) > segmentThresholds.minAscAmp()) {
+                segmentTrendType = SegmentTrendType.UP;
+            }
+        } else {
+            if (Math.abs(deltaValMissing) > segmentThresholds.minDescAmp()) {
+                segmentTrendType = SegmentTrendType.DOWN;
+            }
+        }
+
+        return new Segment(
+                prevSegment.endIndex(), segment.startIndex(),
+                prevSegment.endTime(), segment.startTime(),
+                prevSegment.endVal(), segment.startVal(),
+                segmentTrendType);
+    }
+
     // Window function types
     public enum WindowType {
         TRIANGULAR,
@@ -46,7 +70,7 @@ public final class ExtremaSegmentDetector {
         GAUSSIAN
     }
 
-    // If value changes are < ±0.01, treat derivative as zero (lower EPSILON to catch subtler slopes)
+    // If value changes are < ±EPSILON, treat derivative as zero (lower EPSILON to catch subtler slopes)
     private static final double EPSILON = 0.000000000001;
 
     // If accuracy is worse than 50, skip
@@ -107,9 +131,9 @@ public final class ExtremaSegmentDetector {
             Extremum e2 = extrema.get(i + 1);
 
             // e1 must come before e2 in time
-            if (e2.index <= e1.index) {
+/*            if (e2.index <= e1.index) {
                 continue;
-            }
+            }*/
 
             // Get the start/end points
             PrimitiveDataEntity p1 = smoothed.get(e1.index);
@@ -127,25 +151,19 @@ public final class ExtremaSegmentDetector {
             if (e1.type == ExtremaType.MIN && e2.type == ExtremaType.MAX) {
                 // ascending candidate
                 if ((p2.getValue() > p1.getValue()) &&
-                        (amplitude >= segmentThresholds.minAscAmp()) &&
-                        (avgDerivative >= segmentThresholds.minAscDerivative())) {
+                        (amplitude >= segmentThresholds.minAscAmp())) {
 
-                    segments.add(new Segment(e1.index, e2.index, p1.getTimestamp(), p2.getTimestamp(), SegmentTrendType.UP));
-                }/* else {
-                    segments.add(new Segment(e1.index, e2.index, p1.getTimestamp(), p2.getTimestamp(), SegmentTrendType.CONSTANT));
-                }*/
+                    segments.add(new Segment(e1.index, e2.index, p1.getTimestamp(), p2.getTimestamp(), p1.getValue(), p2.getValue(), SegmentTrendType.UP));
+                }
             }
             // or (MAX -> MIN)
             else if (e1.type == ExtremaType.MAX && e2.type == ExtremaType.MIN) {
                 // descending candidate
                 if ((p1.getValue() > p2.getValue()) &&
-                        (amplitude >= segmentThresholds.minDescAmp()) &&
-                        (avgDerivative >= segmentThresholds.minDescDerivative())) {
+                        (amplitude >= segmentThresholds.minDescAmp())) {
 
-                    segments.add(new Segment(e1.index, e2.index, p1.getTimestamp(), p2.getTimestamp(), SegmentTrendType.DOWN));
-                }/* else {
-                    segments.add(new Segment(e1.index, e2.index, p1.getTimestamp(), p2.getTimestamp(), SegmentTrendType.CONSTANT));
-                }*/
+                    segments.add(new Segment(e1.index, e2.index, p1.getTimestamp(), p2.getTimestamp(), p1.getValue(), p2.getValue(), SegmentTrendType.DOWN));
+                }
             }
         }
 
@@ -221,6 +239,21 @@ public final class ExtremaSegmentDetector {
         return smoothedList;
     }
 
+
+    private static double[] derivativeRungeKutta(List<PrimitiveDataEntity> smoothed) {
+        double[] derivative = new double[smoothed.size() - 1];
+        for (int i = 0; i < smoothed.size() - 1; i++) {
+            PrimitiveDataEntity next = smoothed.get(i + 1);
+            PrimitiveDataEntity current = smoothed.get(i);
+            double h = TimeUnit.MILLISECONDS.toSeconds(next.getTimestamp() - current.getTimestamp());
+
+
+            derivative[i] = smoothed.get(i + 1).getValue() - smoothed.get(i).getValue();
+        }
+
+        return derivative;
+    }
+
     // --------------------------------------------------------------------------
     // 3) FIND LOCAL EXTREMA
     // --------------------------------------------------------------------------
@@ -232,7 +265,12 @@ public final class ExtremaSegmentDetector {
         // Compute discrete derivative
         double[] derivative = new double[n - 1];
         for (int i = 0; i < n - 1; i++) {
-            derivative[i] = smoothed.get(i + 1).getValue() - smoothed.get(i).getValue();
+            PrimitiveDataEntity current = smoothed.get(i);
+            PrimitiveDataEntity next = smoothed.get(i + 1);
+
+            derivative[i] = (next.getValue() - current.getValue());
+                   /* /
+            TimeUnit.MILLISECONDS.toSeconds(Math.abs(next.getTimestamp() - current.getTimestamp()));*/
         }
 
         for (int i = 1; i < n - 1; i++) {

@@ -5,6 +5,8 @@ public record Segment(
         int endIndex,
         long startTime,
         long endTime,
+        double startVal,
+        double endVal,
         SegmentTrendType type) {
 
 }

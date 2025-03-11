@@ -19,7 +19,7 @@ public class IconsUtil {
 		List<Drawable> dataEntityDrawableIconList = new ArrayList<>();
 
 		for (Map.Entry<Integer, BoundaryColorSpan> entry: paletteColorDeterminer.getPalette().entrySet()) {
-			int color = entry.getValue().getColor();
+			int color = entry.getValue().color();
 
 			int colorWithAlpha = setAlphaInIntColor(color, alpha);
 

@@ -16,7 +16,7 @@ import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.renderer.LineChartRenderer;
 import com.github.mikephil.charting.utils.MPPointF;
 import com.itservices.gpxanalyzer.MainActivity;
-import com.itservices.gpxanalyzer.chart.entry.BaseDataEntityEntry;
+import com.itservices.gpxanalyzer.chart.entry.BaseEntry;
 import com.itservices.gpxanalyzer.chart.legend.PaletteColorDeterminer;
 import com.itservices.gpxanalyzer.chart.settings.background.GridBackgroundDrawer;
 import com.itservices.gpxanalyzer.chart.settings.background.LimitLinesBoundaries;
@@ -157,15 +157,15 @@ public class DataEntityLineChart extends LineChart {
 				pointFCenter.getY()
 		);
 
-		if (entry instanceof BaseDataEntityEntry) {
-			BaseDataEntityEntry baseDataEntityEntry = (BaseDataEntityEntry) entry;
+		if (entry instanceof BaseEntry) {
+			BaseEntry baseDataEntityEntry = (BaseEntry) entry;
 
 			highlightValue(baseDataEntityEntry.getX(), baseDataEntityEntry.getY(), baseDataEntityEntry.getDataSetIndex(), true);
 		}
 	}
 
 	public void setHighlightedEntry(Entry selectedEntry) {
-		if (!(selectedEntry instanceof BaseDataEntityEntry)) {
+		if (!(selectedEntry instanceof BaseEntry)) {
 			return;
 		}
 
@@ -173,9 +173,9 @@ public class DataEntityLineChart extends LineChart {
 
 		determineSettingsDataEntityCurveLineHighlightIndicator(chartGesture);
 
-	/*	DataEntity dataEntity = ( (BaseDataEntityEntry)selectedEntry).getDataEntity();
+	/*	DataEntity dataEntity = ( (BaseEntry)selectedEntry).getDataEntity();
 
-		int primaryDataIndex = ((BaseDataEntityEntry) selectedEntry).getStatisticResults().getPrimaryDataIndex();
+		int primaryDataIndex = ((BaseEntry) selectedEntry).getStatisticResults().getPrimaryDataIndex();
 
 			dataEntityInfoLayoutView.setTime( getFormattedTime(dataEntity.getTimestampMillis()) );
 			dataEntityInfoLayoutView.setValue1(
@@ -252,12 +252,7 @@ public class DataEntityLineChart extends LineChart {
 		super.animateZoomToCenter(targetScaleX, targetScaleY, duration, null);
 	}
 
-	@Override
-	public LineData getLineData() {
-		return mData;
-	}
-
-	@Override
+    @Override
 	protected void onDetachedFromWindow() {
 		// releases the bitmap in the renderer to avoid oom error
 		if (mRenderer != null && mRenderer instanceof LineChartRenderer) {

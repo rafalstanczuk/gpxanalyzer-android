@@ -40,7 +40,7 @@ public class LimitLinesBoundaries {
 
         for (Map.Entry<Integer, BoundaryColorSpan> entry : paletteMap.entrySet()) {
             limitLineList.add(
-                    createLimitLine(entry.getValue().getMax(), LimitLine.LimitLabelPosition.LEFT_BOTTOM)
+                    createLimitLine(entry.getValue().max(), LimitLine.LimitLabelPosition.LEFT_BOTTOM)
             );
         }
 
@@ -51,7 +51,7 @@ public class LimitLinesBoundaries {
             assert beforeLastBoundaryColorSpan != null;
             limitLineList.add(
                     createLimitLine(
-                            (lastBoundaryColorSpan.getMax() + (lastBoundaryColorSpan.getMax() - beforeLastBoundaryColorSpan.getMax()) ),
+                            (lastBoundaryColorSpan.max() + (lastBoundaryColorSpan.max() - beforeLastBoundaryColorSpan.max()) ),
                             LimitLine.LimitLabelPosition.LEFT_BOTTOM)
             );
         }

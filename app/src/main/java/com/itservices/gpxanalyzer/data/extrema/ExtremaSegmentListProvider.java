@@ -10,6 +10,7 @@ import com.itservices.gpxanalyzer.data.extrema.detector.Segment;
 import com.itservices.gpxanalyzer.data.extrema.detector.SegmentThresholds;
 import com.itservices.gpxanalyzer.data.extrema.detector.SegmentTrendType;
 
+import java.util.Comparator;
 import java.util.List;
 
 import io.reactivex.Single;
@@ -21,6 +22,8 @@ public class ExtremaSegmentListProvider {
         return Single.fromCallable(() -> {
             List<PrimitiveDataEntity> primitiveList = DataPrimitiveMapper.mapFrom(statisticResults);
 
+            primitiveList.sort(Comparator.comparingLong(PrimitiveDataEntity::getTimestamp));
+
             ExtremaSegmentDetector segmentDetector = new ExtremaSegmentDetector();
             segmentDetector.preprocessAndFindExtrema(primitiveList, ExtremaSegmentDetector.DEFAULT_MAX_VALUE_ACCURACY, windowFunctionWeights);
 
@@ -31,7 +34,7 @@ public class ExtremaSegmentListProvider {
                     = segmentDetector.detectSegmentsOneRun(segmentThresholds);
 
             extremaSegmentList
-                    = segmentDetector.addMissingSegments(extremaSegmentList, SegmentTrendType.CONSTANT);
+                    = segmentDetector.addMissingSegments(extremaSegmentList, segmentThresholds);
 
             return extremaSegmentList;
         });
