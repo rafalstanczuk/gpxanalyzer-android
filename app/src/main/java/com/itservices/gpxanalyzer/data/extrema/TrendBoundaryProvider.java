@@ -22,8 +22,8 @@ import javax.annotation.Nullable;
 
 import io.reactivex.Single;
 
-public final class TrendBoundaryExtremaProvider {
-
+public final class TrendBoundaryProvider {
+    private static double[] windowFunctionWeights = ExtremaSegmentDetector.generateWindowFunction(9, ExtremaSegmentDetector.WindowType.GAUSSIAN, 0.2);
 
     public static List<TrendBoundaryDataEntity> provide(StatisticResults statisticResults, TrendType trendTypeToHighlight) {
         List<TrendBoundaryDataEntity> trendBoundaryDataEntities = new ArrayList<>();
@@ -35,13 +35,11 @@ public final class TrendBoundaryExtremaProvider {
         return Single.fromCallable(() -> {
 
             List<PrimitiveDataEntity> primitiveList = DataPrimitiveMapper.mapFrom(statisticResults);
-            double[] windowFunctionWeights = ExtremaSegmentDetector.generateWindowFunction(9, ExtremaSegmentDetector.WindowType.GAUSSIAN, 0.2);
 
+            double dMinMax = statisticResults.getDeltaMinMax();
 
-            double dMinMax = statisticResults.getMaxValue() - statisticResults.getMinValue();
-
-            //Log.d(TrendBoundaryExtremaProvider.class.getSimpleName(), " statisticResults Min Max " + statisticResults.getMinValue() + " to " + statisticResults.getMaxValue());
-            //Log.d(TrendBoundaryExtremaProvider.class.getSimpleName(), " statisticResults dMinMax " + dMinMax);
+            //Log.d(TrendBoundaryProvider.class.getSimpleName(), " statisticResults Min Max " + statisticResults.getMinValue() + " to " + statisticResults.getMaxValue());
+            //Log.d(TrendBoundaryProvider.class.getSimpleName(), " statisticResults dMinMax " + dMinMax);
 
             SegmentThresholds segmentThresholds = new SegmentThresholds(dMinMax / 5, 0.001, dMinMax / 5, 0.001);
 
@@ -53,15 +51,12 @@ public final class TrendBoundaryExtremaProvider {
 
             Vector<DataEntity> dataEntityVector = statisticResults.getDataEntityVector();
 
-            //Log.d(TrendBoundaryExtremaProvider.class.getSimpleName(), "statisticResults.getDataEntityVector(): " + statisticResults.getDataEntityVector().size());
-
+            //Log.d(TrendBoundaryProvider.class.getSimpleName(), "statisticResults.getDataEntityVector(): " + statisticResults.getDataEntityVector().size());
 
             List<TrendBoundaryDataEntity> trendBoundaryDataEntities = new ArrayList<>();
             int id = 0;
-            int sumTestCount = 0;
             float sumAscending = 0;
             float sumDescending = 0;
-
 
             TrendBoundaryDataEntity prevMissingBoundary = null;
 
@@ -80,9 +75,7 @@ public final class TrendBoundaryExtremaProvider {
 
                         trendBoundaryDataEntities.add(missingBoundary);
 
-                        sumTestCount += missingSegment.size();
-
-                        //Log.d(TrendBoundaryExtremaProvider.class.getSimpleName(), TrendType.CONSTANT.name() + " missing segment from " + missingSegment.firstElement().timestampMillis() + " to " + missingSegment.lastElement() + " deltaValFlat: +" + missingBoundary.trendStatistics().deltaVal() + " missingSegmentDataEntityVector.size: " + missingSegment.size());
+                        //Log.d(TrendBoundaryProvider.class.getSimpleName(), TrendType.CONSTANT.name() + " missing segment from " + missingSegment.firstElement().timestampMillis() + " to " + missingSegment.lastElement() + " deltaValFlat: +" + missingBoundary.trendStatistics().deltaVal() + " missingSegmentDataEntityVector.size: " + missingSegment.size());
                     }
                 }
 
@@ -119,20 +112,16 @@ public final class TrendBoundaryExtremaProvider {
                                 segmentDataEntityVector
                         ));
 
-                sumTestCount += segmentDataEntityVector.size();
-
-                //Log.d(TrendBoundaryExtremaProvider.class.getSimpleName(), trendType.name() + " segment from " + segment.startTime + " to " + segment.endTime + " deltaVal: +" + deltaVal + " segmentDataEntityVector.size: " + segmentDataEntityVector.size());
+                //Log.d(TrendBoundaryProvider.class.getSimpleName(), trendType.name() + " segment from " + segment.startTime + " to " + segment.endTime + " deltaVal: +" + deltaVal + " segmentDataEntityVector.size: " + segmentDataEntityVector.size());
             }
 
-            //Log.d(TrendBoundaryExtremaProvider.class.getSimpleName(), "sumTestCount all segments: " + sumTestCount);
-            //Log.d(TrendBoundaryExtremaProvider.class.getSimpleName(), "sumAscending all segments: " + sumAscending);
-            //Log.d(TrendBoundaryExtremaProvider.class.getSimpleName(), "sumDescending all segments: " + sumDescending);
+            //Log.d(TrendBoundaryProvider.class.getSimpleName(), "sumTestCount all segments: " + sumTestCount);
+            //Log.d(TrendBoundaryProvider.class.getSimpleName(), "sumAscending all segments: " + sumAscending);
+            //Log.d(TrendBoundaryProvider.class.getSimpleName(), "sumDescending all segments: " + sumDescending);
 
             return trendBoundaryDataEntities;
         });
     }
-
-
 
     private static TrendBoundaryDataEntity getMissingTrendBoundaryDataEntity(int id, Vector<DataEntity> missingSegmentDataEntityVector, @Nullable TrendBoundaryDataEntity prevMissingTrendBoundaryDataEntity, StatisticResults statisticResults) {
 

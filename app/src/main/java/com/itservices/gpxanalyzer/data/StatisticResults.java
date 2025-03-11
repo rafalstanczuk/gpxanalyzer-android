@@ -22,6 +22,10 @@ public final class StatisticResults {
         setDataEntityVector(dataEntityVector);
     }
 
+    public double getDeltaMinMax() {
+        return maxValue - minValue;
+    }
+
     public void setPrimaryDataIndex(int primaryDataIndex) {
         this.primaryDataIndex = primaryDataIndex;
         compute();
@@ -47,7 +51,7 @@ public final class StatisticResults {
         maxValue = stats.getMax();
     }
 
-    public final Vector<DataEntity> getDataEntityVector() {
+    public Vector<DataEntity> getDataEntityVector() {
         return dataEntityVector;
     }
 

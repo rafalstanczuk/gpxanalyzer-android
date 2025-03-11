@@ -23,7 +23,7 @@ class ChartProvider {
     LineChartSettings settings;
 
     @Inject
-    ColorFilledLineDataSetListProvider lineDataSetListProvider;
+    LineDataSetListProvider lineDataSetListProvider;
 
     private DataEntityLineChart chart;
 

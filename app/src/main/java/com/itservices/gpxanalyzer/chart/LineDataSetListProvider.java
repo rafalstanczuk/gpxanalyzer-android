@@ -6,7 +6,7 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.itservices.gpxanalyzer.chart.entry.TrendBoundaryEntry;
 import com.itservices.gpxanalyzer.chart.entry.TrendBoundaryEntryProvider;
 import com.itservices.gpxanalyzer.chart.legend.PaletteColorDeterminer;
-import com.itservices.gpxanalyzer.data.extrema.TrendBoundaryExtremaProvider;
+import com.itservices.gpxanalyzer.data.extrema.TrendBoundaryProvider;
 import com.itservices.gpxanalyzer.data.TrendStatistics;
 import com.itservices.gpxanalyzer.data.StatisticResults;
 
@@ -17,21 +17,18 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import io.reactivex.Single;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-class ColorFilledLineDataSetListProvider {
-
+class LineDataSetListProvider {
 
     @Inject
     TrendBoundaryEntryProvider trendBoundaryEntryProvider;
 
     private List<LineDataSet> dataSetList = new ArrayList<>();
 
-    private Disposable providerDisposable;
 
     @Inject
-    public ColorFilledLineDataSetListProvider() {
+    public LineDataSetListProvider() {
     }
 
     public final TrendBoundaryEntryProvider getTrendBoundaryEntryProvider() {
@@ -49,12 +46,12 @@ class ColorFilledLineDataSetListProvider {
         return  !dataSetList.isEmpty() ?
                 Single.just(dataSetList)
                     :
-                TrendBoundaryExtremaProvider
+                TrendBoundaryProvider
                 .provide(statisticResults)
                 .observeOn(Schedulers.computation())
                 .subscribeOn(Schedulers.computation())
                 .map(trendBoundaryDataEntityList -> trendBoundaryEntryProvider.provide(statisticResults, trendBoundaryDataEntityList, paletteColorDeterminer))
-                .map(createTrendBoundaryEntryList -> createAndProvide(createTrendBoundaryEntryList, settings))
+                .map(trendBoundaryEntryList -> createAndProvide(trendBoundaryEntryList, settings))
                 .map(data -> {
                     dataSetList = data;
                     return data;
