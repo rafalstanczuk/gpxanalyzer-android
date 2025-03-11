@@ -36,8 +36,6 @@ public final class TrendBoundaryMapper {
             TrendBoundaryDataEntity prevAscendingBoundary = null;
             TrendBoundaryDataEntity prevDescendingBoundary = null;
 
-            int testN = 0;
-
             Log.d(TrendBoundaryMapper.class.getSimpleName(), "statisticResults.getDataEntityVector().size(): " + statisticResults.getDataEntityVector().size());
 
             for (Segment segment : extremaSegmentList) {
@@ -65,13 +63,8 @@ public final class TrendBoundaryMapper {
 
                 trendBoundaryDataEntities.add(trendBoundaryDataEntity);
 
-                testN += trendBoundaryDataEntity.dataEntityVector().size();
-
                 Log.d(TrendBoundaryMapper.class.getSimpleName(), trendBoundaryDataEntity.toString());
             }
-
-
-            Log.d(TrendBoundaryMapper.class.getSimpleName(), "testN: " + (testN));
 
             return trendBoundaryDataEntities;
     }
@@ -86,7 +79,6 @@ public final class TrendBoundaryMapper {
                         statisticResults.getValue(dataEntityEnd)
         );
     }
-
 
     private static TrendBoundaryDataEntity getTrendBoundaryDataEntity(
             int id,
