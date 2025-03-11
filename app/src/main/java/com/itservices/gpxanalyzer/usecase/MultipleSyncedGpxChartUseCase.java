@@ -154,14 +154,6 @@ public class MultipleSyncedGpxChartUseCase {
                             }
                     );
         });
-
-/*        int minOrdinal =
-                requestStatusList.stream()
-                        .mapToInt(Enum::ordinal)
-                        .min()
-                        .orElse(0);
-
-        return RequestStatus.values()[minOrdinal];*/
     }
 
     private Observable<Vector<DataEntity>> provideDataEntityVector(Context context, int rawResId) {

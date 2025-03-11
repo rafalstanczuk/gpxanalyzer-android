@@ -11,6 +11,34 @@ public final class ExtremaSegmentDetector {
     private List<PrimitiveDataEntity> smoothed;
     private List<Extremum> extrema;
 
+    public List<Segment> addMissingSegments(List<Segment> extremumSegmentList, SegmentTrendType segmentTrendType) {
+
+        List<Segment> newExtremumSegmentList = new ArrayList<>();
+        if (extremumSegmentList.isEmpty()) {
+            return extremumSegmentList;
+        }
+        newExtremumSegmentList.add(extremumSegmentList.get(0));
+
+        for (int i = 1; i < extremumSegmentList.size(); i++) {
+
+            Segment prevSegment = extremumSegmentList.get(i - 1);
+            Segment segment = extremumSegmentList.get(i);
+
+            if (prevSegment.endIndex() != segment.startIndex()) {
+                Segment missingSegment =
+                        new Segment(prevSegment.endIndex(), segment.startIndex(),
+                                prevSegment.endTime(), segment.startTime(),
+                                segmentTrendType);
+
+                newExtremumSegmentList.add(missingSegment);
+            }
+
+            newExtremumSegmentList.add(segment);
+        }
+
+        return newExtremumSegmentList;
+    }
+
     // Window function types
     public enum WindowType {
         TRIANGULAR,

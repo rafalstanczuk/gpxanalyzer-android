@@ -1,5 +1,7 @@
 package com.itservices.gpxanalyzer.data.extrema;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import com.itservices.gpxanalyzer.data.TrendStatistics;
@@ -12,6 +14,7 @@ import com.itservices.gpxanalyzer.data.extrema.detector.ExtremaSegmentDetector;
 import com.itservices.gpxanalyzer.data.extrema.detector.PrimitiveDataEntity;
 import com.itservices.gpxanalyzer.data.extrema.detector.Segment;
 import com.itservices.gpxanalyzer.data.extrema.detector.SegmentThresholds;
+import com.itservices.gpxanalyzer.data.extrema.detector.SegmentTrendType;
 import com.itservices.gpxanalyzer.data.extrema.detector.TrendTypeMapper;
 
 import java.util.ArrayList;
@@ -36,126 +39,115 @@ public final class TrendBoundaryProvider {
 
             List<PrimitiveDataEntity> primitiveList = DataPrimitiveMapper.mapFrom(statisticResults);
 
-            double dMinMax = statisticResults.getDeltaMinMax();
-
-            //Log.d(TrendBoundaryProvider.class.getSimpleName(), " statisticResults Min Max " + statisticResults.getMinValue() + " to " + statisticResults.getMaxValue());
-            //Log.d(TrendBoundaryProvider.class.getSimpleName(), " statisticResults dMinMax " + dMinMax);
-
-            SegmentThresholds segmentThresholds = new SegmentThresholds(dMinMax / 5, 0.001, dMinMax / 5, 0.001);
-
             ExtremaSegmentDetector segmentDetector = new ExtremaSegmentDetector();
             segmentDetector.preprocessAndFindExtrema(primitiveList, ExtremaSegmentDetector.DEFAULT_MAX_VALUE_ACCURACY, windowFunctionWeights);
+
+            // TODO: parameters can be changed by USER  !!!
+            SegmentThresholds segmentThresholds = getSegmentThresholds(statisticResults);
 
             List<Segment> extremumSegmentList
                     = segmentDetector.detectSegmentsOneRun(segmentThresholds);
 
+            extremumSegmentList
+                    = segmentDetector.addMissingSegments(extremumSegmentList, SegmentTrendType.CONSTANT);
+
             Vector<DataEntity> dataEntityVector = statisticResults.getDataEntityVector();
 
-            //Log.d(TrendBoundaryProvider.class.getSimpleName(), "statisticResults.getDataEntityVector(): " + statisticResults.getDataEntityVector().size());
-
             List<TrendBoundaryDataEntity> trendBoundaryDataEntities = new ArrayList<>();
-            int id = 0;
-            float sumAscending = 0;
-            float sumDescending = 0;
 
-            TrendBoundaryDataEntity prevMissingBoundary = null;
+            TrendBoundaryDataEntity prevConstantBoundary = null;
+            TrendBoundaryDataEntity prevAscendingBoundary = null;
+            TrendBoundaryDataEntity prevDescendingBoundary = null;
 
-            for (int iExtremum = 0; iExtremum < extremumSegmentList.size() - 1; iExtremum++) {
+            int testN = 0;
 
-                Segment segment = extremumSegmentList.get(iExtremum);
+            Log.d(TrendBoundaryProvider.class.getSimpleName(), "statisticResults.getDataEntityVector().size(): " + statisticResults.getDataEntityVector().size());
 
-                if (iExtremum > 1) {
-                    Segment prevSegment = extremumSegmentList.get(iExtremum - 1);
-
-                    Vector<DataEntity> missingSegment = detectAndGetMissingSegment(prevSegment, segment, dataEntityVector);
-
-                    if (missingSegment != null) {
-                        TrendBoundaryDataEntity missingBoundary = getMissingTrendBoundaryDataEntity(id++, missingSegment, prevMissingBoundary, statisticResults);
-                        prevMissingBoundary = missingBoundary;
-
-                        trendBoundaryDataEntities.add(missingBoundary);
-
-                        //Log.d(TrendBoundaryProvider.class.getSimpleName(), TrendType.CONSTANT.name() + " missing segment from " + missingSegment.firstElement().timestampMillis() + " to " + missingSegment.lastElement() + " deltaValFlat: +" + missingBoundary.trendStatistics().deltaVal() + " missingSegmentDataEntityVector.size: " + missingSegment.size());
-                    }
-                }
-
+            for (Segment segment : extremumSegmentList) {
                 Vector<DataEntity> segmentDataEntityVector = mapIntoSegmentDataEntityVector(segment, dataEntityVector);
 
-                DataEntity dataEntityStart = dataEntityVector.get(segment.startIndex());
-                DataEntity dataEntityEnd = dataEntityVector.get(segment.endIndex());
-
-                float deltaVal = Math.abs(
-                        statisticResults.getValue(dataEntityStart)
-                                -
-                        statisticResults.getValue(dataEntityEnd)
-                );
-
                 TrendType trendType = TrendTypeMapper.map(segment.type());
-                float trendTypeTotalSum = 0;
+
+                TrendBoundaryDataEntity trendBoundaryDataEntity = null;
+                int index = extremumSegmentList.indexOf(segment);
+
                 switch (trendType) {
                     case UP -> {
-                        sumAscending += deltaVal;
-                        trendTypeTotalSum = sumAscending;
+                        trendBoundaryDataEntity = getTrendBoundaryDataEntity(index, segmentDataEntityVector, trendType, prevAscendingBoundary, statisticResults);
+                        prevAscendingBoundary = trendBoundaryDataEntity;
                     }
                     case CONSTANT -> {
-
+                        trendBoundaryDataEntity = getTrendBoundaryDataEntity(index, segmentDataEntityVector, trendType, prevConstantBoundary, statisticResults);
+                        prevConstantBoundary = trendBoundaryDataEntity;
                     }
                     case DOWN -> {
-                        sumDescending += deltaVal;
-                        trendTypeTotalSum = sumDescending;
+                        trendBoundaryDataEntity = getTrendBoundaryDataEntity(index, segmentDataEntityVector, trendType, prevDescendingBoundary, statisticResults);
+                        prevDescendingBoundary = trendBoundaryDataEntity;
                     }
                 }
 
-                trendBoundaryDataEntities.add(
-                        new TrendBoundaryDataEntity(id++,
-                                new TrendStatistics(trendType, deltaVal, trendTypeTotalSum),
-                                segmentDataEntityVector
-                        ));
+                trendBoundaryDataEntities.add(trendBoundaryDataEntity);
 
-                //Log.d(TrendBoundaryProvider.class.getSimpleName(), trendType.name() + " segment from " + segment.startTime + " to " + segment.endTime + " deltaVal: +" + deltaVal + " segmentDataEntityVector.size: " + segmentDataEntityVector.size());
+                testN +=trendBoundaryDataEntity.dataEntityVector().size();
+
+                Log.d(TrendBoundaryProvider.class.getSimpleName(), trendBoundaryDataEntity.toString());
             }
 
-            //Log.d(TrendBoundaryProvider.class.getSimpleName(), "sumTestCount all segments: " + sumTestCount);
-            //Log.d(TrendBoundaryProvider.class.getSimpleName(), "sumAscending all segments: " + sumAscending);
-            //Log.d(TrendBoundaryProvider.class.getSimpleName(), "sumDescending all segments: " + sumDescending);
+
+            Log.d(TrendBoundaryProvider.class.getSimpleName(), "testN: " + (testN));
 
             return trendBoundaryDataEntities;
         });
     }
 
-    private static TrendBoundaryDataEntity getMissingTrendBoundaryDataEntity(int id, Vector<DataEntity> missingSegmentDataEntityVector, @Nullable TrendBoundaryDataEntity prevMissingTrendBoundaryDataEntity, StatisticResults statisticResults) {
+    private static float getDeltaVal(StatisticResults statisticResults, Vector<DataEntity> segmentDataEntityVector) {
+        DataEntity dataEntityStart = segmentDataEntityVector.firstElement();
+        DataEntity dataEntityEnd = segmentDataEntityVector.lastElement();
 
-        float deltaValMissing = Math.abs(
-                statisticResults.getValue(missingSegmentDataEntityVector.firstElement())
+        return Math.abs(
+                statisticResults.getValue(dataEntityStart)
                         -
-                statisticResults.getValue(missingSegmentDataEntityVector.lastElement())
+                statisticResults.getValue(dataEntityEnd)
         );
+    }
 
-        float sumFlatDrift = 0.0f;
+    @NonNull
+    private static SegmentThresholds getSegmentThresholds(StatisticResults statisticResults) {
+        double dMinMax = statisticResults.getDeltaMinMax();
 
-        if (prevMissingTrendBoundaryDataEntity != null) {
-            sumFlatDrift = prevMissingTrendBoundaryDataEntity.trendStatistics().deltaVal();
+        // TODO: parameters can be changed by USER  !!!
+        SegmentThresholds segmentThresholds = new SegmentThresholds(dMinMax / 5, 0.001, dMinMax / 5, 0.001);
+        return segmentThresholds;
+    }
+
+    private static TrendBoundaryDataEntity getTrendBoundaryDataEntity(
+            int id,
+            Vector<DataEntity> segmentDataEntityVector,
+            TrendType trendType,
+            @Nullable TrendBoundaryDataEntity prevTrendBoundaryDataEntity,
+            StatisticResults statisticResults) {
+
+        float deltaVal = getDeltaVal(statisticResults, segmentDataEntityVector);
+
+        float sumDeltaVal = 0.0f;
+
+        if (prevTrendBoundaryDataEntity != null) {
+            sumDeltaVal = prevTrendBoundaryDataEntity.trendStatistics().sumCumulativeDeltaValIncluded();
         }
 
-        sumFlatDrift += deltaValMissing;
+        sumDeltaVal += deltaVal;
+
+        //Log.d("getTrendBoundaryDataEntity", "id ="+id + ", trendType =" + trendType.name() + ", deltaVal="+deltaVal + ", sumDeltaVal=" + sumDeltaVal );
 
         return new TrendBoundaryDataEntity(id,
-                new TrendStatistics(TrendType.CONSTANT, deltaValMissing, sumFlatDrift),
-                missingSegmentDataEntityVector
+                new TrendStatistics(trendType, deltaVal, sumDeltaVal),
+                segmentDataEntityVector
         );
     }
 
     @NonNull
     private static Vector<DataEntity> mapIntoSegmentDataEntityVector(Segment segment, Vector<DataEntity> dataEntityVector) {
         return getPartial(segment.startIndex(), segment.endIndex(), dataEntityVector);
-    }
-
-    private static Vector<DataEntity> detectAndGetMissingSegment(Segment prevSegment, Segment segment, Vector<DataEntity> allDataEntityVector) {
-        if (prevSegment.endIndex() != segment.startIndex()) {
-            return getPartial(prevSegment.endIndex(), segment.startIndex(), allDataEntityVector);
-        }
-
-        return null;
     }
 
     private static Vector<DataEntity> getPartial(int startIndex, int endIndex, Vector<DataEntity> allDataEntityVector) {
