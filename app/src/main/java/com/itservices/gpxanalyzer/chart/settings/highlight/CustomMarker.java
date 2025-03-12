@@ -4,15 +4,9 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.RectF;
-import android.graphics.Typeface;
-import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
-import android.text.Spanned;
-import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.widget.TextView;
-
-import androidx.annotation.NonNull;
 
 import com.github.mikephil.charting.components.MarkerView;
 import com.github.mikephil.charting.data.Entry;
@@ -21,12 +15,15 @@ import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.utils.MPPointF;
 import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.chart.DataEntityLineChart;
-import com.itservices.gpxanalyzer.chart.entry.CurveDataEntityEntry;
+import com.itservices.gpxanalyzer.chart.entry.CurveEntry;
 import com.itservices.gpxanalyzer.data.entity.DataEntity;
-import com.itservices.gpxanalyzer.data.statistics.TrendType;
+import com.itservices.gpxanalyzer.data.TrendType;
 import com.itservices.gpxanalyzer.databinding.CustomMarkerViewBinding;
 import com.itservices.gpxanalyzer.utils.common.FormatNumberUtil;
 import com.itservices.gpxanalyzer.utils.ui.ColorUtil;
+import com.itservices.gpxanalyzer.utils.ui.TextViewUtil;
+
+import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -49,22 +46,6 @@ public class CustomMarker extends MarkerView {
 
     }
 
-    @NonNull
-    private SpannableStringBuilder getSpannableStringBuilder(String value, String postFixText) {
-        SpannableStringBuilder valueLine = new SpannableStringBuilder();
-
-        SpannableString valueSpannable = new SpannableString(value);
-        valueLine.append(valueSpannable);
-
-        SpannableString labelSpannable = new SpannableString(postFixText);
-        int flag = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE;
-        labelSpannable.setSpan(new StyleSpan(Typeface.BOLD), 0, labelSpannable.length(), flag);
-
-        valueLine.append(labelSpannable);
-
-        return valueLine;
-    }
-
     @Override
     public MPPointF getOffset() {
         return new MPPointF(getWidth() * 0.05f, getHeight() * 0.1f);
@@ -77,17 +58,16 @@ public class CustomMarker extends MarkerView {
         ChartTouchListener.ChartGesture chartGesture = chartView.getChartTouchListener()
                 .getLastGesture();
 
-        if (entry instanceof CurveDataEntityEntry) {
-            CurveDataEntityEntry curveDataEntityEntry = (CurveDataEntityEntry) entry;
+        if (entry instanceof CurveEntry curveDataEntityEntry) {
             DataEntity dataEntity = curveDataEntityEntry.getDataEntity();
 
-            SpannableStringBuilder timeLine = getSpannableStringBuilder(
-                    FormatNumberUtil.getFormattedTime(dataEntity.getTimestampMillis()), " h"
+            SpannableStringBuilder timeLine = TextViewUtil.getSpannableStringBuilder(
+                    FormatNumberUtil.getFormattedTime(dataEntity.timestampMillis()), " h"
             );
 
-            String unitString = dataEntity.getUnitList().get( curveDataEntityEntry.getStatisticResults().getPrimaryDataIndex() );
+            String unitString = curveDataEntityEntry.getDataEntityWrapper().getUnit( dataEntity );
 
-            SpannableStringBuilder valueLine = getSpannableStringBuilder(
+            SpannableStringBuilder valueLine = TextViewUtil.getSpannableStringBuilder(
                     String.valueOf((int) curveDataEntityEntry.getY()), " " + unitString);
 
             binding.markerTextViewTime.setText(timeLine, TextView.BufferType.SPANNABLE);
@@ -96,22 +76,33 @@ public class CustomMarker extends MarkerView {
             TrendType trendType = curveDataEntityEntry.getTrendBoundaryDataEntity().trendStatistics().trendType();
 
             String text = "";
-                    switch (trendType) {
+            switch (trendType) {
                 case UP -> {
-                    text = "+";
+                    text = "+ ";
                 }
                 case CONSTANT -> {
-                    text = "";
+                    text = "  ";
                 }
                 case DOWN -> {
-                    text = "-";
+                    text = "- ";
                 }
             }
-            text+= curveDataEntityEntry.getTrendBoundaryDataEntity().trendStatistics().deltaAsl();
+            text +=
+                    String.format(Locale.getDefault(), "%.2f", curveDataEntityEntry.getTrendBoundaryDataEntity().trendStatistics().absDeltaVal() );
 
 
-            binding.markerTextViewDeltaAsl.setText(getSpannableStringBuilder(text, " " + unitString));
-            binding.markerTextViewDeltaAsl.setBackgroundColor( ColorUtil.setAlphaInIntColor(trendType.getFillColor(), 128) );
+            binding.markerTextViewDeltaValue.setText(TextViewUtil.getSpannableStringBuilder(text, " " + unitString));
+            binding.markerTextViewDeltaValue.setBackgroundColor(ColorUtil.setAlphaInIntColor(trendType.getFillColor(), 128));
+
+            String numberString =
+                    String.format(Locale.getDefault(), "%d.", curveDataEntityEntry.getTrendBoundaryDataEntity().trendStatistics().n() );
+            binding.markerTextViewNumber.setText(TextViewUtil.getSpannableStringBuilder(null, numberString));
+
+
+/*            String text2 =
+                    String.format(Locale.getDefault(), "%.2f", curveDataEntityEntry.getTrendBoundaryDataEntity().trendStatistics().sumCumulativeAbsDeltaValIncluded() );
+
+            binding.markerTextViewCumulative.setText(getSpannableStringBuilder(text2, " " + unitString));*/
 
             binding.trendTypeImageView.setImageResource(trendType.getDrawableId());
         }
@@ -143,7 +134,7 @@ public class CustomMarker extends MarkerView {
             case LONG_PRESS:
             case SINGLE_TAP: {
 
-                drawMarker(posX, (contentRect.top + contentRect.bottom)*0.25f, canvas);
+                drawMarker(posX, (contentRect.top + contentRect.bottom) * 0.25f, canvas);
 
                 break;
             }
@@ -153,7 +144,7 @@ public class CustomMarker extends MarkerView {
             case PINCH_ZOOM:
             case FLING:
             case DRAG:
-                drawMarker(posX, (contentRect.top + contentRect.bottom)*0.25f, canvas);
+                drawMarker(posX, (contentRect.top + contentRect.bottom) * 0.25f, canvas);
                 break;
         }
         //}

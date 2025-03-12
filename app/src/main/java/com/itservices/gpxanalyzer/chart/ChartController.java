@@ -12,22 +12,25 @@ import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
-import com.itservices.gpxanalyzer.chart.entry.BaseDataEntityEntry;
-import com.itservices.gpxanalyzer.data.statistics.StatisticResults;
+import com.itservices.gpxanalyzer.chart.entry.BaseEntry;
+import com.itservices.gpxanalyzer.data.RequestStatus;
+import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
 
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.subjects.PublishSubject;
 
 public class ChartController implements OnChartValueSelectedListener, OnChartGestureListener {
 
-    private final ChartProvider chartProvider;
-    private final PublishSubject<BaseDataEntityEntry> baseEntrySelectionPublishSubject = PublishSubject.create();
+    @Inject
+    ChartProvider chartProvider;
+
+    private final PublishSubject<BaseEntry> baseEntrySelectionPublishSubject = PublishSubject.create();
 
     @Inject
-    public ChartController(ChartProvider chartProvider) {
-        this.chartProvider = chartProvider;
+    public ChartController() {
     }
 
     /**
@@ -72,11 +75,11 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
         chartProvider.getSettings().setDrawXLabels(drawX);
     }
 
-    public RequestStatus updateChartData(StatisticResults statisticResults) {
-        return chartProvider.updateChartData(statisticResults);
+    public Single<RequestStatus> updateChartData(DataEntityWrapper dataEntityWrapper) {
+        return chartProvider.updateChartData(dataEntityWrapper);
     }
 
-    public Observable<BaseDataEntityEntry> getSelection() {
+    public Observable<BaseEntry> getSelection() {
         return baseEntrySelectionPublishSubject;
     }
 
@@ -98,7 +101,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
             return;
         }
 
-        BaseDataEntityEntry entryFound = (BaseDataEntityEntry) chartProvider.getEntryCacheMap().get(selectedTimeMillis);
+        BaseEntry entryFound = (BaseEntry) chartProvider.getEntryCacheMap().get(selectedTimeMillis);
         if (entryFound != null) {
             setSelectionEntry(entryFound, callListeners);
             chart.highlightValue(entryFound.getX(), entryFound.getY(), entryFound.getDataSetIndex(), callListeners);
@@ -116,8 +119,8 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     private void setSelectionEntry(Entry entry, boolean publishSelection) {
         chartProvider.getChart().setHighlightedEntry(entry);
 
-        if (publishSelection && (entry instanceof BaseDataEntityEntry)) {
-            baseEntrySelectionPublishSubject.onNext((BaseDataEntityEntry) entry);
+        if (publishSelection && (entry instanceof BaseEntry)) {
+            baseEntrySelectionPublishSubject.onNext((BaseEntry) entry);
         }
     }
 

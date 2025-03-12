@@ -2,7 +2,7 @@ package com.itservices.gpxanalyzer.chart;
 
 import com.github.mikephil.charting.components.YAxis;
 import com.itservices.gpxanalyzer.chart.settings.background.LimitLinesBoundaries;
-import com.itservices.gpxanalyzer.data.statistics.StatisticResults;
+import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
 import com.itservices.gpxanalyzer.utils.common.PrecisionUtil;
 
 import java.util.Arrays;
@@ -13,74 +13,78 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-public class LineChartScaler {
-	private static final double DEFAULT_MIN_Y_VALUE = 0.0;
-	private double minY = DEFAULT_MIN_Y_VALUE;
-	private StatisticResults statisticResults = null;
+class LineChartScaler {
+    private static final double DEFAULT_MIN_Y_VALUE = 0.0;
+    private double minY = DEFAULT_MIN_Y_VALUE;
+    private DataEntityWrapper dataEntityWrapper = null;
 
-	private LimitLinesBoundaries limitLinesBoundaries;
+    private LimitLinesBoundaries limitLinesBoundaries;
 
-	@Inject
-	LineChartScaler() {
-	}
+    @Inject
+    LineChartScaler() {
+    }
 
-	public void setStatisticResults(StatisticResults statisticResults) {
-		this.statisticResults = statisticResults;
-	}
+    public void setDataEntityWrapper(DataEntityWrapper dataEntityWrapper) {
+        this.dataEntityWrapper = dataEntityWrapper;
+    }
 
-	public void setLimitLinesBoundaries(LimitLinesBoundaries limitLinesBoundaries) {
-		this.limitLinesBoundaries = limitLinesBoundaries;
-	}
+    public void setLimitLinesBoundaries(LimitLinesBoundaries limitLinesBoundaries) {
+        this.limitLinesBoundaries = limitLinesBoundaries;
+    }
 
-	public void scale(DataEntityLineChart lineChart) {
-		double r = statisticResults.getMaxValue() - statisticResults.getMinValue();
-		double o = r * 0.1f;
-		minY = (statisticResults.getMinValue() - o);
+    public void scale(DataEntityLineChart lineChart) {
 
-		List<Double> valYStatisticsList =
-				Arrays.asList(
-						minY,
-						statisticResults !=null ? statisticResults.getMinValue() : minY,
-						statisticResults !=null ? statisticResults.getMaxValue() : minY
-				);
+        if (dataEntityWrapper == null)
+            return;
 
-		List<Double> limitLinesValues =
-				limitLinesBoundaries.getLimitLineList()
-						.stream()
-						.map(limitLine -> (double)limitLine.getLimit())
-						.collect(Collectors.toList());
+        double r = dataEntityWrapper.getMaxValue() - dataEntityWrapper.getMinValue();
+        double o = r * 0.1f;
+        minY = (dataEntityWrapper.getMinValue() - o);
 
-		Vector<Double> valYList =
-				new Vector<>(Arrays.asList(
-						minY,
-						statisticResults !=null ? statisticResults.getMinValue() : minY,
-						statisticResults !=null ? statisticResults.getMaxValue() : minY
-				));
-		valYList.addAll(limitLinesValues);
+        List<Double> valYStatisticsList =
+                Arrays.asList(
+                        minY,
+                        dataEntityWrapper != null ? dataEntityWrapper.getMinValue() : minY,
+                        dataEntityWrapper != null ? dataEntityWrapper.getMaxValue() : minY
+                );
 
-		//combinedChart.setAutoScaleMinMaxEnabled(true);
-		//lineChart.setVisibleXRangeMinimum(0);
+        List<Double> limitLinesValues =
+                limitLinesBoundaries.getLimitLineList()
+                        .stream()
+                        .map(limitLine -> (double) limitLine.getLimit())
+                        .collect(Collectors.toList());
 
-		double minY = valYList.stream().min(Comparator.naturalOrder()).get();
-		double maxY = valYList.stream().max(Comparator.naturalOrder()).get();
+        Vector<Double> valYList =
+                new Vector<>(Arrays.asList(
+                        minY,
+                        dataEntityWrapper != null ? dataEntityWrapper.getMinValue() : minY,
+                        dataEntityWrapper != null ? dataEntityWrapper.getMaxValue() : minY
+                ));
+        valYList.addAll(limitLinesValues);
 
-		double maxStatisticsY = valYStatisticsList.stream().max(Comparator.naturalOrder()).get();
+        //combinedChart.setAutoScaleMinMaxEnabled(true);
+        //lineChart.setVisibleXRangeMinimum(0);
 
-		if (maxY > 1 && maxY > minY) {
-			//lineChart.setVisibleXRangeMaximum(lineChart.getXRange());
+        double minY = valYList.stream().min(Comparator.naturalOrder()).get();
+        double maxY = valYList.stream().max(Comparator.naturalOrder()).get();
 
-			double range = maxY - minY;
-			double offset = range * 0.1f;
+        double maxStatisticsY = valYStatisticsList.stream().max(Comparator.naturalOrder()).get();
 
-			YAxis leftAxis = lineChart.getAxisLeft();
-			leftAxis.setAxisMinimum((float) (minY - offset));
+        if (maxY > 1 && maxY > minY) {
+            //lineChart.setVisibleXRangeMaximum(lineChart.getXRange());
 
-			if (PrecisionUtil.isGreaterEqual((float) maxStatisticsY, (float) maxY, PrecisionUtil.NDIG_PREC_COMP)) {
-				leftAxis.setAxisMaximum((float) (maxStatisticsY + 2.0f * offset));
-			} else {
-				leftAxis.setAxisMaximum((float) (maxY + 2.0f * offset));
-			}
-		}
-	}
+            double range = maxY - minY;
+            double offset = range * 0.1f;
+
+            YAxis leftAxis = lineChart.getAxisLeft();
+            leftAxis.setAxisMinimum((float) (minY - offset));
+
+            if (PrecisionUtil.isGreaterEqual((float) maxStatisticsY, (float) maxY, PrecisionUtil.NDIG_PREC_COMP)) {
+                leftAxis.setAxisMaximum((float) (maxStatisticsY + 2.0f * offset));
+            } else {
+                leftAxis.setAxisMaximum((float) (maxY + 2.0f * offset));
+            }
+        }
+    }
 }
 

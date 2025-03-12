@@ -21,7 +21,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
@@ -106,7 +105,7 @@ public class SelectGpxFileUseCase {
 
                 filePickerLauncherDisposable = addFile(fragmentActivity, uri)
                         .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
+                        .observeOn(Schedulers.io())
                         .subscribe(file -> {
 
                             isGpxFileFound.onNext(file != null);

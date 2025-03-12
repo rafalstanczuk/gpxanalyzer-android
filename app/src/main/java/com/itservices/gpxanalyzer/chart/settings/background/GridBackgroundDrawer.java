@@ -4,7 +4,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
 
-import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.utils.MPPointF;
@@ -31,12 +30,12 @@ public class GridBackgroundDrawer {
     }
 
     private void drawRectArea(Canvas canvas, BoundaryColorSpan boundaryColorSpan, DataEntityLineChart lineChart) {
-        int colorForAreaId = ColorUtil.setAlphaInIntColor(boundaryColorSpan.getColor(), BACKGROUND_BOUNDARIES_AREA_COLOR_ALPHA);
+        int colorForAreaId = ColorUtil.setAlphaInIntColor(boundaryColorSpan.color(), BACKGROUND_BOUNDARIES_AREA_COLOR_ALPHA);
 
         MPPointF leftMin = lineChart.getPosition(
-                new Entry(DEFAULT_START_DRAW_X, boundaryColorSpan.getMin()), YAxis.AxisDependency.LEFT);
+                new Entry(DEFAULT_START_DRAW_X, boundaryColorSpan.min()), YAxis.AxisDependency.LEFT);
         MPPointF leftMax = lineChart.getPosition(
-                new Entry(DEFAULT_START_DRAW_X, boundaryColorSpan.getMax()),
+                new Entry(DEFAULT_START_DRAW_X, boundaryColorSpan.max()),
                 YAxis.AxisDependency.LEFT
         );
 

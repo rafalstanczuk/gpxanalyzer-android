@@ -1,7 +1,7 @@
 package com.itservices.gpxanalyzer.chart.entry;
 
 import com.github.mikephil.charting.data.Entry;
-import com.itservices.gpxanalyzer.data.statistics.TrendBoundaryDataEntity;
+import com.itservices.gpxanalyzer.data.TrendBoundaryDataEntity;
 
 import java.util.List;
 

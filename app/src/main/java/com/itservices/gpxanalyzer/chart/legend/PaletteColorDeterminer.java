@@ -9,7 +9,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.itservices.gpxanalyzer.R;
-import com.itservices.gpxanalyzer.data.statistics.StatisticResults;
+import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
 import com.itservices.gpxanalyzer.utils.common.PrecisionUtil;
 import com.itservices.gpxanalyzer.utils.ui.IconsUtil;
 
@@ -28,7 +28,7 @@ public class PaletteColorDeterminer {
     private Map<Integer, BoundaryColorSpan> paletteMap = new HashMap<>();
     private Map<Integer, Drawable> drawableMap = new LinkedHashMap<>();
 
-    protected StatisticResults statisticResults;
+    protected DataEntityWrapper dataEntityWrapper;
 
     @Inject
     public PaletteColorDeterminer(@ApplicationContext Context context) {
@@ -41,18 +41,18 @@ public class PaletteColorDeterminer {
     private static int[] compactPalettePixelsFrom(Bitmap colorPalette) {
         final int[] paletteFromBitmap;
         paletteFromBitmap = new int[colorPalette.getHeight()];
-        for(int i = 0; i < colorPalette.getHeight(); i++) {
+        for (int i = 0; i < colorPalette.getHeight(); i++) {
             paletteFromBitmap[i] = colorPalette.getPixel(1, i);
         }
         return paletteFromBitmap;
     }
 
-    public void initPalette(StatisticResults statisticResults) {
-        this.statisticResults = statisticResults;
+    public void setDataEntityWrapper(DataEntityWrapper dataEntityWrapper) {
+        this.dataEntityWrapper = dataEntityWrapper;
 
         paletteMap = generatePalette(
-                (float) statisticResults.getMinValue(),
-                (float) statisticResults.getMaxValue(),
+                (float) dataEntityWrapper.getMinValue(),
+                (float) dataEntityWrapper.getMaxValue(),
                 paletteNumberOfDivisions,
                 paletteFromBitmap,
                 PaletteDirection.MAX_IS_ZERO_INDEX_Y_PIXEL);
@@ -63,9 +63,9 @@ public class PaletteColorDeterminer {
     private Map<Integer, Drawable> generateDrawableIconMap(Map<Integer, BoundaryColorSpan> paletteMap) {
         Map<Integer, Drawable> generatedDrawableMap = new HashMap<>(paletteMap.size());
 
-        paletteMap.forEach( (key, boundary) -> {
+        paletteMap.forEach((key, boundary) -> {
             try {
-                int colorInt = boundary.getColor();
+                int colorInt = boundary.color();
                 Drawable drawableIcon = IconsUtil.getDrawableIconForAreaColorId(colorInt, 10, false);
                 generatedDrawableMap.put(key, drawableIcon);
             } catch (Exception ex) {
@@ -78,7 +78,7 @@ public class PaletteColorDeterminer {
 
     public Drawable getDrawableIconFrom(float value) {
         BoundaryColorSpan boundaryColorSpan = getBoundaryFrom(value);
-        return drawableMap.get( boundaryColorSpan.getId() );
+        return drawableMap.get(boundaryColorSpan.id());
     }
 
     public Map<Integer, BoundaryColorSpan> getPalette() {
@@ -87,13 +87,13 @@ public class PaletteColorDeterminer {
 
     public BoundaryColorSpan getBoundaryFrom(float value) {
 
-        float normalizedVal = value - (float)statisticResults.getMinValue();
+        float normalizedVal = value - (float) dataEntityWrapper.getMinValue();
 
-        BoundaryColorSpan first =  paletteMap.entrySet().iterator().next().getValue();
+        BoundaryColorSpan first = paletteMap.entrySet().iterator().next().getValue();
 
-        float delta = first.getMax() - first.getMin();
+        float delta = first.max() - first.min();
 
-        int estimatedKeyIndex = (int) Math.floor( normalizedVal / delta );
+        int estimatedKeyIndex = (int) Math.floor(normalizedVal / delta);
 
         int estimatedKeyIndexLowIndexCheck = Math.max(estimatedKeyIndex, 0);
 
@@ -107,9 +107,9 @@ public class PaletteColorDeterminer {
     }
 
     public static boolean isWithinBoundary(float value, BoundaryColorSpan boundaryColorSpan) {
-        return PrecisionUtil.isGreaterEqual(boundaryColorSpan.getMin(), value, PrecisionUtil.NDIG_PREC_COMP)
+        return PrecisionUtil.isGreaterEqual(boundaryColorSpan.min(), value, PrecisionUtil.NDIG_PREC_COMP)
                 &&
-                value < boundaryColorSpan.getMax();
+                value < boundaryColorSpan.max();
     }
 
     private LinkedHashMap<Integer, BoundaryColorSpan> generatePalette(float min, float max, int numOfDividing, int[] paletteFromBitmap, PaletteDirection paletteDirection) {
@@ -117,20 +117,20 @@ public class PaletteColorDeterminer {
 
         int maxYPalette = paletteFromBitmap.length - 1;
 
-        float stepYPalette =  maxYPalette / (float)numOfDividing ;
+        float stepYPalette = maxYPalette / (float) numOfDividing;
         float valuesSpan = max - min;
-        float stepValue =  valuesSpan / (float)numOfDividing ;
+        float stepValue = valuesSpan / (float) numOfDividing;
 
         float shiftFromStartValueOfBoundary = 0.5f * stepValue;
 
-        for( int i=0; i < numOfDividing; i++) {
+        for (int i = 0; i < numOfDividing; i++) {
             float value = i * stepValue + min;
             float nextValue = value + stepValue;
 
             float middleValueOfCurrentBoundary = value + shiftFromStartValueOfBoundary;
-            float colorFloatScaledIndex = maxYPalette * ( (middleValueOfCurrentBoundary - min)/ valuesSpan );
+            float colorFloatScaledIndex = maxYPalette * ((middleValueOfCurrentBoundary - min) / valuesSpan);
 
-            int indexColorStep = (int) Math.floor( colorFloatScaledIndex / stepYPalette);
+            int indexColorStep = (int) Math.floor(colorFloatScaledIndex / stepYPalette);
 
             int colorFloatScaledIndexSteppedDiscrete = (int) (indexColorStep * stepYPalette);
 
@@ -143,18 +143,11 @@ public class PaletteColorDeterminer {
     }
 
     private int determineDiscreteColorFromScaledValue(int maxYPalette, int colorFloatScaledIndexSteppedDiscrete, PaletteDirection paletteDirection) {
-        int scaledPixelColor = paletteFromBitmap[colorFloatScaledIndexSteppedDiscrete];
-
-        switch (paletteDirection) {
-
-            case MIN_IS_ZERO_INDEX_Y_PIXEL:
-                scaledPixelColor = paletteFromBitmap[colorFloatScaledIndexSteppedDiscrete];
-                break;
-            case MAX_IS_ZERO_INDEX_Y_PIXEL:
-                scaledPixelColor = paletteFromBitmap[maxYPalette - colorFloatScaledIndexSteppedDiscrete];
-                break;
-        }
-
-        return scaledPixelColor;
+        return switch (paletteDirection) {
+            case MIN_IS_ZERO_INDEX_Y_PIXEL ->
+                    paletteFromBitmap[colorFloatScaledIndexSteppedDiscrete];
+            case MAX_IS_ZERO_INDEX_Y_PIXEL ->
+                    paletteFromBitmap[maxYPalette - colorFloatScaledIndexSteppedDiscrete];
+        };
     }
 }

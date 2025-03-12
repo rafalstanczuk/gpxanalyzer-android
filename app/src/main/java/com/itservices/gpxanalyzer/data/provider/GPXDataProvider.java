@@ -8,11 +8,11 @@ import androidx.annotation.NonNull;
 
 import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.data.entity.DataEntity;
-import com.itservices.gpxanalyzer.data.gpx.calculation.LocationCalculatorUtil;
-import com.itservices.gpxanalyzer.data.gpx.parser.GPXParser;
-import com.itservices.gpxanalyzer.data.gpx.parser.domain.Gpx;
-import com.itservices.gpxanalyzer.data.gpx.parser.domain.TrackPoint;
-import com.itservices.gpxanalyzer.data.gpx.parser.domain.TrackSegment;
+import com.itservices.gpxanalyzer.utils.location.LocationCalculatorUtil;
+import com.itservices.gpxanalyzer.data.provider.parser.GPXParser;
+import com.itservices.gpxanalyzer.data.provider.parser.domain.Gpx;
+import com.itservices.gpxanalyzer.data.provider.parser.domain.TrackPoint;
+import com.itservices.gpxanalyzer.data.provider.parser.domain.TrackSegment;
 import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.ViewModeMapper;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -32,7 +32,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext;
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
 
-public class GPXDataProvider {
+public final class GPXDataProvider {
     private static List<String> NAME_LIST = new ArrayList<>();
     private static List<String> UNIT_LIST = new ArrayList<>();
 
@@ -114,7 +114,7 @@ public class GPXDataProvider {
                     segment.getTrackPoints().get(iTrackPoint + 1)
             );
 
-            Location centroidLocation = LocationCalculatorUtil.calculateCentroidManual(Arrays.asList(gpxPointA, gpxPointB));
+            Location centroidLocation = LocationCalculatorUtil.calculateCentroid(Arrays.asList(gpxPointA, gpxPointB));
 
             float speed = LocationCalculatorUtil.calculateSpeed3D(gpxPointA, gpxPointB);
             centroidLocation.setSpeed(speed);
@@ -137,12 +137,11 @@ public class GPXDataProvider {
 
     @NonNull
     private DataEntity createDataEntity(int iTrackPoint, Location location) {
-        DataEntity dataEntity = new DataEntity(iTrackPoint, location.getTime(),
+        return new DataEntity(iTrackPoint, location.getTime(),
                 Arrays.asList((float) location.getAltitude(), location.getSpeed()),
+                Arrays.asList(0.1f, 0.1f),
                 NAME_LIST,
                 UNIT_LIST);
-
-        return dataEntity;
     }
 
     @NonNull
