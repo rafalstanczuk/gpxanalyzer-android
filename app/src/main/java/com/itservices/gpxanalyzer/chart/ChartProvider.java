@@ -7,7 +7,7 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.itservices.gpxanalyzer.chart.entry.EntryCacheMap;
 import com.itservices.gpxanalyzer.data.RequestStatus;
-import com.itservices.gpxanalyzer.data.StatisticResults;
+import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
 
 import java.util.List;
 
@@ -48,12 +48,12 @@ class ChartProvider {
     }
 
     @UiThread
-    public Single<RequestStatus> updateChartData(StatisticResults statisticResults) {
+    public Single<RequestStatus> updateChartData(DataEntityWrapper dataEntityWrapper) {
 
-        chart.setStatisticResults(statisticResults);
+        chart.setDataEntityWrapper(dataEntityWrapper);
 
         return lineDataSetListProvider
-                .provide(statisticResults, settings, chart.getPaletteColorDeterminer())
+                .provide(dataEntityWrapper, settings, chart.getPaletteColorDeterminer())
                 .observeOn(AndroidSchedulers.mainThread())
                 .map(newLineDataSetList -> {
 

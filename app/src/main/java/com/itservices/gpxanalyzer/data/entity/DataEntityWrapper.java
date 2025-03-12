@@ -1,25 +1,25 @@
-package com.itservices.gpxanalyzer.data;
+package com.itservices.gpxanalyzer.data.entity;
 
 
 import java.util.DoubleSummaryStatistics;
 import java.util.Vector;
 import java.util.stream.Collectors;
 
-public final class StatisticResults {
+public final class DataEntityWrapper {
     public static final int DEFAULT_PRIMARY_DATA_INDEX = 0;
     private double maxValue;
     private double minValue;
 
-    private Vector<DataEntity> dataEntityVector = new Vector<>();
+    private Vector<DataEntity> data = new Vector<>();
 
     private int primaryDataIndex = DEFAULT_PRIMARY_DATA_INDEX;
 
-    private StatisticResults() {
+    private DataEntityWrapper() {
     }
 
-    public StatisticResults(Vector<DataEntity> dataEntityVector, int primaryDataIndex) {
+    public DataEntityWrapper(Vector<DataEntity> data, int primaryDataIndex) {
         this.primaryDataIndex = primaryDataIndex;
-        setDataEntityVector(dataEntityVector);
+        setData(data);
     }
 
     public double getDeltaMinMax() {
@@ -32,14 +32,14 @@ public final class StatisticResults {
     }
 
     private void clear() {
-        dataEntityVector.clear();
+        data.clear();
 
         maxValue = Float.MIN_VALUE;
         minValue = Float.MAX_VALUE;
     }
 
     private void compute() {
-        DoubleSummaryStatistics stats = dataEntityVector.stream()
+        DoubleSummaryStatistics stats = data.stream()
                 .collect(
                         Collectors.summarizingDouble(
                                 dataEntity -> {
@@ -51,16 +51,16 @@ public final class StatisticResults {
         maxValue = stats.getMax();
     }
 
-    public Vector<DataEntity> getDataEntityVector() {
-        return dataEntityVector;
+    public Vector<DataEntity> getData() {
+        return data;
     }
 
     public int getPrimaryDataIndex() {
         return primaryDataIndex;
     }
 
-    private void setDataEntityVector(Vector<DataEntity> dataEntityVector) {
-        this.dataEntityVector = dataEntityVector;
+    private void setData(Vector<DataEntity> dataEntityVector) {
+        this.data = dataEntityVector;
 
         compute();
     }
@@ -73,8 +73,32 @@ public final class StatisticResults {
         return minValue;
     }
 
+    public float getAccuracy(int index) {
+        return data.get(index).valueAccuracyList().get(primaryDataIndex);
+    }
+
+    public float getAccuracy(DataEntity dataEntity) {
+        return dataEntity.valueAccuracyList().get(primaryDataIndex);
+    }
+
+    public String getName(int index) {
+        return data.get(index).nameList().get(primaryDataIndex);
+    }
+
+    public String getName(DataEntity dataEntity) {
+        return dataEntity.nameList().get(primaryDataIndex);
+    }
+
+    public String getUnit(int index) {
+        return data.get(index).unitList().get(primaryDataIndex);
+    }
+
+    public String getUnit(DataEntity dataEntity) {
+        return dataEntity.unitList().get(primaryDataIndex);
+    }
+
     public float getValue(int index) {
-        return dataEntityVector.get(index).valueList().get(primaryDataIndex);
+        return data.get(index).valueList().get(primaryDataIndex);
     }
 
     public float getValue(DataEntity dataEntity) {

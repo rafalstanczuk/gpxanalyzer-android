@@ -14,9 +14,9 @@ import androidx.annotation.NonNull;
 import com.itservices.gpxanalyzer.chart.ChartController;
 import com.itservices.gpxanalyzer.chart.entry.BaseEntry;
 import com.itservices.gpxanalyzer.data.RequestStatus;
-import com.itservices.gpxanalyzer.data.DataEntity;
-import com.itservices.gpxanalyzer.data.gpx.GPXDataProvider;
-import com.itservices.gpxanalyzer.data.StatisticResults;
+import com.itservices.gpxanalyzer.data.entity.DataEntity;
+import com.itservices.gpxanalyzer.data.provider.GPXDataProvider;
+import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
 import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItem;
 import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.ViewMode;
 import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.ViewModeMapper;
@@ -131,7 +131,7 @@ public class MultipleSyncedGpxChartUseCase {
             ViewMode iChartViewMode = chartAreaItem.getViewMode().getValue();
 
             int primaryKeyIndex = viewModeMapper.mapToPrimaryKeyIndexList(iChartViewMode);
-            chartAreaItem.setStatisticResults(new StatisticResults(gpxData, primaryKeyIndex));
+            chartAreaItem.setDataEntityWrapper(new DataEntityWrapper(gpxData, primaryKeyIndex));
         }
 
         return chartAreaItemList;
@@ -143,7 +143,7 @@ public class MultipleSyncedGpxChartUseCase {
         List<RequestStatus> updateChartStatusList = new ArrayList<>();
 
         chartAreaItemList.forEach(item -> {
-            chartUpdateDisposable = updateChart(item.getChartController(), item.getStatisticResults())
+            chartUpdateDisposable = updateChart(item.getChartController(), item.getDataEntityWrapper())
                     .observeOn(Schedulers.io())
                     .subscribe(updateChartStatus -> {
                                 updateChartStatusList.add(updateChartStatus);
@@ -170,8 +170,8 @@ public class MultipleSyncedGpxChartUseCase {
     }
 
 
-    private Single<RequestStatus> updateChart(ChartController chartController, StatisticResults statisticResults) {
-        return chartController.updateChartData(statisticResults);
+    private Single<RequestStatus> updateChart(ChartController chartController, DataEntityWrapper dataEntityWrapper) {
+        return chartController.updateChartData(dataEntityWrapper);
     }
 
     private Disposable observeSelectionOn(Activity activity, Observable<BaseEntry> selection, ChartController chartController) {

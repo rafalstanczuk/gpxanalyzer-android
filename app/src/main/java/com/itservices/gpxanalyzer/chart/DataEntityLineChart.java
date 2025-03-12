@@ -21,7 +21,7 @@ import com.itservices.gpxanalyzer.chart.legend.PaletteColorDeterminer;
 import com.itservices.gpxanalyzer.chart.settings.background.GridBackgroundDrawer;
 import com.itservices.gpxanalyzer.chart.settings.background.LimitLinesBoundaries;
 import com.itservices.gpxanalyzer.chart.settings.highlight.StaticChartHighlighter;
-import com.itservices.gpxanalyzer.data.StatisticResults;
+import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -175,7 +175,7 @@ public class DataEntityLineChart extends LineChart {
 
 	/*	DataEntity dataEntity = ( (BaseEntry)selectedEntry).getDataEntity();
 
-		int primaryDataIndex = ((BaseEntry) selectedEntry).getStatisticResults().getPrimaryDataIndex();
+		int primaryDataIndex = ((BaseEntry) selectedEntry).getDataEntityWrapper().getPrimaryDataIndex();
 
 			dataEntityInfoLayoutView.setTime( getFormattedTime(dataEntity.getTimestampMillis()) );
 			dataEntityInfoLayoutView.setValue1(
@@ -261,8 +261,8 @@ public class DataEntityLineChart extends LineChart {
 		super.onDetachedFromWindow();
 	}
 
-	public void setStatisticResults(StatisticResults statisticResults) {
-		paletteColorDeterminer.setStatisticResults(statisticResults);
-		scaler.setStatisticResults(statisticResults);
+	public void setDataEntityWrapper(DataEntityWrapper dataEntityWrapper) {
+		paletteColorDeterminer.setDataEntityWrapper(dataEntityWrapper);
+		scaler.setDataEntityWrapper(dataEntityWrapper);
 	}
 }

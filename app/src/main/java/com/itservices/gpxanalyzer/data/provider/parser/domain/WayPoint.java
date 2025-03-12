@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.data.gpx.parser.domain;
+package com.itservices.gpxanalyzer.data.provider.parser.domain;
 
 /**
  * A way point (wpt element).

@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.data.gpx;
+package com.itservices.gpxanalyzer.data.provider;
 
 import android.content.Context;
 import android.location.Location;
@@ -7,12 +7,12 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.itservices.gpxanalyzer.R;
-import com.itservices.gpxanalyzer.data.DataEntity;
+import com.itservices.gpxanalyzer.data.entity.DataEntity;
 import com.itservices.gpxanalyzer.utils.location.LocationCalculatorUtil;
-import com.itservices.gpxanalyzer.data.gpx.parser.GPXParser;
-import com.itservices.gpxanalyzer.data.gpx.parser.domain.Gpx;
-import com.itservices.gpxanalyzer.data.gpx.parser.domain.TrackPoint;
-import com.itservices.gpxanalyzer.data.gpx.parser.domain.TrackSegment;
+import com.itservices.gpxanalyzer.data.provider.parser.GPXParser;
+import com.itservices.gpxanalyzer.data.provider.parser.domain.Gpx;
+import com.itservices.gpxanalyzer.data.provider.parser.domain.TrackPoint;
+import com.itservices.gpxanalyzer.data.provider.parser.domain.TrackSegment;
 import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.ViewModeMapper;
 
 import org.xmlpull.v1.XmlPullParserException;

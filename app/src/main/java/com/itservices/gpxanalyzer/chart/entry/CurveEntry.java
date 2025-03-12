@@ -4,8 +4,8 @@ import android.graphics.drawable.Drawable;
 import android.util.Log;
 
 import com.itservices.gpxanalyzer.chart.settings.axis.HourMinutesAxisValueFormatter;
-import com.itservices.gpxanalyzer.data.DataEntity;
-import com.itservices.gpxanalyzer.data.StatisticResults;
+import com.itservices.gpxanalyzer.data.entity.DataEntity;
+import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
 import com.itservices.gpxanalyzer.chart.legend.PaletteColorDeterminer;
 import com.itservices.gpxanalyzer.data.TrendBoundaryDataEntity;
 
@@ -16,9 +16,9 @@ public class CurveEntry extends BaseEntry {
     private final TrendBoundaryDataEntity trendBoundaryDataEntity;
 
     CurveEntry(
-            DataEntity dataEntity, TrendBoundaryDataEntity trendBoundaryDataEntity, float x, float y, Drawable icon, StatisticResults statisticResults
+            DataEntity dataEntity, TrendBoundaryDataEntity trendBoundaryDataEntity, float x, float y, Drawable icon, DataEntityWrapper dataEntityWrapper
     ) {
-        super(dataEntity, trendBoundaryDataEntity.id(), x, y, icon, statisticResults);
+        super(dataEntity, trendBoundaryDataEntity.id(), x, y, icon, dataEntityWrapper);
 
         this.trendBoundaryDataEntity = trendBoundaryDataEntity;
     }
@@ -26,14 +26,14 @@ public class CurveEntry extends BaseEntry {
     public static CurveEntry create(
             DataEntity dataEntity,
             TrendBoundaryDataEntity trendBoundaryDataEntity, PaletteColorDeterminer paletteColorDeterminer,
-            StatisticResults statisticResults
+            DataEntityWrapper dataEntityWrapper
     ) {
         Drawable drawableIcon = null;
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(dataEntity.timestampMillis());
         float floatTime = HourMinutesAxisValueFormatter.combineIntoFloatTime(calendar);
-        float value = dataEntity.valueList().get(statisticResults.getPrimaryDataIndex());
+        float value = dataEntityWrapper.getValue( dataEntity );
 
         try {
             drawableIcon = paletteColorDeterminer.getDrawableIconFrom(value);
@@ -45,7 +45,7 @@ public class CurveEntry extends BaseEntry {
                 dataEntity,
                 trendBoundaryDataEntity,
                 floatTime, value, SHOW_COLOR_CURVE_DATA_ENTITY_RANGE_CIRCLES_ICONS ? drawableIcon : null,
-                statisticResults
+                dataEntityWrapper
         );
     }
 

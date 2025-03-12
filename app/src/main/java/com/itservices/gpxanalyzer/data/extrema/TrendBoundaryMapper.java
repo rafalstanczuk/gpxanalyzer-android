@@ -6,8 +6,8 @@ import androidx.annotation.NonNull;
 
 import com.itservices.gpxanalyzer.data.TrendStatistics;
 import com.itservices.gpxanalyzer.data.TrendType;
-import com.itservices.gpxanalyzer.data.DataEntity;
-import com.itservices.gpxanalyzer.data.StatisticResults;
+import com.itservices.gpxanalyzer.data.entity.DataEntity;
+import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
 import com.itservices.gpxanalyzer.data.TrendBoundaryDataEntity;
 import com.itservices.gpxanalyzer.data.extrema.detector.Segment;
 import com.itservices.gpxanalyzer.data.extrema.detector.TrendTypeMapper;
@@ -20,15 +20,15 @@ import javax.annotation.Nullable;
 
 public final class TrendBoundaryMapper {
 
-    public static List<TrendBoundaryDataEntity> mapFrom(StatisticResults statisticResults, TrendType trendTypeToHighlight) {
+    public static List<TrendBoundaryDataEntity> mapFrom(DataEntityWrapper dataEntityWrapper, TrendType trendTypeToHighlight) {
         List<TrendBoundaryDataEntity> trendBoundaryDataEntities = new ArrayList<>();
 
         return trendBoundaryDataEntities;
     }
 
-    public static List<TrendBoundaryDataEntity> mapFrom(StatisticResults statisticResults, List<Segment> extremaSegmentList) {
+    public static List<TrendBoundaryDataEntity> mapFrom(DataEntityWrapper dataEntityWrapper, List<Segment> extremaSegmentList) {
 
-            Vector<DataEntity> dataEntityVector = statisticResults.getDataEntityVector();
+            Vector<DataEntity> dataEntityVector = dataEntityWrapper.getData();
 
             List<TrendBoundaryDataEntity> trendBoundaryDataEntities = new ArrayList<>();
 
@@ -36,7 +36,7 @@ public final class TrendBoundaryMapper {
             TrendBoundaryDataEntity prevAscendingBoundary = null;
             TrendBoundaryDataEntity prevDescendingBoundary = null;
 
-            Log.d(TrendBoundaryMapper.class.getSimpleName(), "statisticResults.getDataEntityVector().size(): " + statisticResults.getDataEntityVector().size());
+            Log.d(TrendBoundaryMapper.class.getSimpleName(), "dataEntityWrapper.getDataEntityVector().size(): " + dataEntityWrapper.getData().size());
 
             for (Segment segment : extremaSegmentList) {
                 Vector<DataEntity> segmentDataEntityVector = mapIntoSegmentDataEntityVector(segment, dataEntityVector);
@@ -48,15 +48,15 @@ public final class TrendBoundaryMapper {
 
                 switch (trendType) {
                     case UP -> {
-                        trendBoundaryDataEntity = getTrendBoundaryDataEntity(index, segmentDataEntityVector, trendType, prevAscendingBoundary, statisticResults);
+                        trendBoundaryDataEntity = getTrendBoundaryDataEntity(index, segmentDataEntityVector, trendType, prevAscendingBoundary, dataEntityWrapper);
                         prevAscendingBoundary = trendBoundaryDataEntity;
                     }
                     case CONSTANT -> {
-                        trendBoundaryDataEntity = getTrendBoundaryDataEntity(index, segmentDataEntityVector, trendType, prevConstantBoundary, statisticResults);
+                        trendBoundaryDataEntity = getTrendBoundaryDataEntity(index, segmentDataEntityVector, trendType, prevConstantBoundary, dataEntityWrapper);
                         prevConstantBoundary = trendBoundaryDataEntity;
                     }
                     case DOWN -> {
-                        trendBoundaryDataEntity = getTrendBoundaryDataEntity(index, segmentDataEntityVector, trendType, prevDescendingBoundary, statisticResults);
+                        trendBoundaryDataEntity = getTrendBoundaryDataEntity(index, segmentDataEntityVector, trendType, prevDescendingBoundary, dataEntityWrapper);
                         prevDescendingBoundary = trendBoundaryDataEntity;
                     }
                 }
@@ -69,14 +69,14 @@ public final class TrendBoundaryMapper {
             return trendBoundaryDataEntities;
     }
 
-    private static float getDeltaVal(StatisticResults statisticResults, Vector<DataEntity> segmentDataEntityVector) {
+    private static float getDeltaVal(DataEntityWrapper dataEntityWrapper, Vector<DataEntity> segmentDataEntityVector) {
         DataEntity dataEntityStart = segmentDataEntityVector.firstElement();
         DataEntity dataEntityEnd = segmentDataEntityVector.lastElement();
 
         return Math.abs(
-                statisticResults.getValue(dataEntityStart)
+                dataEntityWrapper.getValue(dataEntityStart)
                         -
-                        statisticResults.getValue(dataEntityEnd)
+                        dataEntityWrapper.getValue(dataEntityEnd)
         );
     }
 
@@ -85,9 +85,9 @@ public final class TrendBoundaryMapper {
             Vector<DataEntity> segmentDataEntityVector,
             TrendType trendType,
             @Nullable TrendBoundaryDataEntity prevTrendBoundaryDataEntity,
-            StatisticResults statisticResults) {
+            DataEntityWrapper dataEntityWrapper) {
 
-        float deltaVal = getDeltaVal(statisticResults, segmentDataEntityVector);
+        float deltaVal = getDeltaVal(dataEntityWrapper, segmentDataEntityVector);
 
         float sumDeltaVal = 0.0f;
 

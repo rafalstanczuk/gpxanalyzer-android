@@ -2,7 +2,7 @@ package com.itservices.gpxanalyzer.chart;
 
 import com.github.mikephil.charting.components.YAxis;
 import com.itservices.gpxanalyzer.chart.settings.background.LimitLinesBoundaries;
-import com.itservices.gpxanalyzer.data.StatisticResults;
+import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
 import com.itservices.gpxanalyzer.utils.common.PrecisionUtil;
 
 import java.util.Arrays;
@@ -16,7 +16,7 @@ import javax.inject.Inject;
 class LineChartScaler {
     private static final double DEFAULT_MIN_Y_VALUE = 0.0;
     private double minY = DEFAULT_MIN_Y_VALUE;
-    private StatisticResults statisticResults = null;
+    private DataEntityWrapper dataEntityWrapper = null;
 
     private LimitLinesBoundaries limitLinesBoundaries;
 
@@ -24,8 +24,8 @@ class LineChartScaler {
     LineChartScaler() {
     }
 
-    public void setStatisticResults(StatisticResults statisticResults) {
-        this.statisticResults = statisticResults;
+    public void setDataEntityWrapper(DataEntityWrapper dataEntityWrapper) {
+        this.dataEntityWrapper = dataEntityWrapper;
     }
 
     public void setLimitLinesBoundaries(LimitLinesBoundaries limitLinesBoundaries) {
@@ -34,18 +34,18 @@ class LineChartScaler {
 
     public void scale(DataEntityLineChart lineChart) {
 
-        if (statisticResults == null)
+        if (dataEntityWrapper == null)
             return;
 
-        double r = statisticResults.getMaxValue() - statisticResults.getMinValue();
+        double r = dataEntityWrapper.getMaxValue() - dataEntityWrapper.getMinValue();
         double o = r * 0.1f;
-        minY = (statisticResults.getMinValue() - o);
+        minY = (dataEntityWrapper.getMinValue() - o);
 
         List<Double> valYStatisticsList =
                 Arrays.asList(
                         minY,
-                        statisticResults != null ? statisticResults.getMinValue() : minY,
-                        statisticResults != null ? statisticResults.getMaxValue() : minY
+                        dataEntityWrapper != null ? dataEntityWrapper.getMinValue() : minY,
+                        dataEntityWrapper != null ? dataEntityWrapper.getMaxValue() : minY
                 );
 
         List<Double> limitLinesValues =
@@ -57,8 +57,8 @@ class LineChartScaler {
         Vector<Double> valYList =
                 new Vector<>(Arrays.asList(
                         minY,
-                        statisticResults != null ? statisticResults.getMinValue() : minY,
-                        statisticResults != null ? statisticResults.getMaxValue() : minY
+                        dataEntityWrapper != null ? dataEntityWrapper.getMinValue() : minY,
+                        dataEntityWrapper != null ? dataEntityWrapper.getMaxValue() : minY
                 ));
         valYList.addAll(limitLinesValues);
 

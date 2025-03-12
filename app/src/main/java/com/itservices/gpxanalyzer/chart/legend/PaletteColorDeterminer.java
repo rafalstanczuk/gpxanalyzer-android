@@ -9,7 +9,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.itservices.gpxanalyzer.R;
-import com.itservices.gpxanalyzer.data.StatisticResults;
+import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
 import com.itservices.gpxanalyzer.utils.common.PrecisionUtil;
 import com.itservices.gpxanalyzer.utils.ui.IconsUtil;
 
@@ -28,7 +28,7 @@ public class PaletteColorDeterminer {
     private Map<Integer, BoundaryColorSpan> paletteMap = new HashMap<>();
     private Map<Integer, Drawable> drawableMap = new LinkedHashMap<>();
 
-    protected StatisticResults statisticResults;
+    protected DataEntityWrapper dataEntityWrapper;
 
     @Inject
     public PaletteColorDeterminer(@ApplicationContext Context context) {
@@ -47,12 +47,12 @@ public class PaletteColorDeterminer {
         return paletteFromBitmap;
     }
 
-    public void setStatisticResults(StatisticResults statisticResults) {
-        this.statisticResults = statisticResults;
+    public void setDataEntityWrapper(DataEntityWrapper dataEntityWrapper) {
+        this.dataEntityWrapper = dataEntityWrapper;
 
         paletteMap = generatePalette(
-                (float) statisticResults.getMinValue(),
-                (float) statisticResults.getMaxValue(),
+                (float) dataEntityWrapper.getMinValue(),
+                (float) dataEntityWrapper.getMaxValue(),
                 paletteNumberOfDivisions,
                 paletteFromBitmap,
                 PaletteDirection.MAX_IS_ZERO_INDEX_Y_PIXEL);
@@ -87,7 +87,7 @@ public class PaletteColorDeterminer {
 
     public BoundaryColorSpan getBoundaryFrom(float value) {
 
-        float normalizedVal = value - (float) statisticResults.getMinValue();
+        float normalizedVal = value - (float) dataEntityWrapper.getMinValue();
 
         BoundaryColorSpan first = paletteMap.entrySet().iterator().next().getValue();
 

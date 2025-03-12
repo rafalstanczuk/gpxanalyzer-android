@@ -3,28 +3,28 @@ package com.itservices.gpxanalyzer.chart.entry;
 import android.graphics.drawable.Drawable;
 
 import com.github.mikephil.charting.data.Entry;
-import com.itservices.gpxanalyzer.data.DataEntity;
-import com.itservices.gpxanalyzer.data.StatisticResults;
+import com.itservices.gpxanalyzer.data.entity.DataEntity;
+import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
 
 public class BaseEntry extends Entry {
     protected final DataEntity dataEntity;
-    protected final StatisticResults statisticResults;
+    protected final DataEntityWrapper dataEntityWrapper;
     private final int dataSetIndex;
 
     public BaseEntry(
             DataEntity dataEntity,
             int dataSetIndex,
-            float x, float y, Drawable icon, StatisticResults statisticResults
+            float x, float y, Drawable icon, DataEntityWrapper dataEntityWrapper
     ) {
         super(x, y, icon);
         this.dataEntity = dataEntity;
         this.dataSetIndex = dataSetIndex;
-        this.statisticResults = statisticResults;
+        this.dataEntityWrapper = dataEntityWrapper;
 
     }
 
-    public StatisticResults getStatisticResults() {
-        return statisticResults;
+    public DataEntityWrapper getDataEntityWrapper() {
+        return dataEntityWrapper;
     }
 
     public DataEntity getDataEntity() {
@@ -35,7 +35,7 @@ public class BaseEntry extends Entry {
     public String toString() {
         return "BaseEntry{" +
                 "dataEntity=" + dataEntity +
-                ", statisticResults=" + statisticResults +
+                ", dataEntityWrapper=" + dataEntityWrapper +
                 '}';
     }
 

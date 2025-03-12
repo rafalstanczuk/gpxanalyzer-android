@@ -22,11 +22,13 @@ import com.github.mikephil.charting.utils.MPPointF;
 import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.chart.DataEntityLineChart;
 import com.itservices.gpxanalyzer.chart.entry.CurveEntry;
-import com.itservices.gpxanalyzer.data.DataEntity;
+import com.itservices.gpxanalyzer.data.entity.DataEntity;
 import com.itservices.gpxanalyzer.data.TrendType;
 import com.itservices.gpxanalyzer.databinding.CustomMarkerViewBinding;
 import com.itservices.gpxanalyzer.utils.common.FormatNumberUtil;
 import com.itservices.gpxanalyzer.utils.ui.ColorUtil;
+
+import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -84,7 +86,7 @@ public class CustomMarker extends MarkerView {
                     FormatNumberUtil.getFormattedTime(dataEntity.timestampMillis()), " h"
             );
 
-            String unitString = dataEntity.unitList().get(curveDataEntityEntry.getStatisticResults().getPrimaryDataIndex());
+            String unitString = curveDataEntityEntry.getDataEntityWrapper().getUnit( dataEntity );
 
             SpannableStringBuilder valueLine = getSpannableStringBuilder(
                     String.valueOf((int) curveDataEntityEntry.getY()), " " + unitString);
@@ -106,7 +108,8 @@ public class CustomMarker extends MarkerView {
                     text = "-";
                 }
             }
-            text += curveDataEntityEntry.getTrendBoundaryDataEntity().trendStatistics().deltaVal();
+            text +=
+                    String.format(Locale.getDefault(), "%.2f", curveDataEntityEntry.getTrendBoundaryDataEntity().trendStatistics().deltaVal() );
 
 
             binding.markerTextViewDeltaAsl.setText(getSpannableStringBuilder(text, " " + unitString));

@@ -14,7 +14,7 @@ import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.itservices.gpxanalyzer.chart.entry.BaseEntry;
 import com.itservices.gpxanalyzer.data.RequestStatus;
-import com.itservices.gpxanalyzer.data.StatisticResults;
+import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
 
 import javax.inject.Inject;
 
@@ -75,8 +75,8 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
         chartProvider.getSettings().setDrawXLabels(drawX);
     }
 
-    public Single<RequestStatus> updateChartData(StatisticResults statisticResults) {
-        return chartProvider.updateChartData(statisticResults);
+    public Single<RequestStatus> updateChartData(DataEntityWrapper dataEntityWrapper) {
+        return chartProvider.updateChartData(dataEntityWrapper);
     }
 
     public Observable<BaseEntry> getSelection() {

@@ -3,8 +3,8 @@ package com.itservices.gpxanalyzer.chart.entry;
 import com.github.mikephil.charting.data.Entry;
 import com.itservices.gpxanalyzer.data.TrendBoundaryDataEntity;
 import com.itservices.gpxanalyzer.chart.legend.PaletteColorDeterminer;
-import com.itservices.gpxanalyzer.data.DataEntity;
-import com.itservices.gpxanalyzer.data.StatisticResults;
+import com.itservices.gpxanalyzer.data.entity.DataEntity;
+import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,9 +29,9 @@ public class TrendBoundaryEntryProvider {
     }
 
     public List<TrendBoundaryEntry> provide(
-            StatisticResults statisticResults, List<TrendBoundaryDataEntity> trendBoundaryList, PaletteColorDeterminer paletteColorDeterminer
+            DataEntityWrapper dataEntityWrapper, List<TrendBoundaryDataEntity> trendBoundaryList, PaletteColorDeterminer paletteColorDeterminer
     ) {
-        entryCacheMap.init(statisticResults.getDataEntityVector().size());
+        entryCacheMap.init(dataEntityWrapper.getData().size());
 
         List<TrendBoundaryEntry> trendBoundaryEntryList = new ArrayList<>();
 
@@ -42,7 +42,7 @@ public class TrendBoundaryEntryProvider {
             Vector<DataEntity> dataEntityVector = trendBoundaryDataEntity.dataEntityVector();
 
             dataEntityVector.forEach(dataEntity -> {
-                CurveEntry entry = CurveEntry.create(dataEntity, trendBoundaryDataEntity, paletteColorDeterminer, statisticResults);
+                CurveEntry entry = CurveEntry.create(dataEntity, trendBoundaryDataEntity, paletteColorDeterminer, dataEntityWrapper);
 
                 entryCacheMap.add(dataEntity.timestampMillis(), entry);
 

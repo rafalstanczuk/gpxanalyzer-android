@@ -2,6 +2,8 @@ package com.itservices.gpxanalyzer.data;
 
 import androidx.annotation.NonNull;
 
+import com.itservices.gpxanalyzer.data.entity.DataEntity;
+
 import java.util.Vector;
 
 public record TrendBoundaryDataEntity(int id,

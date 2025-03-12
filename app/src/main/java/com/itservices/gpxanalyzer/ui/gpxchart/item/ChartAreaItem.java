@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.itservices.gpxanalyzer.chart.ChartController;
-import com.itservices.gpxanalyzer.data.StatisticResults;
+import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
 import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.ViewMode;
 
 import dagger.assisted.Assisted;
@@ -12,7 +12,7 @@ import dagger.assisted.AssistedInject;
 
 public class ChartAreaItem {
 
-    private StatisticResults statisticResults;
+    private DataEntityWrapper dataEntityWrapper;
     private final ChartController chartController;
     private MutableLiveData<ViewMode> viewModeLiveData = new MutableLiveData<>();
 
@@ -50,12 +50,12 @@ public class ChartAreaItem {
         return enabledLiveData;
     }
 
-    public void setStatisticResults(StatisticResults statisticResults) {
-        this.statisticResults = statisticResults;
+    public void setDataEntityWrapper(DataEntityWrapper dataEntityWrapper) {
+        this.dataEntityWrapper = dataEntityWrapper;
     }
 
-    public StatisticResults getStatisticResults() {
-        return statisticResults;
+    public DataEntityWrapper getDataEntityWrapper() {
+        return dataEntityWrapper;
     }
 
     public void setViewMode(ViewMode viewMode) {

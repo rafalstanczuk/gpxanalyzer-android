@@ -9,7 +9,7 @@ import com.itservices.gpxanalyzer.chart.legend.PaletteColorDeterminer;
 import com.itservices.gpxanalyzer.data.extrema.ExtremaSegmentListProvider;
 import com.itservices.gpxanalyzer.data.extrema.TrendBoundaryMapper;
 import com.itservices.gpxanalyzer.data.TrendStatistics;
-import com.itservices.gpxanalyzer.data.StatisticResults;
+import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,19 +40,19 @@ class LineDataSetListProvider {
         return dataSetList;
     }
 
-    public Single<List<LineDataSet>> provide(StatisticResults statisticResults, LineChartSettings settings, PaletteColorDeterminer paletteColorDeterminer) {
-        if (statisticResults == null)
+    public Single<List<LineDataSet>> provide(DataEntityWrapper dataEntityWrapper, LineChartSettings settings, PaletteColorDeterminer paletteColorDeterminer) {
+        if (dataEntityWrapper == null)
             return Single.just(dataSetList);
 
         return  !dataSetList.isEmpty() ?
                 Single.just(dataSetList)
                     :
                 ExtremaSegmentListProvider
-                        .provide(statisticResults)
-                .map(segmentList -> TrendBoundaryMapper.mapFrom(statisticResults, segmentList))
+                        .provide(dataEntityWrapper)
+                .map(segmentList -> TrendBoundaryMapper.mapFrom(dataEntityWrapper, segmentList))
                 .observeOn(Schedulers.computation())
                 .subscribeOn(Schedulers.computation())
-                .map(trendBoundaryDataEntityList -> trendBoundaryEntryProvider.provide(statisticResults, trendBoundaryDataEntityList, paletteColorDeterminer))
+                .map(trendBoundaryDataEntityList -> trendBoundaryEntryProvider.provide(dataEntityWrapper, trendBoundaryDataEntityList, paletteColorDeterminer))
                 .map(trendBoundaryEntryList -> createAndProvide(trendBoundaryEntryList, settings))
                 .map(data -> {
                     dataSetList = data;
