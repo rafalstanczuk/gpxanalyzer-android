@@ -26,7 +26,7 @@ public class ExtremaSegmentListProvider {
             ExtremaSegmentDetector segmentDetector = new ExtremaSegmentDetector();
             segmentDetector.preprocessAndFindExtrema(primitiveList, ExtremaSegmentDetector.DEFAULT_MAX_VALUE_ACCURACY, alpineSkiWindowFunctionWeights);
 
-            // TODO: parameters can be changed by USER  !!!
+            // TODO: parameters can be changed by USER by for ex. select type of activity !!!
             SegmentThresholds segmentThresholds = getAlpineSkiSegmentThresholds(dataEntityWrapper);
 
             List<Segment> extremaSegmentList
