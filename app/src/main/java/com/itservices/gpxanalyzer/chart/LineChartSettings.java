@@ -159,7 +159,7 @@ public class LineChartSettings {
 
         yAxisLeft.removeAllLimitLines();
 
-        if (yAxisLeft.getLimitLines().size() == 0) {
+        if (yAxisLeft.getLimitLines().isEmpty()) {
             limitLinesBoundaries.addLimitLinesInto(yAxisLeft);
         }
     }
