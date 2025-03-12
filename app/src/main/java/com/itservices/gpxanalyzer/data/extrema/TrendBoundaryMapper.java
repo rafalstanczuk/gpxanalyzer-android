@@ -1,7 +1,5 @@
 package com.itservices.gpxanalyzer.data.extrema;
 
-import android.util.Log;
-
 import androidx.annotation.NonNull;
 
 import com.itservices.gpxanalyzer.data.TrendStatistics;
@@ -36,7 +34,7 @@ public final class TrendBoundaryMapper {
             TrendBoundaryDataEntity prevAscendingBoundary = null;
             TrendBoundaryDataEntity prevDescendingBoundary = null;
 
-            Log.d(TrendBoundaryMapper.class.getSimpleName(), "dataEntityWrapper.getDataEntityVector().size(): " + dataEntityWrapper.getData().size());
+            //Log.d(TrendBoundaryMapper.class.getSimpleName(), "dataEntityWrapper.getDataEntityVector().size(): " + dataEntityWrapper.getData().size());
 
             for (Segment segment : extremaSegmentList) {
                 Vector<DataEntity> segmentDataEntityVector = mapIntoSegmentDataEntityVector(segment, dataEntityVector);
@@ -63,7 +61,7 @@ public final class TrendBoundaryMapper {
 
                 trendBoundaryDataEntities.add(trendBoundaryDataEntity);
 
-                Log.d(TrendBoundaryMapper.class.getSimpleName(), trendBoundaryDataEntity.toString());
+                //Log.d(TrendBoundaryMapper.class.getSimpleName(), trendBoundaryDataEntity.toString());
             }
 
             return trendBoundaryDataEntities;
@@ -90,17 +88,21 @@ public final class TrendBoundaryMapper {
         float deltaVal = getDeltaVal(dataEntityWrapper, segmentDataEntityVector);
 
         float sumDeltaVal = 0.0f;
+        int n = 0;
 
         if (prevTrendBoundaryDataEntity != null) {
-            sumDeltaVal = prevTrendBoundaryDataEntity.trendStatistics().sumCumulativeDeltaValIncluded();
+            sumDeltaVal = prevTrendBoundaryDataEntity.trendStatistics().sumCumulativeAbsDeltaValIncluded();
+
+            n = prevTrendBoundaryDataEntity.trendStatistics().n();
         }
 
         sumDeltaVal += deltaVal;
+        n++;
 
-        //Log.d("getTrendBoundaryDataEntity", "id ="+id + ", trendType =" + trendType.name() + ", deltaVal="+deltaVal + ", sumDeltaVal=" + sumDeltaVal );
+        //Log.d("getTrendBoundaryDataEntity", "id ="+id + ", trendType =" + trendType.name() + ", absDeltaVal="+absDeltaVal + ", sumDeltaVal=" + sumDeltaVal );
 
         return new TrendBoundaryDataEntity(id,
-                new TrendStatistics(trendType, deltaVal, sumDeltaVal),
+                new TrendStatistics(trendType, deltaVal, sumDeltaVal, n),
                 segmentDataEntityVector
         );
     }

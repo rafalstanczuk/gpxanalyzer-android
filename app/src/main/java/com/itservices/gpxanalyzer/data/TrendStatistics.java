@@ -4,16 +4,17 @@ import androidx.annotation.NonNull;
 
 public record TrendStatistics(
         TrendType trendType,
-        float deltaVal,
-        float sumCumulativeDeltaValIncluded
+        float absDeltaVal,
+        float sumCumulativeAbsDeltaValIncluded,
+        int n
 ) {
     @NonNull
     @Override
     public String toString() {
         return "TrendStatistics{" +
                 "trendType=" + trendType +
-                ", deltaVal=" + deltaVal +
-                ", sumCumulativeDeltaValIncluded=" + sumCumulativeDeltaValIncluded +
+                ", absDeltaVal=" + absDeltaVal +
+                ", sumCumulativeAbsDeltaValIncluded=" + sumCumulativeAbsDeltaValIncluded +
                 '}';
     }
 }
