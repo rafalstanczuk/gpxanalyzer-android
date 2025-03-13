@@ -36,12 +36,13 @@
             android:alpha="0.5"
             android:background="@color/white"
             android:contentDescription="@{ chartAreaItem.getViewMode().name}"
+            android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData}"
             android:onClick="@{() -> viewModel.onSwitchViewMode(chartAreaItem)}"
             app:imageResource="@{ chartAreaItem.getViewMode().getDrawableIconResId  }"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!--android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData()}"-->
+        <!--android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData}"-->
 
         <androidx.appcompat.widget.AppCompatCheckBox
             android:id="@+id/onOffColorizedCirclesCheckBox"
@@ -50,7 +51,7 @@
             android:alpha="0.5"
             android:button="@drawable/ic_checkbox_dots_selector"
             android:checked="@{chartAreaItem.isDrawIconsEnabledLiveData}"
-            android:enabled="@{chartAreaItem.enabledLiveData}"
+            android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData}"
             android:onCheckedChanged="@{(buttonView, isChecked) -> viewModel.onOnOffColorizedCirclesCheckBoxChanged(chartAreaItem, isChecked)}"
             android:textColorHighlight="@color/white"
             app:layout_constraintStart_toEndOf="@+id/switchModeButton"

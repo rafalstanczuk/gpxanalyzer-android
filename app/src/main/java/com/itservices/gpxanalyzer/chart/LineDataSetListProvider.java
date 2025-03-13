@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 
@@ -40,12 +41,12 @@ class LineDataSetListProvider {
         return dataSetList;
     }
 
-    public Single<List<LineDataSet>> provide(DataEntityWrapper dataEntityWrapper, LineChartSettings settings, PaletteColorDeterminer paletteColorDeterminer) {
+    public Observable<List<LineDataSet>> provide(DataEntityWrapper dataEntityWrapper, LineChartSettings settings, PaletteColorDeterminer paletteColorDeterminer) {
         if (dataEntityWrapper == null)
-            return Single.just(dataSetList);
+            return Observable.just(dataSetList);
 
         return  !dataSetList.isEmpty() ?
-                Single.just(dataSetList)
+                Observable.just(dataSetList)
                     :
                 ExtremaSegmentListProvider
                         .provide(dataEntityWrapper)

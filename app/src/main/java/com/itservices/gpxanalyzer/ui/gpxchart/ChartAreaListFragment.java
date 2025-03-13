@@ -65,7 +65,7 @@ public class ChartAreaListFragment extends Fragment {
             viewModel.setChartAreaItemList(itemList);
             viewModel.setDefaultChartAreaItemList(immutableList);
         } else {
-            adapter = new ChartAreaItemAdapter(viewModel.getChartAreaItemListLiveData().getValue(), viewModel);
+            adapter = new ChartAreaItemAdapter(viewModel.getChartAreaItemListLiveData().getValue(), viewModel, getViewLifecycleOwner());
             binding.gpxChartsRecyclerView.setAdapter(adapter);
         }
 
@@ -76,7 +76,7 @@ public class ChartAreaListFragment extends Fragment {
         binding.switchSeverityModeButton.setOnClickListener(view -> viewModel.switchSeverityMode());
 
         viewModel.getChartAreaItemListLiveData().observe(getViewLifecycleOwner(), items -> {
-                    adapter = new ChartAreaItemAdapter(items, viewModel);
+                    adapter = new ChartAreaItemAdapter(items, viewModel, getViewLifecycleOwner());
                     binding.gpxChartsRecyclerView.setAdapter(adapter);
 
                     viewModel.switchSeverityViewModeOrReloadAdapter(adapter);

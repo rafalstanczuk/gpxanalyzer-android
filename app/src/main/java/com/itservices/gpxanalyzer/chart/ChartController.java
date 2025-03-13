@@ -75,7 +75,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
         chartProvider.getSettings().setDrawXLabels(drawX);
     }
 
-    public Single<RequestStatus> updateChartData(DataEntityWrapper dataEntityWrapper) {
+    public Observable<RequestStatus> updateChartData(DataEntityWrapper dataEntityWrapper) {
         return chartProvider.updateChartData(dataEntityWrapper);
     }
 

@@ -5,6 +5,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.itservices.gpxanalyzer.R;
@@ -17,12 +18,14 @@ public class ChartAreaItemAdapter extends RecyclerView.Adapter<ChartAreaItemAdap
 
     private final List<ChartAreaItem> chartAreaItems;
     private final ChartAreaListViewModel viewModel;
+    private final LifecycleOwner viewLifecycleOwner;
 
 
-    public ChartAreaItemAdapter(List<ChartAreaItem> chartAreaItems, ChartAreaListViewModel viewModel) {
+    public ChartAreaItemAdapter(List<ChartAreaItem> chartAreaItems, ChartAreaListViewModel viewModel, LifecycleOwner viewLifecycleOwner) {
         this.chartAreaItems = chartAreaItems;
         this.viewModel = viewModel;
 
+        this.viewLifecycleOwner = viewLifecycleOwner;
     }
 
     @NonNull
@@ -36,7 +39,7 @@ public class ChartAreaItemAdapter extends RecyclerView.Adapter<ChartAreaItemAdap
     @Override
     public void onBindViewHolder(@NonNull ChartAreaItemViewHolder holder, int position) {
         ChartAreaItem item = chartAreaItems.get(position);
-        holder.bind(item, viewModel);
+        holder.bind(item, viewModel, viewLifecycleOwner);
     }
 
     @Override
@@ -56,15 +59,18 @@ public class ChartAreaItemAdapter extends RecyclerView.Adapter<ChartAreaItemAdap
             this.binding = binding;
         }
 
-        void bind(ChartAreaItem item, ChartAreaListViewModel viewModel) {
+        void bind(ChartAreaItem item, ChartAreaListViewModel viewModel, LifecycleOwner viewLifecycleOwner) {
             item.getChartController().bindChart(binding.lineChart);
 
+            binding.chartAreaItemPropertiesControlLayout.setLifecycleOwner(viewLifecycleOwner);
             binding.chartAreaItemPropertiesControlLayout.setViewModel(viewModel);
             binding.chartAreaItemPropertiesControlLayout.setChartAreaItem(item);
 
+            binding.chartAreaItemScaleControlLayout.setLifecycleOwner(viewLifecycleOwner);
             binding.chartAreaItemScaleControlLayout.setViewModel(viewModel);
             binding.chartAreaItemScaleControlLayout.setChartAreaItem(item);
 
+            binding.setLifecycleOwner(viewLifecycleOwner);
             binding.setViewModel(viewModel);
             binding.setChartAreaItem(item);
 
