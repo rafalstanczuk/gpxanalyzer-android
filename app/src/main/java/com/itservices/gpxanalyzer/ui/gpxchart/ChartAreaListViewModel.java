@@ -183,7 +183,7 @@ public class ChartAreaListViewModel extends ViewModel {
         ConcurrentUtil.tryToDispose(observeRequestStatusDisposable);
         observeRequestStatusDisposable = requestStatus
                 .subscribeOn(Schedulers.single())
-                .observeOn(AndroidSchedulers.mainThread())
+                .observeOn(Schedulers.io())
                 .subscribe(
                         request -> {
                             Log.d("requestStatus", "request = [" + request.name() + "]");
