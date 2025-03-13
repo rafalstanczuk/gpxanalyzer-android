@@ -9,10 +9,6 @@
             type="com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItem" />
 
         <variable
-            name="handler"
-            type="com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItemHandler" />
-
-        <variable
             name="viewModel"
             type="com.itservices.gpxanalyzer.ui.gpxchart.ChartAreaListViewModel" />
     </data>

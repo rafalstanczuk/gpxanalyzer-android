@@ -107,17 +107,13 @@ public class MultipleSyncedGpxChartUseCase {
                 )
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(Schedulers.newThread())
-                .doOnNext(list -> {
-                    requestStatus.onNext(PROCESSING);
-                })
+                .doOnNext(chartAreaItem -> requestStatus.onNext(PROCESSING))
                 .flatMap(chartAreaItem ->
                         updateChart(chartAreaItem.getChartController(), chartAreaItem.getDataEntityWrapper() )
                 )
                 .toList()
                 .toObservable()
-                .doOnNext(list -> {
-                    requestStatus.onNext(PROCESSED);
-                })
+                .doOnNext(chartAreaItem -> requestStatus.onNext(PROCESSED))
                 .doOnError(e -> Log.e("updateChart", "updateChart: doOnError ", e))
                 .subscribe(
                         requestStatusList ->

@@ -11,5 +11,7 @@ public enum RequestStatus {
     DATA_LOADED,
     PROCESSING,
     PROCESSED,
+    CHART_UPDATING,
+    CHART_UPDATED,
     DONE
 }
