@@ -23,8 +23,8 @@ import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.ViewModeMapper;
 import com.itservices.gpxanalyzer.utils.common.ConcurrentUtil;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Vector;
 
@@ -32,7 +32,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.reactivex.Observable;
-import io.reactivex.Single;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -54,8 +53,7 @@ public class MultipleSyncedGpxChartUseCase {
 
     private Disposable loadDataDisposable;
 
-    private Disposable chartUpdateDisposable;
-
+    private CompositeDisposable chartUpdateCompositeDisposable = new CompositeDisposable();
     private CompositeDisposable observeSelectionCompositeDisposable = new CompositeDisposable();
     private Vector<DataEntity> gpxData;
     private Activity activity;
@@ -103,12 +101,25 @@ public class MultipleSyncedGpxChartUseCase {
 
         loadDataDisposable = provideDataEntityVector(activity, defaultRawGpxDataId)
                 .map(this::updateGpxDataCache)
-                .map(gpxData -> updateStatisticsForItemList(chartAreaItemList, gpxData))
-                .subscribeOn(Schedulers.io())
+                .flatMap(gpxData ->
+                        Observable.fromIterable(chartAreaItemList)
+                                .map(chartAreaItem -> updateDataWrapperItem(chartAreaItem, gpxData))
+                )
+                .subscribeOn(Schedulers.newThread())
                 .observeOn(Schedulers.newThread())
-                .doOnError(e -> Log.e("loadData", "loadData: doOnError ", e))
+                .doOnNext(chartAreaItem -> requestStatus.onNext(PROCESSING))
+                .flatMap(chartAreaItem ->
+                        updateChart(chartAreaItem.getChartController(), chartAreaItem.getDataEntityWrapper() )
+                )
+                .toList()
+                .toObservable()
+                .doOnNext(chartAreaItem -> requestStatus.onNext(PROCESSED))
+                .doOnError(e -> Log.e("updateChart", "updateChart: doOnError ", e))
                 .subscribe(
-                        this::processChartUpdates,
+                        requestStatusList ->
+                                requestStatusList.stream()
+                                        .min(Comparator.comparingInt(Enum::ordinal))
+                                        .ifPresent(requestStatus::onNext),
                         onError -> Log.e("loadData", "loadData: onError ", onError)
                 );
     }
@@ -126,34 +137,13 @@ public class MultipleSyncedGpxChartUseCase {
     }
 
     @NonNull
-    private List<ChartAreaItem> updateStatisticsForItemList(List<ChartAreaItem> chartAreaItemList, Vector<DataEntity> gpxData) {
-        for (ChartAreaItem chartAreaItem : chartAreaItemList) {
+    private ChartAreaItem updateDataWrapperItem(ChartAreaItem chartAreaItem, Vector<DataEntity> gpxData) {
             ViewMode iChartViewMode = chartAreaItem.getViewMode().getValue();
 
             int primaryKeyIndex = viewModeMapper.mapToPrimaryKeyIndexList(iChartViewMode);
             chartAreaItem.setDataEntityWrapper(new DataEntityWrapper(gpxData, primaryKeyIndex));
-        }
 
-        return chartAreaItemList;
-    }
-
-    private void processChartUpdates(List<ChartAreaItem> chartAreaItemList) {
-        requestStatus.onNext(PROCESSING);
-
-        List<RequestStatus> updateChartStatusList = new ArrayList<>();
-
-        chartAreaItemList.forEach(item -> {
-            chartUpdateDisposable = updateChart(item.getChartController(), item.getDataEntityWrapper())
-                    .observeOn(Schedulers.io())
-                    .subscribe(updateChartStatus -> {
-                                updateChartStatusList.add(updateChartStatus);
-
-                                if (updateChartStatusList.size() == chartAreaItemList.size()) {
-                                    requestStatus.onNext(PROCESSED);
-                                }
-                            }
-                    );
-        });
+        return chartAreaItem;
     }
 
     private Observable<Vector<DataEntity>> provideDataEntityVector(Context context, int rawResId) {
@@ -169,8 +159,7 @@ public class MultipleSyncedGpxChartUseCase {
                 : dataProvider.provide(context, rawResId);
     }
 
-
-    private Single<RequestStatus> updateChart(ChartController chartController, DataEntityWrapper dataEntityWrapper) {
+    private Observable<RequestStatus> updateChart(ChartController chartController, DataEntityWrapper dataEntityWrapper) {
         return chartController.updateChartData(dataEntityWrapper);
     }
 

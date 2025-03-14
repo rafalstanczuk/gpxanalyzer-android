@@ -19,7 +19,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/margin_small"
-            android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData()}"
+            android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData}"
             android:text="@string/load"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -33,7 +33,7 @@
             android:backgroundTint="@color/white"
             android:alpha="0.5"
             android:contentDescription="@{ viewModel.getViewModeSeverityLiveData().name}"
-            android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData()}"
+            android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData}"
             app:imageResource="@{ viewModel.getViewModeSeverityLiveData().getNextCyclic().getDrawableIconResId  }"
             app:layout_constraintBottom_toBottomOf="@+id/loadButton"
             app:layout_constraintStart_toEndOf="@+id/loadButton"

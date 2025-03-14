@@ -6,6 +6,7 @@ import static java.util.Objects.requireNonNull;
 
 import android.app.Activity;
 import android.content.res.Configuration;
+import android.util.Log;
 import android.util.Pair;
 
 import androidx.lifecycle.LiveData;
@@ -136,7 +137,7 @@ public class ChartAreaListViewModel extends ViewModel {
         return chartPercentageHeightLiveData;
     }
 
-    public LiveData<Boolean> buttonsEnabledByRequestStatusLiveData() {
+    public LiveData<Boolean> getButtonsEnabledByRequestStatusLiveData() {
         return buttonsEnabledLiveData;
     }
 
@@ -181,15 +182,17 @@ public class ChartAreaListViewModel extends ViewModel {
     private void observeRequestStatusOnLiveData(Observable<RequestStatus> requestStatus) {
         ConcurrentUtil.tryToDispose(observeRequestStatusDisposable);
         observeRequestStatusDisposable = requestStatus
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnNext(request -> {
+                .subscribeOn(Schedulers.single())
+                .observeOn(Schedulers.io())
+                .subscribe(
+                        request -> {
+                            Log.d("requestStatus", "request = [" + request.name() + "]");
                             requestStatusLiveData.postValue(request);
 
                             buttonsEnabledLiveData.postValue(getButtonEnabled(request));
-                        }
-                )
-                .subscribe();
+                        },
+                        onError -> Log.e("requestStatus", onError.toString() )
+                        );
     }
 
     private boolean getButtonEnabled(RequestStatus requestStatus) {

@@ -12,13 +12,14 @@ import com.itservices.gpxanalyzer.data.extrema.detector.SegmentThresholds;
 import java.util.Comparator;
 import java.util.List;
 
+import io.reactivex.Observable;
 import io.reactivex.Single;
 
 public class ExtremaSegmentListProvider {
     private static final double[] alpineSkiWindowFunctionWeights = ExtremaSegmentDetector.generateWindowFunction(9, ExtremaSegmentDetector.WindowType.GAUSSIAN, 0.2);
 
-    public static Single<List<Segment>> provide(DataEntityWrapper dataEntityWrapper) {
-        return Single.fromCallable(() -> {
+    public static Observable<List<Segment>> provide(DataEntityWrapper dataEntityWrapper) {
+        return Observable.fromCallable(() -> {
             List<PrimitiveDataEntity> primitiveList = DataPrimitiveMapper.mapFrom(dataEntityWrapper);
 
             primitiveList.sort(Comparator.comparingLong(PrimitiveDataEntity::getTimestamp));

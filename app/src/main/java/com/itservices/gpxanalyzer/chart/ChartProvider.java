@@ -13,6 +13,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -48,7 +49,7 @@ class ChartProvider {
     }
 
     @UiThread
-    public Single<RequestStatus> updateChartData(DataEntityWrapper dataEntityWrapper) {
+    public Observable<RequestStatus> updateChartData(DataEntityWrapper dataEntityWrapper) {
 
         chart.setDataEntityWrapper(dataEntityWrapper);
 
