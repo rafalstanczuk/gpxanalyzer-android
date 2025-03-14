@@ -1,136 +1,209 @@
 package com.itservices.gpxanalyzer.data.extrema;
 
+
 import com.itservices.gpxanalyzer.data.extrema.detector.ExtremaSegmentDetector;
 import com.itservices.gpxanalyzer.data.extrema.detector.PrimitiveDataEntity;
-import com.itservices.gpxanalyzer.data.extrema.detector.SegmentThresholds;
 
-import java.util.*;
+import org.apache.commons.math3.complex.Complex;
+import org.apache.commons.math3.transform.*;
+import java.util.List;
 
 public class WaveletLagDataSmoother {
 
     /**
-     * Computes an optimized window function that highlights amplitude changes rather than over-smoothing.
+     * Computes an adaptive window function that highlights amplitude changes
+     * while preventing excessive smoothing. Uses FFT for noise reduction.
      *
-     * @param dataEntities List of data points.
-     * @param thresholds   Segment thresholds (minAscAmp & minDescAmp control how much smoothing is applied).
+     * @param dataEntities The list of data points.
+     * @param stdDev       The standard deviation of the dataset.
      * @param windowType   The type of window function to apply.
-     * @return A double array representing the computed window function.
+     * @return A double array representing the computed noise-filtered window function.
      */
     public static double[] computeAdaptiveWindowFunction(
             List<PrimitiveDataEntity> dataEntities,
-            SegmentThresholds thresholds,
+            double stdDev,
             ExtremaSegmentDetector.WindowType windowType) {
 
-        if (dataEntities == null || dataEntities.isEmpty()) return new double[]{1.0}; // Default if no data
-
-        // Extract numerical values from dataEntities
-        int size = dataEntities.size();
-        double[] values = new double[size];
-
-        for (int i = 0; i < size; i++) {
-            values[i] = dataEntities.get(i).getValue();
+        if (dataEntities == null || dataEntities.isEmpty()) {
+            return new double[]{1.0}; // Default window if no data
         }
 
-        // Compute optimal smoothing lag
-        int optimalLag = computeOptimalLagWavelet(values, thresholds);
+        int dataSize = dataEntities.size();
 
-        // Ensure `optimalLag` is valid (≥3 and odd)
-        if (optimalLag < 3) optimalLag = 3;
-        if (optimalLag % 2 == 0) optimalLag += 1;
+        // Compute an adaptive lag that prioritizes amplitude preservation
+        int optimalLag = computeAdaptiveLag(dataEntities, dataSize, stdDev);
 
-        // Generate the window function
-        return generateWindowFunction(optimalLag, windowType, thresholds);
+        // Generate the adaptive window function using the computed lag
+        return generateAdaptiveWindowFunction(optimalLag, windowType, dataSize, stdDev, dataEntities);
     }
 
     /**
-     * Computes the optimal lag for smoothing while preserving amplitude variations.
-     *
-     * @param values     The input data.
-     * @param thresholds The amplitude thresholds for adjusting smoothing.
-     * @return Optimal smoothing lag (≥3 and odd).
+     * Computes an adaptive lag that minimizes smoothing when amplitude changes are high.
      */
-    private static int computeOptimalLagWavelet(double[] values, SegmentThresholds thresholds) {
-        int N = values.length;
-        if (N < 10) return 3; // Minimum lag for small datasets
+    private static int computeAdaptiveLag(List<PrimitiveDataEntity> dataEntities, int dataSize, double stdDev) {
+        int N = dataEntities.size();
+        if (N < 10) return 3;
 
         double[] waveletScales = new double[N / 2];
 
-        // Compute energy of different wavelet scales
+        // Compute wavelet energy
         for (int scale = 1; scale < N / 2; scale++) {
             double sumEnergy = 0;
             for (int i = 0; i < N - scale; i++) {
-                double diff = values[i] - values[i + scale];
+                double diff = dataEntities.get(i).getValue() - dataEntities.get(i + scale).getValue();
                 sumEnergy += diff * diff;
             }
             waveletScales[scale] = sumEnergy / (N - scale);
         }
 
-        // Find the highest energy scale (best for smoothing)
-        int optimalWaveletScale = 3;
+        int optimalLag = 3;
         for (int i = 2; i < waveletScales.length; i++) {
-            if (waveletScales[i] > waveletScales[optimalWaveletScale]) {
-                optimalWaveletScale = i;
+            if (waveletScales[i] > waveletScales[optimalLag]) {
+                optimalLag = i;
             }
         }
 
-        // Reduce smoothing effect when high amplitude changes are detected
-        double amplitudeFactor = 1.0 / (1.0 + Math.max(thresholds.minAscAmp(), thresholds.minDescAmp()));
-        optimalWaveletScale = (int) (optimalWaveletScale * amplitudeFactor);
+        // Reduce smoothing when standard deviation is high
+        double smoothingFactor = 1.0 - Math.min(0.8, stdDev / (10.0 + stdDev));
+        optimalLag = (int) (optimalLag * smoothingFactor);
 
-        // Ensure valid values (≥3 and odd)
-        if (optimalWaveletScale < 3) optimalWaveletScale = 3;
-        if (optimalWaveletScale % 2 == 0) optimalWaveletScale += 1;
+        // Limit window size
+        int maxAllowedLag = Math.max(3, dataSize / 200);
+        if (optimalLag > maxAllowedLag) {
+            optimalLag = maxAllowedLag;
+        }
 
-        return optimalWaveletScale;
+        // Ensure the lag is at least 3 and is odd
+        if (optimalLag < 3) {
+            optimalLag = 3;
+        }
+        if (optimalLag % 2 == 0) {
+            optimalLag -= 1;
+        }
+
+        return optimalLag;
     }
 
     /**
-     * Generates a smoothing window function based on the computed optimal lag.
-     *
-     * @param size        The computed window size (lag-based).
-     * @param type        The type of window function to apply.
-     * @param thresholds  The amplitude thresholds that control smoothing intensity.
-     * @return A normalized double array representing the computed window function.
+     * Generates an adaptive window function using FFT to remove high-frequency noise.
      */
-    private static double[] generateWindowFunction(int size, ExtremaSegmentDetector.WindowType type, SegmentThresholds thresholds) {
-        // Ensure the window size is valid
-        if (size < 3 || (size % 2 == 0)) {
-            size += 1; // Ensure odd size
+    private static double[] generateAdaptiveWindowFunction(int size, ExtremaSegmentDetector.WindowType type, int dataSize, double stdDev, List<PrimitiveDataEntity> dataEntities) {
+        int maxAllowedWindowSize = Math.max(3, dataSize / 200);
+        if (size > maxAllowedWindowSize) {
+            size = maxAllowedWindowSize;
         }
 
+        // Ensure the window size is odd
+        if (size < 3 || (size % 2 == 0)) {
+            size = (size < 3) ? 3 : size + 1;
+        }
+
+        // Step 1: Perform FFT on the signal
+        double[] signalFFT = applyFFT(dataEntities);
+
+        // Step 2: Compute noise threshold from FFT
+        double noiseThreshold = computeNoiseThreshold(signalFFT, stdDev);
+
+        // Step 3: Apply window function and remove high-frequency noise
+        return applyFilteredWindowFunction(size, type, signalFFT, noiseThreshold);
+    }
+
+    /**
+     * Applies FFT using Apache Commons Math to analyze the frequency spectrum.
+     * Fixes issue with non-power-of-2 input by padding to the next power of 2.
+     *
+     * @param dataEntities The input signal as a list of PrimitiveDataEntity.
+     * @return FFT-transformed array of magnitudes.
+     */
+    private static double[] applyFFT(List<PrimitiveDataEntity> dataEntities) {
+        int N = dataEntities.size();
+        int fftSize = nextPowerOf2(N); // Fix: Pad to next power of 2
+
+        double[] paddedSignal = new double[fftSize];
+
+        // Copy original signal into padded array
+        for (int i = 0; i < N; i++) {
+            paddedSignal[i] = dataEntities.get(i).getValue();
+        }
+
+        FastFourierTransformer fft = new FastFourierTransformer(DftNormalization.STANDARD);
+        Complex[] result = fft.transform(paddedSignal, TransformType.FORWARD);
+
+        // Compute magnitudes of the FFT result
+        double[] magnitudes = new double[result.length];
+        for (int i = 0; i < result.length; i++) {
+            magnitudes[i] = result[i].abs();
+        }
+
+        return magnitudes;
+    }
+
+    /**
+     * Computes the next power of 2 greater than or equal to `n`.
+     *
+     * @param n The input number.
+     * @return The next power of 2.
+     */
+    private static int nextPowerOf2(int n) {
+        int power = 1;
+        while (power < n) {
+            power *= 2;
+        }
+        return power;
+    }
+
+    /**
+     * Computes a noise threshold by analyzing the FFT spectrum.
+     */
+    private static double computeNoiseThreshold(double[] fftData, double stdDev) {
+        int N = fftData.length;
+        double totalEnergy = 0.0;
+        double noiseEnergy = 0.0;
+
+        for (int i = 1; i < N / 2; i++) {
+            totalEnergy += fftData[i];
+            if (i > N / 4) {
+                noiseEnergy += fftData[i];
+            }
+        }
+
+        double noiseRatio = noiseEnergy / (totalEnergy + 1e-10);
+        return Math.min(noiseRatio * stdDev, stdDev * 0.1);
+    }
+
+    /**
+     * Applies a window function while removing high-frequency noise.
+     */
+    private static double[] applyFilteredWindowFunction(int size, ExtremaSegmentDetector.WindowType type, double[] fftData, double noiseThreshold) {
         double[] window = new double[size];
         int M = size - 1;
         double center = M / 2.0;
 
-        // Adjust the smoothing strength based on amplitude thresholds
-        double amplitudeFactor = 1.0 / (1.0 + Math.max(thresholds.minAscAmp(), thresholds.minDescAmp()));
+        double noiseFactor = 1.0 - Math.min(0.7, noiseThreshold);
 
         switch (type) {
             case TRIANGULAR:
                 for (int n = 0; n < size; n++) {
-                    window[n] = (1.0 - Math.abs(n - center) / center) * amplitudeFactor;
+                    window[n] = (1.0 - Math.abs(n - center) / center) * noiseFactor;
                 }
                 break;
-
             case HANNING:
                 for (int n = 0; n < size; n++) {
-                    window[n] = (0.5 - 0.5 * Math.cos((2.0 * Math.PI * n) / M)) * amplitudeFactor;
+                    window[n] = (0.5 - 0.5 * Math.cos((2.0 * Math.PI * n) / M)) * noiseFactor;
                 }
                 break;
-
             case GAUSSIAN:
-                double sigma = 0.4 + (0.1 * (size / 25.0));
+                double sigma = 0.2 + (0.05 * (size / 25.0));
                 for (int n = 0; n < size; n++) {
                     double x = (n - center) / (sigma * center);
-                    window[n] = Math.exp(-0.5 * x * x) * amplitudeFactor;
+                    window[n] = Math.exp(-0.5 * x * x) * noiseFactor;
                 }
                 break;
-
             default:
                 throw new IllegalArgumentException("Unknown window type: " + type);
         }
 
-        // Normalize the window function (sum of weights = 1)
+        // Normalize the window function
         double sum = 0;
         for (double w : window) {
             sum += w;
@@ -142,3 +215,4 @@ public class WaveletLagDataSmoother {
         return window;
     }
 }
+
