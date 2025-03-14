@@ -9,6 +9,7 @@ import com.itservices.gpxanalyzer.data.extrema.detector.PrimitiveDataEntity;
 import com.itservices.gpxanalyzer.data.extrema.detector.Segment;
 import com.itservices.gpxanalyzer.data.extrema.detector.SegmentThresholds;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -25,10 +26,18 @@ public class ExtremaSegmentListProvider {
             primitiveList.sort(Comparator.comparingLong(PrimitiveDataEntity::getTimestamp));
 
             ExtremaSegmentDetector segmentDetector = new ExtremaSegmentDetector();
-            segmentDetector.preprocessAndFindExtrema(primitiveList, ExtremaSegmentDetector.DEFAULT_MAX_VALUE_ACCURACY, alpineSkiWindowFunctionWeights);
 
             // TODO: parameters can be changed by USER by for ex. select type of activity !!!
             SegmentThresholds segmentThresholds = getAlpineSkiSegmentThresholds(dataEntityWrapper);
+
+
+
+            double[] windowFunction = WaveletLagDataSmoother.computeAdaptiveWindowFunction(primitiveList, segmentThresholds, ExtremaSegmentDetector.WindowType.TRIANGULAR);
+            System.out.println("Optimal Adaptive Window Size (Wavelet-based): windowFunction" + Arrays.toString(windowFunction));
+
+            segmentDetector.preprocessAndFindExtrema(primitiveList, ExtremaSegmentDetector.DEFAULT_MAX_VALUE_ACCURACY, windowFunction);
+
+
 
             List<Segment> extremaSegmentList
                     = segmentDetector.detectSegmentsOneRun(segmentThresholds);

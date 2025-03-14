@@ -399,32 +399,39 @@ public final class ExtremaSegmentDetector {
     // 6) WINDOW FUNCTION GENERATION
     // --------------------------------------------------------------------------
     public static double[] generateWindowFunction(int size, WindowType type, double param) {
+        // Ensure the window size is at least 3 and an odd number
         if (size < 3 || (size % 2 == 0)) {
             throw new IllegalArgumentException("Window size must be odd and >= 3");
         }
 
         double[] window = new double[size];
-        int M = size - 1;
+        int M = size - 1;  // Maximum index for the window
+        double center = M / 2.0;  // Center index of the window
 
         switch (type) {
             case TRIANGULAR:
+                // Triangular window function:
                 // w[n] = 1 - |(n - M/2) / (M/2)|
                 for (int n = 0; n < size; n++) {
-                    window[n] = 1.0 - Math.abs(n - (M / 2.0)) / (M / 2.0);
+                    window[n] = 1.0 - Math.abs(n - center) / center;
                 }
                 break;
 
             case HANNING:
+                // Hanning window function:
                 // w[n] = 0.5 - 0.5 * cos(2πn / M)
+                // The scaleFactor allows parameter tuning if param > 0
+                double scaleFactor = (param > 0) ? param : 1.0;
                 for (int n = 0; n < size; n++) {
-                    window[n] = 0.5 - 0.5 * Math.cos((2.0 * Math.PI * n) / M);
+                    window[n] = (0.5 - 0.5 * Math.cos((2.0 * Math.PI * n) / M)) * scaleFactor;
                 }
                 break;
 
             case GAUSSIAN:
+                // Gaussian window function:
                 // w[n] = exp(-0.5 * ((n - M/2) / (sigma * M/2))^2)
-                double sigma = (param <= 0) ? 0.4 : param;
-                double center = M / 2.0;
+                // Sigma controls the spread; if param is not set, it is dynamically adjusted based on size
+                double sigma = (param > 0) ? param : (0.4 + (0.1 * (size / 25.0)));
                 for (int n = 0; n < size; n++) {
                     double x = (n - center) / (sigma * center);
                     window[n] = Math.exp(-0.5 * x * x);
@@ -434,6 +441,16 @@ public final class ExtremaSegmentDetector {
             default:
                 throw new IllegalArgumentException("Unknown window type: " + type);
         }
+
+        // Normalize the window so that the sum of weights equals 1
+        double sum = 0;
+        for (double w : window) {
+            sum += w;
+        }
+        for (int i = 0; i < size; i++) {
+            window[i] /= sum;
+        }
+
         return window;
     }
 }
