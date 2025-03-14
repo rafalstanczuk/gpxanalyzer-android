@@ -32,22 +32,17 @@ public class ExtremaSegmentListProvider {
 
             double stdDev = getStandardDeviation(primitiveList);
 
-
-            // TODO: parameters can be changed by USER by for ex. select type of activity !!!
-            SegmentThresholds segmentThresholds = getSegmentThresholds(dataEntityWrapper, stdDev);
-
-
-
             double[] windowFunction = WaveletLagDataSmoother.computeAdaptiveWindowFunction(
                     primitiveList, stdDev, ExtremaSegmentDetector.WindowType.GAUSSIAN);
 
             System.out.println("Optimal Adaptive Window Size (Wavelet-based): windowFunction: " + Arrays.toString(windowFunction));
             System.out.println("Optimal Adaptive Window Size (Wavelet-based): size: " + windowFunction.length);
             System.out.println("Optimal Adaptive Window Size (Wavelet-based): data size: " + primitiveList.size());
+            System.out.println("Optimal Adaptive Window Size (Wavelet-based): stdDev: " + stdDev);
 
             segmentDetector.preprocessAndFindExtrema(primitiveList, ExtremaSegmentDetector.DEFAULT_MAX_VALUE_ACCURACY, windowFunction);
 
-
+            SegmentThresholds segmentThresholds = new SegmentThresholds(stdDev * 0.2);
 
             List<Segment> extremaSegmentList
                     = segmentDetector.detectSegmentsOneRun(segmentThresholds);
@@ -79,23 +74,5 @@ public class ExtremaSegmentListProvider {
         // Use Apache Commons Math StandardDeviation class
         StandardDeviation stdDev = new StandardDeviation(false); // 'false' means population std dev
         return stdDev.evaluate(values);
-    }
-
-    @NonNull
-    private static SegmentThresholds getSegmentThresholds(DataEntityWrapper dataEntityWrapper, double stdDev) {
-        double dMinMax = dataEntityWrapper.getDeltaMinMax();
-
-        System.out.println("getStandardDeviation " + stdDev);
-        System.out.println("dMinMax " + dMinMax);
-
-        // Adaptive min amplitude calculation based on both min-max range and standard deviation
-        double minAscAmp = Math.max(dMinMax / 6, stdDev / 2);
-        double minDescAmp = Math.max(dMinMax / 6, stdDev / 2);
-
-        // Ensure minimal threshold values to avoid over-sensitivity to noise
-        if (minAscAmp < 0.001) minAscAmp = 0.001;
-        if (minDescAmp < 0.001) minDescAmp = 0.001;
-
-        return new SegmentThresholds(minAscAmp, 0.001, minDescAmp, 0.001);
     }
 }

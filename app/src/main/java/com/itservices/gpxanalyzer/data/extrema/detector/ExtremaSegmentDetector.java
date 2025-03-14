@@ -47,11 +47,11 @@ public final class ExtremaSegmentDetector {
         SegmentTrendType segmentTrendType = SegmentTrendType.CONSTANT;
 
         if (deltaValMissing > 0.0) {
-            if (Math.abs(deltaValMissing) > segmentThresholds.minAscAmp()) {
+            if (Math.abs(deltaValMissing) > segmentThresholds.deviationThreshold()) {
                 segmentTrendType = SegmentTrendType.UP;
             }
         } else {
-            if (Math.abs(deltaValMissing) > segmentThresholds.minDescAmp()) {
+            if (Math.abs(deltaValMissing) > segmentThresholds.deviationThreshold()) {
                 segmentTrendType = SegmentTrendType.DOWN;
             }
         }
@@ -151,7 +151,7 @@ public final class ExtremaSegmentDetector {
             if (e1.type == ExtremaType.MIN && e2.type == ExtremaType.MAX) {
                 // ascending candidate
                 if ((p2.getValue() > p1.getValue()) &&
-                        (amplitude >= segmentThresholds.minAscAmp())) {
+                        (amplitude >= segmentThresholds.deviationThreshold())) {
 
                     segments.add(new Segment(e1.index, e2.index, p1.getTimestamp(), p2.getTimestamp(), p1.getValue(), p2.getValue(), SegmentTrendType.UP));
                 }
@@ -160,7 +160,7 @@ public final class ExtremaSegmentDetector {
             else if (e1.type == ExtremaType.MAX && e2.type == ExtremaType.MIN) {
                 // descending candidate
                 if ((p1.getValue() > p2.getValue()) &&
-                        (amplitude >= segmentThresholds.minDescAmp())) {
+                        (amplitude >= segmentThresholds.deviationThreshold())) {
 
                     segments.add(new Segment(e1.index, e2.index, p1.getTimestamp(), p2.getTimestamp(), p1.getValue(), p2.getValue(), SegmentTrendType.DOWN));
                 }
