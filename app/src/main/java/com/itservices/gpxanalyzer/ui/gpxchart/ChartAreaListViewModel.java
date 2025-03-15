@@ -175,7 +175,10 @@ public class ChartAreaListViewModel extends ViewModel {
         observeReloadEventDisposable = reloadEvent
                 .subscribeOn(Schedulers.single())
                 .observeOn(Schedulers.newThread())
-                .doOnNext(orientation -> multipleSyncedGpxChartUseCase.loadData(context, requireNonNull(chartAreaItemListLiveData.getValue()), defaultRawGpxDataId))
+                .doOnNext(orientation -> {
+                    multipleSyncedGpxChartUseCase.loadData(context, requireNonNull(chartAreaItemListLiveData.getValue()), defaultRawGpxDataId);
+                }
+                )
                 .doOnError(Throwable::printStackTrace)
                 .subscribe();
     }
@@ -228,14 +231,8 @@ public class ChartAreaListViewModel extends ViewModel {
         ViewMode newItemViewMode = requireNonNull(item.getViewMode().getValue()).getNextCyclic();
         item.setViewMode(newItemViewMode);
 
-        notifySwitchingViewModeToLiveData(item);
-    }
-
-    private void notifySwitchingViewModeToLiveData(ChartAreaItem item) {
-        //multipleSyncedGpxChartUseCase.switchViewMode(item);
         switchViewModeLiveData.postValue(item);
     }
-
 
     public void onZoomIn(ChartAreaItem item) {
         item.getChartController().animateZoomToCenter(1.1f, 1.0f, 200);

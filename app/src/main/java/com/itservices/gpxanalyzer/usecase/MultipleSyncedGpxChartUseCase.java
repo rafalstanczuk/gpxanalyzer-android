@@ -108,11 +108,11 @@ public class MultipleSyncedGpxChartUseCase {
                 .map(this::updateGpxDataCache)
                 .flatMap(gpxData ->
                         Observable.fromIterable(chartAreaItemList)
-                                .map(chartAreaItem -> updateDataWrapperItem(chartAreaItem, gpxData))
+                                .flatMap(chartAreaItem -> updateDataWrapperItem(chartAreaItem, gpxData))
                 )
                 .doOnNext(chartAreaItem -> requestStatus.onNext(PROCESSING))
                 .flatMap(chartAreaItem ->
-                        updateChart(chartAreaItem.getChartController(), chartAreaItem.getDataEntityWrapper() )
+                        updateChart(chartAreaItem.getChartController(), chartAreaItem.getDataEntityWrapper())
                 )
                 .toList()
                 .toObservable()
@@ -140,13 +140,17 @@ public class MultipleSyncedGpxChartUseCase {
     }
 
     @NonNull
-    private ChartAreaItem updateDataWrapperItem(ChartAreaItem chartAreaItem, Vector<DataEntity> gpxData) {
-            ViewMode iChartViewMode = chartAreaItem.getViewMode().getValue();
+    private Observable<ChartAreaItem> updateDataWrapperItem(ChartAreaItem chartAreaItem, Vector<DataEntity> gpxData) {
+        return chartAreaItem.getChartController()
+                .reinitChart()
+                .map(requestStatus -> {
+                    ViewMode iChartViewMode = chartAreaItem.getViewMode().getValue();
 
-            int primaryKeyIndex = viewModeMapper.mapToPrimaryKeyIndexList(iChartViewMode);
-            chartAreaItem.setDataEntityWrapper(new DataEntityWrapper(gpxData, primaryKeyIndex));
+                    int primaryKeyIndex = viewModeMapper.mapToPrimaryKeyIndexList(iChartViewMode);
+                    chartAreaItem.setDataEntityWrapper(new DataEntityWrapper(gpxData, primaryKeyIndex));
 
-        return chartAreaItem;
+                    return chartAreaItem;
+                });
     }
 
     private Observable<Vector<DataEntity>> provideDataEntityVector(Context context, int rawResId) {
@@ -171,7 +175,7 @@ public class MultipleSyncedGpxChartUseCase {
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext(baseEntry ->
-                            chartController.select(baseEntry.getDataEntity().timestampMillis())
+                        chartController.select(baseEntry.getDataEntity().timestampMillis())
                 )
                 .subscribe();
     }

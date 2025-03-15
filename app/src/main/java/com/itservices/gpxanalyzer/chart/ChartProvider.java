@@ -39,15 +39,25 @@ class ChartProvider {
 
     /**
      * Initialize the chart with empty data + styling.
+     *
+     * @return
      */
-    public void initChart(DataEntityLineChart chart) {
-        if (chartWeakReference != null)
-            chartWeakReference.clear();
+    public Observable<RequestStatus> initChart(DataEntityLineChart chart) {
 
-        chartWeakReference = new WeakReference<>(chart);
-        chartWeakReference.get().initChart(settings)
+        if (chart != null) {
+            if (chartWeakReference != null)
+                chartWeakReference.clear();
+
+            chartWeakReference = new WeakReference<>(chart);
+        }
+
+        if (chartWeakReference == null || chartWeakReference.get() == null) {
+            return Observable.just(RequestStatus.ERROR);
+        }
+
+        return chartWeakReference.get().initChart(settings)
                 .subscribeOn(AndroidSchedulers.mainThread())
-                .observeOn(Schedulers.single())
+                .observeOn(AndroidSchedulers.mainThread())
                 .flatMap(req -> {
                     List<LineDataSet> sets = lineDataSetListProvider.provide();
                     if (sets != null) {
@@ -55,8 +65,7 @@ class ChartProvider {
                         return tryToUpdateDataChart();
                     }
                     return Observable.just(RequestStatus.DONE);
-                })
-                .subscribe();
+                });
     }
 
     public void setSelectionHighlight(Highlight h) {

@@ -40,7 +40,12 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
         chartBindings.setOnChartValueSelectedListener(this);
         chartBindings.setOnChartGestureListener(this);
 
-        chartProvider.initChart(chartBindings);
+        chartProvider.initChart(chartBindings)
+                .subscribe();
+    }
+
+    public Observable<RequestStatus> reinitChart() {
+        return chartProvider.initChart(null);
     }
 
     @UiThread
