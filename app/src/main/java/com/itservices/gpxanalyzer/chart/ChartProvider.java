@@ -52,7 +52,7 @@ class ChartProvider {
         }
 
         if (chartWeakReference == null || chartWeakReference.get() == null) {
-            return Observable.just(RequestStatus.ERROR);
+            return Observable.just(RequestStatus.CHART_WEAK_REFERENCE_IS_NULL);
         }
 
         return chartWeakReference.get().initChart(settings)
@@ -64,7 +64,7 @@ class ChartProvider {
                         sets.clear();
                         return tryToUpdateDataChart();
                     }
-                    return Observable.just(RequestStatus.DONE);
+                    return Observable.just(RequestStatus.CHART_INITIALIZED);
                 });
     }
 
@@ -76,7 +76,7 @@ class ChartProvider {
     public Observable<RequestStatus> updateChartData(DataEntityWrapper dataEntityWrapper) {
 
         if (chartWeakReference == null || chartWeakReference.get() == null) {
-            return Observable.just(RequestStatus.ERROR);
+            return Observable.just(RequestStatus.CHART_WEAK_REFERENCE_IS_NULL);
         }
 
         return
@@ -135,12 +135,12 @@ class ChartProvider {
         return Observable.fromCallable(() -> {
 
             if (chartWeakReference == null)
-                return RequestStatus.ERROR;
+                return RequestStatus.CHART_WEAK_REFERENCE_IS_NULL;
 
             DataEntityLineChart chart = chartWeakReference.get();
 
             if (chart == null)
-                return RequestStatus.ERROR;
+                return RequestStatus.CHART_IS_NULL;
 
             synchronized (chart) {
                 chart.clear();
@@ -149,7 +149,7 @@ class ChartProvider {
                 chart.highlightValue(highlight, true);
                 chart.invalidate();
             }
-            return RequestStatus.DONE;
+            return RequestStatus.CHART_UPDATED;
         });
     }
 }

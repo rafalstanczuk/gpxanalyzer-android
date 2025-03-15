@@ -24,6 +24,8 @@ import com.itservices.gpxanalyzer.utils.SingleLiveEvent;
 import com.itservices.gpxanalyzer.utils.common.ConcurrentUtil;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -47,7 +49,7 @@ public class ChartAreaListViewModel extends ViewModel {
 
     public final MutableLiveData<Integer> orientationLiveData
             = new MutableLiveData<>(Configuration.ORIENTATION_PORTRAIT);
-    private final PublishSubject<Boolean> reloadEvent = PublishSubject.create();
+    private final PublishSubject<List<ChartAreaItem>> reloadItems = PublishSubject.create();
     private final MutableLiveData<RequestStatus> requestStatusLiveData = new MutableLiveData<>(DEFAULT);
     private final MutableLiveData<Boolean> buttonsEnabledLiveData = new MutableLiveData<>(true);
     private final MutableLiveData<Integer> percentageProcessingLiveData = new MutableLiveData<>(0);
@@ -88,7 +90,7 @@ public class ChartAreaListViewModel extends ViewModel {
         observeProgressOnLiveData(multipleSyncedGpxChartUseCase.getPercentageProgress());
         observeRequestStatusOnLiveData(multipleSyncedGpxChartUseCase.getRequestStatus());
 
-        observeReloadEventToReload(reloadEvent, context, defaultRawGpxDataId);
+        observeReloadEventToReload(reloadItems, context, defaultRawGpxDataId);
     }
 
     public void loadData(Context context) {
@@ -118,6 +120,8 @@ public class ChartAreaListViewModel extends ViewModel {
 
         list = new ArrayList<>( immutableList.subList(0, mode.getCount()) );
         chartAreaItemListLiveData.setValue(list);
+
+        multipleSyncedGpxChartUseCase.initChartAreaItemList(list);
     }
 
     public void setOrientation(int orientation) {
@@ -131,7 +135,8 @@ public class ChartAreaListViewModel extends ViewModel {
         }
 
         orientationLiveData.setValue(orientation);
-        reloadEvent.onNext(true);
+
+        reloadItems.onNext(requireNonNull(chartAreaItemListLiveData.getValue()));
     }
 
     public LiveData<Float> getDataEntityChartPercentageHeight() {
@@ -170,13 +175,13 @@ public class ChartAreaListViewModel extends ViewModel {
         return percentageProcessingLiveData;
     }
 
-    private void observeReloadEventToReload(PublishSubject<Boolean> reloadEvent, Context context, int defaultRawGpxDataId) {
+    private void observeReloadEventToReload(PublishSubject<List<ChartAreaItem>> listPublishSubject, Context context, int defaultRawGpxDataId) {
         ConcurrentUtil.tryToDispose(observeReloadEventDisposable);
-        observeReloadEventDisposable = reloadEvent
+        observeReloadEventDisposable = listPublishSubject
                 .subscribeOn(Schedulers.single())
                 .observeOn(Schedulers.newThread())
-                .doOnNext(orientation -> {
-                    multipleSyncedGpxChartUseCase.loadData(context, requireNonNull(chartAreaItemListLiveData.getValue()), defaultRawGpxDataId);
+                .doOnNext(chartAreaItemsToReload -> {
+                    multipleSyncedGpxChartUseCase.loadData(context, chartAreaItemsToReload, defaultRawGpxDataId);
                 }
                 )
                 .doOnError(Throwable::printStackTrace)
@@ -274,14 +279,14 @@ public class ChartAreaListViewModel extends ViewModel {
             }
         }
 
-        reloadEvent.onNext(true);
+        reloadItems.onNext(Collections.singletonList(item));
     }
 
     public void switchSeverityViewModeOrReloadAdapter(ChartAreaItemAdapter adapter) {
 
         adapter.notifyDataSetChanged();
 
-        reloadEvent.onNext(true);
+        reloadItems.onNext(requireNonNull(chartAreaItemListLiveData.getValue()));
     }
 
     public void zoomIn(ChartAreaItemAdapter adapter, ChartAreaItem item, Activity activity) {
