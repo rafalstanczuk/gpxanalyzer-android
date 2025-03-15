@@ -2,29 +2,29 @@ package com.itservices.gpxanalyzer.chart.entry;
 
 import com.github.mikephil.charting.data.Entry;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.inject.Inject;
 
 public class EntryCacheMap {
 
-    private Map<Long, Entry> entryMap = new HashMap<>();
+    private ConcurrentMap<Long, Entry> entryMap = new ConcurrentHashMap<>();
 
     @Inject
     public EntryCacheMap() {
     }
 
-    public void add(long timestampMillis, Entry entry) {
+    public synchronized void add(long timestampMillis, Entry entry) {
         entryMap.put(timestampMillis, entry);
     }
 
-    public Entry get(long timestampMillis) {
+    public synchronized Entry get(long timestampMillis) {
         return entryMap.get(timestampMillis);
     }
 
-    public void init(int n) {
+    public synchronized void init(int n) {
         entryMap.clear();
-        entryMap = new HashMap<>(n + 1);
+        entryMap = new ConcurrentHashMap<>(n + 1);
     }
 }

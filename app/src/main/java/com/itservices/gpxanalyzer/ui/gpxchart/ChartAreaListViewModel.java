@@ -5,6 +5,7 @@ import static com.itservices.gpxanalyzer.data.RequestStatus.DEFAULT;
 import static java.util.Objects.requireNonNull;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.util.Log;
 import android.util.Pair;
@@ -81,19 +82,19 @@ public class ChartAreaListViewModel extends ViewModel {
         return chartAreaItemListLiveData;
     }
 
-    public void bind(Activity activity, int defaultRawGpxDataId) {
+    public void bind(Context context, int defaultRawGpxDataId) {
         this.defaultRawGpxDataId = defaultRawGpxDataId;
 
         observeProgressOnLiveData(multipleSyncedGpxChartUseCase.getPercentageProgress());
         observeRequestStatusOnLiveData(multipleSyncedGpxChartUseCase.getRequestStatus());
 
-        observeReloadEventToReload(reloadEvent, activity, defaultRawGpxDataId);
+        observeReloadEventToReload(reloadEvent, context, defaultRawGpxDataId);
     }
 
-    public void loadData(Activity activity) {
+    public void loadData(Context context) {
         assert chartAreaItemListLiveData.getValue() != null;
 
-        multipleSyncedGpxChartUseCase.loadData(activity, chartAreaItemListLiveData.getValue(), defaultRawGpxDataId);
+        multipleSyncedGpxChartUseCase.loadData(context, chartAreaItemListLiveData.getValue(), defaultRawGpxDataId);
     }
 
     public void switchSeverityMode() {
@@ -169,12 +170,12 @@ public class ChartAreaListViewModel extends ViewModel {
         return percentageProcessingLiveData;
     }
 
-    private void observeReloadEventToReload(PublishSubject<Boolean> reloadEvent, Activity activity, int defaultRawGpxDataId) {
+    private void observeReloadEventToReload(PublishSubject<Boolean> reloadEvent, Context context, int defaultRawGpxDataId) {
         ConcurrentUtil.tryToDispose(observeReloadEventDisposable);
         observeReloadEventDisposable = reloadEvent
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnNext(orientation -> multipleSyncedGpxChartUseCase.loadData(activity, requireNonNull(chartAreaItemListLiveData.getValue()), defaultRawGpxDataId))
+                .subscribeOn(Schedulers.single())
+                .observeOn(Schedulers.newThread())
+                .doOnNext(orientation -> multipleSyncedGpxChartUseCase.loadData(context, requireNonNull(chartAreaItemListLiveData.getValue()), defaultRawGpxDataId))
                 .doOnError(Throwable::printStackTrace)
                 .subscribe();
     }
@@ -212,6 +213,7 @@ public class ChartAreaListViewModel extends ViewModel {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext(percentageProcessingLiveData::postValue)
+                .doOnError(Throwable::printStackTrace)
                 .subscribe();
     }
 
@@ -230,7 +232,7 @@ public class ChartAreaListViewModel extends ViewModel {
     }
 
     private void notifySwitchingViewModeToLiveData(ChartAreaItem item) {
-        multipleSyncedGpxChartUseCase.switchViewMode(item);
+        //multipleSyncedGpxChartUseCase.switchViewMode(item);
         switchViewModeLiveData.postValue(item);
     }
 

@@ -17,6 +17,7 @@ import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItemAdapter;
 import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItemFactory;
 import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.ViewMode;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -40,7 +41,7 @@ public class ChartAreaListFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         viewModel = new ViewModelProvider(this.requireActivity()).get(ChartAreaListViewModel.class);
-        viewModel.bind(requireActivity(), R.raw.skiing20250121t091423);
+        viewModel.bind(requireContext(), R.raw.skiing20250121t091423);
         viewModel.setOrientation(getResources().getConfiguration().orientation);
     }
 
@@ -70,7 +71,7 @@ public class ChartAreaListFragment extends Fragment {
         }
 
         binding.loadButton.setOnClickListener(view ->
-                viewModel.loadData(requireActivity())
+                viewModel.loadData(requireContext())
         );
 
         binding.switchSeverityModeButton.setOnClickListener(view -> viewModel.switchSeverityMode());

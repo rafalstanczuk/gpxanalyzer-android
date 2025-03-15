@@ -24,7 +24,7 @@ public class TrendBoundaryEntryProvider {
 
     }
 
-    public final EntryCacheMap getEntryCacheMap() {
+    public synchronized final EntryCacheMap getEntryCacheMap() {
         return entryCacheMap;
     }
 

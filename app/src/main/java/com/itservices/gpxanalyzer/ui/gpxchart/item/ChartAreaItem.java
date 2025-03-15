@@ -51,6 +51,9 @@ public class ChartAreaItem {
     }
 
     public void setDataEntityWrapper(DataEntityWrapper dataEntityWrapper) {
+        if (this.dataEntityWrapper != null) {
+            this.dataEntityWrapper = null;
+        }
         this.dataEntityWrapper = dataEntityWrapper;
     }
 

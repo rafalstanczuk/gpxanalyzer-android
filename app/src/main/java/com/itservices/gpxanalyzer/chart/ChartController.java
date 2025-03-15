@@ -19,7 +19,6 @@ import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
-import io.reactivex.Single;
 import io.reactivex.subjects.PublishSubject;
 
 public class ChartController implements OnChartValueSelectedListener, OnChartGestureListener {
@@ -38,17 +37,18 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
      */
     @UiThread
     public void bindChart(@NonNull DataEntityLineChart chartBindings) {
-        chartProvider.initChart(chartBindings);
-
         chartBindings.setOnChartValueSelectedListener(this);
         chartBindings.setOnChartGestureListener(this);
+
+        chartProvider.initChart(chartBindings);
     }
 
     @UiThread
     public void setDrawIconsEnabled(boolean isChecked) {
 
         chartProvider.getSettings().setDrawIconsEnabled(isChecked);
-        chartProvider.tryToUpdateDataChart();
+        chartProvider.tryToUpdateDataChart()
+                .subscribe();
     }
 
     @UiThread

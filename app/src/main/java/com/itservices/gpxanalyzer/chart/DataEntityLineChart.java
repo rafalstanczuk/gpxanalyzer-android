@@ -21,6 +21,7 @@ import com.itservices.gpxanalyzer.chart.legend.PaletteColorDeterminer;
 import com.itservices.gpxanalyzer.chart.settings.background.GridBackgroundDrawer;
 import com.itservices.gpxanalyzer.chart.settings.background.LimitLinesBoundaries;
 import com.itservices.gpxanalyzer.chart.settings.highlight.StaticChartHighlighter;
+import com.itservices.gpxanalyzer.data.RequestStatus;
 import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
 
 import java.util.List;
@@ -29,6 +30,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import io.reactivex.Observable;
 
 @AndroidEntryPoint
 public class DataEntityLineChart extends LineChart {
@@ -111,17 +113,19 @@ public class DataEntityLineChart extends LineChart {
 		);*/
 	}
 
-	public void initChart(LineChartSettings settings) {
-		StaticChartHighlighter<DataEntityLineChart> staticChartHighlighter = new StaticChartHighlighter<>(
-				this, (BarLineChartTouchListener) mChartTouchListener);
-		setHighlighter(staticChartHighlighter);
+	public Observable<RequestStatus> initChart(LineChartSettings settings) {
+		return Observable.fromCallable(() -> {
+			StaticChartHighlighter<DataEntityLineChart> staticChartHighlighter = new StaticChartHighlighter<>(
+					this, (BarLineChartTouchListener) mChartTouchListener);
+			setHighlighter(staticChartHighlighter);
 
-		clear();
-		setData(new LineData());
+			setData(new LineData());
 
-		loadChartSettings(settings);
+			loadChartSettings(settings);
 
-		invalidate();
+			invalidate();
+			return RequestStatus.DONE;
+		});
 	}
 
 	public BarLineChartTouchListener getChartTouchListener() {
