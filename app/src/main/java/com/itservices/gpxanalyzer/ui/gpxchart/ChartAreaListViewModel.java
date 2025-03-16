@@ -88,6 +88,7 @@ public class ChartAreaListViewModel extends ViewModel {
     public void postEventLoadData() {
         assert chartAreaItemListLiveData.getValue() != null;
 
+        multipleSyncedGpxChartUseCase.initObserveSelectionOnNeighborChart(chartAreaItemListLiveData.getValue());
         reloadItems.onNext(chartAreaItemListLiveData.getValue());
     }
 
