@@ -84,7 +84,10 @@ public class LineChartSettings {
         lineChart.setPaint(paintGridBg, PAINT_GRID_BACKGROUND);
         lineChart.setAutoScaleMinMaxEnabled(false);
         lineChart.setDrawGridBackground(true);
-        lineChart.setNoDataText("No data...");
+
+        lineChart.setNoDataText("Load data to show here.");
+        lineChart.setNoDataTextColor(Color.RED);
+
         customMarker.setChartView(lineChart);
         lineChart.setMarker(customMarker);
         lineChart.setDrawBorders(false);

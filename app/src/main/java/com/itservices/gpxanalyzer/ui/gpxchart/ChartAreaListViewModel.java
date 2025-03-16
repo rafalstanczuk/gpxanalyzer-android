@@ -24,7 +24,6 @@ import com.itservices.gpxanalyzer.utils.SingleLiveEvent;
 import com.itservices.gpxanalyzer.utils.common.ConcurrentUtil;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -39,37 +38,25 @@ import io.reactivex.subjects.PublishSubject;
 
 @HiltViewModel
 public class ChartAreaListViewModel extends ViewModel {
-    @Inject
-    MultipleSyncedGpxChartUseCase multipleSyncedGpxChartUseCase;
-
     public static final float DEFAULT_PERCENT_VALUE = 0.5f;
-
-    public final MutableLiveData<Float> chartPercentageHeightLiveData
-            = new MutableLiveData<>(DEFAULT_PERCENT_VALUE);
-
-    public final MutableLiveData<Integer> orientationLiveData
-            = new MutableLiveData<>(Configuration.ORIENTATION_PORTRAIT);
-    private final PublishSubject<List<ChartAreaItem>> reloadItems = PublishSubject.create();
+    public final MutableLiveData<Float> chartPercentageHeightLiveData = new MutableLiveData<>(DEFAULT_PERCENT_VALUE);
+    public final MutableLiveData<Integer> orientationLiveData = new MutableLiveData<>(Configuration.ORIENTATION_PORTRAIT);
     private final MutableLiveData<RequestStatus> requestStatusLiveData = new MutableLiveData<>(DEFAULT);
     private final MutableLiveData<Boolean> buttonsEnabledLiveData = new MutableLiveData<>(true);
     private final MutableLiveData<Integer> percentageProcessingLiveData = new MutableLiveData<>(0);
-
     private final MutableLiveData<List<ChartAreaItem>> chartAreaItemListLiveData = new MutableLiveData<>(new ArrayList<>());
-
-
     private final MutableLiveData<ViewModeSeverity> viewModeSeverityLiveData = new MutableLiveData<>(ViewModeSeverity.TWO_CHARTS);
-
     private final MutableLiveData<ChartAreaItem> switchViewModeLiveData = new SingleLiveEvent<>();
-
     private final MutableLiveData<Pair<ChartAreaItem, Boolean>> onOnOffColorizedCirclesCheckBoxChangedLiveData = new SingleLiveEvent<>();
     private final MutableLiveData<ChartAreaItem> zoomInLiveData = new SingleLiveEvent<>();
     private final MutableLiveData<ChartAreaItem> zoomOutLiveData = new SingleLiveEvent<>();
     private final MutableLiveData<ChartAreaItem> autoScalingLiveData = new SingleLiveEvent<>();
-
+    @Inject
+    MultipleSyncedGpxChartUseCase multipleSyncedGpxChartUseCase;
+    private final PublishSubject<List<ChartAreaItem>> reloadItems = PublishSubject.create();
     private Disposable observeReloadEventDisposable;
     private Disposable observeRequestStatusDisposable;
     private Disposable observeProgressDisposable;
-    private int defaultRawGpxDataId;
     private List<ChartAreaItem> immutableList;
 
     @Inject
@@ -84,19 +71,32 @@ public class ChartAreaListViewModel extends ViewModel {
         return chartAreaItemListLiveData;
     }
 
-    public void bind(Context context, int defaultRawGpxDataId) {
-        this.defaultRawGpxDataId = defaultRawGpxDataId;
+    public void bind(Context context, int defaultDataFromRawResId) {
+        multipleSyncedGpxChartUseCase.initWithContext(context, defaultDataFromRawResId);
 
         observeProgressOnLiveData(multipleSyncedGpxChartUseCase.getPercentageProgress());
         observeRequestStatusOnLiveData(multipleSyncedGpxChartUseCase.getRequestStatus());
 
-        observeReloadEventToReload(reloadItems, context, defaultRawGpxDataId);
+        observeReloadItemsRequestOn(reloadItems);
     }
 
-    public void loadData(Context context) {
+    public void postEventLoadData() {
         assert chartAreaItemListLiveData.getValue() != null;
 
-        multipleSyncedGpxChartUseCase.loadData(context, chartAreaItemListLiveData.getValue(), defaultRawGpxDataId);
+        reloadItems.onNext(chartAreaItemListLiveData.getValue());
+    }
+
+
+    public void postEventLoadData(List<ChartAreaItem> chartAreaItems) {
+        reloadItems.onNext(chartAreaItems);
+    }
+
+    public void postEventLoadData(ChartAreaItem item) {
+        //reloadItems.onNext(Collections.singletonList(item));
+
+        //assert chartAreaItemListLiveData.getValue() != null;
+
+        //reloadItems.onNext(chartAreaItemListLiveData.getValue());
     }
 
     public void switchSeverityMode() {
@@ -121,7 +121,7 @@ public class ChartAreaListViewModel extends ViewModel {
         list = new ArrayList<>(immutableList.subList(0, mode.getCount()));
         chartAreaItemListLiveData.setValue(list);
 
-        multipleSyncedGpxChartUseCase.initChartAreaItemList(list);
+        multipleSyncedGpxChartUseCase.initObserveSelectionOnNeighborChart(list);
     }
 
     public void setOrientation(int orientation) {
@@ -136,7 +136,9 @@ public class ChartAreaListViewModel extends ViewModel {
 
         orientationLiveData.setValue(orientation);
 
-        reloadItems.onNext(requireNonNull(chartAreaItemListLiveData.getValue()));
+        if( !requireNonNull(chartAreaItemListLiveData.getValue()).isEmpty() ) {
+            reloadItems.onNext(chartAreaItemListLiveData.getValue());
+        }
     }
 
     public LiveData<Float> getDataEntityChartPercentageHeight() {
@@ -175,14 +177,14 @@ public class ChartAreaListViewModel extends ViewModel {
         return percentageProcessingLiveData;
     }
 
-    private void observeReloadEventToReload(PublishSubject<List<ChartAreaItem>> listPublishSubject, Context context, int defaultRawGpxDataId) {
+    private void observeReloadItemsRequestOn(PublishSubject<List<ChartAreaItem>> listPublishSubject) {
         ConcurrentUtil.tryToDispose(observeReloadEventDisposable);
         observeReloadEventDisposable = listPublishSubject
                 .subscribeOn(Schedulers.single())
                 .observeOn(Schedulers.newThread())
-                .doOnNext(chartAreaItemsToReload -> {
-                            multipleSyncedGpxChartUseCase.loadData(context, chartAreaItemsToReload, defaultRawGpxDataId);
-                        }
+                .doOnNext(chartAreaItemsToReload ->
+                        multipleSyncedGpxChartUseCase
+                                .loadData(chartAreaItemsToReload)
                 )
                 .doOnError(Throwable::printStackTrace)
                 .subscribe();
@@ -270,22 +272,15 @@ public class ChartAreaListViewModel extends ViewModel {
         // reloadEvent.onNext(true);
     }
 
-    public void switchViewMode(ChartAreaItemAdapter adapter, ChartAreaItem item, Activity activity) {
+    public void switchViewMode(ChartAreaItemAdapter adapter, ChartAreaItem item) {
         int indexOfItem = adapter.getItems().indexOf(item);
         switch (requireNonNull(item.getViewMode().getValue())) {
             case ASL_T_1, V_T_1 -> {
-                adapter.notifyItemChanged(indexOfItem);
+               // adapter.notifyItemChanged(indexOfItem);
             }
         }
 
-        reloadItems.onNext(Collections.singletonList(item));
-    }
-
-    public void switchSeverityViewModeOrReloadAdapter(ChartAreaItemAdapter adapter) {
-
-        adapter.notifyDataSetChanged();
-
-        reloadItems.onNext(requireNonNull(chartAreaItemListLiveData.getValue()));
+        reloadItems.onNext( Collections.singletonList(item) );
     }
 
     public void zoomIn(ChartAreaItemAdapter adapter, ChartAreaItem item, Activity activity) {

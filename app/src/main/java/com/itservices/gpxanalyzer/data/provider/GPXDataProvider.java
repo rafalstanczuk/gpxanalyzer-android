@@ -54,6 +54,13 @@ public final class GPXDataProvider {
     }
 
     public Observable<Vector<DataEntity>> provide(Context context, int rawId) {
+        return context == null ?
+                Observable.just(new Vector<>())
+                :
+                provideInternal(context, rawId);
+    }
+
+    private Observable<Vector<DataEntity>> provideInternal(Context context, int rawId) {
         return Observable.fromCallable(() -> {
             InputStream inputStream = context.getResources().openRawResource(rawId);
             return loadDataEntity(inputStream);

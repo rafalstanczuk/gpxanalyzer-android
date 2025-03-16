@@ -1,5 +1,6 @@
 package com.itservices.gpxanalyzer.chart;
 
+import android.util.Log;
 import android.view.MotionEvent;
 
 import androidx.annotation.NonNull;
@@ -16,6 +17,8 @@ import com.itservices.gpxanalyzer.chart.entry.BaseEntry;
 import com.itservices.gpxanalyzer.data.RequestStatus;
 import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
 
+import java.util.Objects;
+
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
@@ -23,10 +26,9 @@ import io.reactivex.subjects.PublishSubject;
 
 public class ChartController implements OnChartValueSelectedListener, OnChartGestureListener {
 
+    private final PublishSubject<BaseEntry> baseEntrySelectionPublishSubject = PublishSubject.create();
     @Inject
     ChartProvider chartProvider;
-
-    private final PublishSubject<BaseEntry> baseEntrySelectionPublishSubject = PublishSubject.create();
 
     @Inject
     public ChartController() {
@@ -37,23 +39,16 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
      */
     @UiThread
     public void bindChart(@NonNull DataEntityLineChart chartBindings) {
+        Log.d(ChartController.class.getSimpleName(), "bindChart() called with: chartBindings = [" + chartBindings + "]");
+
         chartBindings.setOnChartValueSelectedListener(this);
         chartBindings.setOnChartGestureListener(this);
 
-        chartProvider.initChart(chartBindings)
-                .subscribe();
+        chartProvider.registerBinding(chartBindings);
     }
 
-    public Observable<RequestStatus> reinitChart() {
-        return chartProvider.initChart(null);
-    }
-
-    @UiThread
-    public void setDrawIconsEnabled(boolean isChecked) {
-
-        chartProvider.getSettings().setDrawIconsEnabled(isChecked);
-        chartProvider.tryToUpdateDataChart()
-                .subscribe();
+    public Observable<RequestStatus> initChart() {
+        return chartProvider.initChart();
     }
 
     @UiThread
@@ -68,12 +63,19 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
         return chartProvider.getSettings().isDrawIconsEnabled();
     }
 
+    @UiThread
+    public void setDrawIconsEnabled(boolean isChecked) {
+
+        chartProvider.getSettings().setDrawIconsEnabled(isChecked);
+        chartProvider.tryToUpdateDataChart().subscribe();
+    }
+
     public void animateZoomToCenter(final float targetScaleX, final float targetScaleY, long duration) {
-        chartProvider.getChart().animateZoomToCenter(targetScaleX, targetScaleY, duration);
+        Objects.requireNonNull(chartProvider.getChart()).animateZoomToCenter(targetScaleX, targetScaleY, duration);
     }
 
     public void animateFitScreen(long duration) {
-        chartProvider.getChart().animateFitScreen(duration);
+        Objects.requireNonNull(chartProvider.getChart()).animateFitScreen(duration);
     }
 
     public void setDrawXLabels(boolean drawX) {
@@ -89,13 +91,12 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     }
 
     public void select(long selectedTimeMillis) {
-        manualSelectEntryOnSelectedTime(chartProvider.getChart(), selectedTimeMillis, true, false);
+        manualSelectEntryOnSelectedTime(Objects.requireNonNull(chartProvider.getChart()), selectedTimeMillis, true, false);
     }
 
     private void manualSelectEntryOnSelectedTime(DataEntityLineChart chart, long selectedTimeMillis, boolean centerViewToSelection, boolean callListeners) {
 
-        chart.getChartTouchListener()
-                .setLastGesture(ChartTouchListener.ChartGesture.NONE);
+        chart.getChartTouchListener().setLastGesture(ChartTouchListener.ChartGesture.NONE);
 
         if (selectedTimeMillis < 0) {
             chart.highlightValue(null, false);
@@ -122,7 +123,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     }
 
     private void setSelectionEntry(Entry entry, boolean publishSelection) {
-        chartProvider.getChart().setHighlightedEntry(entry);
+        Objects.requireNonNull(chartProvider.getChart()).setHighlightedEntry(entry);
 
         if (publishSelection && (entry instanceof BaseEntry)) {
             baseEntrySelectionPublishSubject.onNext((BaseEntry) entry);
@@ -131,7 +132,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
 
     private void resetMarkerAndClearSelection(DataEntityLineChart chart) {
         chartProvider.setSelectionHighlight(null);
-        chartProvider.getChart().setHighlightedEntry(null);
+        chart.setHighlightedEntry(null);
 
         manualSelectEntryOnSelectedTime(chart, -1, false, true);
     }
@@ -166,7 +167,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
 
     @Override
     public void onChartTranslate(MotionEvent me, float dX, float dY) {
-        chartProvider.getChart().highlightCenterValueInTranslation();
+        Objects.requireNonNull(chartProvider.getChart()).highlightCenterValueInTranslation();
     }
 
     @Override
@@ -177,7 +178,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
 
     @Override
     public void onNothingSelected() {
-        resetMarkerAndClearSelection(chartProvider.getChart());
+        resetMarkerAndClearSelection(Objects.requireNonNull(chartProvider.getChart()));
     }
 
 }

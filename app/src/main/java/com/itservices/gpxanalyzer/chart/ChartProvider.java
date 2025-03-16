@@ -1,5 +1,7 @@
 package com.itservices.gpxanalyzer.chart;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
@@ -37,19 +39,28 @@ class ChartProvider {
     public ChartProvider() {
     }
 
-    /**
-     * Initialize the chart with empty data + styling.
-     *
-     * @return
-     */
-    public Observable<RequestStatus> initChart(DataEntityLineChart chart) {
 
+    public void registerBinding(DataEntityLineChart chart) {
         if (chart != null) {
             if (chartWeakReference != null)
                 chartWeakReference.clear();
 
             chartWeakReference = new WeakReference<>(chart);
+
+            initChart().subscribe();
+            Log.d(ChartProvider.class.getSimpleName(), "chartWeakReference = [" + chartWeakReference + "]");
         }
+    }
+
+    /**
+     * Initialize the chart with empty data + styling.
+     *
+     * @return
+     */
+    public Observable<RequestStatus> initChart() {
+        Log.d(ChartProvider.class.getSimpleName(), "initChart chartWeakReference = [" + chartWeakReference + "]");
+        Log.d(ChartProvider.class.getSimpleName(), "chartWeakReference = [" + chartWeakReference + "]");
+        Log.d(ChartProvider.class.getSimpleName(), "chartWeakReference.get() = [" + chartWeakReference.get() + "]");
 
         if (chartWeakReference == null || chartWeakReference.get() == null) {
             return Observable.just(RequestStatus.CHART_WEAK_REFERENCE_IS_NULL);
@@ -74,6 +85,7 @@ class ChartProvider {
 
     @UiThread
     public Observable<RequestStatus> updateChartData(DataEntityWrapper dataEntityWrapper) {
+        Log.d(ChartProvider.class.getSimpleName(), "updateChartData() called with: dataEntityWrapper = [" + dataEntityWrapper + "]");
 
         if (chartWeakReference == null || chartWeakReference.get() == null) {
             return Observable.just(RequestStatus.CHART_WEAK_REFERENCE_IS_NULL);
@@ -152,4 +164,5 @@ class ChartProvider {
             return RequestStatus.CHART_UPDATED;
         });
     }
+
 }

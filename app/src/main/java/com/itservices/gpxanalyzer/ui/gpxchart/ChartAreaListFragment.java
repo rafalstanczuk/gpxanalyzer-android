@@ -17,7 +17,6 @@ import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItemAdapter;
 import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItemFactory;
 import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.ViewMode;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -71,22 +70,20 @@ public class ChartAreaListFragment extends Fragment {
         }
 
         binding.loadButton.setOnClickListener(view ->
-                viewModel.loadData(requireContext())
+                viewModel.postEventLoadData()
         );
 
         binding.switchSeverityModeButton.setOnClickListener(view -> viewModel.switchSeverityMode());
 
         viewModel.getChartAreaItemListLiveData().observe(getViewLifecycleOwner(), items -> {
                     adapter = new ChartAreaItemAdapter(items, viewModel, getViewLifecycleOwner());
-                    binding.gpxChartsRecyclerView.setAdapter(adapter);
-
-                    viewModel.switchSeverityViewModeOrReloadAdapter(adapter);
+                    binding.gpxChartsRecyclerView.swapAdapter(adapter, false);
                 }
         );
 
         viewModel.getOnSwitchViewModeChangedLiveData().observe(getViewLifecycleOwner(),
                 (item -> {
-                    viewModel.switchViewMode(adapter, item, requireActivity());
+                    viewModel.switchViewMode(adapter, item);
                 }));
 
         viewModel.getOnOnOffColorizedCirclesCheckBoxChangedLiveData().observe(getViewLifecycleOwner(),

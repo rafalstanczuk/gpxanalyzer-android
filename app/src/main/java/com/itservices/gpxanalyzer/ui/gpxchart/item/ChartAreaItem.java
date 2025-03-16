@@ -4,11 +4,14 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.itservices.gpxanalyzer.chart.ChartController;
+import com.itservices.gpxanalyzer.data.RequestStatus;
 import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
 import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.ViewMode;
 
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
+import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
 
 public class ChartAreaItem {
 
@@ -67,5 +70,9 @@ public class ChartAreaItem {
 
     public void setDrawX(boolean drawX) {
         chartController.setDrawXLabels(drawX);
+    }
+
+    public Observable<RequestStatus> updateChart() {
+        return chartController.updateChartData(dataEntityWrapper);
     }
 }
