@@ -71,14 +71,6 @@ public class MultipleSyncedGpxChartUseCase {
         this.gpxData = gpxData;
     }
 
-    public void switchViewMode(ChartAreaItem chartAreaItem) {
-
-        if (contextWeakReference == null)
-            return;
-
-        loadData(contextWeakReference.get(), Collections.singletonList(chartAreaItem), defaultRawGpxDataId);
-    }
-
     public void initChartAreaItemList(List<ChartAreaItem> list) {
         ConcurrentUtil.tryToDispose(observeSelectionCompositeDisposable);
         observeSelectionCompositeDisposable = new CompositeDisposable();
@@ -126,6 +118,8 @@ public class MultipleSyncedGpxChartUseCase {
                                         .ifPresent(status -> {
                                             if (status == RequestStatus.CHART_UPDATED) {
                                                 requestStatus.onNext(RequestStatus.DONE);
+                                            } else {
+                                                requestStatus.onNext(status);
                                             }
                                         }),
 
@@ -150,7 +144,7 @@ public class MultipleSyncedGpxChartUseCase {
         return chartAreaItem.getChartController()
                 .reinitChart()
                 .map(status -> {
-                    requestStatus.onNext(status);
+                    //requestStatus.onNext(status);
 
                     ViewMode iChartViewMode = chartAreaItem.getViewMode().getValue();
 

@@ -118,7 +118,7 @@ public class ChartAreaListViewModel extends ViewModel {
         assert list != null;
         list.clear();
 
-        list = new ArrayList<>( immutableList.subList(0, mode.getCount()) );
+        list = new ArrayList<>(immutableList.subList(0, mode.getCount()));
         chartAreaItemListLiveData.setValue(list);
 
         multipleSyncedGpxChartUseCase.initChartAreaItemList(list);
@@ -181,8 +181,8 @@ public class ChartAreaListViewModel extends ViewModel {
                 .subscribeOn(Schedulers.single())
                 .observeOn(Schedulers.newThread())
                 .doOnNext(chartAreaItemsToReload -> {
-                    multipleSyncedGpxChartUseCase.loadData(context, chartAreaItemsToReload, defaultRawGpxDataId);
-                }
+                            multipleSyncedGpxChartUseCase.loadData(context, chartAreaItemsToReload, defaultRawGpxDataId);
+                        }
                 )
                 .doOnError(Throwable::printStackTrace)
                 .subscribe();
@@ -200,19 +200,18 @@ public class ChartAreaListViewModel extends ViewModel {
 
                             buttonsEnabledLiveData.postValue(getButtonEnabled(request));
                         },
-                        onError -> Log.e("requestStatus", onError.toString() )
-                        );
+                        onError -> Log.e("requestStatus", onError.toString())
+                );
     }
 
     private boolean getButtonEnabled(RequestStatus requestStatus) {
-        switch (requireNonNull(requestStatus)) {
-            case LOADING:
-            case DATA_LOADED:
-            case PROCESSING:
-                return false;
-            default:
-                return true;
-        }
+        return switch (requireNonNull(requestStatus)) {
+            case LOADING, DATA_LOADED, PROCESSING, PROCESSED, CHART_INITIALIZED, CHART_UPDATING,
+                 CHART_UPDATED -> false;
+            case ERROR_DATA_SETS_NULL, ERROR_LINE_DATA_SET_NULL, ERROR_NEW_DATA_SET_NULL,
+                 ERROR_INVALID_DATA_SET_AMOUNT_TO_SHOW, CHART_WEAK_REFERENCE_IS_NULL, CHART_IS_NULL,
+                 ERROR, DEFAULT, DONE -> true;
+        };
     }
 
     private void observeProgressOnLiveData(Observable<Integer> integerObservable) {
