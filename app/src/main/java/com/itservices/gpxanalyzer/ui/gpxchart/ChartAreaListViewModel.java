@@ -77,6 +77,11 @@ public class ChartAreaListViewModel extends ViewModel {
         observeProgressOnLiveData(multipleSyncedGpxChartUseCase.getPercentageProgress());
         observeRequestStatusOnLiveData(multipleSyncedGpxChartUseCase.getRequestStatus());
 
+
+        if (chartAreaItemListLiveData.getValue() != null && !chartAreaItemListLiveData.getValue().isEmpty()) {
+            multipleSyncedGpxChartUseCase.initObserveSelectionOnNeighborChart(chartAreaItemListLiveData.getValue());
+        }
+
         observeReloadItemsRequestOn(reloadItems);
     }
 
@@ -120,7 +125,6 @@ public class ChartAreaListViewModel extends ViewModel {
 
         list = new ArrayList<>(immutableList.subList(0, mode.getCount()));
         chartAreaItemListLiveData.setValue(list);
-
         multipleSyncedGpxChartUseCase.initObserveSelectionOnNeighborChart(list);
     }
 
