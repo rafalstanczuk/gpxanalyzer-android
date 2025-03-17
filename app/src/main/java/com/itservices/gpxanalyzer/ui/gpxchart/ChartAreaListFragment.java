@@ -41,7 +41,7 @@ public class ChartAreaListFragment extends Fragment {
 
         viewModel = new ViewModelProvider(this.requireActivity()).get(ChartAreaListViewModel.class);
         viewModel.bind(requireContext(), R.raw.skiing20250121t091423);
-        viewModel.setOrientation(getResources().getConfiguration().orientation);
+
     }
 
     @Override
@@ -68,6 +68,8 @@ public class ChartAreaListFragment extends Fragment {
             adapter = new ChartAreaItemAdapter(viewModel.getChartAreaItemListLiveData().getValue(), viewModel, getViewLifecycleOwner());
             binding.gpxChartsRecyclerView.setAdapter(adapter);
         }
+
+        viewModel.setOrientation(getResources().getConfiguration().orientation);
 
         binding.loadButton.setOnClickListener(view ->
                 viewModel.postEventLoadData()
