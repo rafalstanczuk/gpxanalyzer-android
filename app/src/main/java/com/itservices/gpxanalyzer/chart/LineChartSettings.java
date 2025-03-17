@@ -94,7 +94,7 @@ public class LineChartSettings {
         lineChart.setMaxHighlightDistance(10000.0f);
 
         lineChart.resetZoom();
-        lineChart.setMaxVisibleValueCount(10000);
+        lineChart.setMaxVisibleValueCount(20000);
         lineChart.setTouchEnabled(true);
 
         lineChart.setDragYEnabled(false);

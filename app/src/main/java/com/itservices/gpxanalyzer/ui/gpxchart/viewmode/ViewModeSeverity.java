@@ -8,7 +8,7 @@ import androidx.annotation.DrawableRes;
 import com.itservices.gpxanalyzer.R;
 
 public enum ViewModeSeverity {
-	TWO_CHARTS(R.drawable.ic_splitscreen_two_selector, 0.4f, 0.4f, 2),
+	TWO_CHARTS(R.drawable.ic_splitscreen_two_selector, 0.45f, 0.45f, 2),
 	ONE_CHART(R.drawable.ic_fullscreen_one_selector, 0.8f, 0.8f, 1);
 
 

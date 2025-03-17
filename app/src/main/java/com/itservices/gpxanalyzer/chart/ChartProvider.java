@@ -59,8 +59,6 @@ class ChartProvider {
      */
     public Observable<RequestStatus> initChart() {
         Log.d(ChartProvider.class.getSimpleName(), "initChart chartWeakReference = [" + chartWeakReference + "]");
-        Log.d(ChartProvider.class.getSimpleName(), "chartWeakReference = [" + chartWeakReference + "]");
-        Log.d(ChartProvider.class.getSimpleName(), "chartWeakReference.get() = [" + chartWeakReference.get() + "]");
 
         if (chartWeakReference == null || chartWeakReference.get() == null) {
             return Observable.just(RequestStatus.CHART_WEAK_REFERENCE_IS_NULL);

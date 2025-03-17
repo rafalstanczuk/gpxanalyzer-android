@@ -17,7 +17,8 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/chart_layout"
             android:layout_width="match_parent"
-            android:layout_height="300dp"
+            android:layout_height="0dp"
+            app:height_percent="@{viewModel.dataEntityChartPercentageHeight}"
             app:layout_constraintTop_toTopOf="parent">
 
             <!--"@{viewModel.dataEntityChartPercentageHeight}"-->
