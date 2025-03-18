@@ -15,9 +15,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
 
-            android:layout_marginTop="@dimen/margin_medium_small"
-            android:layout_marginStart="@dimen/margin_very_small"
-            android:layout_marginEnd="@dimen/margin_very_small"
+            android:paddingStart="@dimen/margin_very_small"
+            android:paddingEnd="@dimen/margin_very_small"
+            android:paddingTop="@dimen/margin_small"
+            android:layout_marginTop="@dimen/margin_small"
+
 
             android:text="Time"
             android:textAppearance="?android:attr/textAppearanceSmall"
@@ -32,8 +34,10 @@
             android:layout_height="wrap_content"
 
             android:layout_marginTop="@dimen/margin_very_small"
-            android:layout_marginStart="@dimen/margin_very_small"
-            android:layout_marginEnd="@dimen/margin_very_small"
+            android:layout_marginStart="@dimen/margin_small"
+            android:paddingStart="0dp"
+            android:paddingEnd="@dimen/margin_small"
+            android:paddingBottom="@dimen/margin_small"
 
             android:text="Value"
             android:textAppearance="?android:attr/textAppearanceSmall"
@@ -42,56 +46,62 @@
             app:layout_constraintStart_toStartOf="@id/markerTextViewTime"
             app:layout_constraintTop_toBottomOf="@+id/markerTextViewTime" />
 
-        <TextView
-            android:id="@+id/markerTextViewNumber"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/trendStatisticsLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:visibility="visible"
+            app:layout_constraintStart_toStartOf="@+id/markerTextViewValue"
+            app:layout_constraintTop_toBottomOf="@id/markerTextViewValue">
 
-            android:paddingStart="0dp"
-            android:paddingEnd="@dimen/margin_very_small"
-            android:layout_marginTop="@dimen/margin_very_small"
+            <TextView
+                android:id="@+id/markerTextViewNumber"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
 
-            android:text="1."
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="@android:color/black"
-            android:textSize="11sp"
-            app:layout_constraintStart_toStartOf="@id/markerTextViewValue"
-            app:layout_constraintTop_toBottomOf="@id/markerTextViewValue" />
+                android:paddingStart="0dp"
+                android:paddingEnd="@dimen/margin_very_small"
 
-
-        <ImageView
-            android:id="@+id/trendTypeImageView"
-            android:layout_width="20dp"
-            android:layout_height="wrap_content"
-            android:contentDescription="trendTypeImageView"
-            app:layout_constraintTop_toTopOf="@id/markerTextViewNumber"
-            app:layout_constraintBottom_toBottomOf="@id/markerTextViewNumber"
-            app:layout_constraintStart_toEndOf="@id/markerTextViewNumber"
-            android:src="@drawable/ic_trending_flat_fill0"
-            />
-
-        <TextView
-            android:id="@+id/markerTextViewDeltaValue"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-
-            android:paddingStart="@dimen/margin_very_small"
-            android:paddingEnd="@dimen/margin_very_small"
-            android:layout_marginTop="@dimen/margin_very_small"
-            android:layout_marginBottom="@dimen/margin_small"
-            android:layout_marginStart="@dimen/margin_very_small"
-            android:layout_marginEnd="@dimen/margin_small"
-            android:text="+/-ASL"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="@android:color/black"
-            android:textSize="11sp"
-            app:layout_constraintStart_toStartOf="@id/markerTextViewNumber"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/markerTextViewNumber"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+                android:text="1."
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="@android:color/black"
+                android:textSize="11sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
 
+            <ImageView
+                android:id="@+id/trendTypeImageView"
+                android:layout_width="20dp"
+                android:layout_height="wrap_content"
+                android:contentDescription="trendTypeImageView"
+                android:src="@drawable/ic_trending_flat_fill0"
+                app:layout_constraintBottom_toBottomOf="@id/markerTextViewNumber"
+                app:layout_constraintStart_toEndOf="@id/markerTextViewNumber"
+                app:layout_constraintTop_toTopOf="@id/markerTextViewNumber" />
 
+            <TextView
+                android:id="@+id/markerTextViewDeltaValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:layout_marginStart="@dimen/margin_very_small"
+                android:layout_marginTop="@dimen/margin_very_small"
+                android:layout_marginEnd="@dimen/margin_small"
+                android:layout_marginBottom="@dimen/margin_small"
+                android:paddingStart="@dimen/margin_very_small"
+                android:paddingEnd="@dimen/margin_very_small"
+                android:text="+/-ASL"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="@android:color/black"
+                android:textSize="11sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@id/markerTextViewNumber"
+                app:layout_constraintTop_toBottomOf="@id/markerTextViewNumber" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

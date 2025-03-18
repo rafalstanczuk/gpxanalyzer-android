@@ -2,7 +2,6 @@ package com.itservices.gpxanalyzer.chart;
 
 import android.util.Log;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 
@@ -34,13 +33,6 @@ class ChartProvider {
 
     @Inject
     public ChartProvider() {
-    }
-
-    @NonNull
-    private static LineData mapIntoLineData(List<LineDataSet> lineDataSetList) {
-        LineData lineData = new LineData();
-        lineDataSetList.forEach(lineData::addDataSet);
-        return lineData;
     }
 
     public void registerBinding(DataEntityLineChart chart) {
@@ -100,7 +92,7 @@ class ChartProvider {
                         })
                         .flatMap(palette -> lineDataSetListProvider
                                 .provide(dataEntityWrapper, settings, palette))
-                        .map(ChartProvider::mapIntoLineData)
+                        .map(LineDataSetMapper::mapIntoLineData)
                         .subscribeOn(Schedulers.computation())
                         .observeOn(AndroidSchedulers.mainThread())
                         .flatMap(lineData -> updateChart(lineData, currentHighlightRef.get()))
@@ -112,7 +104,7 @@ class ChartProvider {
                 .subscribeOn(Schedulers.io())
                 .map(settings::updateSettingsFor)
                 .observeOn(Schedulers.computation())
-                .map(ChartProvider::mapIntoLineData)
+                .map(LineDataSetMapper::mapIntoLineData)
                 .observeOn(AndroidSchedulers.mainThread())
                 .flatMap(lineData -> updateChart(lineData, currentHighlightRef.get()));
 

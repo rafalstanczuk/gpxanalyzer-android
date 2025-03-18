@@ -15,13 +15,16 @@ import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.utils.MPPointF;
 import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.chart.DataEntityLineChart;
+import com.itservices.gpxanalyzer.chart.LineChartSettings;
 import com.itservices.gpxanalyzer.chart.entry.CurveEntry;
+import com.itservices.gpxanalyzer.data.TrendStatistics;
 import com.itservices.gpxanalyzer.data.entity.DataEntity;
 import com.itservices.gpxanalyzer.data.TrendType;
 import com.itservices.gpxanalyzer.databinding.CustomMarkerViewBinding;
 import com.itservices.gpxanalyzer.utils.common.FormatNumberUtil;
 import com.itservices.gpxanalyzer.utils.ui.ColorUtil;
 import com.itservices.gpxanalyzer.utils.ui.TextViewUtil;
+import com.itservices.gpxanalyzer.utils.ui.ViewUtil;
 
 import java.util.Locale;
 
@@ -35,6 +38,7 @@ public class CustomMarker extends MarkerView {
     private static final int layoutResource = R.layout.custom_marker_view;
 
     CustomMarkerViewBinding binding;
+    private LineChartSettings settings;
 
     @Inject
     public CustomMarker(@ApplicationContext Context context) {
@@ -73,30 +77,45 @@ public class CustomMarker extends MarkerView {
             binding.markerTextViewTime.setText(timeLine, TextView.BufferType.SPANNABLE);
             binding.markerTextViewValue.setText(valueLine, TextView.BufferType.SPANNABLE);
 
-            TrendType trendType = curveDataEntityEntry.getTrendBoundaryDataEntity().trendStatistics().trendType();
+            setupTrendStatisticsLayout(curveDataEntityEntry, unitString);
+        }
 
-            String text = "";
-            switch (trendType) {
-                case UP -> {
-                    text = "+ ";
-                }
-                case CONSTANT -> {
-                    text = "  ";
-                }
-                case DOWN -> {
-                    text = "- ";
-                }
+        super.refreshContent(entry, highlight);
+    }
+
+    private void setupTrendStatisticsLayout(CurveEntry curveDataEntityEntry, String unitString) {
+        ViewUtil.setVisibility(binding.trendStatisticsLayout, settings.isDrawAscDescSegEnabled());
+        if (settings.isDrawAscDescSegEnabled()) {
+            TrendStatistics trendStatistics = curveDataEntityEntry.getTrendBoundaryDataEntity().trendStatistics();
+            setupAscDescSegStatistics(trendStatistics, unitString);
+        }
+    }
+
+    private void setupAscDescSegStatistics(TrendStatistics trendStatistics, String unitString) {
+
+        TrendType trendType = trendStatistics.trendType();
+        String text = "";
+        switch (trendType) {
+            case UP -> {
+                text = "+ ";
             }
-            text +=
-                    String.format(Locale.getDefault(), "%.2f", curveDataEntityEntry.getTrendBoundaryDataEntity().trendStatistics().absDeltaVal() );
+            case CONSTANT -> {
+                text = "  ";
+            }
+            case DOWN -> {
+                text = "- ";
+            }
+        }
+        text +=
+                String.format(Locale.getDefault(), "%.2f", trendStatistics.absDeltaVal());
 
 
-            binding.markerTextViewDeltaValue.setText(TextViewUtil.getSpannableStringBuilder(text, " " + unitString));
-            binding.markerTextViewDeltaValue.setBackgroundColor(ColorUtil.setAlphaInIntColor(trendType.getFillColor(), 128));
+        binding.markerTextViewDeltaValue.setText(TextViewUtil.getSpannableStringBuilder(text, " " + unitString));
+        binding.markerTextViewDeltaValue.setBackgroundColor(ColorUtil.setAlphaInIntColor(trendType.getFillColor(), 128));
 
-            String numberString =
-                    String.format(Locale.getDefault(), "%d.", curveDataEntityEntry.getTrendBoundaryDataEntity().trendStatistics().n() );
-            binding.markerTextViewNumber.setText(TextViewUtil.getSpannableStringBuilder(null, numberString));
+        String numberString =
+                String.format(Locale.getDefault(), "%d.", trendStatistics.n());
+        binding.markerTextViewNumber.setText(TextViewUtil.getSpannableStringBuilder(null, numberString));
 
 
 /*            String text2 =
@@ -104,10 +123,7 @@ public class CustomMarker extends MarkerView {
 
             binding.markerTextViewCumulative.setText(getSpannableStringBuilder(text2, " " + unitString));*/
 
-            binding.trendTypeImageView.setImageResource(trendType.getDrawableId());
-        }
-
-        super.refreshContent(entry, highlight);
+        binding.trendTypeImageView.setImageResource(trendType.getDrawableId());
     }
 
     @Override
@@ -159,5 +175,9 @@ public class CustomMarker extends MarkerView {
         draw(canvas);
 
         canvas.restoreToCount(saveId);
+    }
+
+    public void setSettings(final LineChartSettings settings) {
+        this.settings = settings;
     }
 }

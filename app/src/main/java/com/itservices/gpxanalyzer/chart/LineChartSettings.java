@@ -36,7 +36,7 @@ public class LineChartSettings {
     private boolean dragDecelerationEnabled = false;
 
     private boolean drawIconsEnabled = false;
-    private boolean drawAscDescSegEnabled = true;
+    private boolean drawAscDescSegEnabled = false;
 
     @Inject
     LineChartSettings(
@@ -93,6 +93,7 @@ public class LineChartSettings {
         lineChart.setNoDataTextColor(Color.RED);
 
         customMarker.setChartView(lineChart);
+        customMarker.setSettings(this);
         lineChart.setMarker(customMarker);
         lineChart.setDrawBorders(false);
         lineChart.setMaxHighlightDistance(10000.0f);
