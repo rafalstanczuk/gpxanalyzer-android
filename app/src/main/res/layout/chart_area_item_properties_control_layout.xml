@@ -38,8 +38,24 @@
             android:contentDescription="@{ chartAreaItem.getViewMode().name}"
             android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData}"
             android:onClick="@{() -> viewModel.onSwitchViewMode(chartAreaItem)}"
+            android:src="@drawable/ic_altitude_fill0"
             app:imageResource="@{ chartAreaItem.getViewMode().getDrawableIconResId  }"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <androidx.appcompat.widget.AppCompatCheckBox
+            android:id="@+id/drawAscDescSegCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/margin_small"
+            android:alpha="0.5"
+            android:button="@drawable/ic_checkbox_ascdescseg_selector"
+            android:checked="@{chartAreaItem.isDrawAscDescSegEnabled}"
+            android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData}"
+            android:onCheckedChanged="@{(buttonView, isChecked) -> viewModel.onDrawAscDescSegCheckBoxChanged(chartAreaItem, isChecked)}"
+            android:textColorHighlight="@color/white"
+            app:layout_constraintStart_toEndOf="@+id/switchModeButton"
             app:layout_constraintTop_toTopOf="parent" />
 
         <!--android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData}"-->
@@ -50,11 +66,11 @@
             android:layout_height="match_parent"
             android:alpha="0.5"
             android:button="@drawable/ic_checkbox_dots_selector"
-            android:checked="@{chartAreaItem.isDrawIconsEnabledLiveData}"
+            android:checked="@{chartAreaItem.drawIconsEnabled}"
             android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData}"
             android:onCheckedChanged="@{(buttonView, isChecked) -> viewModel.onOnOffColorizedCirclesCheckBoxChanged(chartAreaItem, isChecked)}"
             android:textColorHighlight="@color/white"
-            app:layout_constraintStart_toEndOf="@+id/switchModeButton"
+            app:layout_constraintStart_toEndOf="@+id/drawAscDescSegCheckBox"
             app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

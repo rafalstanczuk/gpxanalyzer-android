@@ -81,9 +81,8 @@ class LineDataSetListProvider {
                     lineDataSet.setDrawIcons(settings.isDrawIconsEnabled());
                     lineDataSet.setDrawValues(false);
 
-                    lineDataSet.setDrawFilled(true);
-
                     TrendStatistics trendStatistics = boundaryEntry.trendBoundaryDataEntity().trendStatistics();
+                    lineDataSet.setDrawFilled(settings.isDrawAscDescSegEnabled());
                     lineDataSet.setFillColor(trendStatistics.trendType().getFillColor());
                     lineDataSet.setFillAlpha(trendStatistics.trendType().getFillAlpha());
 

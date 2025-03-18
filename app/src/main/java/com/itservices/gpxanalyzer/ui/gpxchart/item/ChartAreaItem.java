@@ -11,7 +11,6 @@ import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.ViewMode;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
 
 public class ChartAreaItem {
 
@@ -19,9 +18,6 @@ public class ChartAreaItem {
     private final ChartController chartController;
     private MutableLiveData<ViewMode> viewModeLiveData = new MutableLiveData<>();
 
-    private MutableLiveData<Boolean> enabledLiveData = new MutableLiveData<>(true);
-
-    private MutableLiveData<Boolean> isDrawIconsEnabledLiveData = new MutableLiveData<>(false);
 
     @AssistedInject
     public ChartAreaItem(@Assisted ViewMode viewMode,
@@ -30,7 +26,6 @@ public class ChartAreaItem {
                          ChartController chartController) {
         this.chartController = chartController;
 
-        isDrawIconsEnabledLiveData.setValue(chartController.isDrawIconsEnabled());
         viewModeLiveData.setValue(viewMode);
 
         this.chartController.setDrawIconsEnabled(drawIconsEnabled);
@@ -45,12 +40,12 @@ public class ChartAreaItem {
         return viewModeLiveData;
     }
 
-    public boolean isDrawIconsEnabledLiveData() {
+    public boolean isDrawIconsEnabled() {
         return chartController.isDrawIconsEnabled();
     }
 
-    public LiveData<Boolean> getEnabledLiveData() {
-        return enabledLiveData;
+    public boolean isDrawAscDescSegEnabled() {
+        return chartController.isDrawAscDescSegEnabled();
     }
 
     public void setDataEntityWrapper(DataEntityWrapper dataEntityWrapper) {
