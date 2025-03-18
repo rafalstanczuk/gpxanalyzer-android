@@ -63,6 +63,17 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
         return chartProvider.getSettings().isDrawIconsEnabled();
     }
 
+
+    public boolean isDrawAscDescSegEnabled() {
+        return chartProvider.getSettings().isDrawAscDescSegEnabled();
+    }
+    @UiThread
+    public void setDrawAscDescSegEnabled(boolean isChecked) {
+
+        chartProvider.getSettings().setDrawAscDescSegEnabled(isChecked);
+        chartProvider.tryToUpdateDataChart().subscribe();
+    }
+
     @UiThread
     public void setDrawIconsEnabled(boolean isChecked) {
 

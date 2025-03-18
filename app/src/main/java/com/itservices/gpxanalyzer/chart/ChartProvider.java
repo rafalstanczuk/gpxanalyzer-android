@@ -25,20 +25,23 @@ import io.reactivex.schedulers.Schedulers;
 
 class ChartProvider {
 
+    private final AtomicReference<Highlight> currentHighlightRef = new AtomicReference<>();
     @Inject
     LineChartSettings settings;
-
     @Inject
     LineDataSetListProvider lineDataSetListProvider;
-
     private WeakReference<DataEntityLineChart> chartWeakReference;
-
-    private final AtomicReference<Highlight> currentHighlightRef = new AtomicReference<>();
 
     @Inject
     public ChartProvider() {
     }
 
+    @NonNull
+    private static LineData mapIntoLineData(List<LineDataSet> lineDataSetList) {
+        LineData lineData = new LineData();
+        lineDataSetList.forEach(lineData::addDataSet);
+        return lineData;
+    }
 
     public void registerBinding(DataEntityLineChart chart) {
         if (chart != null) {
@@ -104,16 +107,10 @@ class ChartProvider {
                         .observeOn(Schedulers.io());
     }
 
-    @NonNull
-    private static LineData mapIntoLineData(List<LineDataSet> lineDataSetList) {
-        LineData lineData = new LineData();
-        lineDataSetList.forEach(lineData::addDataSet);
-        return lineData;
-    }
-
     public Observable<RequestStatus> tryToUpdateDataChart() {
         return Observable.just(lineDataSetListProvider.provide())
                 .subscribeOn(Schedulers.io())
+                .map(settings::updateSettingsFor)
                 .observeOn(Schedulers.computation())
                 .map(ChartProvider::mapIntoLineData)
                 .observeOn(AndroidSchedulers.mainThread())

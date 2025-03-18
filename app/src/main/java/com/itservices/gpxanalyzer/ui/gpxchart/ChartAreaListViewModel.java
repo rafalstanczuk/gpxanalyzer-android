@@ -48,6 +48,11 @@ public class ChartAreaListViewModel extends ViewModel {
     private final MutableLiveData<ViewModeSeverity> viewModeSeverityLiveData = new MutableLiveData<>(ViewModeSeverity.TWO_CHARTS);
     private final MutableLiveData<ChartAreaItem> switchViewModeLiveData = new SingleLiveEvent<>();
     private final MutableLiveData<Pair<ChartAreaItem, Boolean>> onOnOffColorizedCirclesCheckBoxChangedLiveData = new SingleLiveEvent<>();
+
+    private final MutableLiveData<Pair<ChartAreaItem, Boolean>> onDrawAscDescSegCheckBoxChangedLiveData = new SingleLiveEvent<>();
+
+
+
     private final MutableLiveData<ChartAreaItem> zoomInLiveData = new SingleLiveEvent<>();
     private final MutableLiveData<ChartAreaItem> zoomOutLiveData = new SingleLiveEvent<>();
     private final MutableLiveData<ChartAreaItem> autoScalingLiveData = new SingleLiveEvent<>();
@@ -236,6 +241,13 @@ public class ChartAreaListViewModel extends ViewModel {
         item.getChartController().setDrawIconsEnabled(isChecked);
 
         onOnOffColorizedCirclesCheckBoxChangedLiveData.postValue(Pair.create(item, isChecked));
+    }
+
+    public void onDrawAscDescSegCheckBoxChanged(ChartAreaItem item, boolean isChecked) {
+
+        item.getChartController().setDrawAscDescSegEnabled(isChecked);
+
+        onDrawAscDescSegCheckBoxChangedLiveData.postValue(Pair.create(item, isChecked));
     }
 
     public void onSwitchViewMode(ChartAreaItem item) {

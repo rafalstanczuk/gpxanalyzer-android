@@ -10,11 +10,14 @@ import androidx.core.content.ContextCompat;
 
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.LineDataSet;
 import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.chart.settings.axis.AxisValueFormatter;
 import com.itservices.gpxanalyzer.chart.settings.axis.HourMinutesAxisValueFormatter;
 import com.itservices.gpxanalyzer.chart.settings.background.LimitLinesBoundaries;
 import com.itservices.gpxanalyzer.chart.settings.highlight.CustomMarker;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -33,6 +36,7 @@ public class LineChartSettings {
     private boolean dragDecelerationEnabled = false;
 
     private boolean drawIconsEnabled = false;
+    private boolean drawAscDescSegEnabled = true;
 
     @Inject
     LineChartSettings(
@@ -165,5 +169,23 @@ public class LineChartSettings {
         if (yAxisLeft.getLimitLines().isEmpty()) {
             limitLinesBoundaries.addLimitLinesInto(yAxisLeft);
         }
+    }
+
+    public boolean isDrawAscDescSegEnabled() {
+        return drawAscDescSegEnabled;
+    }
+
+    public void setDrawAscDescSegEnabled(boolean drawAscDescSegEnabled) {
+        this.drawAscDescSegEnabled = drawAscDescSegEnabled;
+    }
+
+    public List<LineDataSet> updateSettingsFor(List<LineDataSet> lineDataSetList) {
+        lineDataSetList.forEach(
+                lineDataSet -> {
+                    lineDataSet.setDrawFilled(isDrawAscDescSegEnabled());
+                }
+        );
+
+        return lineDataSetList;
     }
 }
