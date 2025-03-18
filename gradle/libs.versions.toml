@@ -23,6 +23,8 @@ rxjava = "2.2.21"
 rxandroid = "2.1.1"
 protoliteWellKnownTypes = "18.0.0"
 
+math3 = "3.6.1"
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 
@@ -44,6 +46,7 @@ multidex = { module = "androidx.multidex:multidex", version.ref = "multidex" }
 rxandroid = { module = "io.reactivex.rxjava2:rxandroid", version.ref = "rxandroid" }
 rxjava = { module = "io.reactivex.rxjava2:rxjava", version.ref = "rxjava" }
 protolite-well-known-types = { group = "com.google.firebase", name = "protolite-well-known-types", version.ref = "protoliteWellKnownTypes" }
+math3 = {module = "org.apache.commons:commons-math3", version.ref = "math3"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

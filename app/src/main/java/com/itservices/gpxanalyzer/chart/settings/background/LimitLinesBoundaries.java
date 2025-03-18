@@ -11,6 +11,7 @@ import com.itservices.gpxanalyzer.utils.ui.ColorUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 
@@ -18,10 +19,11 @@ public class LimitLinesBoundaries {
 
     private static final int DEFAULT_LIMIT_LINES_COLOR = Color.BLACK;
 
-    private final List<LimitLine> limitLineList = new ArrayList<>();
+    private final AtomicReference<List<LimitLine>> limitLineList = new AtomicReference<>(new ArrayList<>());
 
     @Inject
-    public LimitLinesBoundaries() { }
+    public LimitLinesBoundaries() {
+    }
 
     private static LimitLine createLimitLine(float limitValue, LimitLine.LimitLabelPosition labelPosition) {
         LimitLine line = new LimitLine(limitValue, String.valueOf((int) limitValue));
@@ -34,35 +36,39 @@ public class LimitLinesBoundaries {
         return line;
     }
 
-    public void initLimitLines(PaletteColorDeterminer paletteColorDeterminer) {
+    public synchronized void initLimitLines(PaletteColorDeterminer paletteColorDeterminer) {
         Map<Integer, BoundaryColorSpan> paletteMap = paletteColorDeterminer.getPalette();
-        limitLineList.clear();
 
-        for (Map.Entry<Integer, BoundaryColorSpan> entry : paletteMap.entrySet()) {
-            limitLineList.add(
-                    createLimitLine(entry.getValue().max(), LimitLine.LimitLabelPosition.LEFT_BOTTOM)
-            );
-        }
+        synchronized (limitLineList) {
+            List<LimitLine> limitLines = limitLineList.get();
+            limitLines.clear();
 
-        BoundaryColorSpan lastBoundaryColorSpan = paletteMap.get(paletteMap.size() - 1);
-        BoundaryColorSpan beforeLastBoundaryColorSpan = paletteMap.get(paletteMap.size() - 2);
+            for (Map.Entry<Integer, BoundaryColorSpan> entry : paletteMap.entrySet()) {
+                limitLines.add(
+                        createLimitLine(entry.getValue().max(), LimitLine.LimitLabelPosition.LEFT_BOTTOM)
+                );
+            }
 
-        if (lastBoundaryColorSpan != null) {
-            assert beforeLastBoundaryColorSpan != null;
-            limitLineList.add(
-                    createLimitLine(
-                            (lastBoundaryColorSpan.max() + (lastBoundaryColorSpan.max() - beforeLastBoundaryColorSpan.max()) ),
-                            LimitLine.LimitLabelPosition.LEFT_BOTTOM)
-            );
+            BoundaryColorSpan lastBoundaryColorSpan = paletteMap.get(paletteMap.size() - 1);
+            BoundaryColorSpan beforeLastBoundaryColorSpan = paletteMap.get(paletteMap.size() - 2);
+
+            if (lastBoundaryColorSpan != null) {
+                assert beforeLastBoundaryColorSpan != null;
+                limitLines.add(
+                        createLimitLine(
+                                (lastBoundaryColorSpan.max() + (lastBoundaryColorSpan.max() - beforeLastBoundaryColorSpan.max())),
+                                LimitLine.LimitLabelPosition.LEFT_BOTTOM)
+                );
+            }
         }
     }
 
-    public List<LimitLine> getLimitLineList() {
-        return limitLineList;
+    public synchronized List<LimitLine> getLimitLineList() {
+        return limitLineList.get();
     }
 
-    public void addLimitLinesInto(YAxis yAxisLeft) {
-        for (LimitLine limitLine : limitLineList) {
+    public synchronized void addLimitLinesInto(YAxis yAxisLeft) {
+        for (LimitLine limitLine : limitLineList.get()) {
             if (limitLine != null) {
                 yAxisLeft.addLimitLine(limitLine);
             }

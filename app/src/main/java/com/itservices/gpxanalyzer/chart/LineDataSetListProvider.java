@@ -13,6 +13,7 @@ import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -26,43 +27,44 @@ class LineDataSetListProvider {
     @Inject
     TrendBoundaryEntryProvider trendBoundaryEntryProvider;
 
-    private List<LineDataSet> dataSetList = new ArrayList<>();
+    private AtomicReference<List<LineDataSet>> dataSetList = new AtomicReference<>(new ArrayList<>());
 
 
     @Inject
     public LineDataSetListProvider() {
     }
 
-    public final TrendBoundaryEntryProvider getTrendBoundaryEntryProvider() {
+    public synchronized final TrendBoundaryEntryProvider getTrendBoundaryEntryProvider() {
         return trendBoundaryEntryProvider;
     }
 
-    public List<LineDataSet> provide() {
-        return dataSetList;
+    public synchronized List<LineDataSet> provide() {
+        return dataSetList.get();
     }
 
     public Observable<List<LineDataSet>> provide(DataEntityWrapper dataEntityWrapper, LineChartSettings settings, PaletteColorDeterminer paletteColorDeterminer) {
         if (dataEntityWrapper == null)
-            return Observable.just(dataSetList);
+            return Observable.just(dataSetList.get());
 
-        return  !dataSetList.isEmpty() ?
-                Observable.just(dataSetList)
+
+        return  !dataSetList.get().isEmpty() ?
+                Observable.just(dataSetList.get())
                     :
                 ExtremaSegmentListProvider
                         .provide(dataEntityWrapper)
-                .map(segmentList -> TrendBoundaryMapper.mapFrom(dataEntityWrapper, segmentList))
-                .observeOn(Schedulers.computation())
                 .subscribeOn(Schedulers.computation())
+                .observeOn(Schedulers.computation())
+                .map(segmentList -> TrendBoundaryMapper.mapFrom(dataEntityWrapper, segmentList))
                 .map(trendBoundaryDataEntityList -> trendBoundaryEntryProvider.provide(dataEntityWrapper, trendBoundaryDataEntityList, paletteColorDeterminer))
                 .map(trendBoundaryEntryList -> createAndProvide(trendBoundaryEntryList, settings))
                 .map(data -> {
-                    dataSetList = data;
-                    return data;
+                    dataSetList.set(data);
+                    return dataSetList.get();
                 });
     }
 
     private List<LineDataSet> createAndProvide(List<TrendBoundaryEntry> trendBoundaryEntryList, LineChartSettings settings) {
-        dataSetList = trendBoundaryEntryList.stream()
+        dataSetList.set( trendBoundaryEntryList.stream()
                 .map(boundaryEntry -> {
                     LineDataSet lineDataSet = new LineDataSet(boundaryEntry.entryList(), boundaryEntry.getLabel());
 
@@ -87,11 +89,8 @@ class LineDataSetListProvider {
 
                     return lineDataSet;
                 })
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
 
-
-        return dataSetList;
+        return dataSetList.get();
     }
-
-
 }

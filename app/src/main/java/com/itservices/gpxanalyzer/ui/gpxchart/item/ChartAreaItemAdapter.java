@@ -12,7 +12,9 @@ import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.databinding.ChartAreaItemBinding;
 import com.itservices.gpxanalyzer.ui.gpxchart.ChartAreaListViewModel;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ChartAreaItemAdapter extends RecyclerView.Adapter<ChartAreaItemAdapter.ChartAreaItemViewHolder> {
 
@@ -26,6 +28,11 @@ public class ChartAreaItemAdapter extends RecyclerView.Adapter<ChartAreaItemAdap
         this.viewModel = viewModel;
 
         this.viewLifecycleOwner = viewLifecycleOwner;
+
+        AdapterDataObserverImpl adapterDataObserver = new AdapterDataObserverImpl(chartAreaItems);
+        registerAdapterDataObserver(adapterDataObserver);
+
+        //viewModel.setItemsChangedPublisher(adapterDataObserver.getChangedItems());
     }
 
     @NonNull

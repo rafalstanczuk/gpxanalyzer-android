@@ -40,8 +40,8 @@ public class ChartAreaListFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         viewModel = new ViewModelProvider(this.requireActivity()).get(ChartAreaListViewModel.class);
-        viewModel.bind(requireActivity(), R.raw.skiing20250121t091423);
-        viewModel.setOrientation(getResources().getConfiguration().orientation);
+        viewModel.bind(requireContext(), R.raw.skiing20250121t091423);
+
     }
 
     @Override
@@ -69,23 +69,23 @@ public class ChartAreaListFragment extends Fragment {
             binding.gpxChartsRecyclerView.setAdapter(adapter);
         }
 
+        viewModel.setOrientation(getResources().getConfiguration().orientation);
+
         binding.loadButton.setOnClickListener(view ->
-                viewModel.loadData(requireActivity())
+                viewModel.postEventLoadData()
         );
 
         binding.switchSeverityModeButton.setOnClickListener(view -> viewModel.switchSeverityMode());
 
         viewModel.getChartAreaItemListLiveData().observe(getViewLifecycleOwner(), items -> {
                     adapter = new ChartAreaItemAdapter(items, viewModel, getViewLifecycleOwner());
-                    binding.gpxChartsRecyclerView.setAdapter(adapter);
-
-                    viewModel.switchSeverityViewModeOrReloadAdapter(adapter);
+                    binding.gpxChartsRecyclerView.swapAdapter(adapter, false);
                 }
         );
 
         viewModel.getOnSwitchViewModeChangedLiveData().observe(getViewLifecycleOwner(),
                 (item -> {
-                    viewModel.switchViewMode(adapter, item, requireActivity());
+                    viewModel.switchViewMode(adapter, item);
                 }));
 
         viewModel.getOnOnOffColorizedCirclesCheckBoxChangedLiveData().observe(getViewLifecycleOwner(),
