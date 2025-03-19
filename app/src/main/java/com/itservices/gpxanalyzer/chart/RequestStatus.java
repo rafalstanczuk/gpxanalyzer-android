@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.data;
+package com.itservices.gpxanalyzer.chart;
 
 public enum RequestStatus {
     ERROR_DATA_SETS_NULL,

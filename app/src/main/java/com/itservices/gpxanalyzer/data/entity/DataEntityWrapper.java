@@ -2,6 +2,7 @@ package com.itservices.gpxanalyzer.data.entity;
 
 
 import java.util.DoubleSummaryStatistics;
+import java.util.Objects;
 import java.util.Vector;
 import java.util.stream.Collectors;
 
@@ -10,16 +11,22 @@ public final class DataEntityWrapper {
     private double maxValue;
     private double minValue;
 
-    private Vector<DataEntity> data = new Vector<>();
+    private final Vector<DataEntity> data;
 
     private int primaryDataIndex = DEFAULT_PRIMARY_DATA_INDEX;
 
-    private DataEntityWrapper() {
+    private int hashCode = -1;
+
+    private DataEntityWrapper(Vector<DataEntity> data) {
+        this.data = data;
     }
 
-    public DataEntityWrapper(Vector<DataEntity> data, int primaryDataIndex) {
+    public DataEntityWrapper(final Vector<DataEntity> data, int primaryDataIndex) {
         this.primaryDataIndex = primaryDataIndex;
-        setData(data);
+        this.data = data;
+        compute();
+
+        hashCode = computeHash();
     }
 
     public double getDeltaMinMax() {
@@ -29,6 +36,8 @@ public final class DataEntityWrapper {
     public void setPrimaryDataIndex(int primaryDataIndex) {
         this.primaryDataIndex = primaryDataIndex;
         compute();
+
+        hashCode = computeHash();
     }
 
     private void clear() {
@@ -36,6 +45,8 @@ public final class DataEntityWrapper {
 
         maxValue = Float.MIN_VALUE;
         minValue = Float.MAX_VALUE;
+
+        hashCode = computeHash();
     }
 
     private void compute() {
@@ -57,12 +68,6 @@ public final class DataEntityWrapper {
 
     public int getPrimaryDataIndex() {
         return primaryDataIndex;
-    }
-
-    private void setData(Vector<DataEntity> dataEntityVector) {
-        this.data = dataEntityVector;
-
-        compute();
     }
 
     public double getMaxValue() {
@@ -103,5 +108,25 @@ public final class DataEntityWrapper {
 
     public float getValue(DataEntity dataEntity) {
         return dataEntity.valueList().get(primaryDataIndex);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof DataEntityWrapper that)) return false;
+        return Double.compare(getMaxValue(), that.getMaxValue()) == 0 && Double.compare(getMinValue(), that.getMinValue()) == 0 && getPrimaryDataIndex() == that.getPrimaryDataIndex() && Objects.equals(getData(), that.getData());
+    }
+
+    @Override
+    public int hashCode() {
+        if (hashCode > 0) {
+            return hashCode;
+        }
+
+         return computeHash();
+    }
+
+    private int computeHash() {
+        return Objects.hash(getMaxValue(), getMinValue(), getData(), getPrimaryDataIndex());
     }
 }

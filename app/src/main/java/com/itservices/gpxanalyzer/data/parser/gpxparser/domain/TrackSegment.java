@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.data.provider.parser.domain;
+package com.itservices.gpxanalyzer.data.parser.gpxparser.domain;
 
 import java.util.ArrayList;
 import java.util.Collections;

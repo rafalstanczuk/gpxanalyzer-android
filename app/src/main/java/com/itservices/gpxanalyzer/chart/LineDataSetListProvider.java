@@ -10,25 +10,26 @@ import com.itservices.gpxanalyzer.data.extrema.ExtremaSegmentListProvider;
 import com.itservices.gpxanalyzer.data.extrema.TrendBoundaryMapper;
 import com.itservices.gpxanalyzer.data.TrendStatistics;
 import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
+import com.itservices.gpxanalyzer.data.provider.LineDataSetListCachedProvider;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
-import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 
-class LineDataSetListProvider {
+public class LineDataSetListProvider {
 
+    private final AtomicReference<List<LineDataSet>> listLineDataSetAtomicReference = new AtomicReference<>(new ArrayList<>());
     @Inject
     TrendBoundaryEntryProvider trendBoundaryEntryProvider;
-
-    private AtomicReference<List<LineDataSet>> dataSetList = new AtomicReference<>(new ArrayList<>());
-
+    @Inject
+    LineDataSetListCachedProvider lineDataSetListCachedProvider;
 
     @Inject
     public LineDataSetListProvider() {
@@ -39,57 +40,69 @@ class LineDataSetListProvider {
     }
 
     public synchronized List<LineDataSet> provide() {
-        return dataSetList.get();
+        return listLineDataSetAtomicReference.get();
     }
 
     public Observable<List<LineDataSet>> provide(DataEntityWrapper dataEntityWrapper, LineChartSettings settings, PaletteColorDeterminer paletteColorDeterminer) {
         if (dataEntityWrapper == null)
-            return Observable.just(dataSetList.get());
+            return Observable.just(listLineDataSetAtomicReference.get())
+                    .subscribeOn(Schedulers.computation())
+                    .observeOn(Schedulers.computation());
 
 
-        return  !dataSetList.get().isEmpty() ?
-                Observable.just(dataSetList.get())
-                    :
-                ExtremaSegmentListProvider
-                        .provide(dataEntityWrapper)
-                .subscribeOn(Schedulers.computation())
-                .observeOn(Schedulers.computation())
-                .map(segmentList -> TrendBoundaryMapper.mapFrom(dataEntityWrapper, segmentList))
-                .map(trendBoundaryDataEntityList -> trendBoundaryEntryProvider.provide(dataEntityWrapper, trendBoundaryDataEntityList, paletteColorDeterminer))
-                .map(trendBoundaryEntryList -> createAndProvide(trendBoundaryEntryList, settings))
-                .map(data -> {
-                    dataSetList.set(data);
-                    return dataSetList.get();
-                });
+        List<LineDataSet> cachedList = lineDataSetListCachedProvider.provide(dataEntityWrapper, settings);
+        if (cachedList != null) {
+            return Observable.just( cachedList )
+                    .doOnNext(listLineDataSetAtomicReference::set)
+                    .subscribeOn(Schedulers.computation())
+                    .observeOn(Schedulers.computation());
+        }
+
+        return provideInternal(dataEntityWrapper, settings, paletteColorDeterminer);
+    }
+
+    private Observable<List<LineDataSet>> provideInternal(DataEntityWrapper dataEntityWrapper, LineChartSettings settings, PaletteColorDeterminer paletteColorDeterminer) {
+        return ExtremaSegmentListProvider.provide(dataEntityWrapper)
+                        .subscribeOn(Schedulers.computation())
+                        .observeOn(Schedulers.computation())
+                        .map(segmentList -> TrendBoundaryMapper.mapFrom(dataEntityWrapper, segmentList))
+                        .map(trendBoundaryDataEntityList -> trendBoundaryEntryProvider
+                                .provide(dataEntityWrapper, trendBoundaryDataEntityList, paletteColorDeterminer)
+                        )
+                        .map(trendBoundaryEntryList -> createAndProvide(trendBoundaryEntryList, settings))
+                        .map(newLineDataSet -> {
+                            lineDataSetListCachedProvider.add(dataEntityWrapper, newLineDataSet);
+
+                            listLineDataSetAtomicReference.set(newLineDataSet);
+                            return newLineDataSet;
+                        });
     }
 
     private List<LineDataSet> createAndProvide(List<TrendBoundaryEntry> trendBoundaryEntryList, LineChartSettings settings) {
-        dataSetList.set( trendBoundaryEntryList.stream()
-                .map(boundaryEntry -> {
-                    LineDataSet lineDataSet = new LineDataSet(boundaryEntry.entryList(), boundaryEntry.getLabel());
+        listLineDataSetAtomicReference.set(trendBoundaryEntryList.stream().map(boundaryEntry -> {
+            LineDataSet lineDataSet = new LineDataSet(boundaryEntry.entryList(), boundaryEntry.getLabel());
 
-                    lineDataSet.setMode(LineDataSet.Mode.HORIZONTAL_BEZIER);
-                    lineDataSet.setHighlightEnabled(true);
-                    lineDataSet.setDrawCircles(false);
+            lineDataSet.setMode(LineDataSet.Mode.HORIZONTAL_BEZIER);
+            lineDataSet.setHighlightEnabled(true);
+            lineDataSet.setDrawCircles(false);
 
-                    lineDataSet.setLineWidth(1.0f);
-                    lineDataSet.setColor(Color.BLACK);
+            lineDataSet.setLineWidth(1.0f);
+            lineDataSet.setColor(Color.BLACK);
 
-                    lineDataSet.setDrawHorizontalHighlightIndicator(false);
+            lineDataSet.setDrawHorizontalHighlightIndicator(false);
 
-                    lineDataSet.setHighLightColor(Color.BLACK);
-                    lineDataSet.setDrawIcons(settings.isDrawIconsEnabled());
-                    lineDataSet.setDrawValues(false);
+            lineDataSet.setHighLightColor(Color.BLACK);
+            lineDataSet.setDrawIcons(settings.isDrawIconsEnabled());
+            lineDataSet.setDrawValues(false);
 
-                    TrendStatistics trendStatistics = boundaryEntry.trendBoundaryDataEntity().trendStatistics();
-                    lineDataSet.setDrawFilled(settings.isDrawAscDescSegEnabled());
-                    lineDataSet.setFillColor(trendStatistics.trendType().getFillColor());
-                    lineDataSet.setFillAlpha(trendStatistics.trendType().getFillAlpha());
+            TrendStatistics trendStatistics = boundaryEntry.trendBoundaryDataEntity().trendStatistics();
+            lineDataSet.setDrawFilled(settings.isDrawAscDescSegEnabled());
+            lineDataSet.setFillColor(trendStatistics.trendType().getFillColor());
+            lineDataSet.setFillAlpha(trendStatistics.trendType().getFillAlpha());
 
-                    return lineDataSet;
-                })
-                .collect(Collectors.toList()));
+            return lineDataSet;
+        }).collect(Collectors.toList()));
 
-        return dataSetList.get();
+        return listLineDataSetAtomicReference.get();
     }
 }
