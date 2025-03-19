@@ -101,4 +101,16 @@ public final class DataEntityWrapper {
     public float getValue(DataEntity dataEntity) {
         return dataEntity.valueList().get(primaryDataIndex);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof DataEntityWrapper that)) return false;
+        return Double.compare(getMaxValue(), that.getMaxValue()) == 0 && Double.compare(getMinValue(), that.getMinValue()) == 0 && getPrimaryDataIndex() == that.getPrimaryDataIndex() && Objects.equals(getData(), that.getData());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getMaxValue(), getMinValue(), getData(), getPrimaryDataIndex());
+    }
 }
