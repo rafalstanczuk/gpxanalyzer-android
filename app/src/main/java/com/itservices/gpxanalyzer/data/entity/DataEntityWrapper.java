@@ -15,6 +15,8 @@ public final class DataEntityWrapper {
 
     private int primaryDataIndex = DEFAULT_PRIMARY_DATA_INDEX;
 
+    private int hashCode = -1;
+
     private DataEntityWrapper(Vector<DataEntity> data) {
         this.data = data;
     }
@@ -23,6 +25,8 @@ public final class DataEntityWrapper {
         this.primaryDataIndex = primaryDataIndex;
         this.data = data;
         compute();
+
+        hashCode = computeHash();
     }
 
     public double getDeltaMinMax() {
@@ -32,6 +36,8 @@ public final class DataEntityWrapper {
     public void setPrimaryDataIndex(int primaryDataIndex) {
         this.primaryDataIndex = primaryDataIndex;
         compute();
+
+        hashCode = computeHash();
     }
 
     private void clear() {
@@ -39,6 +45,8 @@ public final class DataEntityWrapper {
 
         maxValue = Float.MIN_VALUE;
         minValue = Float.MAX_VALUE;
+
+        hashCode = computeHash();
     }
 
     private void compute() {
@@ -111,6 +119,14 @@ public final class DataEntityWrapper {
 
     @Override
     public int hashCode() {
+        if (hashCode > 0) {
+            return hashCode;
+        }
+
+         return computeHash();
+    }
+
+    private int computeHash() {
         return Objects.hash(getMaxValue(), getMinValue(), getData(), getPrimaryDataIndex());
     }
 }
