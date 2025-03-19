@@ -14,7 +14,6 @@ import com.github.mikephil.charting.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class LineDataSet extends LineRadarDataSet<Entry> implements ILineDataSet {
 
