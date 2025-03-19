@@ -54,12 +54,14 @@ public class LineDataSetListCachedProvider {
                 key -> {
                    if (isNotEqualByHash(key.getData(), newData.getData())) {
 
+                       Log.d(LineDataSetListCachedProvider.class.getSimpleName(), "clearOldCachedData() remove: key = [" + key + "]");
+
                        concurrentMap.remove(key);
                    }
                 }
         );
 
-        Log.d(LineDataSetListCachedProvider.class.getSimpleName(), "clearOldCachedData() called with: concurrentMap.keySet() = [" + concurrentMap.keySet() + "]");
+        Log.d(LineDataSetListCachedProvider.class.getSimpleName(), "clearOldCachedData() cleaned: concurrentMap.keySet() = [" + concurrentMap.keySet() + "]");
 
     }
 
