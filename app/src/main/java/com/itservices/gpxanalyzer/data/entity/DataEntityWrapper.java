@@ -2,6 +2,7 @@ package com.itservices.gpxanalyzer.data.entity;
 
 
 import java.util.DoubleSummaryStatistics;
+import java.util.Objects;
 import java.util.Vector;
 import java.util.stream.Collectors;
 
@@ -10,16 +11,18 @@ public final class DataEntityWrapper {
     private double maxValue;
     private double minValue;
 
-    private Vector<DataEntity> data = new Vector<>();
+    private final Vector<DataEntity> data;
 
     private int primaryDataIndex = DEFAULT_PRIMARY_DATA_INDEX;
 
-    private DataEntityWrapper() {
+    private DataEntityWrapper(Vector<DataEntity> data) {
+        this.data = data;
     }
 
-    public DataEntityWrapper(Vector<DataEntity> data, int primaryDataIndex) {
+    public DataEntityWrapper(final Vector<DataEntity> data, int primaryDataIndex) {
         this.primaryDataIndex = primaryDataIndex;
-        setData(data);
+        this.data = data;
+        compute();
     }
 
     public double getDeltaMinMax() {
@@ -57,12 +60,6 @@ public final class DataEntityWrapper {
 
     public int getPrimaryDataIndex() {
         return primaryDataIndex;
-    }
-
-    private void setData(Vector<DataEntity> dataEntityVector) {
-        this.data = dataEntityVector;
-
-        compute();
     }
 
     public double getMaxValue() {

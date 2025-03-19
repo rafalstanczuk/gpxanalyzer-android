@@ -8,8 +8,7 @@ import androidx.annotation.StringRes;
 
 import com.itservices.gpxanalyzer.R;
 
-public enum ViewMode {
-/*	DISABLED(R.string.disabled, R.string.disabled, R.drawable.ic_visibility_off_selector, Constants.DEFAULT_DISABLED_VIEW_MODE_KEY_ID),*/
+public enum GpxViewMode {
 	ASL_T_1(R.string.one_chart_asl_t_short, R.string.one_chart_asl_t, R.drawable.ic_altitude_selector, R.string.altitude ),
 	V_T_1(R.string.one_chart_v_t_short, R.string.one_chart_v_t, R.drawable.ic_speed_selector, R.string.speed);
 
@@ -23,14 +22,14 @@ public enum ViewMode {
 	private final int primaryKeyStringId;
 
 
-    ViewMode(@StringRes int idShortName, @StringRes int idLongName, @DrawableRes int drawableIconResId, @StringRes int primaryKeyStringId){
+    GpxViewMode(@StringRes int idShortName, @StringRes int idLongName, @DrawableRes int drawableIconResId, @StringRes int primaryKeyStringId){
         this.idShortName = idShortName;
         this.idLongName = idLongName;
         this.drawableIconResId = drawableIconResId;
         this.primaryKeyStringId = primaryKeyStringId;
     }
 
-	public ViewMode getNextCyclic() {
+	public GpxViewMode getNextCyclic() {
 		int currOrdinal  = ordinal();
 		int maxOrdinal = values().length-1;
 

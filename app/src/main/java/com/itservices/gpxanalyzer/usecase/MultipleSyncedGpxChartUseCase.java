@@ -1,27 +1,25 @@
 package com.itservices.gpxanalyzer.usecase;
 
-import static com.itservices.gpxanalyzer.data.RequestStatus.CHART_UPDATING;
-import static com.itservices.gpxanalyzer.data.RequestStatus.DATA_LOADED;
-import static com.itservices.gpxanalyzer.data.RequestStatus.LOADING;
+import static com.itservices.gpxanalyzer.chart.RequestStatus.CHART_UPDATING;
+import static com.itservices.gpxanalyzer.chart.RequestStatus.DATA_LOADED;
+import static com.itservices.gpxanalyzer.chart.RequestStatus.LOADING;
 
-import android.content.Context;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import com.itservices.gpxanalyzer.chart.ChartController;
 import com.itservices.gpxanalyzer.chart.entry.BaseEntry;
-import com.itservices.gpxanalyzer.data.RequestStatus;
+import com.itservices.gpxanalyzer.chart.RequestStatus;
+import com.itservices.gpxanalyzer.data.provider.DataEntityCachedProvider;
 import com.itservices.gpxanalyzer.data.entity.DataEntity;
-import com.itservices.gpxanalyzer.data.provider.GPXDataProvider;
 import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
+import com.itservices.gpxanalyzer.data.provider.DataEntityWrapperCachedProvider;
 import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItem;
-import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.ViewMode;
-import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.ViewModeMapper;
+import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.GpxViewMode;
+import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.GpxViewModeMapper;
 import com.itservices.gpxanalyzer.utils.common.ConcurrentUtil;
 
-import java.io.File;
-import java.lang.ref.WeakReference;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Vector;
@@ -41,31 +39,20 @@ public class MultipleSyncedGpxChartUseCase {
 
     private final PublishSubject<RequestStatus> requestStatus = PublishSubject.create();
     @Inject
-    ViewModeMapper viewModeMapper;
+    GpxViewModeMapper viewModeMapper;
+
     @Inject
-    GPXDataProvider dataProvider;
+    DataEntityWrapperCachedProvider dataEntityWrapperCachedProvider;
+
     @Inject
-    SelectGpxFileUseCase selectGpxFileUseCase;
+    DataEntityCachedProvider dataEntityCachedProvider;
+
     private Disposable loadDataDisposable;
 
-    private final CompositeDisposable chartUpdateCompositeDisposable = new CompositeDisposable();
     private CompositeDisposable observeSelectionCompositeDisposable = new CompositeDisposable();
-    private Vector<DataEntity> gpxData;
-
-    private WeakReference<Context> contextWeakReference;
-    private int defaultDataFromRawResId;
 
     @Inject
     public MultipleSyncedGpxChartUseCase() {
-    }
-
-    private void setGpxData(Vector<DataEntity> gpxData) {
-        this.gpxData = gpxData;
-    }
-
-    public void initWithContext(Context context, int defaultDataFromRawResId) {
-        contextWeakReference = new WeakReference<>(context);
-        this.defaultDataFromRawResId = defaultDataFromRawResId;
     }
 
     public void initObserveSelectionOnNeighborChart(List<ChartAreaItem> list) {
@@ -91,13 +78,13 @@ public class MultipleSyncedGpxChartUseCase {
         requestStatus.onNext(LOADING);
 
         ConcurrentUtil.tryToDispose(loadDataDisposable);
-        loadDataDisposable = provideDataEntityVector(defaultDataFromRawResId)
+        loadDataDisposable = dataEntityCachedProvider.provide()
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.newThread())
-                .map(this::updateGpxDataCache)
-                .flatMap(gpxData ->
+                .doOnNext(data -> requestStatus.onNext(DATA_LOADED))
+                .flatMap(data ->
                         Observable.fromIterable(chartAreaItemList)
-                                .flatMap(chartAreaItem -> initChartItemWithDataWrapper(chartAreaItem, gpxData))
+                                .flatMap(chartAreaItem -> initChartItemWithDataWrapper(chartAreaItem, data))
                 )
                 .doOnNext(chartAreaItem -> requestStatus.onNext(CHART_UPDATING))
                 .flatMap(ChartAreaItem::updateChart)
@@ -121,49 +108,21 @@ public class MultipleSyncedGpxChartUseCase {
                 );
     }
 
-    private Vector<DataEntity> updateGpxDataCache(Vector<DataEntity> gpxData) {
-        requestStatus.onNext(DATA_LOADED);
-
-        /**
-         * Use selected file once - next time use cached from memory(gpxData or default from rawResId) - don't load twice!
-         */
-        selectGpxFileUseCase.setSelectedFile(null);
-        setGpxData(gpxData);
-
-        return gpxData;
-    }
-
     @NonNull
-    private Observable<ChartAreaItem> initChartItemWithDataWrapper(ChartAreaItem chartAreaItem, Vector<DataEntity> gpxData) {
+    private Observable<ChartAreaItem> initChartItemWithDataWrapper(ChartAreaItem chartAreaItem, Vector<DataEntity> data) {
         return chartAreaItem.getChartController()
                 .initChart()
                 .map(status -> {
-                    //requestStatus.onNext(status);
-
-                    ViewMode iChartViewMode = chartAreaItem.getViewMode().getValue();
+                    GpxViewMode iChartViewMode = chartAreaItem.getViewMode().getValue();
 
                     int primaryKeyIndex = viewModeMapper.mapToPrimaryKeyIndexList(iChartViewMode);
-                    chartAreaItem.setDataEntityWrapper(new DataEntityWrapper(gpxData, primaryKeyIndex));
+
+                    DataEntityWrapper dataEntityWrapper = dataEntityWrapperCachedProvider.provide(data, (short) primaryKeyIndex);
+
+                    chartAreaItem.setDataEntityWrapper(dataEntityWrapper);
 
                     return chartAreaItem;
                 });
-    }
-
-    private Observable<Vector<DataEntity>> provideDataEntityVector(int defaultDataFromRawResId) {
-
-        File selectedFile = selectGpxFileUseCase.getSelectedFile();
-        /**
-         * Use selected file once - next time use cached from memory(gpxData or default from rawResId) - don't load twice!
-         */
-        return (selectedFile != null)
-                ? dataProvider.provide(selectedFile)
-                : (gpxData != null) ?
-                Observable.just(gpxData)
-                :
-                    contextWeakReference != null ?
-                    dataProvider.provide(contextWeakReference.get(), defaultDataFromRawResId)
-                            :
-                    dataProvider.provide(null, defaultDataFromRawResId);
     }
 
     private Disposable observeSelectionOn(Observable<BaseEntry> selection, ChartController chartController) {
@@ -181,13 +140,11 @@ public class MultipleSyncedGpxChartUseCase {
         ConcurrentUtil.tryToDispose(observeSelectionCompositeDisposable);
     }
 
-
     public Observable<Integer> getPercentageProgress() {
-        return dataProvider.getPercentageProgress();
+        return dataEntityCachedProvider.getPercentageProgress();
     }
 
     public Observable<RequestStatus> getRequestStatus() {
         return requestStatus;
     }
-
 }

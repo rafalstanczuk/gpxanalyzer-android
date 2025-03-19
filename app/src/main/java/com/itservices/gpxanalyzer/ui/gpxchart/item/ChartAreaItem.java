@@ -4,9 +4,9 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.itservices.gpxanalyzer.chart.ChartController;
-import com.itservices.gpxanalyzer.data.RequestStatus;
+import com.itservices.gpxanalyzer.chart.RequestStatus;
 import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
-import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.ViewMode;
+import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.GpxViewMode;
 
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
@@ -16,11 +16,11 @@ public class ChartAreaItem {
 
     private DataEntityWrapper dataEntityWrapper;
     private final ChartController chartController;
-    private MutableLiveData<ViewMode> viewModeLiveData = new MutableLiveData<>();
+    private MutableLiveData<GpxViewMode> viewModeLiveData = new MutableLiveData<>();
 
 
     @AssistedInject
-    public ChartAreaItem(@Assisted ViewMode viewMode,
+    public ChartAreaItem(@Assisted GpxViewMode viewMode,
                          @Assisted("drawX") boolean drawX,
                          @Assisted("drawIconsEnabled") boolean drawIconsEnabled,
                          ChartController chartController) {
@@ -36,7 +36,7 @@ public class ChartAreaItem {
         return chartController;
     }
 
-    public LiveData<ViewMode> getViewMode() {
+    public LiveData<GpxViewMode> getViewMode() {
         return viewModeLiveData;
     }
 
@@ -59,7 +59,7 @@ public class ChartAreaItem {
         return dataEntityWrapper;
     }
 
-    public void setViewMode(ViewMode viewMode) {
+    public void setViewMode(GpxViewMode viewMode) {
         viewModeLiveData.setValue(viewMode);
     }
 

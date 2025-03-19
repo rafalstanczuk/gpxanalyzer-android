@@ -15,7 +15,7 @@ import com.itservices.gpxanalyzer.databinding.FragmentChartAreaListBinding;
 import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItem;
 import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItemAdapter;
 import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItemFactory;
-import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.ViewMode;
+import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.GpxViewMode;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,8 +40,7 @@ public class ChartAreaListFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         viewModel = new ViewModelProvider(this.requireActivity()).get(ChartAreaListViewModel.class);
-        viewModel.bind(requireContext(), R.raw.skiing20250121t091423);
-
+        viewModel.bind();
     }
 
     @Override
@@ -58,8 +57,8 @@ public class ChartAreaListFragment extends Fragment {
 
         if (viewModel.getChartAreaItemListLiveData().getValue()==null || viewModel.getChartAreaItemListLiveData().getValue().isEmpty() ) {
             List<ChartAreaItem> immutableList = Arrays.asList(
-                    chartAreaItemFactory.create(ViewMode.ASL_T_1, false, false),
-                    chartAreaItemFactory.create(ViewMode.V_T_1, true, false)
+                    chartAreaItemFactory.create(GpxViewMode.ASL_T_1, false, false),
+                    chartAreaItemFactory.create(GpxViewMode.V_T_1, true, false)
             );
             List<ChartAreaItem> itemList = new ArrayList<>( immutableList );
             viewModel.setChartAreaItemList(itemList);

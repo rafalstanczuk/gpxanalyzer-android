@@ -9,7 +9,6 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.itservices.gpxanalyzer.chart.entry.EntryCacheMap;
-import com.itservices.gpxanalyzer.data.RequestStatus;
 import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
 
 import java.lang.ref.WeakReference;
@@ -142,7 +141,7 @@ class ChartProvider {
                 return RequestStatus.CHART_IS_NULL;
 
             synchronized (chart) {
-                chart.clear();
+                //chart.clear();
                 chart.setData(lineData);
                 chart.loadChartSettings(settings);
                 chart.highlightValue(highlight, true);

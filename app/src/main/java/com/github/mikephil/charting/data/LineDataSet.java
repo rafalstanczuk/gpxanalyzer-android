@@ -14,6 +14,7 @@ import com.github.mikephil.charting.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class LineDataSet extends LineRadarDataSet<Entry> implements ILineDataSet {
 
@@ -406,6 +407,18 @@ public class LineDataSet extends LineRadarDataSet<Entry> implements ILineDataSet
     @Override
     public IFillFormatter getFillFormatter() {
         return mFillFormatter;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof LineDataSet that)) return false;
+        return mCircleHoleColor == that.mCircleHoleColor && Float.compare(mCircleRadius, that.mCircleRadius) == 0 && Float.compare(mCircleHoleRadius, that.mCircleHoleRadius) == 0 && Float.compare(mCubicIntensity, that.mCubicIntensity) == 0 && mDrawCircles == that.mDrawCircles && mDrawCircleHole == that.mDrawCircleHole && mMode == that.mMode && Objects.equals(mCircleColors, that.mCircleColors) && Objects.equals(mDashPathEffect, that.mDashPathEffect) && Objects.equals(mFillFormatter, that.mFillFormatter);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mMode, mCircleColors, mCircleHoleColor, mCircleRadius, mCircleHoleRadius, mCubicIntensity, mDashPathEffect, mFillFormatter, mDrawCircles, mDrawCircleHole);
     }
 
     public enum Mode {

@@ -1,11 +1,10 @@
 package com.itservices.gpxanalyzer.ui.gpxchart;
 
-import static com.itservices.gpxanalyzer.data.RequestStatus.DEFAULT;
+import static com.itservices.gpxanalyzer.chart.RequestStatus.DEFAULT;
 
 import static java.util.Objects.requireNonNull;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.res.Configuration;
 import android.util.Log;
 import android.util.Pair;
@@ -14,10 +13,10 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.itservices.gpxanalyzer.data.RequestStatus;
+import com.itservices.gpxanalyzer.chart.RequestStatus;
 import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItem;
 import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItemAdapter;
-import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.ViewMode;
+import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.GpxViewMode;
 import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.ViewModeSeverity;
 import com.itservices.gpxanalyzer.usecase.MultipleSyncedGpxChartUseCase;
 import com.itservices.gpxanalyzer.utils.SingleLiveEvent;
@@ -76,8 +75,7 @@ public class ChartAreaListViewModel extends ViewModel {
         return chartAreaItemListLiveData;
     }
 
-    public void bind(Context context, int defaultDataFromRawResId) {
-        multipleSyncedGpxChartUseCase.initWithContext(context, defaultDataFromRawResId);
+    public void bind() {
 
         observeProgressOnLiveData(multipleSyncedGpxChartUseCase.getPercentageProgress());
         observeRequestStatusOnLiveData(multipleSyncedGpxChartUseCase.getRequestStatus());
@@ -251,7 +249,7 @@ public class ChartAreaListViewModel extends ViewModel {
     }
 
     public void onSwitchViewMode(ChartAreaItem item) {
-        ViewMode newItemViewMode = requireNonNull(item.getViewMode().getValue()).getNextCyclic();
+        GpxViewMode newItemViewMode = requireNonNull(item.getViewMode().getValue()).getNextCyclic();
         item.setViewMode(newItemViewMode);
 
         switchViewModeLiveData.postValue(item);
