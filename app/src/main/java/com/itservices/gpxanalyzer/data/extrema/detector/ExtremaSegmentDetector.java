@@ -131,7 +131,7 @@ public final class ExtremaSegmentDetector {
             Extremum e1 = extrema.get(i);
             Extremum e2 = extrema.get(i + 1);
 
-            Log.d(ExtremaSegmentDetector.class.getSimpleName(), "detectSegmentsOneRun() e1 = [" + e1.index + "], e2 = [" + e2.index + "]");
+            //Log.d(ExtremaSegmentDetector.class.getSimpleName(), "detectSegmentsOneRun() e1 = [" + e1.index + "], e2 = [" + e2.index + "]");
 
             // e1 must come before e2 in time
 /*            if (e2.index <= e1.index) {
@@ -279,7 +279,7 @@ public final class ExtremaSegmentDetector {
         }
 
         for (int i = 1; i < n; i++) {
-            Log.d(ExtremaSegmentDetector.class.getSimpleName(), "findLocalExtrema()  derivative["+i+"] = [" + derivative[i] + "]");
+            //Log.d(ExtremaSegmentDetector.class.getSimpleName(), "findLocalExtrema()  derivative["+i+"] = [" + derivative[i] + "]");
 
             double prevSign = signWithEpsilon(derivative[i - 1], EPSILON);
             double currSign = signWithEpsilon(derivative[i], EPSILON);

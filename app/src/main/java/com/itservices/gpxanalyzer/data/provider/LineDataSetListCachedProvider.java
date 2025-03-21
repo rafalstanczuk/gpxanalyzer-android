@@ -48,7 +48,7 @@ public class LineDataSetListCachedProvider {
     }
 
     private void clearOldCachedData(DataEntityWrapper newData) {
-        Log.d(LineDataSetListCachedProvider.class.getSimpleName(), "clearOldCachedData() called with: concurrentMap.keySet() = [" + concurrentMap.keySet() + "]");
+        //Log.d(LineDataSetListCachedProvider.class.getSimpleName(), "clearOldCachedData() called with: concurrentMap.keySet() = [" + concurrentMap.keySet() + "]");
 
         concurrentMap.keySet().forEach(
                 key -> {

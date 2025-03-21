@@ -31,7 +31,7 @@ public final class TrendBoundaryCumulativeMapper {
 
             Vector<DataEntity> dataEntityVector = dataEntityWrapper.getData();
 
-            Log.d("TrendBoundaryDataEntity", "mapFrom() called with: dataEntityVector = [" + dataEntityVector.size() + "]");
+            //Log.d("TrendBoundaryDataEntity", "mapFrom() called with: dataEntityVector = [" + dataEntityVector.size() + "]");
 
             List<TrendBoundaryDataEntity> trendBoundaryDataEntities = new ArrayList<>();
 
@@ -144,8 +144,8 @@ public final class TrendBoundaryCumulativeMapper {
         float cumulativeFromSegmentStartValue = 0.0f;
         float cumulativeAllSumValue = cumulativeStatisticsFirst.value();
 
-        Log.d(TrendBoundaryCumulativeMapper.class.getSimpleName(),
-                trendType.name() +" add called with: cumulativeAllSumValue cumulativeStatisticsFirst.value() = [" + cumulativeAllSumValue + "]");
+        //Log.d(TrendBoundaryCumulativeMapper.class.getSimpleName(),
+        //        trendType.name() +" add called with: cumulativeAllSumValue cumulativeStatisticsFirst.value() = [" + cumulativeAllSumValue + "]");
 
         for (int i = 1; i < segmentDataEntityVector.size(); i++) {
 
@@ -160,8 +160,8 @@ public final class TrendBoundaryCumulativeMapper {
             cumulativeFromSegmentStartValue += delta;
             float total = cumulativeAllSumValue + cumulativeFromSegmentStartValue;
 
-            Log.d(TrendBoundaryCumulativeMapper.class.getSimpleName(),
-                    trendType.name() +" add called with: total = [" + total + "]");
+            //Log.d(TrendBoundaryCumulativeMapper.class.getSimpleName(),
+            //        trendType.name() +" add called with: total = [" + total + "]");
 
             dataEntityWrapper.putCumulativeStatistics(dataEntityToUpdate, FROM_SEGMENT_START_SUM_REAL_DELTA_CUMULATIVE_VALUE,
                     new CumulativeStatistics(cumulativeFromSegmentStartValue, accuracy, unit));
@@ -177,7 +177,7 @@ public final class TrendBoundaryCumulativeMapper {
     }
 
     private static Vector<DataEntity> getPartial(int startIndex, int endIndex, Vector<DataEntity> allDataEntityVector) {
-        Log.d("TrendBoundaryDataEntity", "getPartial() called with: startIndex = [" + startIndex + "], endIndex = [" + endIndex + "]");
+        //Log.d("TrendBoundaryDataEntity", "getPartial() called with: startIndex = [" + startIndex + "], endIndex = [" + endIndex + "]");
         Vector<DataEntity> entityVector = new Vector<>();
 
         for (int i = startIndex; i <= endIndex; i++) {
