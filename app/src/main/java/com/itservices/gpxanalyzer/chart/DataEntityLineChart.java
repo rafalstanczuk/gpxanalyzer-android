@@ -132,27 +132,6 @@ public class DataEntityLineChart extends LineChart {
 	}
 
 	public void highlightCenterValueInTranslation() {
-
-/*
-		Rect rectf = new Rect();
-		getLocalVisibleRect(rectf);
-
-				rectf.centerX(),
-				rectf.centerY()
-
-*/
-
-
-/*		MPPointF center = mViewPortHandler.getContentCenter();
-		Entry entry = getEntryByTouchPoint(
-				center.getX(),
-				center.getY()
-		);*/
-
-/*		float centerX = ( getLowestVisibleX() + getHighestVisibleX() )/ 2.0f;
-
-		long timestampLow = combineIntoCalendarTime( getLowestVisibleX() ).getTime().getTime();
-		long timestampHigh = combineIntoCalendarTime( getHighestVisibleX() ).getTime().getTime();*/
 		MPPointF pointFCenter = mViewPortHandler.getContentCenter();
 
 		Entry entry = getEntryByTouchPoint(
@@ -175,25 +154,6 @@ public class DataEntityLineChart extends LineChart {
 		ChartTouchListener.ChartGesture chartGesture = getChartTouchListener().getLastGesture();
 
 		determineSettingsDataEntityCurveLineHighlightIndicator(chartGesture);
-
-	/*	DataEntity dataEntity = ( (BaseEntry)selectedEntry).getDataEntity();
-
-		int primaryDataIndex = ((BaseEntry) selectedEntry).getDataEntityWrapper().getPrimaryDataIndex();
-
-			dataEntityInfoLayoutView.setTime( getFormattedTime(dataEntity.getTimestampMillis()) );
-			dataEntityInfoLayoutView.setValue1(
-					String.format(Locale.getDefault(), "%.1f", dataEntity.getValueList().get(primaryDataIndex))
-			);
-			String unit1 = dataEntity.getUnitList().get(primaryDataIndex);
-			dataEntityInfoLayoutView.setValue1Unit(unit1);
-
-		*//*	dataEntityInfoLayoutView.setValue2(
-					String.format(Locale.getDefault(), "%.2f", dataEntity.getValueList().get(1))
-			);
-			String unit2 = dataEntity.getUnitList().get(1);
-			dataEntityInfoLayoutView.setValue2Unit(unit2);*//*
-
-			dataEntityInfoLayoutView.invalidate();*/
 	}
 
 	private void determineSettingsDataEntityCurveLineHighlightIndicator(
@@ -257,7 +217,6 @@ public class DataEntityLineChart extends LineChart {
 
     @Override
 	protected void onDetachedFromWindow() {
-		// releases the bitmap in the renderer to avoid oom error
 		if (mRenderer != null && mRenderer instanceof LineChartRenderer) {
 			((LineChartRenderer) mRenderer).releaseBitmap();
 		}

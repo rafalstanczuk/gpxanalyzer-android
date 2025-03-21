@@ -15,15 +15,15 @@ public class EntryCacheMap {
     public EntryCacheMap() {
     }
 
-    public synchronized void add(long timestampMillis, Entry entry) {
+    public void add(long timestampMillis, Entry entry) {
         entryMap.put(timestampMillis, entry);
     }
 
-    public synchronized Entry get(long timestampMillis) {
+    public Entry get(long timestampMillis) {
         return entryMap.get(timestampMillis);
     }
 
-    public synchronized void init(int n) {
+    public void init(int n) {
         entryMap.clear();
         entryMap = new ConcurrentHashMap<>(n + 1);
     }

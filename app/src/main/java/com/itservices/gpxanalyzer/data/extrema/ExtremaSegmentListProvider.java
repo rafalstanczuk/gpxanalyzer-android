@@ -20,7 +20,6 @@ import java.util.List;
 import io.reactivex.Observable;
 
 public class ExtremaSegmentListProvider {
-    private static final double[] alpineSkiWindowFunctionWeights = ExtremaSegmentDetector.generateWindowFunction(9, ExtremaSegmentDetector.WindowType.GAUSSIAN, 0.2);
 
     public static Observable<List<Segment>> provide(DataEntityWrapper dataEntityWrapper) {
         return Observable.fromCallable(() -> {

@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.data;
+package com.itservices.gpxanalyzer.data.cumulative;
 
 import androidx.annotation.NonNull;
 

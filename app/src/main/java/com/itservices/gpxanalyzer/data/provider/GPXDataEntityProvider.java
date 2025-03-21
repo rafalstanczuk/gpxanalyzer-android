@@ -150,10 +150,12 @@ public final class GPXDataEntityProvider extends DataEntityProvider {
     @NonNull
     private DataEntity createDataEntity(int iTrackPoint, Location location) {
         return new DataEntity(iTrackPoint, location.getTime(),
-                Arrays.asList((float) location.getAltitude(), location.getSpeed()),
-                Arrays.asList(0.1f, 0.1f),
+                List.of((float) location.getAltitude(), location.getSpeed()),
+                List.of(0.1f, 0.1f),
                 NAME_LIST,
-                UNIT_LIST);
+                UNIT_LIST
+        );
+
     }
 
     @NonNull

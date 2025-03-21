@@ -7,14 +7,13 @@ import com.itservices.gpxanalyzer.chart.entry.TrendBoundaryEntry;
 import com.itservices.gpxanalyzer.chart.entry.TrendBoundaryEntryProvider;
 import com.itservices.gpxanalyzer.chart.legend.PaletteColorDeterminer;
 import com.itservices.gpxanalyzer.data.extrema.ExtremaSegmentListProvider;
-import com.itservices.gpxanalyzer.data.extrema.TrendBoundaryMapper;
-import com.itservices.gpxanalyzer.data.TrendStatistics;
+import com.itservices.gpxanalyzer.data.cumulative.TrendBoundaryCumulativeMapper;
+import com.itservices.gpxanalyzer.data.cumulative.TrendStatistics;
 import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
 import com.itservices.gpxanalyzer.data.provider.LineDataSetListCachedProvider;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -65,7 +64,7 @@ public class LineDataSetListProvider {
         return ExtremaSegmentListProvider.provide(dataEntityWrapper)
                         .subscribeOn(Schedulers.computation())
                         .observeOn(Schedulers.computation())
-                        .map(segmentList -> TrendBoundaryMapper.mapFrom(dataEntityWrapper, segmentList))
+                        .map(segmentList -> TrendBoundaryCumulativeMapper.mapFrom(dataEntityWrapper, segmentList))
                         .map(trendBoundaryDataEntityList -> trendBoundaryEntryProvider
                                 .provide(dataEntityWrapper, trendBoundaryDataEntityList, paletteColorDeterminer)
                         )

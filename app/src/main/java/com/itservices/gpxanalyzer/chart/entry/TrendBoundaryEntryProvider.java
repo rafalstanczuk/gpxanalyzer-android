@@ -1,7 +1,7 @@
 package com.itservices.gpxanalyzer.chart.entry;
 
 import com.github.mikephil.charting.data.Entry;
-import com.itservices.gpxanalyzer.data.TrendBoundaryDataEntity;
+import com.itservices.gpxanalyzer.data.cumulative.TrendBoundaryDataEntity;
 import com.itservices.gpxanalyzer.chart.legend.PaletteColorDeterminer;
 import com.itservices.gpxanalyzer.data.entity.DataEntity;
 import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;

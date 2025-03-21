@@ -1,5 +1,9 @@
 package com.itservices.gpxanalyzer.chart.settings.highlight;
 
+import static com.itservices.gpxanalyzer.data.cumulative.CumulativeProcessedDataType.ALL_SUM_REAL_DELTA_CUMULATIVE_VALUE;
+import static com.itservices.gpxanalyzer.data.cumulative.CumulativeProcessedDataType.FROM_SEGMENT_START_SUM_REAL_DELTA_CUMULATIVE_VALUE;
+
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -17,9 +21,12 @@ import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.chart.DataEntityLineChart;
 import com.itservices.gpxanalyzer.chart.LineChartSettings;
 import com.itservices.gpxanalyzer.chart.entry.CurveEntry;
-import com.itservices.gpxanalyzer.data.TrendStatistics;
+import com.itservices.gpxanalyzer.data.cumulative.CumulativeProcessedDataType;
+import com.itservices.gpxanalyzer.data.cumulative.CumulativeStatistics;
+import com.itservices.gpxanalyzer.data.cumulative.TrendStatistics;
 import com.itservices.gpxanalyzer.data.entity.DataEntity;
 import com.itservices.gpxanalyzer.data.TrendType;
+import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
 import com.itservices.gpxanalyzer.databinding.CustomMarkerViewBinding;
 import com.itservices.gpxanalyzer.utils.common.FormatNumberUtil;
 import com.itservices.gpxanalyzer.utils.ui.ColorUtil;
@@ -30,6 +37,7 @@ import java.util.Locale;
 
 import javax.inject.Inject;
 
+import dagger.hilt.android.qualifiers.ActivityContext;
 import dagger.hilt.android.qualifiers.ApplicationContext;
 
 @SuppressLint("ViewConstructor")
@@ -41,7 +49,7 @@ public class CustomMarker extends MarkerView {
     private LineChartSettings settings;
 
     @Inject
-    public CustomMarker(@ApplicationContext Context context) {
+    public CustomMarker(@ActivityContext Context context) {
         super(context);
 
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(
@@ -69,7 +77,7 @@ public class CustomMarker extends MarkerView {
                     FormatNumberUtil.getFormattedTime(dataEntity.timestampMillis()), " h"
             );
 
-            String unitString = curveDataEntityEntry.getDataEntityWrapper().getUnit( dataEntity );
+            String unitString = curveDataEntityEntry.getDataEntityWrapper().getUnit(dataEntity);
 
             SpannableStringBuilder valueLine = TextViewUtil.getSpannableStringBuilder(
                     String.valueOf((int) curveDataEntityEntry.getY()), " " + unitString);
@@ -77,16 +85,47 @@ public class CustomMarker extends MarkerView {
             binding.markerTextViewTime.setText(timeLine, TextView.BufferType.SPANNABLE);
             binding.markerTextViewValue.setText(valueLine, TextView.BufferType.SPANNABLE);
 
-            setupTrendStatisticsLayout(curveDataEntityEntry, unitString);
+            setupTrendStatisticsLayout(curveDataEntityEntry.getTrendBoundaryDataEntity().trendStatistics(), unitString);
+
+            setupCumulativeProcessedDataTypesLayout(dataEntity, curveDataEntityEntry.getDataEntityWrapper());
         }
 
         super.refreshContent(entry, highlight);
     }
 
-    private void setupTrendStatisticsLayout(CurveEntry curveDataEntityEntry, String unitString) {
+    private void setupCumulativeProcessedDataTypesLayout(DataEntity dataEntity, DataEntityWrapper dataEntityWrapper) {
+        ViewUtil.setVisibility(binding.cumulativeProcessedDataTypesLayout, settings.isDrawAscDescSegEnabled());
+        if (settings.isDrawAscDescSegEnabled()) {
+            setupCumulativeProcessedDataTypes(dataEntity, dataEntityWrapper);
+        }
+    }
+
+    private void setupCumulativeProcessedDataTypes(DataEntity dataEntity, DataEntityWrapper dataEntityWrapper) {
+        fillTextViewWithValueUnit(dataEntity, dataEntityWrapper,
+                FROM_SEGMENT_START_SUM_REAL_DELTA_CUMULATIVE_VALUE,
+                binding.fromSegmentStartSumRealDeltaCumulativeValue);
+
+        fillTextViewWithValueUnit(dataEntity, dataEntityWrapper,
+                ALL_SUM_REAL_DELTA_CUMULATIVE_VALUE,
+                binding.allSumRealDeltaCumulativeValue);
+    }
+
+    private static void fillTextViewWithValueUnit(DataEntity dataEntity, DataEntityWrapper dataEntityWrapper, CumulativeProcessedDataType cumulativeProcessedDataType, TextView textView) {
+
+        CumulativeStatistics cumulativeStatistics = dataEntityWrapper.getCumulativeStatistics(dataEntity, cumulativeProcessedDataType);
+
+        float value = cumulativeStatistics.value();
+        String unit = cumulativeStatistics.unit();
+
+        String valueString =
+                String.format(Locale.getDefault(), "%.2f", value);
+
+        textView.setText(TextViewUtil.getSpannableStringBuilder(valueString, " " + unit));
+    }
+
+    private void setupTrendStatisticsLayout(TrendStatistics trendStatistics, String unitString) {
         ViewUtil.setVisibility(binding.trendStatisticsLayout, settings.isDrawAscDescSegEnabled());
         if (settings.isDrawAscDescSegEnabled()) {
-            TrendStatistics trendStatistics = curveDataEntityEntry.getTrendBoundaryDataEntity().trendStatistics();
             setupAscDescSegStatistics(trendStatistics, unitString);
         }
     }
@@ -116,12 +155,6 @@ public class CustomMarker extends MarkerView {
         String numberString =
                 String.format(Locale.getDefault(), "%d.", trendStatistics.n());
         binding.markerTextViewNumber.setText(TextViewUtil.getSpannableStringBuilder(null, numberString));
-
-
-/*            String text2 =
-                    String.format(Locale.getDefault(), "%.2f", curveDataEntityEntry.getTrendBoundaryDataEntity().trendStatistics().sumCumulativeAbsDeltaValIncluded() );
-
-            binding.markerTextViewCumulative.setText(getSpannableStringBuilder(text2, " " + unitString));*/
 
         binding.trendTypeImageView.setImageResource(trendType.getDrawableId());
     }

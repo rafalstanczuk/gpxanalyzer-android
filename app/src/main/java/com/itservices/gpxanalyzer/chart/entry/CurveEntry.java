@@ -7,7 +7,7 @@ import com.itservices.gpxanalyzer.chart.settings.axis.HourMinutesAxisValueFormat
 import com.itservices.gpxanalyzer.data.entity.DataEntity;
 import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
 import com.itservices.gpxanalyzer.chart.legend.PaletteColorDeterminer;
-import com.itservices.gpxanalyzer.data.TrendBoundaryDataEntity;
+import com.itservices.gpxanalyzer.data.cumulative.TrendBoundaryDataEntity;
 
 import java.util.Calendar;
 

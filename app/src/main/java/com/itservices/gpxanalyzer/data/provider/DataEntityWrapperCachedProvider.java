@@ -3,11 +3,13 @@ package com.itservices.gpxanalyzer.data.provider;
 import com.itservices.gpxanalyzer.data.entity.DataEntity;
 import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.inject.Inject;
 
@@ -21,17 +23,18 @@ public class DataEntityWrapperCachedProvider {
                                     List.of(0.0f),
                                     List.of(0.0f),
                                     List.of(""),
-                                    List.of(""))
+                                    List.of("")
+                            )
                     )
             ),
             0);
-    private Map<Short, DataEntityWrapper> concurrentMap;
+    private ConcurrentMap<Short, DataEntityWrapper> concurrentMap;
 
     @Inject
     public DataEntityWrapperCachedProvider() {
     }
 
-    private static Map<Short, DataEntityWrapper> createCacheWith(DataEntity dataEntity) {
+    private static ConcurrentMap<Short, DataEntityWrapper> createCacheWith(DataEntity dataEntity) {
         return new ConcurrentHashMap<>(dataEntity.nameList().size());
     }
 

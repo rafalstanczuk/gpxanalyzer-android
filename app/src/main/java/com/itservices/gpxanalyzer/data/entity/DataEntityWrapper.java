@@ -1,6 +1,9 @@
 package com.itservices.gpxanalyzer.data.entity;
 
 
+import com.itservices.gpxanalyzer.data.cumulative.CumulativeProcessedDataType;
+import com.itservices.gpxanalyzer.data.cumulative.CumulativeStatistics;
+
 import java.util.DoubleSummaryStatistics;
 import java.util.Objects;
 import java.util.Vector;
@@ -108,6 +111,14 @@ public final class DataEntityWrapper {
 
     public float getValue(DataEntity dataEntity) {
         return dataEntity.valueList().get(primaryDataIndex);
+    }
+
+    public CumulativeStatistics getCumulativeStatistics(DataEntity dataEntity, CumulativeProcessedDataType type) {
+        return dataEntity.get(primaryDataIndex, type);
+    }
+
+    public void putCumulativeStatistics(DataEntity dataEntity, CumulativeProcessedDataType type, CumulativeStatistics statistics) {
+        dataEntity.put(primaryDataIndex, type, statistics);
     }
 
     @Override

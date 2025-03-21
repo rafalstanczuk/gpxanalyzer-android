@@ -1,12 +1,13 @@
-package com.itservices.gpxanalyzer.data.extrema;
+package com.itservices.gpxanalyzer.data.cumulative;
+
+import static com.itservices.gpxanalyzer.data.cumulative.CumulativeProcessedDataType.ALL_SUM_REAL_DELTA_CUMULATIVE_VALUE;
+import static com.itservices.gpxanalyzer.data.cumulative.CumulativeProcessedDataType.FROM_SEGMENT_START_SUM_REAL_DELTA_CUMULATIVE_VALUE;
 
 import androidx.annotation.NonNull;
 
-import com.itservices.gpxanalyzer.data.TrendStatistics;
 import com.itservices.gpxanalyzer.data.TrendType;
 import com.itservices.gpxanalyzer.data.entity.DataEntity;
 import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
-import com.itservices.gpxanalyzer.data.TrendBoundaryDataEntity;
 import com.itservices.gpxanalyzer.data.extrema.detector.Segment;
 import com.itservices.gpxanalyzer.data.extrema.detector.TrendTypeMapper;
 
@@ -16,7 +17,7 @@ import java.util.Vector;
 
 import javax.annotation.Nullable;
 
-public final class TrendBoundaryMapper {
+public final class TrendBoundaryCumulativeMapper {
 
     public static List<TrendBoundaryDataEntity> mapFrom(DataEntityWrapper dataEntityWrapper, TrendType trendTypeToHighlight) {
         List<TrendBoundaryDataEntity> trendBoundaryDataEntities = new ArrayList<>();
@@ -67,7 +68,7 @@ public final class TrendBoundaryMapper {
             return trendBoundaryDataEntities;
     }
 
-    private static float getDeltaVal(DataEntityWrapper dataEntityWrapper, Vector<DataEntity> segmentDataEntityVector) {
+    private static float getDeltaValAbs(DataEntityWrapper dataEntityWrapper, Vector<DataEntity> segmentDataEntityVector) {
         DataEntity dataEntityStart = segmentDataEntityVector.firstElement();
         DataEntity dataEntityEnd = segmentDataEntityVector.lastElement();
 
@@ -85,26 +86,78 @@ public final class TrendBoundaryMapper {
             @Nullable TrendBoundaryDataEntity prevTrendBoundaryDataEntity,
             DataEntityWrapper dataEntityWrapper) {
 
-        float deltaVal = getDeltaVal(dataEntityWrapper, segmentDataEntityVector);
+        TrendStatistics trendStatistics
+                = createTrendStatisticsFor(
+                        trendType, segmentDataEntityVector, prevTrendBoundaryDataEntity, dataEntityWrapper);
 
-        float sumDeltaVal = 0.0f;
-        int n = 0;
-
-        if (prevTrendBoundaryDataEntity != null) {
-            sumDeltaVal = prevTrendBoundaryDataEntity.trendStatistics().sumCumulativeAbsDeltaValIncluded();
-
-            n = prevTrendBoundaryDataEntity.trendStatistics().n();
-        }
-
-        sumDeltaVal += deltaVal;
-        n++;
+        addEveryDataEntityCumulativeStatistics(trendType, segmentDataEntityVector, prevTrendBoundaryDataEntity, dataEntityWrapper);
 
         //Log.d("getTrendBoundaryDataEntity", "id ="+id + ", trendType =" + trendType.name() + ", absDeltaVal="+absDeltaVal + ", sumDeltaVal=" + sumDeltaVal );
 
         return new TrendBoundaryDataEntity(id,
-                new TrendStatistics(trendType, deltaVal, sumDeltaVal, n),
+                trendStatistics,
                 segmentDataEntityVector
         );
+    }
+
+    private static TrendStatistics createTrendStatisticsFor(TrendType trendType, Vector<DataEntity> segmentDataEntityVector, TrendBoundaryDataEntity prevTrendBoundaryDataEntity, DataEntityWrapper dataEntityWrapper) {
+        float deltaValAbs = getDeltaValAbs(dataEntityWrapper, segmentDataEntityVector);
+
+        float sumDeltaSegmentsFirstLastVal = 0.0f;
+        int n = 0;
+
+        if (prevTrendBoundaryDataEntity != null) {
+            sumDeltaSegmentsFirstLastVal = prevTrendBoundaryDataEntity.trendStatistics().sumCumulativeAbsDeltaValIncluded();
+
+            n = prevTrendBoundaryDataEntity.trendStatistics().n();
+        }
+
+        // Cumulative sum of abs deltas first->last value inside segment
+        sumDeltaSegmentsFirstLastVal += deltaValAbs;
+
+        // The count of this trend-type
+        n++;
+
+        return new TrendStatistics(trendType, deltaValAbs, sumDeltaSegmentsFirstLastVal, n);
+    }
+
+    private static void addEveryDataEntityCumulativeStatistics(TrendType trendType, Vector<DataEntity> segmentDataEntityVector, TrendBoundaryDataEntity prevTrendBoundaryDataEntity, DataEntityWrapper dataEntityWrapper) {
+
+        DataEntity first;
+
+        if (prevTrendBoundaryDataEntity!= null ) {
+            first = prevTrendBoundaryDataEntity.dataEntityVector().lastElement();
+        } else {
+            first = segmentDataEntityVector.firstElement();
+        }
+        String unit = dataEntityWrapper.getUnit(first);
+        float accuracy = dataEntityWrapper.getAccuracy(first);
+
+
+        CumulativeStatistics cumulativeStatisticsFirst = dataEntityWrapper.getCumulativeStatistics(first, ALL_SUM_REAL_DELTA_CUMULATIVE_VALUE);
+
+        float cumulativeFromSegmentStartValue = 0.0f;
+        float cumulativeAllSumValue = cumulativeStatisticsFirst.value();
+
+        for (int i = 1; i < segmentDataEntityVector.size(); i++) {
+
+            DataEntity dataEntityToUpdate = segmentDataEntityVector.get(i);
+            DataEntity prevDataEntity = segmentDataEntityVector.get(i - 1);
+
+            float delta =
+                    dataEntityWrapper.getValue( dataEntityToUpdate )
+                            -
+                    dataEntityWrapper.getValue( prevDataEntity );
+
+            cumulativeFromSegmentStartValue += delta;
+            float total = cumulativeAllSumValue + cumulativeFromSegmentStartValue;
+
+            dataEntityWrapper.putCumulativeStatistics(dataEntityToUpdate, FROM_SEGMENT_START_SUM_REAL_DELTA_CUMULATIVE_VALUE,
+                    new CumulativeStatistics(cumulativeFromSegmentStartValue, accuracy, unit));
+
+            dataEntityWrapper.putCumulativeStatistics(dataEntityToUpdate, ALL_SUM_REAL_DELTA_CUMULATIVE_VALUE,
+                    new CumulativeStatistics(total, accuracy, unit));
+        }
     }
 
     @NonNull
