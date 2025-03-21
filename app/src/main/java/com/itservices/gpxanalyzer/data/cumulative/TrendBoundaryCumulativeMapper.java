@@ -3,6 +3,8 @@ package com.itservices.gpxanalyzer.data.cumulative;
 import static com.itservices.gpxanalyzer.data.cumulative.CumulativeProcessedDataType.ALL_SUM_REAL_DELTA_CUMULATIVE_VALUE;
 import static com.itservices.gpxanalyzer.data.cumulative.CumulativeProcessedDataType.FROM_SEGMENT_START_SUM_REAL_DELTA_CUMULATIVE_VALUE;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import com.itservices.gpxanalyzer.data.TrendType;
@@ -28,6 +30,8 @@ public final class TrendBoundaryCumulativeMapper {
     public static List<TrendBoundaryDataEntity> mapFrom(DataEntityWrapper dataEntityWrapper, List<Segment> extremaSegmentList) {
 
             Vector<DataEntity> dataEntityVector = dataEntityWrapper.getData();
+
+            Log.d("TrendBoundaryDataEntity", "mapFrom() called with: dataEntityVector = [" + dataEntityVector.size() + "]");
 
             List<TrendBoundaryDataEntity> trendBoundaryDataEntities = new ArrayList<>();
 
@@ -166,6 +170,7 @@ public final class TrendBoundaryCumulativeMapper {
     }
 
     private static Vector<DataEntity> getPartial(int startIndex, int endIndex, Vector<DataEntity> allDataEntityVector) {
+        Log.d("TrendBoundaryDataEntity", "getPartial() called with: startIndex = [" + startIndex + "], endIndex = [" + endIndex + "]");
         Vector<DataEntity> entityVector = new Vector<>();
 
         for (int i = startIndex; i <= endIndex; i++) {

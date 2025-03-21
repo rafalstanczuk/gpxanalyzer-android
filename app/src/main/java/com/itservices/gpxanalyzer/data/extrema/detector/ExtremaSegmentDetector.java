@@ -1,5 +1,6 @@
 package com.itservices.gpxanalyzer.data.extrema.detector;
 
+import android.util.Log;
 import android.util.Pair;
 
 import androidx.annotation.NonNull;
@@ -129,6 +130,8 @@ public final class ExtremaSegmentDetector {
         for (int i = 0; i < extrema.size() - 1; i++) {
             Extremum e1 = extrema.get(i);
             Extremum e2 = extrema.get(i + 1);
+
+            Log.d(ExtremaSegmentDetector.class.getSimpleName(), "detectSegmentsOneRun() e1 = [" + e1.index + "], e2 = [" + e2.index + "]");
 
             // e1 must come before e2 in time
 /*            if (e2.index <= e1.index) {
@@ -263,29 +266,56 @@ public final class ExtremaSegmentDetector {
 
         int n = smoothed.size();
         // Compute discrete derivative
-        double[] derivative = new double[n - 1];
-        for (int i = 0; i < n - 1; i++) {
+        double[] derivative = new double[n];
+        for (int i = 1; i < n; i++) {
+            PrimitiveDataEntity prev = smoothed.get(i - 1);
             PrimitiveDataEntity current = smoothed.get(i);
-            PrimitiveDataEntity next = smoothed.get(i + 1);
 
-            derivative[i] = (next.getValue() - current.getValue());
-                   /* /
-            TimeUnit.MILLISECONDS.toSeconds(Math.abs(next.getTimestamp() - current.getTimestamp()));*/
+
+            double dt = (double)Math.abs(current.getTimestamp() - prev.getTimestamp()) / 1000.0;
+
+            derivative[i] = (current.getValue() - prev.getValue()) / dt;
+
         }
 
-        for (int i = 1; i < n - 1; i++) {
+        for (int i = 1; i < n; i++) {
+            Log.d(ExtremaSegmentDetector.class.getSimpleName(), "findLocalExtrema()  derivative["+i+"] = [" + derivative[i] + "]");
+
             double prevSign = signWithEpsilon(derivative[i - 1], EPSILON);
-            double nextSign = signWithEpsilon(derivative[i], EPSILON);
+            double currSign = signWithEpsilon(derivative[i], EPSILON);
 
             // local minimum => slope from negative to positive
-            if (prevSign < 0 && nextSign > 0) {
+            if (prevSign < 0 && currSign > 0) {
                 result.add(new Extremum(i, ExtremaType.MIN));
             }
             // local maximum => slope from positive to negative
-            else if (prevSign > 0 && nextSign < 0) {
+            else if (prevSign > 0 && currSign < 0) {
                 result.add(new Extremum(i, ExtremaType.MAX));
             }
         }
+
+        // Find missing ending extremum :
+        Extremum lastOne = result.get( result.size() - 1 );
+        Extremum beforeLastOne = result.get( result.size() - 2 );
+
+        int lastIndex = n-1;
+
+        if ( lastOne.index < n-1 ) {
+            //Missing ending extremum!
+            switch (beforeLastOne.type) {
+                case MIN -> {
+                    if (lastOne.type == ExtremaType.MAX) {
+                        result.add(new Extremum(lastIndex, ExtremaType.MIN));
+                    }
+                }
+                case MAX -> {
+                    if (lastOne.type == ExtremaType.MIN) {
+                        result.add(new Extremum(lastIndex, ExtremaType.MAX));
+                    }
+                }
+            }
+        }
+
         return result;
     }
 
