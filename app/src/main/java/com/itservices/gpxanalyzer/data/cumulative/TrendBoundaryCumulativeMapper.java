@@ -128,20 +128,24 @@ public final class TrendBoundaryCumulativeMapper {
     private static void addEveryDataEntityCumulativeStatistics(TrendType trendType, Vector<DataEntity> segmentDataEntityVector, TrendBoundaryDataEntity prevTrendBoundaryDataEntity, DataEntityWrapper dataEntityWrapper) {
 
         DataEntity first;
+        CumulativeStatistics cumulativeStatisticsFirst;
 
         if (prevTrendBoundaryDataEntity!= null ) {
             first = prevTrendBoundaryDataEntity.dataEntityVector().lastElement();
+            cumulativeStatisticsFirst = dataEntityWrapper.getCumulativeStatistics(first, ALL_SUM_REAL_DELTA_CUMULATIVE_VALUE);
         } else {
+            cumulativeStatisticsFirst = new CumulativeStatistics();
             first = segmentDataEntityVector.firstElement();
         }
+
         String unit = dataEntityWrapper.getUnit(first);
         float accuracy = dataEntityWrapper.getAccuracy(first);
 
-
-        CumulativeStatistics cumulativeStatisticsFirst = dataEntityWrapper.getCumulativeStatistics(first, ALL_SUM_REAL_DELTA_CUMULATIVE_VALUE);
-
         float cumulativeFromSegmentStartValue = 0.0f;
         float cumulativeAllSumValue = cumulativeStatisticsFirst.value();
+
+        Log.d(TrendBoundaryCumulativeMapper.class.getSimpleName(),
+                trendType.name() +" add called with: cumulativeAllSumValue cumulativeStatisticsFirst.value() = [" + cumulativeAllSumValue + "]");
 
         for (int i = 1; i < segmentDataEntityVector.size(); i++) {
 
@@ -155,6 +159,9 @@ public final class TrendBoundaryCumulativeMapper {
 
             cumulativeFromSegmentStartValue += delta;
             float total = cumulativeAllSumValue + cumulativeFromSegmentStartValue;
+
+            Log.d(TrendBoundaryCumulativeMapper.class.getSimpleName(),
+                    trendType.name() +" add called with: total = [" + total + "]");
 
             dataEntityWrapper.putCumulativeStatistics(dataEntityToUpdate, FROM_SEGMENT_START_SUM_REAL_DELTA_CUMULATIVE_VALUE,
                     new CumulativeStatistics(cumulativeFromSegmentStartValue, accuracy, unit));
