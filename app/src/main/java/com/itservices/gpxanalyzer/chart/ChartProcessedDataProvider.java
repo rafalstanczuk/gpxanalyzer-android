@@ -1,18 +1,22 @@
 package com.itservices.gpxanalyzer.chart;
 
+import static com.itservices.gpxanalyzer.data.cache.ChartProcessedDataCachedProvider.EMPTY_CHART_PROCESSED_DATA;
+
 import android.graphics.Color;
 
+import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.itservices.gpxanalyzer.chart.entry.EntryCacheMap;
 import com.itservices.gpxanalyzer.chart.entry.TrendBoundaryEntry;
 import com.itservices.gpxanalyzer.chart.entry.TrendBoundaryEntryProvider;
 import com.itservices.gpxanalyzer.chart.legend.PaletteColorDeterminer;
+import com.itservices.gpxanalyzer.data.cache.ChartProcessedData;
 import com.itservices.gpxanalyzer.data.extrema.ExtremaSegmentListProvider;
 import com.itservices.gpxanalyzer.data.cumulative.TrendBoundaryCumulativeMapper;
 import com.itservices.gpxanalyzer.data.cumulative.TrendStatistics;
 import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
-import com.itservices.gpxanalyzer.data.provider.LineDataSetListCachedProvider;
+import com.itservices.gpxanalyzer.data.cache.ChartProcessedDataCachedProvider;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -20,39 +24,40 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 
-public class LineDataSetListProvider {
+public class ChartProcessedDataProvider {
 
-    private final AtomicReference<List<LineDataSet>> listLineDataSetAtomicReference = new AtomicReference<>(new ArrayList<>());
+    private final AtomicReference<ChartProcessedData> chartProcessedDataAtomicReference = new AtomicReference<>(EMPTY_CHART_PROCESSED_DATA);
     @Inject
     TrendBoundaryEntryProvider trendBoundaryEntryProvider;
     @Inject
-    LineDataSetListCachedProvider lineDataSetListCachedProvider;
+    ChartProcessedDataCachedProvider chartProcessedDataCachedProvider;
 
     @Inject
-    public LineDataSetListProvider() {
+    public ChartProcessedDataProvider() {
     }
 
-    public synchronized final TrendBoundaryEntryProvider getTrendBoundaryEntryProvider() {
-        return trendBoundaryEntryProvider;
+    public ChartProcessedData provide() {
+        if ( chartProcessedDataAtomicReference.get() != null ) {
+            return chartProcessedDataAtomicReference.get();
+        }
+
+        return EMPTY_CHART_PROCESSED_DATA;
     }
 
-    public synchronized List<LineDataSet> provide() {
-        return listLineDataSetAtomicReference.get();
-    }
-
-    public Observable<List<LineDataSet>> provide(DataEntityWrapper dataEntityWrapper, LineChartSettings settings, PaletteColorDeterminer paletteColorDeterminer) {
+    public Single<ChartProcessedData> provide(DataEntityWrapper dataEntityWrapper, LineChartSettings settings, PaletteColorDeterminer paletteColorDeterminer) {
         if (dataEntityWrapper == null)
-            return Observable.just(listLineDataSetAtomicReference.get())
+            return Single.just(chartProcessedDataAtomicReference.get())
                     .subscribeOn(Schedulers.computation())
                     .observeOn(Schedulers.computation());
 
 
-        List<LineDataSet> cachedList = lineDataSetListCachedProvider.provide(dataEntityWrapper, settings);
-        if (cachedList != null) {
-            return Observable.just( cachedList )
-                    .doOnNext(listLineDataSetAtomicReference::set)
+        ChartProcessedData cachedChartProcessedData = chartProcessedDataCachedProvider.provide(dataEntityWrapper, settings);
+        if (cachedChartProcessedData != null) {
+            chartProcessedDataAtomicReference.set(cachedChartProcessedData);
+            return Single.just( cachedChartProcessedData )
                     .subscribeOn(Schedulers.computation())
                     .observeOn(Schedulers.computation());
         }
@@ -60,7 +65,7 @@ public class LineDataSetListProvider {
         return provideInternal(dataEntityWrapper, settings, paletteColorDeterminer);
     }
 
-    private Observable<List<LineDataSet>> provideInternal(DataEntityWrapper dataEntityWrapper, LineChartSettings settings, PaletteColorDeterminer paletteColorDeterminer) {
+    private Single<ChartProcessedData> provideInternal(DataEntityWrapper dataEntityWrapper, LineChartSettings settings, PaletteColorDeterminer paletteColorDeterminer) {
         return ExtremaSegmentListProvider.provide(dataEntityWrapper)
                         .subscribeOn(Schedulers.computation())
                         .observeOn(Schedulers.computation())
@@ -68,17 +73,31 @@ public class LineDataSetListProvider {
                         .map(trendBoundaryDataEntityList -> trendBoundaryEntryProvider
                                 .provide(dataEntityWrapper, trendBoundaryDataEntityList, paletteColorDeterminer)
                         )
-                        .map(trendBoundaryEntryList -> createAndProvide(trendBoundaryEntryList, settings))
-                        .map(newLineDataSet -> {
-                            lineDataSetListCachedProvider.add(dataEntityWrapper, newLineDataSet);
+                        .map(trendBoundaryEntryList -> createLineDataSetList(trendBoundaryEntryList, settings))
+                        .map(ChartProcessedDataProvider::mapIntoProcessedData)
+                        .map(chartProcessedData -> {
+                            chartProcessedDataCachedProvider.add(settings, dataEntityWrapper, chartProcessedData);
 
-                            listLineDataSetAtomicReference.set(newLineDataSet);
-                            return newLineDataSet;
+                            chartProcessedDataAtomicReference.set(chartProcessedData);
+
+                            return chartProcessedData;
                         });
     }
 
-    private List<LineDataSet> createAndProvide(List<TrendBoundaryEntry> trendBoundaryEntryList, LineChartSettings settings) {
-        listLineDataSetAtomicReference.set(trendBoundaryEntryList.stream().map(boundaryEntry -> {
+    private static ChartProcessedData mapIntoProcessedData(List<LineDataSet> lineDataSetList) {
+        EntryCacheMap entryCacheMap = new EntryCacheMap();
+        entryCacheMap.update(lineDataSetList);
+
+        LineData lineData = LineDataSetMapper.mapIntoLineData(lineDataSetList);
+
+        return new ChartProcessedData(
+                new AtomicReference<>(entryCacheMap),
+                new AtomicReference<>(lineData)
+        );
+    }
+
+    private List<LineDataSet> createLineDataSetList(List<TrendBoundaryEntry> trendBoundaryEntryList, LineChartSettings settings) {
+        return trendBoundaryEntryList.stream().map(boundaryEntry -> {
             LineDataSet lineDataSet = new LineDataSet(boundaryEntry.entryList(), boundaryEntry.getLabel());
 
             lineDataSet.setMode(LineDataSet.Mode.HORIZONTAL_BEZIER);
@@ -100,8 +119,6 @@ public class LineDataSetListProvider {
             lineDataSet.setFillAlpha(trendStatistics.trendType().getFillAlpha());
 
             return lineDataSet;
-        }).collect(Collectors.toList()));
-
-        return listLineDataSetAtomicReference.get();
+        }).collect(Collectors.toList());
     }
 }

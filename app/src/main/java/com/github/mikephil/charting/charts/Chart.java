@@ -83,6 +83,8 @@ public abstract class Chart<T extends ChartData<? extends IDataSet<? extends Ent
      */
     protected boolean mHighLightPerTapEnabled = true;
 
+    protected boolean mHideLastHighlightedIfAgainSelected = true;
+
     /**
      * If set to true, chart continues to scroll after touch up
      */
@@ -516,6 +518,14 @@ public abstract class Chart<T extends ChartData<? extends IDataSet<? extends Ent
      */
     public void setHighlightPerTapEnabled(boolean enabled) {
         mHighLightPerTapEnabled = enabled;
+    }
+
+    public void setHideLastHighlightedIfAgainSelected(boolean enabled) {
+        mHideLastHighlightedIfAgainSelected = enabled;
+    }
+
+    public boolean isHideLastHighlightedIfAgainSelected() {
+        return mHideLastHighlightedIfAgainSelected;
     }
 
     /**

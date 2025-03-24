@@ -5,19 +5,17 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 
-import com.github.mikephil.charting.data.LineData;
-import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.itservices.gpxanalyzer.chart.entry.EntryCacheMap;
+import com.itservices.gpxanalyzer.data.cache.ChartProcessedData;
 import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
 
 import java.lang.ref.WeakReference;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 
-import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
@@ -27,7 +25,7 @@ class ChartProvider {
     @Inject
     LineChartSettings settings;
     @Inject
-    LineDataSetListProvider lineDataSetListProvider;
+    ChartProcessedDataProvider chartProcessedDataProvider;
     private WeakReference<DataEntityLineChart> chartWeakReference;
 
     @Inject
@@ -51,23 +49,24 @@ class ChartProvider {
      *
      * @return
      */
-    public Observable<RequestStatus> initChart() {
+    public Single<RequestStatus> initChart() {
         Log.d(ChartProvider.class.getSimpleName(), "initChart chartWeakReference = [" + chartWeakReference + "]");
 
         if (chartWeakReference == null || chartWeakReference.get() == null) {
-            return Observable.just(RequestStatus.CHART_WEAK_REFERENCE_IS_NULL);
+            return Single.just(RequestStatus.CHART_WEAK_REFERENCE_IS_NULL);
         }
 
         return chartWeakReference.get().initChart(settings)
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .flatMap(req -> {
-                    List<LineDataSet> sets = lineDataSetListProvider.provide();
-                    if (sets != null) {
-                        sets.clear();
-                        return tryToUpdateDataChart();
+                    ChartProcessedData chartProcessedData = chartProcessedDataProvider.provide();
+                    if (chartProcessedData != null) {
+                        //sets.clear();
+                        return updateDataChart();
+
                     }
-                    return Observable.just(RequestStatus.CHART_INITIALIZED);
+                    return Single.just(RequestStatus.CHART_INITIALIZED);
                 });
     }
 
@@ -76,36 +75,34 @@ class ChartProvider {
     }
 
     @UiThread
-    public Observable<RequestStatus> updateChartData(DataEntityWrapper dataEntityWrapper) {
+    public Single<RequestStatus> updateChartData(DataEntityWrapper dataEntityWrapper) {
         Log.d(ChartProvider.class.getSimpleName(), "updateChartData() called with: dataEntityWrapper = [" + dataEntityWrapper + "]");
 
         if (chartWeakReference == null || chartWeakReference.get() == null) {
-            return Observable.just(RequestStatus.CHART_WEAK_REFERENCE_IS_NULL);
+            return Single.just(RequestStatus.CHART_WEAK_REFERENCE_IS_NULL);
         }
 
         return
-                Observable.just(chartWeakReference.get())
+                Single.just(chartWeakReference.get())
                         .map(chart -> {
                             chart.setDataEntityWrapper(dataEntityWrapper);
                             return chart.getPaletteColorDeterminer();
                         })
-                        .flatMap(palette -> lineDataSetListProvider
+                        .flatMap(palette -> chartProcessedDataProvider
                                 .provide(dataEntityWrapper, settings, palette))
-                        .map(LineDataSetMapper::mapIntoLineData)
                         .subscribeOn(Schedulers.computation())
                         .observeOn(AndroidSchedulers.mainThread())
                         .flatMap(lineData -> updateChart(lineData, currentHighlightRef.get()))
                         .observeOn(Schedulers.io());
     }
 
-    public Observable<RequestStatus> tryToUpdateDataChart() {
-        return Observable.just(lineDataSetListProvider.provide())
+    public Single<RequestStatus> updateDataChart() {
+        return Single.just(chartProcessedDataProvider.provide())
                 .subscribeOn(Schedulers.io())
-                .map(settings::updateSettingsFor)
+                .doOnEvent( (chartProcessedData, throwable) -> settings.updateSettingsFor(chartProcessedData.lineData().get()))
                 .observeOn(Schedulers.computation())
-                .map(LineDataSetMapper::mapIntoLineData)
                 .observeOn(AndroidSchedulers.mainThread())
-                .flatMap(lineData -> updateChart(lineData, currentHighlightRef.get()));
+                .flatMap(chartProcessedData -> updateChart(chartProcessedData, currentHighlightRef.get()));
 
     }
 
@@ -121,16 +118,21 @@ class ChartProvider {
         return settings;
     }
 
+    @Nullable
     public EntryCacheMap getEntryCacheMap() {
-        return lineDataSetListProvider.getTrendBoundaryEntryProvider().getEntryCacheMap();
+        if (chartProcessedDataProvider.provide() != null) {
+            return chartProcessedDataProvider.provide().entryCacheMapAtomic().get();
+        }
+
+        return null;
     }
 
     /**
      * Combine the given datasets, apply styling and scaling, highlight if needed.
      */
-    private Observable<RequestStatus> updateChart(LineData lineData,
+    private Single<RequestStatus> updateChart(ChartProcessedData chartProcessedData,
                                                   Highlight highlight) {
-        return Observable.fromCallable(() -> {
+        return Single.fromCallable(() -> {
 
             if (chartWeakReference == null)
                 return RequestStatus.CHART_WEAK_REFERENCE_IS_NULL;
@@ -141,8 +143,8 @@ class ChartProvider {
                 return RequestStatus.CHART_IS_NULL;
 
             synchronized (chart) {
-                //chart.clear();
-                chart.setData(lineData);
+                chart.clear();
+                chart.setData(chartProcessedData.lineData().get());
                 chart.loadChartSettings(settings);
                 chart.highlightValue(highlight, true);
                 chart.invalidate();

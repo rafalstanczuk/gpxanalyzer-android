@@ -30,6 +30,7 @@ import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 
 @AndroidEntryPoint
 public class DataEntityLineChart extends LineChart {
@@ -112,8 +113,8 @@ public class DataEntityLineChart extends LineChart {
 		);*/
 	}
 
-	public Observable<RequestStatus> initChart(LineChartSettings settings) {
-		return Observable.fromCallable(() -> {
+	public Single<RequestStatus> initChart(LineChartSettings settings) {
+		return Single.fromCallable(() -> {
 			StaticChartHighlighter<DataEntityLineChart> staticChartHighlighter = new StaticChartHighlighter<>(
 					this, (BarLineChartTouchListener) mChartTouchListener);
 			setHighlighter(staticChartHighlighter);

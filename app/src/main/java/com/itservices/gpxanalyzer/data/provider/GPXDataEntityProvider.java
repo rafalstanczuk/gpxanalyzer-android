@@ -32,6 +32,7 @@ import javax.inject.Inject;
 
 import dagger.hilt.android.qualifiers.ApplicationContext;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 
 public final class GPXDataEntityProvider extends DataEntityProvider {
 
@@ -57,7 +58,7 @@ public final class GPXDataEntityProvider extends DataEntityProvider {
     }
 
     @Override
-    public Observable<Vector<DataEntity>> provideDefault() {
+    public Single<Vector<DataEntity>> provideDefault() {
         return contextWeakReference == null || contextWeakReference.get() == null ?
                 super.provideDefault()
                 :
@@ -65,20 +66,20 @@ public final class GPXDataEntityProvider extends DataEntityProvider {
     }
 
     @Override
-    public Observable<Vector<DataEntity>> provide(@NonNull InputStream inputStream) {
-        return Observable.fromCallable(() -> loadDataEntity(inputStream));
+    public Single<Vector<DataEntity>> provide(@NonNull InputStream inputStream) {
+        return Single.fromCallable(() -> loadDataEntity(inputStream));
     }
 
-    public Observable<Vector<DataEntity>> provide(@NonNull File file) {
-        return Observable.fromCallable(() -> {
+    public Single<Vector<DataEntity>> provide(@NonNull File file) {
+        return Single.fromCallable(() -> {
             try (InputStream inputStream = new FileInputStream(file)) {
                 return loadDataEntity(inputStream);
             }
         });
     }
 
-    private Observable<Vector<DataEntity>> provideInternal(Context context, int rawId) {
-        return Observable.fromCallable(() -> {
+    private Single<Vector<DataEntity>> provideInternal(Context context, int rawId) {
+        return Single.fromCallable(() -> {
             InputStream inputStream = context.getResources().openRawResource(rawId);
             return loadDataEntity(inputStream);
         });

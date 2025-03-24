@@ -10,13 +10,16 @@ import androidx.core.content.ContextCompat;
 
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.chart.settings.axis.AxisValueFormatter;
 import com.itservices.gpxanalyzer.chart.settings.axis.HourMinutesAxisValueFormatter;
 import com.itservices.gpxanalyzer.chart.settings.background.LimitLinesBoundaries;
 import com.itservices.gpxanalyzer.chart.settings.highlight.CustomMarker;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -37,6 +40,8 @@ public class LineChartSettings {
 
     private boolean drawIconsEnabled = false;
     private boolean drawAscDescSegEnabled = false;
+
+    private WeakReference<DataEntityLineChart> lineChartWeakRef;
 
     @Inject
     LineChartSettings(
@@ -74,15 +79,13 @@ public class LineChartSettings {
         this.dragDecelerationEnabled = dragDecelerationEnabled;
     }
 
+    public String getChartAddress() {
+        return Integer.toHexString(lineChartWeakRef.get().hashCode());
+    }
 
     public void setChartSettingsFor(DataEntityLineChart lineChart) {
 
-        if (lineChart.getData() != null) {
-
-            lineChart.getData().getDataSets().forEach(
-                    lineDataSet -> lineDataSet.setDrawIcons(drawIconsEnabled)
-            );
-        }
+        this.lineChartWeakRef = new WeakReference<>(lineChart);
 
         lineChart.setDragDecelerationEnabled(dragDecelerationEnabled);
         lineChart.setPaint(paintGridBg, PAINT_GRID_BACKGROUND);
@@ -97,6 +100,8 @@ public class LineChartSettings {
         lineChart.setMarker(customMarker);
         lineChart.setDrawBorders(false);
         lineChart.setMaxHighlightDistance(10000.0f);
+
+        lineChart.setHideLastHighlightedIfAgainSelected(false); //!!!!
 
         lineChart.resetZoom();
         lineChart.setMaxVisibleValueCount(20000);
@@ -180,13 +185,14 @@ public class LineChartSettings {
         this.drawAscDescSegEnabled = drawAscDescSegEnabled;
     }
 
-    public List<LineDataSet> updateSettingsFor(List<LineDataSet> lineDataSetList) {
+    public void updateSettingsFor(LineData lineData) {
+
+        List<ILineDataSet> lineDataSetList = lineData.getDataSets();
         lineDataSetList.forEach(
                 lineDataSet -> {
                     lineDataSet.setDrawFilled(isDrawAscDescSegEnabled());
+                    lineDataSet.setDrawIcons(drawIconsEnabled);
                 }
         );
-
-        return lineDataSetList;
     }
 }

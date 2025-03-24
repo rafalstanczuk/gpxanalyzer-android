@@ -1,143 +1,103 @@
 package com.itservices.gpxanalyzer.usecase;
 
-import static com.itservices.gpxanalyzer.chart.RequestStatus.CHART_UPDATING;
-import static com.itservices.gpxanalyzer.chart.RequestStatus.DATA_LOADED;
-import static com.itservices.gpxanalyzer.chart.RequestStatus.LOADING;
-
 import android.util.Log;
 
-import androidx.annotation.NonNull;
-
-import com.itservices.gpxanalyzer.chart.ChartController;
-import com.itservices.gpxanalyzer.chart.entry.BaseEntry;
 import com.itservices.gpxanalyzer.chart.RequestStatus;
+import com.itservices.gpxanalyzer.data.cache.MultipleChartsGlobalCache;
 import com.itservices.gpxanalyzer.data.provider.DataEntityCachedProvider;
-import com.itservices.gpxanalyzer.data.entity.DataEntity;
-import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
-import com.itservices.gpxanalyzer.data.provider.DataEntityWrapperCachedProvider;
 import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItem;
-import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.GpxViewMode;
-import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.GpxViewModeMapper;
 import com.itservices.gpxanalyzer.utils.common.ConcurrentUtil;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.Vector;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
+import io.reactivex.schedulers.Schedulers;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 
 @Singleton
 public class MultipleSyncedGpxChartUseCase {
-
+    private static final String TAG = "MultipleSyncedGpxChart";
     private final PublishSubject<RequestStatus> requestStatus = PublishSubject.create();
-    @Inject
-    GpxViewModeMapper viewModeMapper;
-
-    @Inject
-    DataEntityWrapperCachedProvider dataEntityWrapperCachedProvider;
-
+    
     @Inject
     DataEntityCachedProvider dataEntityCachedProvider;
 
-    private Disposable loadDataDisposable;
+    @Inject
+    MultipleChartsGlobalCache multipleChartsGlobalCache;
 
-    private CompositeDisposable observeSelectionCompositeDisposable = new CompositeDisposable();
+    private final ChartDataLoader chartDataLoader;
+    private final ChartInitializer chartInitializer;
+    private final SelectionObserver selectionObserver;
+
+    private Disposable loadDataDisposable;
+    private List<ChartAreaItem> currentCharts;
 
     @Inject
-    public MultipleSyncedGpxChartUseCase() {
+    public MultipleSyncedGpxChartUseCase(ChartDataLoader chartDataLoader, ChartInitializer chartInitializer, SelectionObserver selectionObserver) {
+        this.chartDataLoader = chartDataLoader;
+        this.chartInitializer = chartInitializer;
+        this.selectionObserver = selectionObserver;
+        chartDataLoader.setRequestStatusPublish(requestStatus);
     }
 
     public void initObserveSelectionOnNeighborChart(List<ChartAreaItem> list) {
-        Log.d(MultipleSyncedGpxChartUseCase.class.getSimpleName(), "initObservableSelection() called with: list = [" + list + "]");
+        if (list == null || list.isEmpty()) {
+            Log.w(TAG, "Cannot initialize selection observation - chart list is null or empty");
+            return;
+        }
 
-        ConcurrentUtil.tryToDispose(observeSelectionCompositeDisposable);
-        observeSelectionCompositeDisposable = new CompositeDisposable();
-        list.forEach(first ->
-                list.forEach(second -> {
-                    if (first != second) {
-                        observeSelectionCompositeDisposable.add(
-                                observeSelectionOn(first.getChartController().getSelection(), second.getChartController())
-                        );
-                    }
-                })
-        );
+        Log.d(TAG, "Initializing selection observation for " + list.size() + " charts");
+        
+        // Store current charts for later use
+        this.currentCharts = list;
+        
+        // Initialize chart synchronization
+        selectionObserver.initChartSync(list);
+        
+        // Initialize global cache
+        multipleChartsGlobalCache.init(list);
+        Log.d(TAG, "Selection observation initialized successfully");
     }
 
     public void loadData(List<ChartAreaItem> chartAreaItemList) {
-        if (chartAreaItemList.isEmpty())
+        if (chartAreaItemList == null || chartAreaItemList.isEmpty()) {
+            Log.w(TAG, "Cannot load data - chart list is null or empty");
             return;
+        }
 
-        requestStatus.onNext(LOADING);
-
+        Log.d(TAG, "Loading data for " + chartAreaItemList.size() + " charts");
+        
+        // Notify selection observer about new file
+        selectionObserver.onFileLoaded();
+        
+        // Dispose existing data loading subscription
         ConcurrentUtil.tryToDispose(loadDataDisposable);
-        loadDataDisposable = dataEntityCachedProvider.provide()
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.newThread())
-                .doOnNext(data -> requestStatus.onNext(DATA_LOADED))
-                .flatMap(data ->
-                        Observable.fromIterable(chartAreaItemList)
-                                .flatMap(chartAreaItem -> initChartItemWithDataWrapper(chartAreaItem, data))
-                )
-                .doOnNext(chartAreaItem -> requestStatus.onNext(CHART_UPDATING))
-                .flatMap(ChartAreaItem::updateChart)
-                .doOnNext(requestStatus::onNext)
-                .toList()
-                .toObservable()
-                .doOnError(Throwable::printStackTrace)
-                .subscribe(
-                        requestStatusList ->
-                                requestStatusList.stream()
-                                        .min(Comparator.comparingInt(Enum::ordinal))
-                                        .ifPresent(status -> {
-                                            if (status == RequestStatus.CHART_UPDATED) {
-                                                requestStatus.onNext(RequestStatus.DONE);
-                                            } else {
-                                                requestStatus.onNext(status);
-                                            }
-                                        }),
-
-                        onError -> Log.e("loadData", "loadData: onError ", onError)
-                );
-    }
-
-    @NonNull
-    private Observable<ChartAreaItem> initChartItemWithDataWrapper(ChartAreaItem chartAreaItem, Vector<DataEntity> data) {
-        return chartAreaItem.getChartController()
-                .initChart()
-                .map(status -> {
-                    GpxViewMode iChartViewMode = chartAreaItem.getViewMode().getValue();
-
-                    int primaryKeyIndex = viewModeMapper.mapToPrimaryKeyIndexList(iChartViewMode);
-
-                    DataEntityWrapper dataEntityWrapper = dataEntityWrapperCachedProvider.provide(data, (short) primaryKeyIndex);
-
-                    chartAreaItem.setDataEntityWrapper(dataEntityWrapper);
-
-                    return chartAreaItem;
-                });
-    }
-
-    private Disposable observeSelectionOn(Observable<BaseEntry> selection, ChartController chartController) {
-        return selection
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnNext(baseEntry ->
-                        chartController.select(baseEntry.getDataEntity().timestampMillis())
-                )
-                .subscribe();
+        
+        // Load new data
+        loadDataDisposable = chartDataLoader.loadData(chartAreaItemList, chartInitializer)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnComplete(() -> {
+                Log.d(TAG, "Data loading completed successfully");
+                // Reinitialize chart sync after data is loaded
+                if (currentCharts != null) {
+                    initObserveSelectionOnNeighborChart(currentCharts);
+                }
+            })
+            .doOnError(throwable -> Log.e(TAG, "Error loading data", throwable))
+            .subscribe();
     }
 
     public void disposeAll() {
+        Log.d(TAG, "Disposing all subscriptions");
         ConcurrentUtil.tryToDispose(loadDataDisposable);
-        ConcurrentUtil.tryToDispose(observeSelectionCompositeDisposable);
+        selectionObserver.dispose();
+        currentCharts = null;
     }
 
     public Observable<Integer> getPercentageProgress() {
@@ -148,3 +108,4 @@ public class MultipleSyncedGpxChartUseCase {
         return requestStatus;
     }
 }
+

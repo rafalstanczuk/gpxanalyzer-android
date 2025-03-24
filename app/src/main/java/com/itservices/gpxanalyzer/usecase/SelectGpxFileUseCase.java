@@ -21,6 +21,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
@@ -71,15 +72,15 @@ public class SelectGpxFileUseCase {
         return fileFoundList;
     }
 
-    public Observable<List<File>> loadLocalGpxFiles(Context context) {
-        return Observable.fromCallable(() -> {
+    public Single<List<File>> loadLocalGpxFiles(Context context) {
+        return Single.fromCallable(() -> {
             fileFoundList = FileProviderUtils.getFilesByExtension(context, GPX_FILE_EXTENSION);
             return fileFoundList;
         });
     }
 
-    public Observable<File> addFile(Context context, Uri uri) {
-        return Observable.fromCallable(() -> {
+    public Single<File> addFile(Context context, Uri uri) {
+        return Single.fromCallable(() -> {
             File file = FileProviderUtils.copyUriToAppStorage(context, uri, GPX_FILE_EXTENSION);
             if (file != null) {
                 if (fileFoundList != null && !fileFoundList.contains(file)) {

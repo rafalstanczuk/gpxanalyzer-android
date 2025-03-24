@@ -1,9 +1,5 @@
 package com.itservices.gpxanalyzer.data.extrema;
 
-import android.util.Log;
-
-import androidx.annotation.NonNull;
-
 import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
 import com.itservices.gpxanalyzer.data.extrema.detector.DataPrimitiveMapper;
 import com.itservices.gpxanalyzer.data.extrema.detector.ExtremaSegmentDetector;
@@ -17,12 +13,12 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import io.reactivex.Observable;
+import io.reactivex.Single;
 
 public class ExtremaSegmentListProvider {
 
-    public static Observable<List<Segment>> provide(DataEntityWrapper dataEntityWrapper) {
-        return Observable.fromCallable(() -> {
+    public static Single<List<Segment>> provide(DataEntityWrapper dataEntityWrapper) {
+        return Single.fromCallable(() -> {
             List<PrimitiveDataEntity> primitiveList = DataPrimitiveMapper.mapFrom(dataEntityWrapper);
 
             primitiveList.sort(Comparator.comparingLong(PrimitiveDataEntity::getTimestamp));

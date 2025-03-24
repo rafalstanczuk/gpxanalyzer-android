@@ -14,6 +14,7 @@ import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.itservices.gpxanalyzer.chart.entry.BaseEntry;
+import com.itservices.gpxanalyzer.chart.entry.EntryCacheMap;
 import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
 
 import java.util.Objects;
@@ -21,6 +22,7 @@ import java.util.Objects;
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.subjects.PublishSubject;
 
 public class ChartController implements OnChartValueSelectedListener, OnChartGestureListener {
@@ -46,7 +48,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
         chartProvider.registerBinding(chartBindings);
     }
 
-    public Observable<RequestStatus> initChart() {
+    public Single<RequestStatus> initChart() {
         return chartProvider.initChart();
     }
 
@@ -62,22 +64,22 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
         return chartProvider.getSettings().isDrawIconsEnabled();
     }
 
-
-    public boolean isDrawAscDescSegEnabled() {
-        return chartProvider.getSettings().isDrawAscDescSegEnabled();
-    }
-    @UiThread
-    public void setDrawAscDescSegEnabled(boolean isChecked) {
-
-        chartProvider.getSettings().setDrawAscDescSegEnabled(isChecked);
-        chartProvider.tryToUpdateDataChart().subscribe();
-    }
-
     @UiThread
     public void setDrawIconsEnabled(boolean isChecked) {
 
         chartProvider.getSettings().setDrawIconsEnabled(isChecked);
-        chartProvider.tryToUpdateDataChart().subscribe();
+        chartProvider.updateDataChart().subscribe();
+    }
+
+    public boolean isDrawAscDescSegEnabled() {
+        return chartProvider.getSettings().isDrawAscDescSegEnabled();
+    }
+
+    @UiThread
+    public void setDrawAscDescSegEnabled(boolean isChecked) {
+
+        chartProvider.getSettings().setDrawAscDescSegEnabled(isChecked);
+        chartProvider.updateDataChart().subscribe();
     }
 
     public void animateZoomToCenter(final float targetScaleX, final float targetScaleY, long duration) {
@@ -92,7 +94,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
         chartProvider.getSettings().setDrawXLabels(drawX);
     }
 
-    public Observable<RequestStatus> updateChartData(DataEntityWrapper dataEntityWrapper) {
+    public Single<RequestStatus> updateChartData(DataEntityWrapper dataEntityWrapper) {
         return chartProvider.updateChartData(dataEntityWrapper);
     }
 
@@ -105,6 +107,10 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     }
 
     private void manualSelectEntryOnSelectedTime(DataEntityLineChart chart, long selectedTimeMillis, boolean centerViewToSelection, boolean callListeners) {
+        if (chart == null) {
+            Log.w(ChartController.class.getSimpleName(), "Chart is null during selection");
+            return;
+        }
 
         chart.getChartTouchListener().setLastGesture(ChartTouchListener.ChartGesture.NONE);
 
@@ -114,11 +120,19 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
             return;
         }
         if (chart.getData() == null) {
+            Log.w(ChartController.class.getSimpleName(), "Chart data is null during selection");
             return;
         }
 
-        BaseEntry entryFound = (BaseEntry) chartProvider.getEntryCacheMap().get(selectedTimeMillis);
+        EntryCacheMap entryCacheMap = chartProvider.getEntryCacheMap();
+        if (entryCacheMap == null) {
+            Log.w(ChartController.class.getSimpleName(), "Entry cache map is null during selection");
+            return;
+        }
+
+        BaseEntry entryFound = (BaseEntry) entryCacheMap.get(selectedTimeMillis);
         if (entryFound != null) {
+            //Log.d(ChartController.class.getSimpleName(), "Found entry for timestamp: " + selectedTimeMillis);
             setSelectionEntry(entryFound, callListeners);
             chart.highlightValue(entryFound.getX(), entryFound.getY(), entryFound.getDataSetIndex(), callListeners);
 
@@ -129,13 +143,22 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
             if (centerViewToSelection) {
                 chart.centerViewTo(entryFound.getX(), entryFound.getY(), YAxis.AxisDependency.LEFT);
             }
+        } else {
+            Log.w(ChartController.class.getSimpleName(), "No entry found for timestamp: " + selectedTimeMillis);
         }
     }
 
     private void setSelectionEntry(Entry entry, boolean publishSelection) {
-        Objects.requireNonNull(chartProvider.getChart()).setHighlightedEntry(entry);
+        DataEntityLineChart chart = chartProvider.getChart();
+        if (chart == null) {
+            Log.w(ChartController.class.getSimpleName(), "Chart is null during selection entry setting");
+            return;
+        }
+
+        chart.setHighlightedEntry(entry);
 
         if (publishSelection && (entry instanceof BaseEntry)) {
+            //Log.d(ChartController.class.getSimpleName(), "Publishing selection for entry: " + entry);
             baseEntrySelectionPublishSubject.onNext((BaseEntry) entry);
         }
     }
@@ -182,13 +205,24 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
 
     @Override
     public void onValueSelected(Entry e, Highlight h) {
+        //Log.d(ChartController.class.getSimpleName(), "Value selected: " + e + ", highlight: " + h);
         setSelectionEntry(e, true);
         chartProvider.setSelectionHighlight(h);
     }
 
     @Override
     public void onNothingSelected() {
+        Log.d(ChartController.class.getSimpleName(), "Nothing selected");
         resetMarkerAndClearSelection(Objects.requireNonNull(chartProvider.getChart()));
     }
 
+    public String getChartAddress() {
+        DataEntityLineChart chart = chartProvider.getChart();
+
+        if (chart != null) {
+            return Integer.toHexString( chart.hashCode() );
+        }
+
+        return null;
+    }
 }

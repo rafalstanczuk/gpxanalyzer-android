@@ -118,9 +118,9 @@ public abstract class ChartTouchListener<T extends Chart<?>> extends GestureDete
      *
      * @param e
      */
-    protected void performHighlight(Highlight h, MotionEvent e) {
+    protected void performHighlight(Highlight h, MotionEvent e, boolean hideLastHighlightedIfAgainSelected) {
 
-        if (h == null || h.equalTo(mLastHighlighted)) {
+        if (h == null || (h.equalTo(mLastHighlighted) && hideLastHighlightedIfAgainSelected) ) {
             mChart.highlightValue(null, true);
             mLastHighlighted = null;
         } else {

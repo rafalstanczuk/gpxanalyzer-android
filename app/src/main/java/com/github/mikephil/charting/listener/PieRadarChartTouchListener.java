@@ -150,7 +150,7 @@ public class PieRadarChartTouchListener extends ChartTouchListener<PieRadarChart
         }
 
         Highlight high = mChart.getHighlightByTouchPoint(e.getX(), e.getY());
-        performHighlight(high, e);
+        performHighlight(high, e, mChart.isHideLastHighlightedIfAgainSelected());
 
         return true;
     }

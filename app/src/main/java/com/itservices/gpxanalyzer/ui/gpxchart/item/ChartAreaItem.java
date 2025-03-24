@@ -1,5 +1,6 @@
 package com.itservices.gpxanalyzer.ui.gpxchart.item;
 
+import android.util.Log;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -11,6 +12,7 @@ import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.GpxViewMode;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 
 public class ChartAreaItem {
 
@@ -49,9 +51,11 @@ public class ChartAreaItem {
     }
 
     public void setDataEntityWrapper(DataEntityWrapper dataEntityWrapper) {
-        if (this.dataEntityWrapper != null) {
-            this.dataEntityWrapper = null;
+        if (dataEntityWrapper == null) {
+            Log.w(ChartAreaItem.class.getSimpleName(), "Attempted to set null data wrapper");
+            return;
         }
+        Log.d(ChartAreaItem.class.getSimpleName(), "Setting data wrapper with primary index: " + dataEntityWrapper.getPrimaryDataIndex());
         this.dataEntityWrapper = dataEntityWrapper;
     }
 
@@ -60,14 +64,25 @@ public class ChartAreaItem {
     }
 
     public void setViewMode(GpxViewMode viewMode) {
+        if (viewMode == null) {
+            Log.w(ChartAreaItem.class.getSimpleName(), "Attempted to set null view mode");
+            return;
+        }
+        Log.d(ChartAreaItem.class.getSimpleName(), "Setting view mode: " + viewMode.name());
         viewModeLiveData.setValue(viewMode);
     }
 
     public void setDrawX(boolean drawX) {
+        Log.d(ChartAreaItem.class.getSimpleName(), "Setting drawX: " + drawX);
         chartController.setDrawXLabels(drawX);
     }
 
-    public Observable<RequestStatus> updateChart() {
+    public Single<RequestStatus> updateChart() {
+        if (dataEntityWrapper == null) {
+            Log.w(ChartAreaItem.class.getSimpleName(), "Cannot update chart - data wrapper is null");
+            return Single.just(RequestStatus.ERROR);
+        }
+        Log.d(ChartAreaItem.class.getSimpleName(), "Updating chart with data wrapper index: " + dataEntityWrapper.getPrimaryDataIndex());
         return chartController.updateChartData(dataEntityWrapper);
     }
 }

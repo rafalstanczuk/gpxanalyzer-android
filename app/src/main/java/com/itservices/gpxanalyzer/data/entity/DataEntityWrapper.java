@@ -11,14 +11,13 @@ import java.util.stream.Collectors;
 
 public final class DataEntityWrapper {
     public static final int DEFAULT_PRIMARY_DATA_INDEX = 0;
+    private final Vector<DataEntity> data;
     private double maxValue;
     private double minValue;
-
-    private final Vector<DataEntity> data;
-
     private int primaryDataIndex = DEFAULT_PRIMARY_DATA_INDEX;
 
     private int hashCode = -1;
+    private long dataEntityTimestampHash = -1;
 
     private DataEntityWrapper(Vector<DataEntity> data) {
         this.data = data;
@@ -29,18 +28,12 @@ public final class DataEntityWrapper {
         this.data = data;
         compute();
 
+        dataEntityTimestampHash = computeDataEntityTimestampHash();
         hashCode = computeHash();
     }
 
     public double getDeltaMinMax() {
         return maxValue - minValue;
-    }
-
-    public void setPrimaryDataIndex(int primaryDataIndex) {
-        this.primaryDataIndex = primaryDataIndex;
-        compute();
-
-        hashCode = computeHash();
     }
 
     private void clear() {
@@ -49,6 +42,7 @@ public final class DataEntityWrapper {
         maxValue = Float.MIN_VALUE;
         minValue = Float.MAX_VALUE;
 
+        dataEntityTimestampHash = computeDataEntityTimestampHash();
         hashCode = computeHash();
     }
 
@@ -65,12 +59,42 @@ public final class DataEntityWrapper {
         maxValue = stats.getMax();
     }
 
+    private long computeDataEntityTimestampHash() {
+        return Objects.hash(
+                getMaxValue(),
+                getMinValue(),
+                        data
+                        .stream()
+                        .mapToLong(DataEntity::timestampMillis)
+                        .sum(),
+                getPrimaryDataIndex()
+        );
+    }
+
+    public long getDataHash() {
+        if (dataEntityTimestampHash > 0)
+            return dataEntityTimestampHash;
+        else {
+            dataEntityTimestampHash = computeDataEntityTimestampHash();
+        }
+
+        return dataEntityTimestampHash;
+    }
+
     public Vector<DataEntity> getData() {
         return data;
     }
 
     public int getPrimaryDataIndex() {
         return primaryDataIndex;
+    }
+
+    public void setPrimaryDataIndex(int primaryDataIndex) {
+        this.primaryDataIndex = primaryDataIndex;
+        compute();
+
+        dataEntityTimestampHash = computeDataEntityTimestampHash();
+        hashCode = computeHash();
     }
 
     public double getMaxValue() {
@@ -134,7 +158,9 @@ public final class DataEntityWrapper {
             return hashCode;
         }
 
-         return computeHash();
+        hashCode = computeHash();
+
+        return hashCode;
     }
 
     private int computeHash() {

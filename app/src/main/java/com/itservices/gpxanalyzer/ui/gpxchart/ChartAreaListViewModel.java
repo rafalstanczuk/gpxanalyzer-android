@@ -123,13 +123,39 @@ public class ChartAreaListViewModel extends ViewModel {
     }
 
     private void createOnSeverityMode(ViewModeSeverity mode) {
-        List<ChartAreaItem> list = chartAreaItemListLiveData.getValue();
-        assert list != null;
-        list.clear();
-
-        list = new ArrayList<>(immutableList.subList(0, mode.getCount()));
-        chartAreaItemListLiveData.setValue(list);
-        multipleSyncedGpxChartUseCase.initObserveSelectionOnNeighborChart(list);
+        List<ChartAreaItem> currentList = chartAreaItemListLiveData.getValue();
+        assert currentList != null;
+        
+        int targetCount = mode.getCount();
+        int currentCount = currentList.size();
+        
+        // Build a new list that preserves existing chart items to keep their cached data
+        List<ChartAreaItem> newList;
+        
+        if (targetCount <= currentCount) {
+            // Removing charts: keep the first targetCount items to preserve their cache
+            newList = new ArrayList<>(currentList.subList(0, targetCount));
+        } else {
+            // Adding charts: keep all existing charts and add new ones from immutableList
+            newList = new ArrayList<>(currentList); // Keep all existing charts with cached data
+            
+            // Add any additional charts needed from the immutable list
+            for (int i = currentCount; i < targetCount; i++) {
+                if (i < immutableList.size()) {
+                    newList.add(immutableList.get(i));
+                }
+            }
+        }
+        
+        // Update the LiveData with the new list
+        chartAreaItemListLiveData.setValue(newList);
+        
+        // Re-initialize the observation for neighbor charts
+        multipleSyncedGpxChartUseCase.initObserveSelectionOnNeighborChart(newList);
+        
+        // Log the change for debugging
+        Log.d("ChartAreaListViewModel", 
+              "Changed severity mode to " + mode + ", chart count: " + newList.size());
     }
 
     public void setOrientation(int orientation) {
