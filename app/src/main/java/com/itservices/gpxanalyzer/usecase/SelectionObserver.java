@@ -16,14 +16,32 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 
+/**
+ * Manages synchronization of selection events between multiple charts.
+ * This class observes selection events from chart controllers and propagates
+ * them to other charts, ensuring that all charts display selections in sync.
+ * It enables coordinated viewing of data points across multiple chart visualizations.
+ */
 public class SelectionObserver {
     private static final String TAG = "SelectionObserver";
     private CompositeDisposable selectionCompositeDisposable = new CompositeDisposable();
 
+    /**
+     * Creates a new SelectionObserver instance.
+     * Uses Dagger for dependency injection.
+     */
     @Inject
     public SelectionObserver() {
     }
 
+    /**
+     * Initializes synchronization between a list of charts.
+     * This method sets up bidirectional selection event propagation between
+     * all valid pairs of charts in the provided list. When a selection
+     * is made in any chart, it will be reflected in all other charts.
+     *
+     * @param charts The list of charts to synchronize
+     */
     public void initChartSync(List<ChartAreaItem> charts) {
         if (charts == null || charts.isEmpty()) {
             Log.w(TAG, "Cannot initialize chart sync - chart list is null or empty");
@@ -46,6 +64,14 @@ public class SelectionObserver {
         Log.d(TAG, "Chart sync initialized successfully");
     }
 
+    /**
+     * Validates that a chart item is suitable for synchronization.
+     * Checks that the chart and its controller are properly initialized.
+     *
+     * @param chart The chart to validate
+     * @param index The index of the chart in the list (for logging)
+     * @return true if the chart is valid for synchronization, false otherwise
+     */
     private boolean isValidChart(ChartAreaItem chart, int index) {
         if (chart == null) {
             Log.w(TAG, "Chart is null at index " + index);
@@ -66,6 +92,14 @@ public class SelectionObserver {
         return true;
     }
 
+    /**
+     * Sets up synchronization between two charts.
+     * This method subscribes to selection events from the source chart
+     * and propagates them to the target chart.
+     *
+     * @param sourceChart The chart to observe selection events from
+     * @param targetChart The chart to propagate selection events to
+     */
     private void setupSync(ChartAreaItem sourceChart, ChartAreaItem targetChart) {
         ChartController sourceController = sourceChart.getChartController();
         ChartController targetController = targetChart.getChartController();
@@ -104,12 +138,22 @@ public class SelectionObserver {
         selectionCompositeDisposable.add(disposable);
     }
 
+    /**
+     * Disposes all selection synchronization subscriptions.
+     * This method should be called when selection synchronization is no longer needed
+     * or when preparing to set up new synchronization.
+     */
     public void dispose() {
         Log.d(TAG, "Disposing selection subscriptions");
         ConcurrentUtil.tryToDispose(selectionCompositeDisposable);
         selectionCompositeDisposable = new CompositeDisposable();
     }
 
+    /**
+     * Handles notification that a new file has been loaded.
+     * This method disposes existing selection subscriptions to prepare
+     * for new synchronization setup.
+     */
     public void onFileLoaded() {
         Log.d(TAG, "New file loaded - reinitializing chart sync");
         dispose(); // Clean up existing subscriptions

@@ -10,100 +10,103 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * Represents a single data point in the GPX analyzer application.
+ * This class encapsulates all measurements and statistics associated with a single
+ * point in time, including various data measures and cumulative statistics.
+ *
+ * The class is immutable except for the extraData field and cumulative statistics,
+ * which can be modified after construction. It supports multiple data measures and
+ * maintains cumulative statistics for each measure.
+ */
 public final class DataEntity {
     private final int id;
     private final long timestampMillis;
-    private final List<Float> valueList;
-    private final List<Float> valueAccuracyList;
-    private final List<String> nameList;
-    private final List<String> unitList;
+
+    private final List<DataMeasure> dataMeasureList;
+
+    private Object extraData;
     private final List<Map<CumulativeProcessedDataType, CumulativeStatistics>>
             cumulativeStatisticsMapList
             = new ArrayList<>(
-                Arrays.asList(
-                        new HashMap<>(CumulativeProcessedDataType.values().length),
-                        new HashMap<>(CumulativeProcessedDataType.values().length)
-                )
-            );
+            Arrays.asList(
+                    new HashMap<>(CumulativeProcessedDataType.values().length),
+                    new HashMap<>(CumulativeProcessedDataType.values().length)
+            )
+    );
 
+    /**
+     * Creates a new DataEntity with the specified parameters.
+     *
+     * @param id The unique identifier for this data point
+     * @param timestampMillis The timestamp in milliseconds when this data was recorded
+     * @param dataMeasureList The list of measurements associated with this data point
+     * @param extraData Additional data that can be associated with this entity
+     */
     public DataEntity(
             int id,
             long timestampMillis,
-            List<Float> valueList,
-            List<Float> valueAccuracyList,
-            List<String> nameList,
-            List<String> unitList
-    ) {
+            List<DataMeasure> dataMeasureList,
+            Object extraData) {
         this.id = id;
         this.timestampMillis = timestampMillis;
-        this.valueList = valueList;
-        this.valueAccuracyList = valueAccuracyList;
-        this.nameList = nameList;
-        this.unitList = unitList;
+        this.dataMeasureList = dataMeasureList;
+        this.extraData = extraData;
     }
 
-    public boolean hasValuesWithName(String name) {
-        return nameList().contains(name);
+    /**
+     * Returns the list of measurements associated with this data point.
+     *
+     * @return The list of DataMeasure objects
+     */
+    public List<DataMeasure> getMeasures() {
+        return dataMeasureList;
     }
 
-    public int indexValuesWithName(String name) {
-        return nameList().indexOf(name);
-    }
-
-    public float getValue(int index) {
-        return valueList().get(
-                index
-        );
-    }
-
-    public String getUnit(int index) {
-        return unitList().get(
-                index
-        );
-    }
-
-    public float getValueAccuracy(int index) {
-        return valueAccuracyList().get(
-                index
-        );
-    }
-
-    public float getValueWithName(String name) {
-        return valueList().get(
-                nameList().indexOf(name)
-        );
-    }
-
-    public String getUnitWithName(String name) {
-        return unitList().get(
-                nameList().indexOf(name)
-        );
-    }
-
+    /**
+     * Returns the unique identifier of this data point.
+     *
+     * @return The ID value
+     */
     public int id() {
         return id;
     }
 
+    /**
+     * Returns the timestamp when this data was recorded.
+     *
+     * @return The timestamp in milliseconds
+     */
     public long timestampMillis() {
         return timestampMillis;
     }
 
-    public List<Float> valueList() {
-        return valueList;
+    /**
+     * Returns the extra data associated with this entity.
+     *
+     * @return The extra data object, or null if not set
+     */
+    public Object getExtraData() {
+        return extraData;
     }
 
-    public List<Float> valueAccuracyList() {
-        return valueAccuracyList;
+    /**
+     * Sets the extra data for this entity.
+     *
+     * @param extraData The extra data to associate with this entity
+     */
+    public void setExtraData(Object extraData) {
+        this.extraData = extraData;
     }
 
-    public List<String> nameList() {
-        return nameList;
-    }
-
-    public List<String> unitList() {
-        return unitList;
-    }
-
+    /**
+     * Returns the cumulative statistics for a specific measure and type.
+     * If the statistics don't exist, they will be created.
+     *
+     * @param index The index of the measure to get statistics for
+     * @param type The type of cumulative statistics to retrieve
+     * @return The cumulative statistics for the specified measure and type
+     */
     public CumulativeStatistics get(int index, CumulativeProcessedDataType type) {
         if (cumulativeStatisticsMapList.get(index).containsKey(type)) {
             return cumulativeStatisticsMapList.get(index).get(type);
@@ -121,11 +124,11 @@ public final class DataEntity {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof DataEntity that)) return false;
-        return id == that.id && timestampMillis == that.timestampMillis && Objects.equals(valueList, that.valueList) && Objects.equals(nameList, that.nameList) && Objects.equals(unitList, that.unitList) && Objects.equals(valueAccuracyList, that.valueAccuracyList);
+        return id == that.id && timestampMillis == that.timestampMillis && Objects.equals(dataMeasureList, that.dataMeasureList);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, timestampMillis, valueList, valueAccuracyList, nameList, unitList);
+        return Objects.hash(id, timestampMillis, dataMeasureList);
     }
 }

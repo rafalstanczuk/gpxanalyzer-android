@@ -4,7 +4,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import com.itservices.gpxanalyzer.data.cache.DataEntityWrapperCachedProvider;
+import com.itservices.gpxanalyzer.data.cache.type.DataEntityWrapperCachedProvider;
 import com.itservices.gpxanalyzer.data.entity.DataEntity;
 import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
 import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItem;
@@ -17,6 +17,12 @@ import javax.inject.Inject;
 
 import io.reactivex.Single;
 
+/**
+ * Responsible for initializing chart items with appropriate data.
+ * This class handles connecting chart objects with their corresponding data sources,
+ * mapping view modes to data indices, and preparing charts for rendering.
+ * It serves as a bridge between the visual chart components and their underlying data.
+ */
 public class ChartInitializer {
 
     @Inject
@@ -25,10 +31,26 @@ public class ChartInitializer {
     @Inject
     public DataEntityWrapperCachedProvider dataEntityWrapperCachedProvider;
 
+    /**
+     * Creates a new ChartInitializer instance.
+     * Uses Dagger for dependency injection.
+     */
     @Inject
     ChartInitializer() {
     }
 
+    /**
+     * Initializes a chart item with the appropriate data wrapper based on its view mode.
+     * This method:
+     * 1. Initializes the chart controller
+     * 2. Maps the chart's view mode to a primary key index
+     * 3. Obtains the DataEntityWrapper for that index
+     * 4. Associates the data wrapper with the chart item
+     *
+     * @param chartAreaItem The chart item to initialize
+     * @param data The raw data entities available for charting
+     * @return A Single that emits the initialized chart item
+     */
     @NonNull
     Single<ChartAreaItem> initChartItemWithDataWrapper(ChartAreaItem chartAreaItem, Vector<DataEntity> data) {
         return chartAreaItem.getChartController()
@@ -42,7 +64,7 @@ public class ChartInitializer {
                     }
 
                     int primaryKeyIndex = viewModeMapper.mapToPrimaryKeyIndexList(iChartViewMode);
-                    DataEntityWrapper dataEntityWrapper = dataEntityWrapperCachedProvider.provide(data, (short) primaryKeyIndex);
+                    DataEntityWrapper dataEntityWrapper = dataEntityWrapperCachedProvider.provide( (short) primaryKeyIndex);
 
                     if (chartAreaItem.getDataEntityWrapper() == null ||
                             chartAreaItem.getDataEntityWrapper().getPrimaryDataIndex() != primaryKeyIndex) {

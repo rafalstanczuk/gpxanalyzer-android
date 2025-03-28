@@ -32,44 +32,125 @@ import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 
+/**
+ * Specialized LineChart for displaying GPX data.
+ * <p>
+ * This class extends MPAndroidChart's LineChart to provide custom functionality
+ * for displaying and interacting with GPX data. It integrates with the application's
+ * chart styling, data handling, and interaction components.
+ * <p>
+ * Key features include:
+ * <ul>
+ *   <li>Custom background grid drawing with GPX-specific styling</li>
+ *   <li>Enhanced highlighting of data points with selectable behaviors</li>
+ *   <li>Integration with application-specific data structures like {@link DataEntityWrapper}</li>
+ *   <li>Specialized touch handling for GPX data exploration</li>
+ *   <li>Support for limit lines showing important thresholds or boundaries</li>
+ *   <li>Customized scaling and zooming behavior for GPX tracks</li>
+ * </ul>
+ * <p>
+ * This chart component is designed to work with the broader GPX Analyzer application
+ * architecture, including dependency injection through Dagger Hilt and reactive
+ * programming patterns with RxJava.
+ */
 @AndroidEntryPoint
 public class DataEntityLineChart extends LineChart {
 
 /*	@Inject
 	DataEntityInfoLayoutView dataEntityInfoLayoutView;*/
 
+	/**
+	 * Determines colors for chart elements based on the data being displayed.
+	 * <p>
+	 * This component provides a consistent color scheme for the chart based on
+	 * the type of data being visualized (elevation, speed, etc.).
+	 */
 	@Inject
 	PaletteColorDeterminer paletteColorDeterminer;
 
+	/**
+	 * Handles drawing of the chart's background grid.
+	 * <p>
+	 * This component is responsible for rendering the grid background with
+	 * custom styling appropriate for GPX data visualization.
+	 */
 	@Inject
 	GridBackgroundDrawer gridBackgroundDrawer;
 
+	/**
+	 * Manages scaling and zooming of the chart.
+	 * <p>
+	 * This component handles the scaling behavior of the chart, ensuring that
+	 * GPX data is displayed at appropriate scales and with proper boundaries.
+	 */
 	@Inject
 	LineChartScaler scaler;
 
+	/**
+	 * Manages the limit lines (boundaries) of the chart.
+	 * <p>
+	 * This component defines horizontal reference lines that indicate important
+	 * thresholds or boundaries in the data, such as elevation zones or speed limits.
+	 */
 	@Inject
 	LimitLinesBoundaries limitLinesBoundaries;
 
+	/**
+	 * Reference to the main activity, used for context operations.
+	 * <p>
+	 * This may be null if the chart is not directly associated with the main activity.
+	 */
 	@Nullable
 	private MainActivity mainActivity;
+    private int positionSlot = -1;
 
+    /**
+	 * Creates a new DataEntityLineChart with the specified context.
+	 * <p>
+	 * This constructor is typically used when creating the chart programmatically.
+	 *
+	 * @param context The context in which the chart is running
+	 */
 	public DataEntityLineChart(Context context) {
 		super(context);
 		initDataEntityInfoLayoutView();
 	}
 
+	/**
+	 * Creates a new DataEntityLineChart with the specified context and attributes.
+	 * <p>
+	 * This constructor is typically used when the chart is inflated from XML.
+	 *
+	 * @param context The context in which the chart is running
+	 * @param attrs The attribute set defining XML attributes for the chart
+	 */
 	public DataEntityLineChart(Context context, AttributeSet attrs) {
 		super(context, attrs);
 
 		initDataEntityInfoLayoutView();
 	}
 
+	/**
+	 * Creates a new DataEntityLineChart with the specified context, attributes, and style.
+	 * <p>
+	 * This constructor is typically used when the chart is inflated from XML with a specific style.
+	 *
+	 * @param context The context in which the chart is running
+	 * @param attrs The attribute set defining XML attributes for the chart
+	 * @param defStyle The default style resource ID
+	 */
 	public DataEntityLineChart(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 
 		initDataEntityInfoLayoutView();
 	}
 
+	/**
+	 * Initializes the data entity info layout view.
+	 * <p>
+	 * This method is currently commented out in the implementation, but would
+	 * normally set up an overlay view to display information about selected data points.
+	 */
 	private void initDataEntityInfoLayoutView() {
 		//dataEntityInfoLayoutView.setDrawingCacheEnabled(true);
 
@@ -79,6 +160,14 @@ public class DataEntityLineChart extends LineChart {
 		}*/
 	}
 
+	/**
+	 * Draws the chart on the canvas.
+	 * <p>
+	 * This method overrides the parent implementation to handle exceptions gracefully.
+	 * Any exceptions during drawing are caught and ignored to prevent application crashes.
+	 *
+	 * @param canvas The canvas to draw on
+	 */
 	@Override
 	protected void onDraw(Canvas canvas) {
 		try {
@@ -87,6 +176,14 @@ public class DataEntityLineChart extends LineChart {
 		}
 	}
 
+	/**
+	 * Draws the grid background.
+	 * <p>
+	 * This method overrides the parent implementation to use the custom grid background drawer.
+	 * The custom drawer adds GPX-specific styling and visual elements to the grid background.
+	 *
+	 * @param canvas The canvas to draw on
+	 */
 	@Override
 	protected void drawGridBackground(Canvas canvas) {
 		super.drawGridBackground(canvas);
@@ -94,6 +191,18 @@ public class DataEntityLineChart extends LineChart {
 		gridBackgroundDrawer.drawGridBackground(this, paletteColorDeterminer, canvas);
 	}
 
+	/**
+	 * Called when the layout changes.
+	 * <p>
+	 * This method overrides the parent implementation to handle layout of child views.
+	 * Currently, the data entity info layout view positioning is commented out.
+	 *
+	 * @param changed True if the layout has changed
+	 * @param left Left position of this view
+	 * @param top Top position of this view
+	 * @param right Right position of this view
+	 * @param bottom Bottom position of this view
+	 */
 	@Override
 	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
 		super.onLayout(changed, left, top, right, bottom);
@@ -104,6 +213,15 @@ public class DataEntityLineChart extends LineChart {
 		);*/
 	}
 
+	/**
+	 * Called to measure the view and its content.
+	 * <p>
+	 * This method overrides the parent implementation to handle measurement of child views.
+	 * Currently, the data entity info layout view measurement is commented out.
+	 *
+	 * @param widthMeasureSpec Horizontal space requirements as imposed by the parent
+	 * @param heightMeasureSpec Vertical space requirements as imposed by the parent
+	 */
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -113,6 +231,16 @@ public class DataEntityLineChart extends LineChart {
 		);*/
 	}
 
+	/**
+	 * Initializes the chart with the specified settings.
+	 * <p>
+	 * This method sets up the highlighter, initializes empty data, and applies settings.
+	 * It returns a Single that emits the status of the initialization operation, making
+	 * it compatible with reactive programming patterns.
+	 *
+	 * @param settings The chart settings to apply
+	 * @return A Single that emits the status of the initialization operation
+	 */
 	public Single<RequestStatus> initChart(LineChartSettings settings) {
 		return Single.fromCallable(() -> {
 			StaticChartHighlighter<DataEntityLineChart> staticChartHighlighter = new StaticChartHighlighter<>(
@@ -128,10 +256,24 @@ public class DataEntityLineChart extends LineChart {
 		});
 	}
 
+	/**
+	 * Gets the chart's touch listener.
+	 * <p>
+	 * This method provides access to the touch listener that handles user interactions
+	 * with the chart, such as dragging, zooming, and tapping.
+	 *
+	 * @return The BarLineChartTouchListener for this chart
+	 */
 	public BarLineChartTouchListener getChartTouchListener() {
 		return (BarLineChartTouchListener) mChartTouchListener;
 	}
 
+	/**
+	 * Highlights the value at the center of the current view.
+	 * <p>
+	 * This method is called during chart translation to maintain highlight on the center value.
+	 * It determines which data point is at the center of the visible area and highlights it.
+	 */
 	public void highlightCenterValueInTranslation() {
 		MPPointF pointFCenter = mViewPortHandler.getContentCenter();
 
@@ -147,6 +289,14 @@ public class DataEntityLineChart extends LineChart {
 		}
 	}
 
+	/**
+	 * Sets the currently highlighted entry.
+	 * <p>
+	 * This method is called when a value is selected on the chart. It updates
+	 * highlight indicators based on the type of gesture used for selection.
+	 *
+	 * @param selectedEntry The entry to highlight, or null to clear highlight
+	 */
 	public void setHighlightedEntry(Entry selectedEntry) {
 		if (!(selectedEntry instanceof BaseEntry)) {
 			return;
@@ -157,6 +307,14 @@ public class DataEntityLineChart extends LineChart {
 		determineSettingsDataEntityCurveLineHighlightIndicator(chartGesture);
 	}
 
+	/**
+	 * Determines whether to draw highlight indicators based on the chart gesture.
+	 * <p>
+	 * This method controls the appearance of highlight indicators based on the user's interaction.
+	 * Different gestures (tap, drag, zoom) may result in different highlight behaviors.
+	 *
+	 * @param chartGesture The last gesture performed on the chart
+	 */
 	private void determineSettingsDataEntityCurveLineHighlightIndicator(
 		ChartTouchListener.ChartGesture chartGesture
 	) {
@@ -194,15 +352,32 @@ public class DataEntityLineChart extends LineChart {
 			}
 
 			dataEntityCurveLineDataSet.forEach( iLineDataSet -> {
-                ((LineDataSet) iLineDataSet).setDrawHorizontalHighlightIndicator (shouldDraw.get() );
+                ((LineDataSet) iLineDataSet).setDrawHorizontalHighlightIndicator(shouldDraw.get());
             });
 		}
 	}
 
+	/**
+	 * Gets the palette color determiner for this chart.
+	 * <p>
+	 * The palette color determiner provides consistent colors for chart elements
+	 * based on the type of data being visualized.
+	 *
+	 * @return The PaletteColorDeterminer for this chart
+	 */
 	public PaletteColorDeterminer getPaletteColorDeterminer() {
 		return paletteColorDeterminer;
 	}
 
+	/**
+	 * Loads chart settings and applies them to this chart.
+	 * <p>
+	 * This method initializes limit lines, scales the chart, and applies settings.
+	 * It configures all visual and behavioral aspects of the chart according to
+	 * the provided settings.
+	 *
+	 * @param settings The chart settings to apply
+	 */
 	public void loadChartSettings(LineChartSettings settings) {
 		limitLinesBoundaries.initLimitLines(paletteColorDeterminer);
 		scaler.setLimitLinesBoundaries(limitLinesBoundaries);
@@ -212,10 +387,26 @@ public class DataEntityLineChart extends LineChart {
 		settings.setChartSettingsFor(this);
 	}
 
+	/**
+	 * Animates the chart zoom to center with the specified scale.
+	 * <p>
+	 * This method smoothly zooms the chart to a specified scale level, centered
+	 * on the current center point of the visible area.
+	 *
+	 * @param targetScaleX The target X-axis scale
+	 * @param targetScaleY The target Y-axis scale
+	 * @param duration The animation duration in milliseconds
+	 */
 	public void animateZoomToCenter(final float targetScaleX, final float targetScaleY, long duration) {
 		super.animateZoomToCenter(targetScaleX, targetScaleY, duration, null);
 	}
 
+	/**
+	 * Called when the view is detached from its window.
+	 * <p>
+	 * This method ensures proper cleanup of resources, particularly the chart renderer's bitmap.
+	 * Releasing the bitmap prevents memory leaks when the chart is no longer visible.
+	 */
     @Override
 	protected void onDetachedFromWindow() {
 		if (mRenderer != null && mRenderer instanceof LineChartRenderer) {
@@ -224,8 +415,20 @@ public class DataEntityLineChart extends LineChart {
 		super.onDetachedFromWindow();
 	}
 
+	/**
+	 * Sets the data entity wrapper for this chart.
+	 * <p>
+	 * This method updates the palette color determiner and scaler with the new data.
+	 * The data entity wrapper provides the GPX data that will be visualized on the chart.
+	 *
+	 * @param dataEntityWrapper The data entity wrapper containing GPX data to visualize
+	 */
 	public void setDataEntityWrapper(DataEntityWrapper dataEntityWrapper) {
 		paletteColorDeterminer.setDataEntityWrapper(dataEntityWrapper);
 		scaler.setDataEntityWrapper(dataEntityWrapper);
 	}
+
+	public void setPositionSlot(int positionSlot) {
+        this.positionSlot = positionSlot;
+    }
 }

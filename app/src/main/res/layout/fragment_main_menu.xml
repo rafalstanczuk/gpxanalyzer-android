@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
+
         <variable
             name="viewModel"
             type="com.itservices.gpxanalyzer.ui.main.MainMenuViewModel" />
@@ -16,11 +16,35 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/menuRecyclerView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_margin="@dimen/margin_small"
+
+            app:cardCornerRadius="@dimen/margin_medium"
+            app:cardElevation="@dimen/margin_small"
+
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/menuRecyclerView"
+
+            app:strokeColor="@color/black"
+            app:strokeWidth="1dp">
+
+            <com.itservices.gpxanalyzer.ui.mapview.DataMapView
+                android:id="@+id/mapView"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent" />
+
+        </com.google.android.material.card.MaterialCardView>
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

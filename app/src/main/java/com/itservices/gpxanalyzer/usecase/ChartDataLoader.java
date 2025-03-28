@@ -21,6 +21,12 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
 
+/**
+ * Responsible for loading GPX data and initializing chart components.
+ * This class manages the data loading process for all chart elements in the application,
+ * handling the full data loading pipeline from data retrieval to chart initialization and updating.
+ * It publishes status updates during the loading process.
+ */
 public class ChartDataLoader {
     private static final String TAG = "ChartDataLoader";
 
@@ -28,14 +34,35 @@ public class ChartDataLoader {
     public DataEntityCachedProvider dataProvider;
     private PublishSubject<RequestStatus> requestStatusPublishSubject;
 
+    /**
+     * Creates a new ChartDataLoader instance.
+     * Uses Dagger for dependency injection.
+     */
     @Inject
     ChartDataLoader() {
     }
 
+    /**
+     * Sets the PublishSubject for reporting data loading status updates.
+     *
+     * @param requestStatus The PublishSubject to publish status updates to
+     */
     public void setRequestStatusPublish(PublishSubject<RequestStatus> requestStatus) {
         requestStatusPublishSubject = requestStatus;
     }
 
+    /**
+     * Loads data for multiple chart items.
+     * This method orchestrates the data loading, chart initialization, and update process:
+     * 1. Loads data from the cached provider
+     * 2. Initializes each chart item with the loaded data
+     * 3. Updates each chart to display the data
+     * 4. Reports progress and status through the PublishSubject
+     *
+     * @param chartAreaItemList List of chart items to load data for
+     * @param chartInitializer  Initializer component to prepare charts with data
+     * @return Observable emitting the final status of the loading process
+     */
     public Observable<RequestStatus> loadData(List<ChartAreaItem> chartAreaItemList, ChartInitializer chartInitializer) {
         if (chartAreaItemList == null || chartAreaItemList.isEmpty()) {
             Log.w(TAG, "Cannot load data - chart list is null or empty");

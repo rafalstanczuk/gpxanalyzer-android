@@ -1,29 +1,60 @@
 package com.itservices.gpxanalyzer.chart.entry;
 
+import static java.util.Map.Entry.comparingByKey;
+
 import android.util.Log;
 
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+/**
+ * Cache mapping system for chart entries that provides efficient storage and retrieval
+ * of {@link BaseEntry} objects indexed by timestamp.
+ * <p>
+ * This class uses a thread-safe concurrent map implementation to store chart entries,
+ * enabling quick access by timestamp. It includes methods for adding, retrieving,
+ * and clearing entries, as well as initializing with data from a {@link DataEntityWrapper}.
+ * <p>
+ * The cache has a maximum size limit to prevent out-of-memory issues when dealing
+ * with large datasets.
+ */
 public class EntryCacheMap {
 
     private static final int DEFAULT_INITIAL_CAPACITY = 16;
     private static final int MAX_CACHE_SIZE = 50000; // Limit cache size to prevent OOM
-    
-    private ConcurrentMap<Long, Entry> entryMap = new ConcurrentHashMap<>(DEFAULT_INITIAL_CAPACITY);
 
+    private ConcurrentMap<Long, BaseEntry> entryMap = new ConcurrentHashMap<>(DEFAULT_INITIAL_CAPACITY);
+
+    /**
+     * Creates a new instance of the entry cache map.
+     * <p>
+     * This constructor is intended to be used with Dagger dependency injection.
+     */
     @Inject
     public EntryCacheMap() {
     }
 
-    public void add(long timestampMillis, Entry entry) {
+    /**
+     * Adds an entry to the cache, using timestamp as the key.
+     * <p>
+     * If the cache has reached its maximum capacity, the entry will not be added
+     * to prevent memory issues, and a log message will be generated.
+     *
+     * @param timestampMillis The timestamp in milliseconds to use as the key
+     * @param entry The BaseEntry to store in the cache
+     */
+    public void add(long timestampMillis, BaseEntry entry) {
         // Don't add if we're at capacity to prevent memory issues
         if (entryMap.size() >= MAX_CACHE_SIZE) {
             Log.i(EntryCacheMap.class.getSimpleName(), "add() Don't add if we're at capacity to prevent memory issues = [" + timestampMillis + "], entry = [" + entry + "]");
@@ -32,10 +63,45 @@ public class EntryCacheMap {
         entryMap.put(timestampMillis, entry);
     }
 
-    public Entry get(long timestampMillis) {
+    /**
+     * Retrieves an entry from the cache by its timestamp.
+     *
+     * @param timestampMillis The timestamp in milliseconds used as the key
+     * @return The BaseEntry associated with the timestamp, or null if not found
+     */
+    public BaseEntry get(long timestampMillis) {
         return entryMap.get(timestampMillis);
     }
 
+    /**
+     * Retrieves all entries with timestamps within the specified range.
+     * <p>
+     * The returned list is sorted by timestamp in ascending order.
+     *
+     * @param timestampMillisStart The start timestamp (inclusive)
+     * @param timestampMillisEnd The end timestamp (inclusive)
+     * @return A list of BaseEntry objects within the specified timestamp range
+     */
+    public List<BaseEntry> get(long timestampMillisStart, long timestampMillisEnd) {
+        if (timestampMillisEnd < timestampMillisStart) {
+            return new ArrayList<>();
+        }
+
+        return entryMap.entrySet()
+                .stream().sorted( Map.Entry.comparingByKey() )
+                .filter(entry -> entry.getKey() >= timestampMillisStart && entry.getKey() <= timestampMillisEnd)
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Initializes the cache with a new capacity based on the size of the provided data.
+     * <p>
+     * This method clears the existing cache and creates a new one with an appropriate
+     * initial capacity based on the expected size of the data.
+     *
+     * @param dataEntityWrapper The data wrapper containing entities to be processed
+     */
     public void init(DataEntityWrapper dataEntityWrapper) {
         int n = dataEntityWrapper.getData().size();
 
@@ -45,15 +111,26 @@ public class EntryCacheMap {
         entryMap = new ConcurrentHashMap<>(capacity);
     }
 
+    /**
+     * Clears all entries from the cache.
+     */
     public void clear() {
         entryMap.clear();
     }
 
+    /**
+     * Updates the cache with entries from the provided line data sets.
+     * <p>
+     * This method clears the existing cache and adds all entries from the
+     * provided line data sets to the cache, using each entry's timestamp as the key.
+     *
+     * @param lineDataSetList The list of LineDataSet objects containing entries to cache
+     */
     public void update(List<LineDataSet> lineDataSetList) {
         clear();
         lineDataSetList.forEach(lineDataSet -> {
             lineDataSet.getEntries().forEach(entry -> {
-                add(((BaseEntry) entry).getDataEntity().timestampMillis(), entry);
+                add(((BaseEntry) entry).getDataEntity().timestampMillis(), (BaseEntry)entry);
             });
         });
     }

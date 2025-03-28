@@ -8,7 +8,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RawRes;
 
 import com.itservices.gpxanalyzer.R;
+import com.itservices.gpxanalyzer.data.cache.type.DataCachedProvider;
 import com.itservices.gpxanalyzer.data.entity.DataEntity;
+import com.itservices.gpxanalyzer.data.entity.DataMeasure;
 import com.itservices.gpxanalyzer.utils.location.LocationCalculatorUtil;
 import com.itservices.gpxanalyzer.data.parser.gpxparser.GPXParser;
 import com.itservices.gpxanalyzer.data.parser.gpxparser.domain.Gpx;
@@ -31,9 +33,19 @@ import java.util.Vector;
 import javax.inject.Inject;
 
 import dagger.hilt.android.qualifiers.ApplicationContext;
-import io.reactivex.Observable;
 import io.reactivex.Single;
 
+/**
+ * A provider class that converts GPX data into DataEntity objects.
+ * This class is responsible for parsing GPX files and transforming the track points
+ * into a format suitable for analysis and visualization.
+ *
+ * The provider supports:
+ * - Parsing GPX files
+ * - Converting track points to DataEntity objects
+ * - Handling multiple tracks and segments
+ * - Managing file input streams
+ */
 public final class GPXDataEntityProvider extends DataEntityProvider {
 
     @RawRes
@@ -46,6 +58,9 @@ public final class GPXDataEntityProvider extends DataEntityProvider {
 
     @Inject
     public GPXParser parser;
+
+    @Inject
+    public DataCachedProvider dataCachedProvider;
 
     @Inject
     public GPXDataEntityProvider(@ApplicationContext Context context, GpxViewModeMapper viewModeMapper) {
@@ -96,6 +111,8 @@ public final class GPXDataEntityProvider extends DataEntityProvider {
             e.printStackTrace();
         }
 
+        dataCachedProvider.init(UNIT_LIST.size());
+
         if (parsedGpx != null) {
             parsedGpx.getTracks()
                     .forEach(track ->
@@ -135,6 +152,8 @@ public final class GPXDataEntityProvider extends DataEntityProvider {
 
             DataEntity dataEntity = createDataEntity(iTrackPoint, centroidLocation);
 
+            dataCachedProvider.accept(dataEntity);
+
             float percentageProgress = 100.0f * ((float) (iTrackPoint + 1) / (float) maxIteration);
 
             int intPercentageProgress = (int) percentageProgress;
@@ -151,12 +170,21 @@ public final class GPXDataEntityProvider extends DataEntityProvider {
     @NonNull
     private DataEntity createDataEntity(int iTrackPoint, Location location) {
         return new DataEntity(iTrackPoint, location.getTime(),
-                List.of((float) location.getAltitude(), location.getSpeed()),
-                List.of(0.1f, 0.1f),
-                NAME_LIST,
-                UNIT_LIST
-        );
+                List.of(
+                        new DataMeasure((float) location.getAltitude(),
+                                0.1f,
+                                NAME_LIST.get(0),
+                                UNIT_LIST.get(0)
+                                ),
+                        new DataMeasure(location.getSpeed(),
+                                0.1f,
+                                NAME_LIST.get(1),
+                                UNIT_LIST.get(1)
+                        )
 
+                ),
+                location
+        );
     }
 
     @NonNull

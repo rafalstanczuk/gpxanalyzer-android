@@ -21,15 +21,41 @@ import javax.inject.Inject;
 
 import dagger.hilt.android.qualifiers.ApplicationContext;
 
+/**
+ * Provides color mapping functionality for chart visualizations based on data values.
+ * <p>
+ * This class loads a color palette resource and maps data values to specific colors
+ * within that palette. It divides the range of possible data values into discrete 
+ * intervals (boundaries) and associates each interval with a specific color and icon.
+ * <p>
+ * The color mapping is particularly useful for visualizing data trends, where different
+ * ranges of values can be represented by different colors (e.g., speed zones, elevation
+ * changes, or other numerical properties).
+ */
 public class PaletteColorDeterminer {
 
+    /** Number of discrete color divisions in the palette. */
     private final int paletteNumberOfDivisions;
+    
+    /** Array of colors extracted from the palette bitmap. */
     private final int[] paletteFromBitmap;
+    
+    /** Map of boundary index to color boundary definition. */
     private Map<Integer, BoundaryColorSpan> paletteMap = new HashMap<>();
+    
+    /** Map of boundary index to drawable icons representing each color. */
     private Map<Integer, Drawable> drawableMap = new LinkedHashMap<>();
 
+    /** The data wrapper providing context for value ranges. */
     protected DataEntityWrapper dataEntityWrapper;
 
+    /**
+     * Creates a new PaletteColorDeterminer instance.
+     * <p>
+     * Loads the color palette bitmap and extracts the color array.
+     *
+     * @param context Application context for accessing resources
+     */
     @Inject
     public PaletteColorDeterminer(@ApplicationContext Context context) {
         Bitmap colorPalette = BitmapFactory.decodeResource(context.getResources(), R.drawable.color_palette);
@@ -37,6 +63,15 @@ public class PaletteColorDeterminer {
         paletteFromBitmap = compactPalettePixelsFrom(colorPalette);
     }
 
+    /**
+     * Extracts colors from the palette bitmap into a compact array.
+     * <p>
+     * The method reads one pixel from each row of the bitmap to create
+     * a color array representing the vertical gradient of the palette.
+     *
+     * @param colorPalette The bitmap containing the color palette
+     * @return An array of integer color values
+     */
     @NonNull
     private static int[] compactPalettePixelsFrom(Bitmap colorPalette) {
         final int[] paletteFromBitmap;
@@ -47,6 +82,14 @@ public class PaletteColorDeterminer {
         return paletteFromBitmap;
     }
 
+    /**
+     * Sets the data wrapper and initializes the color mappings.
+     * <p>
+     * This method recalculates the palette boundaries based on the min and max
+     * values from the provided data wrapper, and regenerates the drawable icons.
+     *
+     * @param dataEntityWrapper The data wrapper containing value range information
+     */
     public void setDataEntityWrapper(DataEntityWrapper dataEntityWrapper) {
         this.dataEntityWrapper = dataEntityWrapper;
 
@@ -60,6 +103,15 @@ public class PaletteColorDeterminer {
         drawableMap = generateDrawableIconMap(paletteMap);
     }
 
+    /**
+     * Generates drawable icons for each color boundary.
+     * <p>
+     * Creates a map of icons where each icon uses the color from the
+     * corresponding boundary in the palette.
+     *
+     * @param paletteMap The map of color boundaries
+     * @return A map of drawable icons for each boundary
+     */
     private Map<Integer, Drawable> generateDrawableIconMap(Map<Integer, BoundaryColorSpan> paletteMap) {
         Map<Integer, Drawable> generatedDrawableMap = new HashMap<>(paletteMap.size());
 
@@ -76,17 +128,39 @@ public class PaletteColorDeterminer {
         return generatedDrawableMap;
     }
 
+    /**
+     * Gets the drawable icon corresponding to a specific value.
+     * <p>
+     * Determines which color boundary the value falls within and returns
+     * the corresponding drawable icon.
+     *
+     * @param value The data value to find an icon for
+     * @return The drawable icon associated with the value's color boundary
+     */
     public Drawable getDrawableIconFrom(float value) {
         BoundaryColorSpan boundaryColorSpan = getBoundaryFrom(value);
         return drawableMap.get(boundaryColorSpan.id());
     }
 
+    /**
+     * Gets the entire palette map.
+     *
+     * @return The map of color boundaries
+     */
     public Map<Integer, BoundaryColorSpan> getPalette() {
         return paletteMap;
     }
 
+    /**
+     * Determines which color boundary a specific value falls within.
+     * <p>
+     * This method normalizes the value relative to the data range and
+     * calculates the appropriate boundary index.
+     *
+     * @param value The data value to find a boundary for
+     * @return The color boundary the value falls within
+     */
     public BoundaryColorSpan getBoundaryFrom(float value) {
-
         float normalizedVal = value - (float) dataEntityWrapper.getMinValue();
 
         BoundaryColorSpan first = paletteMap.entrySet().iterator().next().getValue();
@@ -106,12 +180,32 @@ public class PaletteColorDeterminer {
         return objectFound;
     }
 
+    /**
+     * Checks if a value falls within a specific color boundary.
+     *
+     * @param value The value to check
+     * @param boundaryColorSpan The boundary to check against
+     * @return True if the value is within the boundary, false otherwise
+     */
     public static boolean isWithinBoundary(float value, BoundaryColorSpan boundaryColorSpan) {
         return PrecisionUtil.isGreaterEqual(boundaryColorSpan.min(), value, PrecisionUtil.NDIG_PREC_COMP)
                 &&
                 value < boundaryColorSpan.max();
     }
 
+    /**
+     * Generates a palette of color boundaries based on the data range.
+     * <p>
+     * This method divides the range between min and max values into equal intervals
+     * and assigns a color from the palette to each interval.
+     *
+     * @param min The minimum value in the data range
+     * @param max The maximum value in the data range
+     * @param numOfDividing The number of divisions to create
+     * @param paletteFromBitmap The array of colors from the palette bitmap
+     * @param paletteDirection The direction to read the palette (ascending or descending)
+     * @return A map of color boundaries indexed by their position
+     */
     private LinkedHashMap<Integer, BoundaryColorSpan> generatePalette(float min, float max, int numOfDividing, int[] paletteFromBitmap, PaletteDirection paletteDirection) {
         LinkedHashMap<Integer, BoundaryColorSpan> boundaryColorSpan = new LinkedHashMap<>();
 
@@ -142,6 +236,17 @@ public class PaletteColorDeterminer {
         return boundaryColorSpan;
     }
 
+    /**
+     * Determines the actual color from the palette based on the scaled index.
+     * <p>
+     * This method handles different palette directions (ascending or descending)
+     * when retrieving colors from the palette array.
+     *
+     * @param maxYPalette The maximum index in the palette array
+     * @param colorFloatScaledIndexSteppedDiscrete The scaled and discretized index
+     * @param paletteDirection The direction to read the palette
+     * @return The integer color value from the palette
+     */
     private int determineDiscreteColorFromScaledValue(int maxYPalette, int colorFloatScaledIndexSteppedDiscrete, PaletteDirection paletteDirection) {
         return switch (paletteDirection) {
             case MIN_IS_ZERO_INDEX_Y_PIXEL ->

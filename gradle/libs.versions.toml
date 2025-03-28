@@ -19,6 +19,7 @@ navigationFragmentKtx = "2.8.7"
 navigationUiKtx = "2.8.7"
 multidex = "2.0.1"
 
+osmdroidAndroid = "6.1.18"
 rxjava = "2.2.21"
 rxandroid = "2.1.1"
 protoliteWellKnownTypes = "18.0.0"
@@ -43,6 +44,7 @@ androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifec
 androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
 androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigationUiKtx" }
 multidex = { module = "androidx.multidex:multidex", version.ref = "multidex" }
+osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroidAndroid" }
 rxandroid = { module = "io.reactivex.rxjava2:rxandroid", version.ref = "rxandroid" }
 rxjava = { module = "io.reactivex.rxjava2:rxjava", version.ref = "rxjava" }
 protolite-well-known-types = { group = "com.google.firebase", name = "protolite-well-known-types", version.ref = "protoliteWellKnownTypes" }

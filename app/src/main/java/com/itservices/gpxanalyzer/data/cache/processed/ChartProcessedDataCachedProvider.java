@@ -1,16 +1,16 @@
-package com.itservices.gpxanalyzer.data.cache;
+package com.itservices.gpxanalyzer.data.cache.processed;
+
+import static com.itservices.gpxanalyzer.data.entity.DataEntityWrapper.isNotEqualByHash;
 
 import android.util.Log;
 
 import com.github.mikephil.charting.data.LineData;
 import com.itservices.gpxanalyzer.chart.LineChartSettings;
 import com.itservices.gpxanalyzer.chart.entry.EntryCacheMap;
-import com.itservices.gpxanalyzer.data.entity.DataEntity;
 import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
@@ -36,22 +36,8 @@ public class ChartProcessedDataCachedProvider {
     public ChartProcessedDataCachedProvider() {
     }
 
-    private static boolean isNotEqualByHash(DataEntityWrapper dataEntityWrapper, DataEntityWrapper dataEntityWrapperSecond) {
-        Vector<DataEntity> data = dataEntityWrapper.getData();
-        Vector<DataEntity> dataSecond = dataEntityWrapperSecond.getData();
-
-        if (data == dataSecond) return false;
-        if (data == null || dataSecond == null) return true;
-        if (data.size() != dataSecond.size()) return true;
-        
-        // More reliable hash comparison that only compares essential data
-        long hash1 = dataEntityWrapper.getDataHash();
-        long hash2 = dataEntityWrapperSecond.getDataHash();
-        return hash1 != hash2;
-    }
-
-    public ChartProcessedData provide(DataEntityWrapper currentDataEntityWrapper, LineChartSettings settings) {
-        if (currentDataEntityWrapper == null || settings == null) {
+    public ChartProcessedData provide(DataEntityWrapper currentWrapper, LineChartSettings settings) {
+        if (currentWrapper == null || settings == null) {
             return null;
         }
 
@@ -60,7 +46,7 @@ public class ChartProcessedDataCachedProvider {
             return null;
         }
 
-        clearOldCachedData(currentDataEntityWrapper);
+        clearOldCachedData(currentWrapper);
 
         ConcurrentMap<DataEntityWrapper, AtomicReference<ChartProcessedData>> map =
                 chartDataMap.get(chartAddress);
@@ -69,7 +55,7 @@ public class ChartProcessedDataCachedProvider {
             return null;
         }
 
-        AtomicReference<ChartProcessedData> chartProcessedDataAtomicReference = map.get(currentDataEntityWrapper);
+        AtomicReference<ChartProcessedData> chartProcessedDataAtomicReference = map.get(currentWrapper);
 
         if (chartProcessedDataAtomicReference == null) {
             return null;
@@ -96,9 +82,9 @@ public class ChartProcessedDataCachedProvider {
 
         chartDataMap.forEach((chartAddress, dataMap) -> {
             if (dataMap != null) {
-                dataMap.keySet().removeIf(wrapper -> {
-                    if (wrapper == null || isNotEqualByHash(wrapper, currentDataEntityWrapper)) {
-                        Log.d(TAG, "clearOldCachedData() remove: key keyDataEntityWrapperMap = [" + wrapper + "]");
+                dataMap.keySet().removeIf(oldWrapperFingerprint -> {
+                    if (oldWrapperFingerprint == null || isNotEqualByHash(oldWrapperFingerprint, currentDataEntityWrapper)) {
+                        Log.d(TAG, "clearOldCachedData() remove: key oldWrapperFingerprint = [" + oldWrapperFingerprint + "]");
                         return true;
                     }
                     return false;
@@ -218,11 +204,9 @@ public class ChartProcessedDataCachedProvider {
             // Check if we need to limit the total charts cached
             if (chartDataMap.size() >= MAX_CHARTS_TO_CACHE) {
                 // Simple approach: remove one random entry to make room
-                if (!chartDataMap.isEmpty()) {
-                    String keyToRemove = chartDataMap.keySet().iterator().next();
-                    chartDataMap.remove(keyToRemove);
-                    Log.d(TAG, "Cache limit reached. Removing chart: " + keyToRemove);
-                }
+                String keyToRemove = chartDataMap.keySet().iterator().next();
+                chartDataMap.remove(keyToRemove);
+                Log.d(TAG, "Cache limit reached. Removing chart: " + keyToRemove);
             }
             
             chartDataMap.put(chartAddress, map);

@@ -1,148 +1,248 @@
 package com.itservices.gpxanalyzer.data.entity;
 
+import android.util.Log;
 
+import com.itservices.gpxanalyzer.data.cache.type.DataEntityCachedProvider;
 import com.itservices.gpxanalyzer.data.cumulative.CumulativeProcessedDataType;
 import com.itservices.gpxanalyzer.data.cumulative.CumulativeStatistics;
 
-import java.util.DoubleSummaryStatistics;
 import java.util.Objects;
 import java.util.Vector;
-import java.util.stream.Collectors;
 
+/**
+ * A wrapper class that provides a simplified interface for accessing and analyzing
+ * DataEntity objects. This class manages a collection of DataEntity objects and provides
+ * methods for accessing their values, statistics, and metadata.
+ *
+ * The wrapper maintains a primary data index that determines which measure is used
+ * for statistical calculations and value retrievals. It also provides methods for
+ * accessing accuracy, names, units, and values for specific measures.
+ */
 public final class DataEntityWrapper {
+    /** Default index for the primary data measure */
     public static final int DEFAULT_PRIMARY_DATA_INDEX = 0;
-    private final Vector<DataEntity> data;
-    private double maxValue;
-    private double minValue;
+    private static final String TAG = DataEntityWrapper.class.getSimpleName();
+
     private int primaryDataIndex = DEFAULT_PRIMARY_DATA_INDEX;
-
-    private int hashCode = -1;
+    private DataEntityCachedProvider dataEntityCachedProvider;
     private long dataEntityTimestampHash = -1;
+    private int hashCode = -1;
 
-    private DataEntityWrapper(Vector<DataEntity> data) {
-        this.data = data;
+    /**
+     * Private constructor to prevent instantiation without parameters.
+     */
+    private DataEntityWrapper() {
     }
 
-    public DataEntityWrapper(final Vector<DataEntity> data, int primaryDataIndex) {
+    /**
+     * Creates a new DataEntityWrapper with the specified parameters.
+     *
+     * @param primaryDataIndex The index of the primary data measure to use
+     * @param dataEntityCachedProvider The provider that manages the cached data entities
+     */
+    public DataEntityWrapper(int primaryDataIndex, DataEntityCachedProvider dataEntityCachedProvider) {
         this.primaryDataIndex = primaryDataIndex;
-        this.data = data;
-        compute();
-
+        this.dataEntityCachedProvider = dataEntityCachedProvider;
         dataEntityTimestampHash = computeDataEntityTimestampHash();
-        hashCode = computeHash();
     }
 
-    public double getDeltaMinMax() {
-        return maxValue - minValue;
-    }
-
-    private void clear() {
-        data.clear();
-
-        maxValue = Float.MIN_VALUE;
-        minValue = Float.MAX_VALUE;
-
-        dataEntityTimestampHash = computeDataEntityTimestampHash();
-        hashCode = computeHash();
-    }
-
-    private void compute() {
-        DoubleSummaryStatistics stats = data.stream()
-                .collect(
-                        Collectors.summarizingDouble(
-                                dataEntity -> {
-                                    return dataEntity.valueList().get(primaryDataIndex);
-                                }
-                        )
-                );
-        minValue = stats.getMin();
-        maxValue = stats.getMax();
-    }
-
+    /**
+     * Computes a hash value based on the primary data index and the sum of timestamps
+     * of all data entities.
+     *
+     * @return The computed hash value
+     */
     private long computeDataEntityTimestampHash() {
+        if (dataEntityCachedProvider == null) {
+            return dataEntityTimestampHash;
+        }
+
         return Objects.hash(
-                getMaxValue(),
-                getMinValue(),
-                        data
+                getPrimaryDataIndex(),
+                dataEntityCachedProvider.getDataEntitityVector()
                         .stream()
                         .mapToLong(DataEntity::timestampMillis)
-                        .sum(),
-                getPrimaryDataIndex()
+                        .sum()
         );
     }
 
+    /**
+     * Returns a hash value that uniquely identifies the current state of the data.
+     * If the hash hasn't been computed yet, it will be computed and cached.
+     *
+     * @return The hash value
+     */
     public long getDataHash() {
         if (dataEntityTimestampHash > 0)
             return dataEntityTimestampHash;
         else {
             dataEntityTimestampHash = computeDataEntityTimestampHash();
         }
-
         return dataEntityTimestampHash;
     }
 
+    /**
+     * Returns the vector of data entities managed by this wrapper.
+     *
+     * @return The vector of DataEntity objects
+     */
     public Vector<DataEntity> getData() {
-        return data;
+        if (dataEntityCachedProvider == null) {
+            return new Vector<>();
+        }
+        return dataEntityCachedProvider.getDataEntitityVector();
     }
 
+    /**
+     * Returns the index of the primary data measure.
+     *
+     * @return The primary data index
+     */
     public int getPrimaryDataIndex() {
         return primaryDataIndex;
     }
 
-    public void setPrimaryDataIndex(int primaryDataIndex) {
-        this.primaryDataIndex = primaryDataIndex;
-        compute();
-
-        dataEntityTimestampHash = computeDataEntityTimestampHash();
-        hashCode = computeHash();
-    }
-
+    /**
+     * Returns the maximum value for the primary data measure.
+     *
+     * @return The maximum value, or 0.0 if no data is available
+     */
     public double getMaxValue() {
-        return maxValue;
+        if (dataEntityCachedProvider == null)
+            return 0.0;
+        return dataEntityCachedProvider.getDataEntityStatistics().getMax(primaryDataIndex);
     }
 
+    /**
+     * Returns the minimum value for the primary data measure.
+     *
+     * @return The minimum value, or 0.0 if no data is available
+     */
     public double getMinValue() {
-        return minValue;
+        if (dataEntityCachedProvider == null)
+            return 0.0;
+        return dataEntityCachedProvider.getDataEntityStatistics().getMin(primaryDataIndex);
     }
 
+    /**
+     * Returns the accuracy of the measure at the specified index.
+     *
+     * @param index The index of the data entity
+     * @return The accuracy value
+     */
     public float getAccuracy(int index) {
-        return data.get(index).valueAccuracyList().get(primaryDataIndex);
+        return dataEntityCachedProvider.getDataEntitityVector().get(index).getMeasures().get(primaryDataIndex).valueAccuracy();
     }
 
+    /**
+     * Returns the accuracy of the measure for the specified data entity.
+     *
+     * @param dataEntity The data entity to get accuracy for
+     * @return The accuracy value
+     */
     public float getAccuracy(DataEntity dataEntity) {
-        return dataEntity.valueAccuracyList().get(primaryDataIndex);
+        return dataEntity.getMeasures().get(primaryDataIndex).valueAccuracy();
     }
 
+    /**
+     * Returns the name of the measure at the specified index.
+     *
+     * @param index The index of the data entity
+     * @return The measure name
+     */
     public String getName(int index) {
-        return data.get(index).nameList().get(primaryDataIndex);
+        return dataEntityCachedProvider.getDataEntitityVector().get(index).getMeasures().get(primaryDataIndex).name();
     }
 
+    /**
+     * Returns the name of the measure for the specified data entity.
+     *
+     * @param dataEntity The data entity to get name for
+     * @return The measure name
+     */
     public String getName(DataEntity dataEntity) {
-        return dataEntity.nameList().get(primaryDataIndex);
+        return dataEntity.getMeasures().get(primaryDataIndex).name();
     }
 
+    /**
+     * Returns the unit of the measure at the specified index.
+     *
+     * @param index The index of the data entity
+     * @return The measure unit
+     */
     public String getUnit(int index) {
-        return data.get(index).unitList().get(primaryDataIndex);
+        return dataEntityCachedProvider.getDataEntitityVector().get(index).getMeasures().get(primaryDataIndex).unit();
     }
 
+    /**
+     * Returns the unit of the measure for the specified data entity.
+     *
+     * @param dataEntity The data entity to get unit for
+     * @return The measure unit
+     */
     public String getUnit(DataEntity dataEntity) {
-        return dataEntity.unitList().get(primaryDataIndex);
+        return dataEntity.getMeasures().get(primaryDataIndex).unit();
     }
 
+    /**
+     * Returns the value of the measure at the specified index.
+     *
+     * @param index The index of the data entity
+     * @return The measure value
+     */
     public float getValue(int index) {
-        return data.get(index).valueList().get(primaryDataIndex);
+        return dataEntityCachedProvider.getDataEntitityVector().get(index).getMeasures().get(primaryDataIndex).value();
     }
 
+    /**
+     * Returns the value of the measure for the specified data entity.
+     *
+     * @param dataEntity The data entity to get value for
+     * @return The measure value
+     */
     public float getValue(DataEntity dataEntity) {
-        return dataEntity.valueList().get(primaryDataIndex);
+        return dataEntity.getMeasures().get(primaryDataIndex).value();
     }
 
+    /**
+     * Returns the cumulative statistics for the specified data entity and type.
+     *
+     * @param dataEntity The data entity to get statistics for
+     * @param type The type of cumulative statistics to retrieve
+     * @return The cumulative statistics
+     */
     public CumulativeStatistics getCumulativeStatistics(DataEntity dataEntity, CumulativeProcessedDataType type) {
         return dataEntity.get(primaryDataIndex, type);
     }
 
     public void putCumulativeStatistics(DataEntity dataEntity, CumulativeProcessedDataType type, CumulativeStatistics statistics) {
         dataEntity.put(primaryDataIndex, type, statistics);
+    }
+
+    public static boolean isNotEqualByData(DataEntityWrapper firstWrapper, DataEntityWrapper secondWrapper) {
+        Log.d(TAG, "isNotEqualByData() called with: firstWrapper = [" + firstWrapper + "], secondWrapper = [" + secondWrapper + "]");
+
+
+        return firstWrapper.getPrimaryDataIndex() != secondWrapper.getPrimaryDataIndex();
+    }
+
+    public static boolean isNotEqualByHash(DataEntityWrapper firstWrapper, DataEntityWrapper secondWrapper) {
+        Log.d(TAG, "isNotEqualByHash() called with: firstWrapper = [" + firstWrapper + "], secondWrapper = [" + secondWrapper + "]");
+
+        Vector<DataEntity> data = firstWrapper.getData();
+        Vector<DataEntity> dataSecond = secondWrapper.getData();
+
+        if (data == dataSecond) return false;
+        if (data == null || dataSecond == null) return true;
+        if (data.size() != dataSecond.size()) return true;
+
+        // More reliable hash comparison that only compares essential data
+        long hash1 = firstWrapper.getDataHash();
+        long hash2 = secondWrapper.getDataHash();
+
+        Log.i(TAG, "isNotEqualByHash() called with: hash1 = [" + hash1 + "], hash2 = [" + hash2 + "]");
+
+        return hash1 != hash2;
     }
 
     @Override

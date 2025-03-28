@@ -106,7 +106,9 @@ android {
 
 dependencies {
     implementation(files("libs/proj4j-1.1.0.jar"))
-    
+
+    implementation(libs.osmdroid.android)
+
     // RxJava dependencies.
     implementation(libs.rxjava)
     implementation(libs.rxandroid)

@@ -74,6 +74,25 @@ public class MainMenuFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        binding.mapView.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        binding.mapView.onResume();
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        binding.mapView.onDetachedFromWindow();
         binding = null; // Prevent memory leaks
     }
 }

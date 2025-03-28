@@ -19,6 +19,15 @@ import io.reactivex.subjects.PublishSubject;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 
+/**
+ * Orchestrates the management of multiple synchronized GPX charts.
+ * This use case is responsible for coordinating data loading, chart initialization,
+ * and synchronization between multiple chart components in the application.
+ * It manages the lifecycle of chart-related operations and provides status updates.
+ *
+ * The class is a singleton to ensure consistent management of chart data and synchronization
+ * across the application.
+ */
 @Singleton
 public class MultipleSyncedGpxChartUseCase {
     private static final String TAG = "MultipleSyncedGpxChart";
@@ -37,6 +46,13 @@ public class MultipleSyncedGpxChartUseCase {
     private Disposable loadDataDisposable;
     private List<ChartAreaItem> currentCharts;
 
+    /**
+     * Creates a new MultipleSyncedGpxChartUseCase with required dependencies.
+     *
+     * @param chartDataLoader The data loader for chart data
+     * @param chartInitializer The initializer for chart components
+     * @param selectionObserver The observer for chart selection synchronization
+     */
     @Inject
     public MultipleSyncedGpxChartUseCase(ChartDataLoader chartDataLoader, ChartInitializer chartInitializer, SelectionObserver selectionObserver) {
         this.chartDataLoader = chartDataLoader;
@@ -45,6 +61,13 @@ public class MultipleSyncedGpxChartUseCase {
         chartDataLoader.setRequestStatusPublish(requestStatus);
     }
 
+    /**
+     * Initializes selection observation between charts.
+     * This method sets up synchronization between all charts in the list, ensuring
+     * that when a selection is made in one chart, it is reflected in all others.
+     *
+     * @param list The list of chart items to synchronize
+     */
     public void initObserveSelectionOnNeighborChart(List<ChartAreaItem> list) {
         if (list == null || list.isEmpty()) {
             Log.w(TAG, "Cannot initialize selection observation - chart list is null or empty");
@@ -64,6 +87,14 @@ public class MultipleSyncedGpxChartUseCase {
         Log.d(TAG, "Selection observation initialized successfully");
     }
 
+    /**
+     * Loads data for multiple chart items.
+     * This method orchestrates the entire data loading process, including
+     * notifying the selection observer, disposing of previous loading operations,
+     * and initiating new data loading.
+     *
+     * @param chartAreaItemList The list of chart items to load data for
+     */
     public void loadData(List<ChartAreaItem> chartAreaItemList) {
         if (chartAreaItemList == null || chartAreaItemList.isEmpty()) {
             Log.w(TAG, "Cannot load data - chart list is null or empty");
@@ -93,6 +124,10 @@ public class MultipleSyncedGpxChartUseCase {
             .subscribe();
     }
 
+    /**
+     * Disposes all resources held by this use case.
+     * This method should be called when the use case is no longer needed to prevent memory leaks.
+     */
     public void disposeAll() {
         Log.d(TAG, "Disposing all subscriptions");
         ConcurrentUtil.tryToDispose(loadDataDisposable);
@@ -100,10 +135,20 @@ public class MultipleSyncedGpxChartUseCase {
         currentCharts = null;
     }
 
+    /**
+     * Returns an Observable that emits percentage progress updates during data loading.
+     *
+     * @return Observable emitting integer percentage values
+     */
     public Observable<Integer> getPercentageProgress() {
         return dataEntityCachedProvider.getPercentageProgress();
     }
 
+    /**
+     * Returns an Observable that emits status updates during the data loading process.
+     *
+     * @return Observable emitting RequestStatus values
+     */
     public Observable<RequestStatus> getRequestStatus() {
         return requestStatus;
     }

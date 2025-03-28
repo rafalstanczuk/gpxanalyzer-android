@@ -26,6 +26,19 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
 
+/**
+ * Manages the selection, storage, and retrieval of GPX files.
+ * This use case handles all operations related to file selection, including:
+ * - Loading local GPX files from storage
+ * - Requesting necessary file access permissions
+ * - Opening the system file picker
+ * - Copying selected files to the app's storage
+ * - Tracking available GPX files
+ * 
+ * The class acts as a central point for managing GPX file selection and access.
+ * It is implemented as a singleton to maintain consistent file selection state
+ * across the application.
+ */
 @Singleton
 public class SelectGpxFileUseCase {
     public static final String GPX_FILE_EXTENSION = ".gpx";
@@ -43,35 +56,75 @@ public class SelectGpxFileUseCase {
 
     ActivityResultLauncher<String[]> permissionLauncher;
 
+    /**
+     * Creates a new SelectGpxFileUseCase.
+     * Uses Dagger dependency injection.
+     */
     @Inject
     public SelectGpxFileUseCase() {
     }
 
+    /**
+     * Returns an Observable that emits a boolean indicating whether a GPX file has been found.
+     * 
+     * @return Observable emitting true when a GPX file is found, false otherwise
+     */
     public Observable<Boolean> getIsGpxFileFound() {
         return isGpxFileFound;
     }
 
+    /**
+     * Returns an Observable that emits the permission grant status.
+     * 
+     * @return Observable emitting true when permissions are granted, false otherwise
+     */
     public Observable<Boolean> getPermissionsGranted() {
         return permissionsGranted;
     }
 
+    /**
+     * Returns an Observable that emits the list of found GPX files whenever it changes.
+     * 
+     * @return Observable emitting the current list of GPX files
+     */
     public Observable<List<File>> getGpxFileFoundList() {
         return gpxFileFoundList;
     }
 
+    /**
+     * Sets the currently selected GPX file.
+     * 
+     * @param file The GPX file to set as selected
+     */
     public void setSelectedFile(File file) {
         selectedFile = file;
     }
 
+    /**
+     * Gets the currently selected GPX file.
+     * 
+     * @return The currently selected file, or null if none is selected
+     */
     @Nullable
     public File getSelectedFile() {
         return selectedFile;
     }
 
+    /**
+     * Gets the list of all GPX files found in the app's storage.
+     * 
+     * @return List of GPX files
+     */
     public List<File> getFileFoundList() {
         return fileFoundList;
     }
 
+    /**
+     * Loads all GPX files from the app's local storage.
+     * 
+     * @param context The context used to access file storage
+     * @return Single that emits the list of found GPX files
+     */
     public Single<List<File>> loadLocalGpxFiles(Context context) {
         return Single.fromCallable(() -> {
             fileFoundList = FileProviderUtils.getFilesByExtension(context, GPX_FILE_EXTENSION);
@@ -79,6 +132,15 @@ public class SelectGpxFileUseCase {
         });
     }
 
+    /**
+     * Adds a file to the app's storage from a content URI.
+     * This method copies the file from the URI to the app's private storage,
+     * and adds it to the list of available GPX files.
+     * 
+     * @param context The context used to access file storage
+     * @param uri The URI of the file to add
+     * @return Single that emits the added file, or null if the file could not be added
+     */
     public Single<File> addFile(Context context, Uri uri) {
         return Single.fromCallable(() -> {
             File file = FileProviderUtils.copyUriToAppStorage(context, uri, GPX_FILE_EXTENSION);
@@ -92,6 +154,12 @@ public class SelectGpxFileUseCase {
         });
     }
 
+    /**
+     * Registers activity result launchers for file picker and permissions with a FragmentActivity.
+     * This method sets up launchers for handling file selection and permission requests.
+     * 
+     * @param fragmentActivity The activity to register the launchers with
+     */
     public void registerLauncherOn(FragmentActivity fragmentActivity) {
         permissionLauncher =
                 fragmentActivity.registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
@@ -121,6 +189,12 @@ public class SelectGpxFileUseCase {
         });
     }
 
+    /**
+     * Checks for necessary file access permissions and requests them if not granted.
+     * 
+     * @param requireActivity The activity to request permissions from
+     * @return Observable that emits true when permissions are granted, false otherwise
+     */
     public Observable<Boolean> checkAndRequestPermissions(FragmentActivity requireActivity) {
         // Check and request storage permissions if needed
         if (PermissionUtils.hasFileAccessPermissions(requireActivity)) {
@@ -132,6 +206,11 @@ public class SelectGpxFileUseCase {
         return permissionsGranted;
     }
 
+    /**
+     * Opens the system file picker for selecting a GPX file.
+     * 
+     * @return true if the file picker was launched successfully, false otherwise
+     */
     public boolean openFilePicker() {
         if (filePickerLauncher != null) {
             String[] mimeTypes = new String[]{

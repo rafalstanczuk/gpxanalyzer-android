@@ -2,6 +2,8 @@ package com.itservices.gpxanalyzer.data.cache;
 
 import android.util.Log;
 
+import com.itservices.gpxanalyzer.data.cache.processed.ChartProcessedDataCachedProvider;
+import com.itservices.gpxanalyzer.data.cache.type.DataEntityWrapperCachedProvider;
 import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItem;
 
 import java.util.Collections;

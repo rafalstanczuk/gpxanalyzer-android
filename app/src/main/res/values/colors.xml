@@ -9,6 +9,8 @@
     <color name="white">#FFFFFFFF</color>
     <color name="white128">#80FFFFFF</color>
 
+    <color name="lightGreen128">#8000F200</color>
+
     <color name="lightGreen">#00F200</color>
     <color name="darkGreen">#00E700</color>
     <color name="lightGray">#F2F2F2</color>

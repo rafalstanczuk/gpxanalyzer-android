@@ -11,16 +11,34 @@ import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.GpxViewMode;
 
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
-import io.reactivex.Observable;
 import io.reactivex.Single;
 
+/**
+ * Represents a chart area displaying GPX data in the application.
+ * This class acts as a model for individual chart components, handling the connection
+ * between the data layer (DataEntityWrapper) and the chart visualization (ChartController).
+ * It manages chart configuration, data binding, and chart update operations.
+ *
+ * The class supports different view modes for displaying various aspects of GPX data,
+ * and maintains state for visual properties like axis labels and icons.
+ */
 public class ChartAreaItem {
 
     private DataEntityWrapper dataEntityWrapper;
     private final ChartController chartController;
     private MutableLiveData<GpxViewMode> viewModeLiveData = new MutableLiveData<>();
 
+    private int positionSlot = -1;
 
+    /**
+     * Creates a new ChartAreaItem with the specified configuration.
+     * Uses Dagger's assisted injection to provide required dependencies.
+     *
+     * @param viewMode The initial view mode for this chart
+     * @param drawX Whether to draw X-axis labels
+     * @param drawIconsEnabled Whether to enable drawing of icons on the chart
+     * @param chartController The controller for the underlying chart component
+     */
     @AssistedInject
     public ChartAreaItem(@Assisted GpxViewMode viewMode,
                          @Assisted("drawX") boolean drawX,
@@ -34,22 +52,48 @@ public class ChartAreaItem {
         this.chartController.setDrawXLabels(drawX);
     }
 
+    /**
+     * Gets the chart controller associated with this chart area.
+     *
+     * @return The ChartController instance
+     */
     public ChartController getChartController() {
         return chartController;
     }
 
+    /**
+     * Gets the view mode for this chart as a LiveData object.
+     *
+     * @return LiveData containing the current view mode
+     */
     public LiveData<GpxViewMode> getViewMode() {
         return viewModeLiveData;
     }
 
+    /**
+     * Checks if drawing icons on the chart is enabled.
+     *
+     * @return true if icons are enabled, false otherwise
+     */
     public boolean isDrawIconsEnabled() {
         return chartController.isDrawIconsEnabled();
     }
 
+    /**
+     * Checks if drawing ascent/descent segments on the chart is enabled.
+     *
+     * @return true if ascent/descent segments are enabled, false otherwise
+     */
     public boolean isDrawAscDescSegEnabled() {
         return chartController.isDrawAscDescSegEnabled();
     }
 
+    /**
+     * Sets the data wrapper for this chart area.
+     * This associates a specific set of data with the chart for visualization.
+     *
+     * @param dataEntityWrapper The data wrapper containing GPX data to visualize
+     */
     public void setDataEntityWrapper(DataEntityWrapper dataEntityWrapper) {
         if (dataEntityWrapper == null) {
             Log.w(ChartAreaItem.class.getSimpleName(), "Attempted to set null data wrapper");
@@ -59,10 +103,21 @@ public class ChartAreaItem {
         this.dataEntityWrapper = dataEntityWrapper;
     }
 
+    /**
+     * Gets the data wrapper currently associated with this chart area.
+     *
+     * @return The current DataEntityWrapper, or null if none is set
+     */
     public DataEntityWrapper getDataEntityWrapper() {
         return dataEntityWrapper;
     }
 
+    /**
+     * Sets the view mode for this chart area.
+     * The view mode determines which aspect of the GPX data will be visualized.
+     *
+     * @param viewMode The new view mode to set
+     */
     public void setViewMode(GpxViewMode viewMode) {
         if (viewMode == null) {
             Log.w(ChartAreaItem.class.getSimpleName(), "Attempted to set null view mode");
@@ -72,11 +127,22 @@ public class ChartAreaItem {
         viewModeLiveData.setValue(viewMode);
     }
 
+    /**
+     * Sets whether to draw X-axis labels on the chart.
+     *
+     * @param drawX true to show X-axis labels, false to hide them
+     */
     public void setDrawX(boolean drawX) {
         Log.d(ChartAreaItem.class.getSimpleName(), "Setting drawX: " + drawX);
         chartController.setDrawXLabels(drawX);
     }
 
+    /**
+     * Updates the chart with current data.
+     * This triggers a refresh of the chart visualization using the current data wrapper.
+     *
+     * @return A Single that emits the RequestStatus of the update operation
+     */
     public Single<RequestStatus> updateChart() {
         if (dataEntityWrapper == null) {
             Log.w(ChartAreaItem.class.getSimpleName(), "Cannot update chart - data wrapper is null");
@@ -84,5 +150,13 @@ public class ChartAreaItem {
         }
         Log.d(ChartAreaItem.class.getSimpleName(), "Updating chart with data wrapper index: " + dataEntityWrapper.getPrimaryDataIndex());
         return chartController.updateChartData(dataEntityWrapper);
+    }
+
+    public void setPositionSlot(int positionSlot) {
+        this.positionSlot = positionSlot;
+    }
+
+    public int getPositionSlot() {
+        return positionSlot;
     }
 }
