@@ -106,7 +106,8 @@ public class ChartProcessedDataCachedProvider {
 
                     AtomicReference<ChartProcessedData> chartProcessedDataAtomic = dataMap.get(gpxViewMode);
 
-                    if (chartProcessedDataAtomic != null) {
+                    if (chartProcessedDataAtomic != null && chartProcessedDataAtomic.get() != null
+                            && chartProcessedDataAtomic.get().inputDataEntityWrapperHash() != null) {
                         long inputDataWrapperHash = chartProcessedDataAtomic.get().inputDataEntityWrapperHash().get();
 
                         boolean toRemove = isNotEqualByDataHash(inputDataWrapperHash, currentDataEntityWrapper);
@@ -116,7 +117,7 @@ public class ChartProcessedDataCachedProvider {
                                     + inputDataWrapperHash + "], currentDataEntityWrapper = ["
                                     + currentDataEntityWrapper.getDataHash() + "]");
 
-                            chartProcessedDataAtomic.set(EMPTY_CHART_PROCESSED_DATA);
+                            chartProcessedDataAtomic.set(null);
                         }
                     }
                 });

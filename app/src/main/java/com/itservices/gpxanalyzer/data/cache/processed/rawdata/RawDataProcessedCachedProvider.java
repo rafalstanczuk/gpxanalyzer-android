@@ -79,7 +79,8 @@ public class RawDataProcessedCachedProvider {
 
                     AtomicReference<RawDataProcessed> rawDataProcessedDataAtomic = rawDataProcessedDataMap.get(gpxViewMode);
 
-                    if (rawDataProcessedDataAtomic != null) {
+                    if (rawDataProcessedDataAtomic != null && rawDataProcessedDataAtomic.get() != null
+                            && rawDataProcessedDataAtomic.get().inputDataEntityWrapperHash() != null) {
                         long inputDataWrapperHash = rawDataProcessedDataAtomic.get().inputDataEntityWrapperHash().get();
 
                         boolean toRemove = isNotEqualByDataHash(inputDataWrapperHash, currentDataEntityWrapper);
@@ -89,7 +90,7 @@ public class RawDataProcessedCachedProvider {
                                     + inputDataWrapperHash + "], currentDataEntityWrapper = ["
                                     + currentDataEntityWrapper.getDataHash() + "]");
 
-                            rawDataProcessedDataAtomic.set(EMPTY_RAW_DATA_PROCESSED_DATA);
+                            rawDataProcessedDataAtomic.set(null);
                         }
                     }
                 });
