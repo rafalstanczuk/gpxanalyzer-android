@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.chart;
+package com.itservices.gpxanalyzer.data.provider;
 
 import androidx.annotation.NonNull;
 

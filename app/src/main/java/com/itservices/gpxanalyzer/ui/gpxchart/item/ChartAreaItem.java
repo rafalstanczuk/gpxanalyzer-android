@@ -6,7 +6,8 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.itservices.gpxanalyzer.chart.ChartController;
 import com.itservices.gpxanalyzer.chart.RequestStatus;
-import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
+import com.itservices.gpxanalyzer.data.cache.processed.chart.ChartSlot;
+import com.itservices.gpxanalyzer.data.cache.processed.rawdata.RawDataProcessed;
 import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.GpxViewMode;
 
 import dagger.assisted.Assisted;
@@ -24,11 +25,10 @@ import io.reactivex.Single;
  */
 public class ChartAreaItem {
 
-    private DataEntityWrapper dataEntityWrapper;
     private final ChartController chartController;
     private MutableLiveData<GpxViewMode> viewModeLiveData = new MutableLiveData<>();
 
-    private int positionSlot = -1;
+    private ChartSlot chartSlot = null;
 
     /**
      * Creates a new ChartAreaItem with the specified configuration.
@@ -89,30 +89,6 @@ public class ChartAreaItem {
     }
 
     /**
-     * Sets the data wrapper for this chart area.
-     * This associates a specific set of data with the chart for visualization.
-     *
-     * @param dataEntityWrapper The data wrapper containing GPX data to visualize
-     */
-    public void setDataEntityWrapper(DataEntityWrapper dataEntityWrapper) {
-        if (dataEntityWrapper == null) {
-            Log.w(ChartAreaItem.class.getSimpleName(), "Attempted to set null data wrapper");
-            return;
-        }
-        Log.d(ChartAreaItem.class.getSimpleName(), "Setting data wrapper with primary index: " + dataEntityWrapper.getPrimaryDataIndex());
-        this.dataEntityWrapper = dataEntityWrapper;
-    }
-
-    /**
-     * Gets the data wrapper currently associated with this chart area.
-     *
-     * @return The current DataEntityWrapper, or null if none is set
-     */
-    public DataEntityWrapper getDataEntityWrapper() {
-        return dataEntityWrapper;
-    }
-
-    /**
      * Sets the view mode for this chart area.
      * The view mode determines which aspect of the GPX data will be visualized.
      *
@@ -143,20 +119,20 @@ public class ChartAreaItem {
      *
      * @return A Single that emits the RequestStatus of the update operation
      */
-    public Single<RequestStatus> updateChart() {
-        if (dataEntityWrapper == null) {
+    public Single<RequestStatus> updateChart(RawDataProcessed rawDataProcessed) {
+        if (rawDataProcessed == null) {
             Log.w(ChartAreaItem.class.getSimpleName(), "Cannot update chart - data wrapper is null");
             return Single.just(RequestStatus.ERROR);
         }
-        Log.d(ChartAreaItem.class.getSimpleName(), "Updating chart with data wrapper index: " + dataEntityWrapper.getPrimaryDataIndex());
-        return chartController.updateChartData(dataEntityWrapper);
+
+         return chartController.updateChartData(rawDataProcessed);
     }
 
-    public void setPositionSlot(int positionSlot) {
-        this.positionSlot = positionSlot;
+    public void setChartSlot(ChartSlot chartSlot) {
+        this.chartSlot = chartSlot;
     }
 
-    public int getPositionSlot() {
-        return positionSlot;
+    public ChartSlot getChartSlot() {
+        return chartSlot;
     }
 }

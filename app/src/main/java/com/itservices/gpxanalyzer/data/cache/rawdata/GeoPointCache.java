@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.data.cache;
+package com.itservices.gpxanalyzer.data.cache.rawdata;
 
 
 import com.itservices.gpxanalyzer.data.statistics.GeoPointStatistics;
@@ -12,14 +12,14 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
-public class GeoPointCachedProvider {
+public class GeoPointCache {
 
     private final Vector<GeoPoint> geoPointVector = new Vector<>();
 
     GeoPointStatistics geoPointStatistics = new GeoPointStatistics();
 
     @Inject
-    public GeoPointCachedProvider() {
+    public GeoPointCache() {
     }
 
     public void init() {

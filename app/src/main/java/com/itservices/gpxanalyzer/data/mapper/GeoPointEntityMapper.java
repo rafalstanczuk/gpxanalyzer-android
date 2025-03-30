@@ -2,8 +2,8 @@ package com.itservices.gpxanalyzer.data.mapper;
 
 import android.location.Location;
 
-import com.itservices.gpxanalyzer.data.entity.DataEntity;
-import com.itservices.gpxanalyzer.data.entity.GeoPointEntity;
+import com.itservices.gpxanalyzer.data.raw.DataEntity;
+import com.itservices.gpxanalyzer.data.raw.GeoPointEntity;
 
 public class GeoPointEntityMapper {
 

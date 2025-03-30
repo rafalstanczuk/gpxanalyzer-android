@@ -4,8 +4,6 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
 
-import androidx.annotation.Nullable;
-
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
@@ -15,21 +13,19 @@ import com.github.mikephil.charting.listener.BarLineChartTouchListener;
 import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.renderer.LineChartRenderer;
 import com.github.mikephil.charting.utils.MPPointF;
-import com.itservices.gpxanalyzer.MainActivity;
 import com.itservices.gpxanalyzer.chart.entry.BaseEntry;
-import com.itservices.gpxanalyzer.chart.legend.PaletteColorDeterminer;
 import com.itservices.gpxanalyzer.chart.settings.background.GridBackgroundDrawer;
-import com.itservices.gpxanalyzer.chart.settings.background.LimitLinesBoundaries;
 import com.itservices.gpxanalyzer.chart.settings.highlight.StaticChartHighlighter;
-import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
+import com.itservices.gpxanalyzer.data.cache.processed.chart.ChartSlot;
+import com.itservices.gpxanalyzer.data.raw.DataEntityWrapper;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
-import io.reactivex.Observable;
 import io.reactivex.Single;
 
 /**
@@ -60,15 +56,6 @@ public class DataEntityLineChart extends LineChart {
 	DataEntityInfoLayoutView dataEntityInfoLayoutView;*/
 
 	/**
-	 * Determines colors for chart elements based on the data being displayed.
-	 * <p>
-	 * This component provides a consistent color scheme for the chart based on
-	 * the type of data being visualized (elevation, speed, etc.).
-	 */
-	@Inject
-	PaletteColorDeterminer paletteColorDeterminer;
-
-	/**
 	 * Handles drawing of the chart's background grid.
 	 * <p>
 	 * This component is responsible for rendering the grid background with
@@ -77,34 +64,10 @@ public class DataEntityLineChart extends LineChart {
 	@Inject
 	GridBackgroundDrawer gridBackgroundDrawer;
 
-	/**
-	 * Manages scaling and zooming of the chart.
-	 * <p>
-	 * This component handles the scaling behavior of the chart, ensuring that
-	 * GPX data is displayed at appropriate scales and with proper boundaries.
-	 */
-	@Inject
-	LineChartScaler scaler;
+	private ChartSlot chartSlot = null;
+	private WeakReference<ChartComponents> chartComponentsWeakReference;
 
 	/**
-	 * Manages the limit lines (boundaries) of the chart.
-	 * <p>
-	 * This component defines horizontal reference lines that indicate important
-	 * thresholds or boundaries in the data, such as elevation zones or speed limits.
-	 */
-	@Inject
-	LimitLinesBoundaries limitLinesBoundaries;
-
-	/**
-	 * Reference to the main activity, used for context operations.
-	 * <p>
-	 * This may be null if the chart is not directly associated with the main activity.
-	 */
-	@Nullable
-	private MainActivity mainActivity;
-    private int positionSlot = -1;
-
-    /**
 	 * Creates a new DataEntityLineChart with the specified context.
 	 * <p>
 	 * This constructor is typically used when creating the chart programmatically.
@@ -188,7 +151,11 @@ public class DataEntityLineChart extends LineChart {
 	protected void drawGridBackground(Canvas canvas) {
 		super.drawGridBackground(canvas);
 
-		gridBackgroundDrawer.drawGridBackground(this, paletteColorDeterminer, canvas);
+		if (chartComponentsWeakReference != null && chartComponentsWeakReference.get() != null) {
+			gridBackgroundDrawer.drawGridBackground(
+					this, chartComponentsWeakReference.get().getPaletteColorDeterminer(), canvas
+			);
+		}
 	}
 
 	/**
@@ -238,18 +205,19 @@ public class DataEntityLineChart extends LineChart {
 	 * It returns a Single that emits the status of the initialization operation, making
 	 * it compatible with reactive programming patterns.
 	 *
-	 * @param settings The chart settings to apply
 	 * @return A Single that emits the status of the initialization operation
 	 */
-	public Single<RequestStatus> initChart(LineChartSettings settings) {
+	public Single<RequestStatus> initChart(ChartComponents chartComponents) {
 		return Single.fromCallable(() -> {
+			chartComponentsWeakReference = new WeakReference<>(chartComponents);
+
 			StaticChartHighlighter<DataEntityLineChart> staticChartHighlighter = new StaticChartHighlighter<>(
 					this, (BarLineChartTouchListener) mChartTouchListener);
 			setHighlighter(staticChartHighlighter);
 
 			setData(new LineData());
 
-			loadChartSettings(settings);
+			chartComponents.loadChartSettings(this);
 
 			invalidate();
 			return RequestStatus.DONE;
@@ -357,35 +325,7 @@ public class DataEntityLineChart extends LineChart {
 		}
 	}
 
-	/**
-	 * Gets the palette color determiner for this chart.
-	 * <p>
-	 * The palette color determiner provides consistent colors for chart elements
-	 * based on the type of data being visualized.
-	 *
-	 * @return The PaletteColorDeterminer for this chart
-	 */
-	public PaletteColorDeterminer getPaletteColorDeterminer() {
-		return paletteColorDeterminer;
-	}
 
-	/**
-	 * Loads chart settings and applies them to this chart.
-	 * <p>
-	 * This method initializes limit lines, scales the chart, and applies settings.
-	 * It configures all visual and behavioral aspects of the chart according to
-	 * the provided settings.
-	 *
-	 * @param settings The chart settings to apply
-	 */
-	public void loadChartSettings(LineChartSettings settings) {
-		limitLinesBoundaries.initLimitLines(paletteColorDeterminer);
-		scaler.setLimitLinesBoundaries(limitLinesBoundaries);
-		scaler.scale(this);
-		settings.setLimitLinesBoundaries(limitLinesBoundaries);
-
-		settings.setChartSettingsFor(this);
-	}
 
 	/**
 	 * Animates the chart zoom to center with the specified scale.
@@ -415,20 +355,11 @@ public class DataEntityLineChart extends LineChart {
 		super.onDetachedFromWindow();
 	}
 
-	/**
-	 * Sets the data entity wrapper for this chart.
-	 * <p>
-	 * This method updates the palette color determiner and scaler with the new data.
-	 * The data entity wrapper provides the GPX data that will be visualized on the chart.
-	 *
-	 * @param dataEntityWrapper The data entity wrapper containing GPX data to visualize
-	 */
-	public void setDataEntityWrapper(DataEntityWrapper dataEntityWrapper) {
-		paletteColorDeterminer.setDataEntityWrapper(dataEntityWrapper);
-		scaler.setDataEntityWrapper(dataEntityWrapper);
+	public void setChartSlot(ChartSlot chartSlot) {
+		this.chartSlot = chartSlot;
 	}
 
-	public void setPositionSlot(int positionSlot) {
-        this.positionSlot = positionSlot;
-    }
+	public ChartSlot getChartSlot() {
+		return chartSlot;
+	}
 }

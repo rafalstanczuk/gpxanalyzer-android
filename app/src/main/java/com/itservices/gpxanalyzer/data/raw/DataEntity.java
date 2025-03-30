@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.data.entity;
+package com.itservices.gpxanalyzer.data.raw;
 
 import com.itservices.gpxanalyzer.data.cumulative.CumulativeProcessedDataType;
 import com.itservices.gpxanalyzer.data.cumulative.CumulativeStatistics;

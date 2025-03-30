@@ -1,7 +1,7 @@
-package com.itservices.gpxanalyzer.data.cache.processed;
+package com.itservices.gpxanalyzer.data.cache.processed.chart;
 
 import com.github.mikephil.charting.data.LineData;
-import com.itservices.gpxanalyzer.chart.entry.EntryCacheMap;
+import com.itservices.gpxanalyzer.data.raw.DataEntityWrapper;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -14,11 +14,16 @@ import java.util.concurrent.atomic.AtomicReference;
  * 
  * Both components are wrapped in AtomicReference for thread safety, as they may be
  * accessed from different threads during chart updates and user interactions.
- * 
+ *
+ * @param inputDataEntityWrapperHash Atomic reference to the input data hash
+ *                                   provided from DataEntityWrapper getDataHash()
+ * @see DataEntityWrapper getDataHash()
+ *
  * @param entryCacheMapAtomic Atomic reference to the cache map of chart entries
  * @param lineData Atomic reference to the MPAndroidChart LineData object
  */
 public record ChartProcessedData(
+        AtomicReference<Long> inputDataEntityWrapperHash,
         AtomicReference<EntryCacheMap> entryCacheMapAtomic,
         AtomicReference<LineData> lineData) {
 }

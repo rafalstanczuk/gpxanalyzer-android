@@ -8,8 +8,8 @@ import android.util.Pair;
 import androidx.annotation.NonNull;
 
 import com.itservices.gpxanalyzer.data.TrendType;
-import com.itservices.gpxanalyzer.data.entity.DataEntity;
-import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
+import com.itservices.gpxanalyzer.data.raw.DataEntity;
+import com.itservices.gpxanalyzer.data.raw.DataEntityWrapper;
 import com.itservices.gpxanalyzer.data.extrema.detector.Segment;
 import com.itservices.gpxanalyzer.data.extrema.detector.TrendTypeMapper;
 

@@ -6,9 +6,12 @@ import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 
 import com.github.mikephil.charting.highlight.Highlight;
-import com.itservices.gpxanalyzer.chart.entry.EntryCacheMap;
-import com.itservices.gpxanalyzer.data.cache.processed.ChartProcessedData;
-import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
+import com.itservices.gpxanalyzer.chart.settings.LineChartSettings;
+import com.itservices.gpxanalyzer.data.cache.processed.chart.EntryCacheMap;
+import com.itservices.gpxanalyzer.data.cache.processed.chart.ChartProcessedData;
+import com.itservices.gpxanalyzer.data.cache.processed.rawdata.RawDataProcessed;
+import com.itservices.gpxanalyzer.data.provider.ChartProcessedDataProvider;
+import com.itservices.gpxanalyzer.data.raw.DataEntityWrapper;
 
 import java.lang.ref.WeakReference;
 import java.util.concurrent.atomic.AtomicReference;
@@ -42,10 +45,13 @@ class ChartProvider {
     private static final String TAG = ChartProvider.class.getSimpleName();
 
     private final AtomicReference<Highlight> currentHighlightRef = new AtomicReference<>();
-    @Inject
-    LineChartSettings settings;
+
     @Inject
     ChartProcessedDataProvider chartProcessedDataProvider;
+
+    @Inject
+    ChartComponents chartComponents;
+
     private WeakReference<DataEntityLineChart> chartWeakReference;
 
     /**
@@ -79,15 +85,6 @@ class ChartProvider {
         }
     }
 
-    /**
-     * Initializes the chart with empty data and styling.
-     * <p>
-     * If processed data is available, the chart will be updated with that data.
-     * This method should be called after a chart is registered to ensure proper initialization.
-     * The operation is performed asynchronously using RxJava to avoid blocking the UI thread.
-     *
-     * @return A Single that emits the status of the initialization operation
-     */
     public Single<RequestStatus> initChart() {
         Log.d(ChartProvider.class.getSimpleName(), "initChart chartWeakReference = [" + chartWeakReference + "]");
 
@@ -95,7 +92,7 @@ class ChartProvider {
             return Single.just(RequestStatus.CHART_WEAK_REFERENCE_IS_NULL);
         }
 
-        return chartWeakReference.get().initChart(settings)
+        return chartWeakReference.get().initChart(chartComponents)
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .flatMap(req -> {
@@ -131,25 +128,25 @@ class ChartProvider {
      * <p>
      * This method should be called when new GPX data is available for visualization.
      *
-     * @param dataEntityWrapper The data wrapper containing GPX data to visualize
+     * @param rawDataProcessed The data wrapper containing GPX data to visualize
      * @return A Single that emits the status of the update operation
      */
     @UiThread
-    public Single<RequestStatus> updateChartData(DataEntityWrapper dataEntityWrapper) {
-        Log.d(ChartProvider.class.getSimpleName(), "updateChartData() called with: dataEntityWrapper = [" + dataEntityWrapper + "]");
+    public Single<RequestStatus> updateChartData(RawDataProcessed rawDataProcessed) {
+        Log.d(ChartProvider.class.getSimpleName(), "updateChartData() called with: rawDataProcessed ");
 
         if (chartWeakReference == null || chartWeakReference.get() == null) {
             return Single.just(RequestStatus.CHART_WEAK_REFERENCE_IS_NULL);
         }
 
         return
-                Single.just(chartWeakReference.get())
-                        .map(chart -> {
-                            chart.setDataEntityWrapper(dataEntityWrapper);
-                            return chart.getPaletteColorDeterminer();
+                Single.just(chartComponents)
+                        .map(components -> {
+                            components.init(rawDataProcessed.dataEntityWrapperAtomic().get());
+                            return components.getPaletteColorDeterminer();
                         })
                         .flatMap(palette -> chartProcessedDataProvider
-                                .provide(dataEntityWrapper, settings, palette))
+                                .provide(rawDataProcessed, chartComponents.settings, palette))
                         .subscribeOn(Schedulers.computation())
                         .observeOn(AndroidSchedulers.mainThread())
                         .flatMap(lineData -> updateChart(lineData, currentHighlightRef.get()))
@@ -171,7 +168,7 @@ class ChartProvider {
     public Single<RequestStatus> updateDataChart() {
         return Single.just(chartProcessedDataProvider.provide())
                 .subscribeOn(Schedulers.io())
-                .doOnEvent((chartProcessedData, throwable) -> settings.updateSettingsFor(chartProcessedData.lineData().get()))
+                .doOnEvent((chartProcessedData, throwable) -> chartComponents.settings.updateSettingsFor(chartProcessedData.lineData().get()))
                 .observeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .flatMap(chartProcessedData -> updateChart(chartProcessedData, currentHighlightRef.get()));
@@ -204,7 +201,7 @@ class ChartProvider {
      * @return The LineChartSettings instance
      */
     public synchronized LineChartSettings getSettings() {
-        return settings;
+        return chartComponents.settings;
     }
 
     /**
@@ -253,7 +250,7 @@ class ChartProvider {
             synchronized (chart) {
                 //chart.clear();
                 chart.setData(chartProcessedData.lineData().get());
-                chart.loadChartSettings(settings);
+                chartComponents.loadChartSettings(chart);
                 chart.highlightValue(highlight, true);
                 chart.invalidate();
 

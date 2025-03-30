@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.data.entity;
+package com.itservices.gpxanalyzer.data.raw;
 
 import java.util.Vector;
 

@@ -1,5 +1,6 @@
 package com.itservices.gpxanalyzer.ui.gpxchart.item;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -9,6 +10,7 @@ import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.itservices.gpxanalyzer.R;
+import com.itservices.gpxanalyzer.data.cache.processed.chart.ChartSlot;
 import com.itservices.gpxanalyzer.databinding.ChartAreaItemBinding;
 import com.itservices.gpxanalyzer.ui.gpxchart.ChartAreaListViewModel;
 
@@ -22,6 +24,7 @@ import java.util.List;
  * data models and view models.
  */
 public class ChartAreaItemAdapter extends RecyclerView.Adapter<ChartAreaItemAdapter.ChartAreaItemViewHolder> {
+    private static final String TAG = ChartAreaItemAdapter.class.getSimpleName();
 
     private final List<ChartAreaItem> chartAreaItems;
     private final ChartAreaListViewModel viewModel;
@@ -69,9 +72,15 @@ public class ChartAreaItemAdapter extends RecyclerView.Adapter<ChartAreaItemAdap
      */
     @Override
     public void onBindViewHolder(@NonNull ChartAreaItemViewHolder holder, int position) {
-        ChartAreaItem item = chartAreaItems.get(position);
-        item.setPositionSlot(position);
-        holder.bind(item, viewModel, viewLifecycleOwner);
+        try {
+            ChartSlot chartSlot = ChartSlot.fromPosition(position);
+
+            ChartAreaItem item = chartAreaItems.get(position);
+            item.setChartSlot(chartSlot);
+            holder.bind(item, viewModel, viewLifecycleOwner);
+        } catch (IndexOutOfBoundsException e) {
+            Log.e(TAG, "onBindViewHolder: ", e);
+        }
     }
 
     /**
@@ -121,7 +130,7 @@ public class ChartAreaItemAdapter extends RecyclerView.Adapter<ChartAreaItemAdap
          * @param viewLifecycleOwner The lifecycle owner for observing LiveData
          */
         void bind(ChartAreaItem item, ChartAreaListViewModel viewModel, LifecycleOwner viewLifecycleOwner) {
-            binding.lineChart.setPositionSlot(item.getPositionSlot());
+            binding.lineChart.setChartSlot(item.getChartSlot());
             item.getChartController().bindChart(binding.lineChart);
 
             binding.chartAreaItemPropertiesControlLayout.setLifecycleOwner(viewLifecycleOwner);

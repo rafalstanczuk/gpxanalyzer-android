@@ -3,13 +3,11 @@ package com.itservices.gpxanalyzer.ui.mapview;
 import static org.osmdroid.util.BoundingBox.fromGeoPoints;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.Log;
 
 import com.itservices.gpxanalyzer.R;
-import com.itservices.gpxanalyzer.data.cache.type.DataEntityWrapperCachedProvider;
-import com.itservices.gpxanalyzer.data.cache.GeoPointCachedProvider;
+import com.itservices.gpxanalyzer.data.cache.rawdata.GeoPointCache;
 
 import org.osmdroid.config.Configuration;
 import org.osmdroid.events.MapListener;
@@ -41,10 +39,9 @@ public class DataMapView extends MapView implements MapListener, MapOperations, 
     private final List<Polyline> polylines = new ArrayList<>();
     private final CompositeDisposable disposables = new CompositeDisposable();
     private final MapReadinessManager readinessManager;
+
     @Inject
-    DataEntityWrapperCachedProvider dataEntityWrapperCachedProvider;
-    @Inject
-    GeoPointCachedProvider geoPointCachedProvider;
+    GeoPointCache geoPointCachedProvider;
 
     public DataMapView(Context context) {
         super(context);

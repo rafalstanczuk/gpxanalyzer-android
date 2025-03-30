@@ -19,14 +19,14 @@ import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.utils.MPPointF;
 import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.chart.DataEntityLineChart;
-import com.itservices.gpxanalyzer.chart.LineChartSettings;
+import com.itservices.gpxanalyzer.chart.settings.LineChartSettings;
 import com.itservices.gpxanalyzer.chart.entry.CurveEntry;
 import com.itservices.gpxanalyzer.data.cumulative.CumulativeProcessedDataType;
 import com.itservices.gpxanalyzer.data.cumulative.CumulativeStatistics;
 import com.itservices.gpxanalyzer.data.cumulative.TrendStatistics;
-import com.itservices.gpxanalyzer.data.entity.DataEntity;
+import com.itservices.gpxanalyzer.data.raw.DataEntity;
 import com.itservices.gpxanalyzer.data.TrendType;
-import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
+import com.itservices.gpxanalyzer.data.raw.DataEntityWrapper;
 import com.itservices.gpxanalyzer.databinding.CustomMarkerViewBinding;
 import com.itservices.gpxanalyzer.utils.common.FormatNumberUtil;
 import com.itservices.gpxanalyzer.utils.ui.ColorUtil;
@@ -38,7 +38,6 @@ import java.util.Locale;
 import javax.inject.Inject;
 
 import dagger.hilt.android.qualifiers.ActivityContext;
-import dagger.hilt.android.qualifiers.ApplicationContext;
 
 @SuppressLint("ViewConstructor")
 public class CustomMarker extends MarkerView {

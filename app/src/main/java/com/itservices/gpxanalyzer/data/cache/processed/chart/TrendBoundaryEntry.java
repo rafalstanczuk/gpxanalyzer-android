@@ -1,8 +1,8 @@
-package com.itservices.gpxanalyzer.chart.entry;
+package com.itservices.gpxanalyzer.data.cache.processed.chart;
 
 import com.github.mikephil.charting.data.Entry;
 import com.itservices.gpxanalyzer.data.cumulative.TrendBoundaryDataEntity;
-import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
+import com.itservices.gpxanalyzer.data.raw.DataEntityWrapper;
 
 import java.util.List;
 

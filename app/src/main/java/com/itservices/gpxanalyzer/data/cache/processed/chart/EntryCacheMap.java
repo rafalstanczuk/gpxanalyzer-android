@@ -1,15 +1,14 @@
-package com.itservices.gpxanalyzer.chart.entry;
+package com.itservices.gpxanalyzer.data.cache.processed.chart;
 
 import static java.util.Map.Entry.comparingByKey;
 
 import android.util.Log;
 
-import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineDataSet;
-import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
+import com.itservices.gpxanalyzer.chart.entry.BaseEntry;
+import com.itservices.gpxanalyzer.data.raw.DataEntityWrapper;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

@@ -1,47 +1,48 @@
-package com.itservices.gpxanalyzer.data.cache.type;
+package com.itservices.gpxanalyzer.data.cache.rawdata;
 
 import android.location.Location;
 
-import com.itservices.gpxanalyzer.data.cache.GeoPointCachedProvider;
-import com.itservices.gpxanalyzer.data.entity.DataEntity;
-import com.itservices.gpxanalyzer.data.entity.GeoPointEntity;
+import com.itservices.gpxanalyzer.data.raw.DataEntity;
+import com.itservices.gpxanalyzer.data.raw.GeoPointEntity;
 import com.itservices.gpxanalyzer.data.mapper.GeoPointEntityMapper;
+
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
-public class DataCachedProvider {
+public class LoadDataCache {
 
     @Inject
-    DataEntityCachedProvider dataEntityCachedProvider;
+    DataEntityCache dataEntityCache;
 
     @Inject
-    GeoPointCachedProvider geoPointCachedProvider;
+    GeoPointCache geoPointCache;
 
 
     @Inject
-    public DataCachedProvider() {
+    public LoadDataCache() {
     }
 
     public void init(int nPrimaryIndexes) {
-        dataEntityCachedProvider.init(nPrimaryIndexes);
-        geoPointCachedProvider.init();
+        dataEntityCache.init(nPrimaryIndexes);
+        geoPointCache.init();
     }
 
     public void accept(DataEntity dataEntity) {
-        dataEntityCachedProvider.accept(dataEntity);
+        dataEntityCache.accept(dataEntity);
         if (dataEntity.getExtraData() instanceof Location) {
 
             GeoPointEntity geoPointEntity = GeoPointEntityMapper.mapFrom(dataEntity);
 
             dataEntity.setExtraData(geoPointEntity);
 
-            geoPointCachedProvider.accept(
+            geoPointCache.accept(
                     geoPointEntity
             );
         } else if(dataEntity.getExtraData() instanceof GeoPointEntity) {
-            geoPointCachedProvider.accept(
+            geoPointCache.accept(
                     (GeoPointEntity)dataEntity.getExtraData()
             );
         }

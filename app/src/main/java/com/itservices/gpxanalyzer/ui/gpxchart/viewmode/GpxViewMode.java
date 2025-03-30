@@ -52,7 +52,7 @@ public enum GpxViewMode {
 		return drawableIconResId;
 	}
 
-	public static class Constants {
-		public static final int DEFAULT_DISABLED_VIEW_MODE_KEY_ID = -1;
+	public static GpxViewMode from(int primaryDataIndex) throws IndexOutOfBoundsException {
+		return GpxViewMode.values()[primaryDataIndex];
 	}
 }

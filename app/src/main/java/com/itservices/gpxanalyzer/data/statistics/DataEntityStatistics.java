@@ -1,6 +1,6 @@
 package com.itservices.gpxanalyzer.data.statistics;
 
-import com.itservices.gpxanalyzer.data.entity.DataEntity;
+import com.itservices.gpxanalyzer.data.raw.DataEntity;
 
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
@@ -121,7 +121,11 @@ public class DataEntityStatistics implements DataEntityStatisticsOperations {
      */
     @Override
     public double getMin(int index) {
-        return min[index];
+        if (index < min.length) {
+            return min[index];
+        } else {
+            return Double.MAX_VALUE;
+        }
     }
 
     /**
@@ -132,7 +136,11 @@ public class DataEntityStatistics implements DataEntityStatisticsOperations {
      */
     @Override
     public double getMax(int index) {
-        return max[index];
+        if (index < max.length) {
+            return max[index];
+        } else {
+            return Double.MIN_VALUE;
+        }
     }
 
     /**

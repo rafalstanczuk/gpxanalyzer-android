@@ -9,7 +9,7 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.utils.MPPointF;
 import com.itservices.gpxanalyzer.chart.DataEntityLineChart;
 import com.itservices.gpxanalyzer.chart.legend.BoundaryColorSpan;
-import com.itservices.gpxanalyzer.chart.legend.PaletteColorDeterminer;
+import com.itservices.gpxanalyzer.chart.palette.PaletteColorDeterminer;
 import com.itservices.gpxanalyzer.utils.ui.ColorUtil;
 
 import java.util.Map;

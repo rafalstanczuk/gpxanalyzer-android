@@ -2,7 +2,7 @@ package com.itservices.gpxanalyzer.data.cumulative;
 
 import androidx.annotation.NonNull;
 
-import com.itservices.gpxanalyzer.data.entity.DataEntity;
+import com.itservices.gpxanalyzer.data.raw.DataEntity;
 
 import java.util.List;
 import java.util.Vector;

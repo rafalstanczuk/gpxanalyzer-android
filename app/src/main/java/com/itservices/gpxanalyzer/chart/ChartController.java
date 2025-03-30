@@ -14,8 +14,8 @@ import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.itservices.gpxanalyzer.chart.entry.BaseEntry;
-import com.itservices.gpxanalyzer.chart.entry.EntryCacheMap;
-import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
+import com.itservices.gpxanalyzer.data.cache.processed.chart.EntryCacheMap;
+import com.itservices.gpxanalyzer.data.cache.processed.rawdata.RawDataProcessed;
 
 import java.util.Objects;
 
@@ -216,11 +216,11 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
      * when switching to a different data set. It triggers data processing and
      * visualization updates on the chart.
      *
-     * @param dataEntityWrapper The data wrapper containing GPX data to visualize
+     * @param rawDataProcessed The data wrapper containing GPX data to visualize
      * @return A Single that emits the status of the update operation
      */
-    public Single<RequestStatus> updateChartData(DataEntityWrapper dataEntityWrapper) {
-        return chartProvider.updateChartData(dataEntityWrapper);
+    public Single<RequestStatus> updateChartData(RawDataProcessed rawDataProcessed) {
+        return chartProvider.updateChartData(rawDataProcessed);
     }
 
     /**

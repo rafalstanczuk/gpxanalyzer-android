@@ -1,6 +1,6 @@
-package com.itservices.gpxanalyzer.data.cache.type;
+package com.itservices.gpxanalyzer.data.cache.rawdata;
 
-import com.itservices.gpxanalyzer.data.entity.DataEntity;
+import com.itservices.gpxanalyzer.data.raw.DataEntity;
 import com.itservices.gpxanalyzer.data.statistics.DataEntityStatistics;
 
 import java.util.List;
@@ -20,7 +20,7 @@ import javax.inject.Singleton;
  * dependency injection and provides a centralized cache for data entities.
  */
 @Singleton
-public class DataEntityCachedProvider {
+public class DataEntityCache {
 
     private AtomicReference<Vector<DataEntity>> dataEntityVector = new AtomicReference<>(new Vector<>());
     private DataEntityStatistics dataEntityStatistics;
@@ -29,7 +29,7 @@ public class DataEntityCachedProvider {
      * Creates a new DataEntityCachedProvider with initial statistics for one measure.
      */
     @Inject
-    public DataEntityCachedProvider() {
+    public DataEntityCache() {
         dataEntityStatistics = new DataEntityStatistics(1);
     }
 

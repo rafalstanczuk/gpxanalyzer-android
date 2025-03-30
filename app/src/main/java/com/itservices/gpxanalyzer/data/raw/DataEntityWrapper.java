@@ -1,8 +1,8 @@
-package com.itservices.gpxanalyzer.data.entity;
+package com.itservices.gpxanalyzer.data.raw;
 
 import android.util.Log;
 
-import com.itservices.gpxanalyzer.data.cache.type.DataEntityCachedProvider;
+import com.itservices.gpxanalyzer.data.cache.rawdata.DataEntityCache;
 import com.itservices.gpxanalyzer.data.cumulative.CumulativeProcessedDataType;
 import com.itservices.gpxanalyzer.data.cumulative.CumulativeStatistics;
 
@@ -24,8 +24,8 @@ public final class DataEntityWrapper {
     private static final String TAG = DataEntityWrapper.class.getSimpleName();
 
     private int primaryDataIndex = DEFAULT_PRIMARY_DATA_INDEX;
-    private DataEntityCachedProvider dataEntityCachedProvider;
-    private long dataEntityTimestampHash = -1;
+    private DataEntityCache dataEntityCache;
+    private long dataHash = -1;
     private int hashCode = -1;
 
     /**
@@ -38,12 +38,12 @@ public final class DataEntityWrapper {
      * Creates a new DataEntityWrapper with the specified parameters.
      *
      * @param primaryDataIndex The index of the primary data measure to use
-     * @param dataEntityCachedProvider The provider that manages the cached data entities
+     * @param dataEntityCache The provider that manages the cached data entities
      */
-    public DataEntityWrapper(int primaryDataIndex, DataEntityCachedProvider dataEntityCachedProvider) {
+    public DataEntityWrapper(int primaryDataIndex, DataEntityCache dataEntityCache) {
         this.primaryDataIndex = primaryDataIndex;
-        this.dataEntityCachedProvider = dataEntityCachedProvider;
-        dataEntityTimestampHash = computeDataEntityTimestampHash();
+        this.dataEntityCache = dataEntityCache;
+        dataHash = computeDataHash();
     }
 
     /**
@@ -52,18 +52,15 @@ public final class DataEntityWrapper {
      *
      * @return The computed hash value
      */
-    private long computeDataEntityTimestampHash() {
-        if (dataEntityCachedProvider == null) {
-            return dataEntityTimestampHash;
+    private long computeDataHash() {
+        if (dataEntityCache == null) {
+            return dataHash;
         }
 
-        return Objects.hash(
-                getPrimaryDataIndex(),
-                dataEntityCachedProvider.getDataEntitityVector()
+        return dataEntityCache.getDataEntitityVector()
                         .stream()
                         .mapToLong(DataEntity::timestampMillis)
-                        .sum()
-        );
+                        .sum();
     }
 
     /**
@@ -73,12 +70,12 @@ public final class DataEntityWrapper {
      * @return The hash value
      */
     public long getDataHash() {
-        if (dataEntityTimestampHash > 0)
-            return dataEntityTimestampHash;
+        if (dataHash > 0)
+            return dataHash;
         else {
-            dataEntityTimestampHash = computeDataEntityTimestampHash();
+            dataHash = computeDataHash();
         }
-        return dataEntityTimestampHash;
+        return dataHash;
     }
 
     /**
@@ -87,10 +84,10 @@ public final class DataEntityWrapper {
      * @return The vector of DataEntity objects
      */
     public Vector<DataEntity> getData() {
-        if (dataEntityCachedProvider == null) {
+        if (dataEntityCache == null) {
             return new Vector<>();
         }
-        return dataEntityCachedProvider.getDataEntitityVector();
+        return dataEntityCache.getDataEntitityVector();
     }
 
     /**
@@ -108,9 +105,9 @@ public final class DataEntityWrapper {
      * @return The maximum value, or 0.0 if no data is available
      */
     public double getMaxValue() {
-        if (dataEntityCachedProvider == null)
+        if (dataEntityCache == null)
             return 0.0;
-        return dataEntityCachedProvider.getDataEntityStatistics().getMax(primaryDataIndex);
+        return dataEntityCache.getDataEntityStatistics().getMax(primaryDataIndex);
     }
 
     /**
@@ -119,9 +116,9 @@ public final class DataEntityWrapper {
      * @return The minimum value, or 0.0 if no data is available
      */
     public double getMinValue() {
-        if (dataEntityCachedProvider == null)
+        if (dataEntityCache == null)
             return 0.0;
-        return dataEntityCachedProvider.getDataEntityStatistics().getMin(primaryDataIndex);
+        return dataEntityCache.getDataEntityStatistics().getMin(primaryDataIndex);
     }
 
     /**
@@ -131,7 +128,7 @@ public final class DataEntityWrapper {
      * @return The accuracy value
      */
     public float getAccuracy(int index) {
-        return dataEntityCachedProvider.getDataEntitityVector().get(index).getMeasures().get(primaryDataIndex).valueAccuracy();
+        return dataEntityCache.getDataEntitityVector().get(index).getMeasures().get(primaryDataIndex).valueAccuracy();
     }
 
     /**
@@ -151,7 +148,7 @@ public final class DataEntityWrapper {
      * @return The measure name
      */
     public String getName(int index) {
-        return dataEntityCachedProvider.getDataEntitityVector().get(index).getMeasures().get(primaryDataIndex).name();
+        return dataEntityCache.getDataEntitityVector().get(index).getMeasures().get(primaryDataIndex).name();
     }
 
     /**
@@ -171,7 +168,7 @@ public final class DataEntityWrapper {
      * @return The measure unit
      */
     public String getUnit(int index) {
-        return dataEntityCachedProvider.getDataEntitityVector().get(index).getMeasures().get(primaryDataIndex).unit();
+        return dataEntityCache.getDataEntitityVector().get(index).getMeasures().get(primaryDataIndex).unit();
     }
 
     /**
@@ -191,7 +188,7 @@ public final class DataEntityWrapper {
      * @return The measure value
      */
     public float getValue(int index) {
-        return dataEntityCachedProvider.getDataEntitityVector().get(index).getMeasures().get(primaryDataIndex).value();
+        return dataEntityCache.getDataEntitityVector().get(index).getMeasures().get(primaryDataIndex).value();
     }
 
     /**
@@ -226,44 +223,13 @@ public final class DataEntityWrapper {
         return firstWrapper.getPrimaryDataIndex() != secondWrapper.getPrimaryDataIndex();
     }
 
-    public static boolean isNotEqualByHash(DataEntityWrapper firstWrapper, DataEntityWrapper secondWrapper) {
-        Log.d(TAG, "isNotEqualByHash() called with: firstWrapper = [" + firstWrapper + "], secondWrapper = [" + secondWrapper + "]");
-
-        Vector<DataEntity> data = firstWrapper.getData();
-        Vector<DataEntity> dataSecond = secondWrapper.getData();
-
-        if (data == dataSecond) return false;
-        if (data == null || dataSecond == null) return true;
-        if (data.size() != dataSecond.size()) return true;
+    public static boolean isNotEqualByDataHash(long firstWrapperDataHash, DataEntityWrapper secondWrapper) {
+        Log.d(TAG, "isNotEqualByHash() called with: firstWrapperDataHash = [" + firstWrapperDataHash + "], secondWrapper = [" + secondWrapper + "]");
 
         // More reliable hash comparison that only compares essential data
-        long hash1 = firstWrapper.getDataHash();
+        long hash1 = firstWrapperDataHash;
         long hash2 = secondWrapper.getDataHash();
 
-        Log.i(TAG, "isNotEqualByHash() called with: hash1 = [" + hash1 + "], hash2 = [" + hash2 + "]");
-
         return hash1 != hash2;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof DataEntityWrapper that)) return false;
-        return Double.compare(getMaxValue(), that.getMaxValue()) == 0 && Double.compare(getMinValue(), that.getMinValue()) == 0 && getPrimaryDataIndex() == that.getPrimaryDataIndex() && Objects.equals(getData(), that.getData());
-    }
-
-    @Override
-    public int hashCode() {
-        if (hashCode > 0) {
-            return hashCode;
-        }
-
-        hashCode = computeHash();
-
-        return hashCode;
-    }
-
-    private int computeHash() {
-        return Objects.hash(getMaxValue(), getMinValue(), getData(), getPrimaryDataIndex());
     }
 }

@@ -1,10 +1,8 @@
 package com.itservices.gpxanalyzer.data.provider;
 
-import android.content.Context;
-
 import androidx.annotation.NonNull;
 
-import com.itservices.gpxanalyzer.data.entity.DataEntity;
+import com.itservices.gpxanalyzer.data.raw.DataEntity;
 
 import java.io.InputStream;
 import java.util.Vector;

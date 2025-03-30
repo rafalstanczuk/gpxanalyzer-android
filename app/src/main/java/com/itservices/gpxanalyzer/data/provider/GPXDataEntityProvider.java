@@ -8,9 +8,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RawRes;
 
 import com.itservices.gpxanalyzer.R;
-import com.itservices.gpxanalyzer.data.cache.type.DataCachedProvider;
-import com.itservices.gpxanalyzer.data.entity.DataEntity;
-import com.itservices.gpxanalyzer.data.entity.DataMeasure;
+import com.itservices.gpxanalyzer.data.cache.rawdata.LoadDataCache;
+import com.itservices.gpxanalyzer.data.raw.DataEntity;
+import com.itservices.gpxanalyzer.data.raw.DataMeasure;
 import com.itservices.gpxanalyzer.utils.location.LocationCalculatorUtil;
 import com.itservices.gpxanalyzer.data.parser.gpxparser.GPXParser;
 import com.itservices.gpxanalyzer.data.parser.gpxparser.domain.Gpx;
@@ -60,7 +60,7 @@ public final class GPXDataEntityProvider extends DataEntityProvider {
     public GPXParser parser;
 
     @Inject
-    public DataCachedProvider dataCachedProvider;
+    public LoadDataCache dataCachedProvider;
 
     @Inject
     public GPXDataEntityProvider(@ApplicationContext Context context, GpxViewModeMapper viewModeMapper) {

@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.chart.legend;
+package com.itservices.gpxanalyzer.chart.palette;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -9,7 +9,8 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.itservices.gpxanalyzer.R;
-import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
+import com.itservices.gpxanalyzer.chart.legend.BoundaryColorSpan;
+import com.itservices.gpxanalyzer.data.raw.DataEntityWrapper;
 import com.itservices.gpxanalyzer.utils.common.PrecisionUtil;
 import com.itservices.gpxanalyzer.utils.ui.IconsUtil;
 

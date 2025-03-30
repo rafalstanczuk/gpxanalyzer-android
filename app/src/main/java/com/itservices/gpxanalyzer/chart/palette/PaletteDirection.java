@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.chart.legend;
+package com.itservices.gpxanalyzer.chart.palette;
 
 /**
  * Defines the direction in which to read colors from a color palette.

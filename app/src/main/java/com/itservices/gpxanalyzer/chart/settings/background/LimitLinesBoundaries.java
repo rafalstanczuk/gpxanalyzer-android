@@ -5,7 +5,7 @@ import android.graphics.Color;
 import com.github.mikephil.charting.components.LimitLine;
 import com.github.mikephil.charting.components.YAxis;
 import com.itservices.gpxanalyzer.chart.legend.BoundaryColorSpan;
-import com.itservices.gpxanalyzer.chart.legend.PaletteColorDeterminer;
+import com.itservices.gpxanalyzer.chart.palette.PaletteColorDeterminer;
 import com.itservices.gpxanalyzer.utils.ui.ColorUtil;
 
 import java.util.ArrayList;

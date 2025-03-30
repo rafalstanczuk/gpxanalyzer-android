@@ -4,9 +4,9 @@ import android.graphics.drawable.Drawable;
 import android.util.Log;
 
 import com.itservices.gpxanalyzer.chart.settings.axis.HourMinutesAxisValueFormatter;
-import com.itservices.gpxanalyzer.data.entity.DataEntity;
-import com.itservices.gpxanalyzer.data.entity.DataEntityWrapper;
-import com.itservices.gpxanalyzer.chart.legend.PaletteColorDeterminer;
+import com.itservices.gpxanalyzer.data.raw.DataEntity;
+import com.itservices.gpxanalyzer.data.raw.DataEntityWrapper;
+import com.itservices.gpxanalyzer.chart.palette.PaletteColorDeterminer;
 import com.itservices.gpxanalyzer.data.cumulative.TrendBoundaryDataEntity;
 
 import java.util.Calendar;

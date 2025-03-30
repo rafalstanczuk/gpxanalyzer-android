@@ -3,7 +3,6 @@ package com.itservices.gpxanalyzer.usecase;
 import android.util.Log;
 
 import com.itservices.gpxanalyzer.chart.RequestStatus;
-import com.itservices.gpxanalyzer.data.cache.MultipleChartsGlobalCache;
 import com.itservices.gpxanalyzer.data.provider.DataEntityCachedProvider;
 import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItem;
 import com.itservices.gpxanalyzer.utils.common.ConcurrentUtil;
@@ -35,9 +34,6 @@ public class MultipleSyncedGpxChartUseCase {
     
     @Inject
     DataEntityCachedProvider dataEntityCachedProvider;
-
-    @Inject
-    MultipleChartsGlobalCache multipleChartsGlobalCache;
 
     private final ChartDataLoader chartDataLoader;
     private final ChartInitializer chartInitializer;
@@ -82,8 +78,6 @@ public class MultipleSyncedGpxChartUseCase {
         // Initialize chart synchronization
         selectionObserver.initChartSync(list);
         
-        // Initialize global cache
-        multipleChartsGlobalCache.init(list);
         Log.d(TAG, "Selection observation initialized successfully");
     }
 

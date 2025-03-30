@@ -1,11 +1,11 @@
 package com.itservices.gpxanalyzer.data.provider;
 
-import com.itservices.gpxanalyzer.data.entity.DataEntity;
+import com.itservices.gpxanalyzer.data.cache.rawdata.DataEntityCache;
+import com.itservices.gpxanalyzer.data.raw.DataEntity;
 import com.itservices.gpxanalyzer.usecase.SelectGpxFileUseCase;
 
 import java.io.File;
 import java.util.Vector;
-import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 
@@ -20,7 +20,8 @@ public final class DataEntityCachedProvider {
     @Inject
     SelectGpxFileUseCase selectGpxFileUseCase;
 
-    private final AtomicReference<Vector<DataEntity>> dataEntitiesAtomic = new AtomicReference<>();
+    @Inject
+    DataEntityCache dataEntityCache;
 
     @Inject
     public DataEntityCachedProvider() {
@@ -37,7 +38,7 @@ public final class DataEntityCachedProvider {
          * Use selected file once - next time use cached from memory(dataEntityVector or default from rawResId) - don't load twice!
          */
         selectGpxFileUseCase.setSelectedFile(null);
-        setDataEntities(dataEntityVector);
+
 
         return dataEntityVector;
     }
@@ -46,14 +47,10 @@ public final class DataEntityCachedProvider {
         File selectedFile = selectGpxFileUseCase.getSelectedFile();
         return (selectedFile != null)
                 ? dataProvider.provide(selectedFile)
-                : (dataEntitiesAtomic.get() != null) ?
-                Single.just(dataEntitiesAtomic.get())
+                : ( !dataEntityCache.getDataEntitityVector().isEmpty() ) ?
+                Single.just(dataEntityCache.getDataEntitityVector())
                 :
                 dataProvider.provideDefault();
-    }
-
-    private void setDataEntities(Vector<DataEntity> dataEntities) {
-        dataEntitiesAtomic.set(dataEntities);
     }
 
     public Observable<Integer> getPercentageProgress() {

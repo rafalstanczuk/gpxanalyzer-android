@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.chart;
+package com.itservices.gpxanalyzer.chart.settings;
 
 import static com.github.mikephil.charting.charts.Chart.PAINT_GRID_BACKGROUND;
 
@@ -14,10 +14,12 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.itservices.gpxanalyzer.R;
+import com.itservices.gpxanalyzer.chart.DataEntityLineChart;
 import com.itservices.gpxanalyzer.chart.settings.axis.AxisValueFormatter;
 import com.itservices.gpxanalyzer.chart.settings.axis.HourMinutesAxisValueFormatter;
 import com.itservices.gpxanalyzer.chart.settings.background.LimitLinesBoundaries;
 import com.itservices.gpxanalyzer.chart.settings.highlight.CustomMarker;
+import com.itservices.gpxanalyzer.data.cache.processed.chart.ChartSlot;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
@@ -128,6 +130,21 @@ public class LineChartSettings {
         paintGridBg.setColor(Color.WHITE);
     }
 
+    public static void updateLineDataSetWithSettings(LineDataSet lineDataSet, LineChartSettings settings) {
+        lineDataSet.setDrawFilled(settings.isDrawAscDescSegEnabled());
+        lineDataSet.setDrawIcons(settings.isDrawIconsEnabled());
+
+        if (settings.isDrawAscDescSegEnabled()) {
+            lineDataSet.setHighLightColor(Color.BLACK);
+            lineDataSet.enableDashedHighlightLine(30f, 5f, 0f);
+            lineDataSet.setHighlightLineWidth(1f);
+        } else {
+            lineDataSet.setHighLightColor(Color.BLACK);
+            lineDataSet.disableDashedHighlightLine();
+            lineDataSet.setHighlightLineWidth(1f);
+        }
+    }
+
     /**
      * Checks if icon display is enabled for data points.
      * Icons provide visual indicators at data points on the chart.
@@ -179,20 +196,6 @@ public class LineChartSettings {
      */
     public void setDragDecelerationEnabled(boolean dragDecelerationEnabled) {
         this.dragDecelerationEnabled = dragDecelerationEnabled;
-    }
-
-    /**
-     * Gets a unique identifier for the chart this settings object is applied to.
-     * This can be useful for debugging or tracking multiple chart instances.
-     *
-     * @return A hex string representation of the chart's hash code, or an empty string if no chart is referenced
-     */
-    public String getChartAddress() {
-        if (lineChartWeakRef == null || lineChartWeakRef.get() == null) {
-            return "";
-        }
-
-        return Integer.toHexString(lineChartWeakRef.get().hashCode());
     }
 
     /**
@@ -363,18 +366,11 @@ public class LineChartSettings {
         );
     }
 
-    public static void updateLineDataSetWithSettings(LineDataSet lineDataSet, LineChartSettings settings) {
-        lineDataSet.setDrawFilled(settings.isDrawAscDescSegEnabled());
-        lineDataSet.setDrawIcons(settings.isDrawIconsEnabled());
-
-        if (settings.isDrawAscDescSegEnabled()) {
-            lineDataSet.setHighLightColor(Color.BLACK);
-            lineDataSet.enableDashedHighlightLine(30f, 5f, 0f);
-            lineDataSet.setHighlightLineWidth(1f);
-        } else {
-            lineDataSet.setHighLightColor(Color.BLACK);
-            lineDataSet.disableDashedHighlightLine();
-            lineDataSet.setHighlightLineWidth(1f);
+    public ChartSlot getChartSlot() {
+        if (lineChartWeakRef == null || lineChartWeakRef.get() == null) {
+            return null;
         }
+
+        return lineChartWeakRef.get().getChartSlot();
     }
 }
