@@ -14,7 +14,6 @@ import com.itservices.gpxanalyzer.data.raw.DataMeasure;
 import com.itservices.gpxanalyzer.utils.location.LocationCalculatorUtil;
 import com.itservices.gpxanalyzer.data.parser.gpxparser.GPXParser;
 import com.itservices.gpxanalyzer.data.parser.gpxparser.domain.Gpx;
-import com.itservices.gpxanalyzer.data.parser.gpxparser.domain.TrackPoint;
 import com.itservices.gpxanalyzer.data.parser.gpxparser.domain.TrackSegment;
 import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.GpxViewModeMapper;
 
@@ -137,38 +136,42 @@ public final class GPXDataEntityProvider extends DataEntityProvider {
 
         for (int iTrackPoint = 0; iTrackPoint < maxIteration; iTrackPoint++) {
 
-            Location gpxPointA = createLocation(
+            Location gpxPointA = LocationMapper.mapFrom(
                     segment.getTrackPoints().get(iTrackPoint)
             );
-            Location gpxPointB = createLocation(
+            Location gpxPointB = LocationMapper.mapFrom(
                     segment.getTrackPoints().get(iTrackPoint + 1)
             );
 
-            Location centroidLocation = LocationCalculatorUtil.calculateCentroid(Arrays.asList(gpxPointA, gpxPointB));
-
-            float speed = LocationCalculatorUtil.calculateSpeed3D(gpxPointA, gpxPointB);
-            centroidLocation.setSpeed(speed);
-            centroidLocation.setTime(LocationCalculatorUtil.computeMeanTime(gpxPointA, gpxPointB));
+            Location centroidLocation = LocationCalculatorUtil.calculateCentroidLocation(gpxPointA, gpxPointB);
 
             DataEntity dataEntity = createDataEntity(iTrackPoint, centroidLocation);
 
             dataCachedProvider.accept(dataEntity);
 
-            float percentageProgress = 100.0f * ((float) (iTrackPoint + 1) / (float) maxIteration);
+            int intPercentageProgress = computePercentageProgress((float)(iTrackPoint + 1), (float) maxIteration);
 
-            int intPercentageProgress = (int) percentageProgress;
-
-            if (lastIntPercentageProgress != intPercentageProgress) {
-                lastIntPercentageProgress = intPercentageProgress;
-                percentageProgressSubject.onNext(intPercentageProgress);
-            }
+            lastIntPercentageProgress = publishProgressOnChange(lastIntPercentageProgress, intPercentageProgress);
 
             gpxPointList.add(dataEntity);
         }
     }
 
+    private static int computePercentageProgress(float value, float maxValue) {
+        return (int) ( 100.0f * ( (value / maxValue) ) );
+    }
+
+    private int publishProgressOnChange(int lastIntPercentageProgress, int intPercentageProgress) {
+        if (lastIntPercentageProgress != intPercentageProgress) {
+            lastIntPercentageProgress = intPercentageProgress;
+
+            percentageProgressSubject.onNext(intPercentageProgress);
+        }
+        return lastIntPercentageProgress;
+    }
+
     @NonNull
-    private DataEntity createDataEntity(int iTrackPoint, Location location) {
+    private static DataEntity createDataEntity(int iTrackPoint, Location location) {
         return new DataEntity(iTrackPoint, location.getTime(),
                 List.of(
                         new DataMeasure((float) location.getAltitude(),
@@ -186,17 +189,4 @@ public final class GPXDataEntityProvider extends DataEntityProvider {
                 location
         );
     }
-
-    @NonNull
-    private static Location createLocation(TrackPoint trackPoint) {
-        Location location = new Location("TrackPoint");
-
-        location.setLatitude(trackPoint.getLatitude());
-        location.setLongitude(trackPoint.getLongitude());
-        location.setAltitude(trackPoint.getElevation());
-        location.setTime(trackPoint.getTime().toDate().getTime());
-
-        return location;
-    }
-
 }
