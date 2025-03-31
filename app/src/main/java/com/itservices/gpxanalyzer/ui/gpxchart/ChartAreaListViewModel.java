@@ -255,7 +255,11 @@ public class ChartAreaListViewModel extends ViewModel {
         observeProgressDisposable = integerObservable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnNext(percentageProcessingLiveData::postValue)
+                .doOnNext(percent -> {
+                    if (percent != null) {
+                        percentageProcessingLiveData.setValue(percent);
+                    }
+                })
                 .doOnError(Throwable::printStackTrace)
                 .subscribe();
     }

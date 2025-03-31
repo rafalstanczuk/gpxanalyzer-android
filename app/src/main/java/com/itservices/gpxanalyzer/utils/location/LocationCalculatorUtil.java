@@ -2,6 +2,9 @@ package com.itservices.gpxanalyzer.utils.location;
 
 import android.location.Location;
 
+import androidx.annotation.NonNull;
+
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -153,5 +156,15 @@ public class LocationCalculatorUtil {
 
         // Calculate speed
         return (float) (distance3D / timeDifferenceSeconds);
+    }
+
+    @NonNull
+    public static Location calculateCentroidLocation(Location gpxPointA, Location gpxPointB) {
+        Location centroidLocation = calculateCentroid(Arrays.asList(gpxPointA, gpxPointB));
+
+        float speed = calculateSpeed3D(gpxPointA, gpxPointB);
+        centroidLocation.setSpeed(speed);
+        centroidLocation.setTime(computeMeanTime(gpxPointA, gpxPointB));
+        return centroidLocation;
     }
 }
