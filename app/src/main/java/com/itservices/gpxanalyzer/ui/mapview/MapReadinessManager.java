@@ -6,28 +6,35 @@ import android.util.Log;
 
 import org.osmdroid.views.MapView;
 
+import java.lang.ref.WeakReference;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.inject.Inject;
 
 import io.reactivex.Observable;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.subjects.BehaviorSubject;
+import io.reactivex.subjects.PublishSubject;
 
 public class MapReadinessManager {
-    private static final String TAG = "MapReadinessManager";
+    private static final String TAG = MapReadinessManager.class.getSimpleName();
 
-    private final MapView mapView;
+    private WeakReference<MapView> mapView;
     private final AtomicBoolean isMapReady = new AtomicBoolean(false);
-    private final BehaviorSubject<Boolean> mapReadySubject = BehaviorSubject.create();
+    private PublishSubject<Boolean> mapReadyPublishSubject = PublishSubject.create();
     private final CompositeDisposable disposables = new CompositeDisposable();
     private OnMapReadyCallback mapReadyCallback;
 
-    public MapReadinessManager(MapView mapView) {
-        this.mapView = mapView;
+    @Inject
+    public MapReadinessManager() {}
+
+    public void bind(MapView mapView) {
+        this.mapView = new WeakReference<>(mapView);
         setupMapReadyListener();
     }
 
     private void setupMapReadyListener() {
-        mapView.getTileProvider().getTileRequestCompleteHandlers().add(
+        mapView.get().getTileProvider().getTileRequestCompleteHandlers().add(
                 new Handler(
                         Looper.getMainLooper(),
                         msg -> {
@@ -40,7 +47,7 @@ public class MapReadinessManager {
     private void setMapReady() {
         if (isMapReady.compareAndSet(false, true)) {
             Log.d(TAG, "Map is ready");
-            mapReadySubject.onNext(true);
+            mapReadyPublishSubject.onNext(true);
             if (mapReadyCallback != null) {
                 mapReadyCallback.onMapReady();
             }
@@ -55,7 +62,7 @@ public class MapReadinessManager {
     }
 
     public Observable<Boolean> getMapReadyObservable() {
-        return mapReadySubject;
+        return mapReadyPublishSubject;
     }
 
     public boolean isMapReady() {
@@ -64,7 +71,7 @@ public class MapReadinessManager {
 
     public void dispose() {
         disposables.clear();
-        mapReadySubject.onComplete();
+        mapReadyPublishSubject.onComplete();
     }
 
     public interface OnMapReadyCallback {

@@ -33,11 +33,11 @@ public enum ViewModeSeverity {
     }
 
     public float getPercentageHeightPortrait() {
-        return 0.9f / (float) count;
+        return 1f / (float) count;
     }
 
     public float getPercentageHeightLandscape() {
-        return 0.9f / (float) count;
+        return 1f / (float) count;
     }
 
     public int getCount() {

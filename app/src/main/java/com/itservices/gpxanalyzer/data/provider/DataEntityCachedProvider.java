@@ -1,5 +1,8 @@
 package com.itservices.gpxanalyzer.data.provider;
 
+import static com.itservices.gpxanalyzer.chart.RequestStatus.NEW_DATA_LOADING;
+
+import com.itservices.gpxanalyzer.event.MapChartGlobalEventWrapper;
 import com.itservices.gpxanalyzer.data.cache.rawdata.DataEntityCache;
 import com.itservices.gpxanalyzer.data.raw.DataEntity;
 import com.itservices.gpxanalyzer.usecase.SelectGpxFileUseCase;
@@ -24,6 +27,9 @@ public final class DataEntityCachedProvider {
     DataEntityCache dataEntityCache;
 
     @Inject
+    MapChartGlobalEventWrapper eventWrapper;
+
+    @Inject
     public DataEntityCachedProvider() {
     }
 
@@ -42,15 +48,24 @@ public final class DataEntityCachedProvider {
 
         return dataEntityVector;
     }
-
     private Single<Vector<DataEntity>> provideDataEntityVector() {
         File selectedFile = selectGpxFileUseCase.getSelectedFile();
         return (selectedFile != null)
-                ? dataProvider.provide(selectedFile)
+                ? provideFromSelected(selectedFile)
                 : ( !dataEntityCache.getDataEntitityVector().isEmpty() ) ?
                 Single.just(dataEntityCache.getDataEntitityVector())
                 :
-                dataProvider.provideDefault();
+                getProvideDefault();
+    }
+
+    private Single<Vector<DataEntity>> getProvideDefault() {
+        eventWrapper.onNext(NEW_DATA_LOADING);
+        return dataProvider.provideDefault();
+    }
+
+    private Single<Vector<DataEntity>> provideFromSelected(File selectedFile) {
+        eventWrapper.onNext(NEW_DATA_LOADING);
+        return dataProvider.provide(selectedFile);
     }
 
     public Observable<Integer> getPercentageProgress() {

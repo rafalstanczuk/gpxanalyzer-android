@@ -10,8 +10,8 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.databinding.FragmentChartAreaListBinding;
+import com.itservices.gpxanalyzer.databinding.TopBarLayoutBinding;
 import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItem;
 import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItemAdapter;
 import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItemFactory;
@@ -51,6 +51,10 @@ public class ChartAreaListFragment extends Fragment {
         binding.setViewModel(viewModel);
         binding.setLifecycleOwner(getViewLifecycleOwner());
 
+        TopBarLayoutBinding topBarLayoutBinding = binding.topBarLayout;
+        topBarLayoutBinding.setViewModel(viewModel);
+        topBarLayoutBinding.setLifecycleOwner(getViewLifecycleOwner());
+
         binding.gpxChartsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
         viewModel.bind();
@@ -70,42 +74,17 @@ public class ChartAreaListFragment extends Fragment {
 
         viewModel.setOrientation(getResources().getConfiguration().orientation);
 
-        binding.loadButton.setOnClickListener(view ->
+        topBarLayoutBinding.loadButton.setOnClickListener(view ->
                 viewModel.postEventLoadData()
         );
 
-        binding.switchSeverityModeButton.setOnClickListener(view -> viewModel.switchSeverityMode());
+        topBarLayoutBinding.switchSeverityModeButton.setOnClickListener(view -> viewModel.switchSeverityMode());
 
         viewModel.getChartAreaItemListLiveData().observe(getViewLifecycleOwner(), items -> {
                     adapter = new ChartAreaItemAdapter(items, viewModel, getViewLifecycleOwner());
                     binding.gpxChartsRecyclerView.swapAdapter(adapter, false);
                 }
         );
-
-        viewModel.getOnSwitchViewModeChangedLiveData().observe(getViewLifecycleOwner(),
-                (item -> {
-                    viewModel.switchViewMode(adapter, item);
-                }));
-
-        viewModel.getOnOnOffColorizedCirclesCheckBoxChangedLiveData().observe(getViewLifecycleOwner(),
-                (pair -> {
-                    viewModel.changeOnOffColorizedCircles(adapter, pair, requireActivity());
-                }));
-
-        viewModel.getOnZoomInClickedLiveData().observe(getViewLifecycleOwner(),
-                (item -> {
-                    viewModel.zoomIn(adapter, item, requireActivity());
-                }));
-
-        viewModel.getOnZoomOutLiveData().observe(getViewLifecycleOwner(),
-                (item -> {
-                    viewModel.zoomOut(adapter, item, requireActivity());
-                }));
-
-        viewModel.getOnAutoScalingLiveData().observe(getViewLifecycleOwner(),
-                (item -> {
-                    viewModel.autoScaling(adapter, item, requireActivity());
-                }));
 
         return binding.getRoot();
     }
@@ -114,5 +93,19 @@ public class ChartAreaListFragment extends Fragment {
     public void onPause() {
         super.onPause();
         viewModel.onPause();
+        binding.mapView.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        binding.mapView.onResume();
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        binding.mapView.onDetachedFromWindow();
+        binding = null; // Prevent memory leaks
     }
 }

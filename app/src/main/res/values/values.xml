@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
    <integer name="palette_number_of_divisions">8</integer>
+   <fraction name="button_alpha">0.7</fraction>
 </resources>

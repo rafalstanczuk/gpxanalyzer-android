@@ -2,8 +2,6 @@ package com.itservices.gpxanalyzer.data.cumulative;
 
 import androidx.annotation.NonNull;
 
-import com.itservices.gpxanalyzer.data.TrendType;
-
 /**
  * Statistical information about a trend segment in GPX data.
  * <p>

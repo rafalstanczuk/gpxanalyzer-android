@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
+
         <variable
             name="chartAreaItem"
             type="com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItem" />
@@ -17,49 +18,60 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/margin_small">
 
-        <ImageButton
-            android:id="@+id/time_zoom_in_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="@dimen/margin_small"
-            android:alpha="0.5"
-            android:background="@drawable/ic_zoom_in_selector"
-            android:backgroundTintMode="add"
-            android:contentDescription="@string/zoom_in"
-            android:onClick="@{() -> viewModel.onZoomIn(chartAreaItem)}"
-            android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData}"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageButton
-            android:id="@+id/time_zoom_out_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="@dimen/margin_very_small"
-            android:alpha="0.5"
-            android:background="@drawable/ic_zoom_out_selector"
-            android:backgroundTintMode="add"
-            android:contentDescription="@string/zoom_out"
-            android:onClick="@{() -> viewModel.onZoomOut(chartAreaItem)}"
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/time_zoom_in_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_small"
+            android:alpha="@fraction/button_alpha"
+            android:background="@color/white"
+            android:contentDescription="@string/zoom_in"
             android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData}"
+            android:onClick="@{() -> viewModel.onZoomIn(chartAreaItem)}"
+
+            app:fabSize="mini"
+            app:srcCompat="@drawable/ic_zoom_in_selector"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/time_zoom_out_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha="@fraction/button_alpha"
+            android:background="@color/white"
+            android:contentDescription="@string/zoom_out"
+            android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData}"
+            android:onClick="@{() -> viewModel.onZoomOut(chartAreaItem)}"
+
+            app:fabSize="mini"
+            app:srcCompat="@drawable/ic_zoom_out_selector"
             app:layout_constraintEnd_toStartOf="@+id/time_autoscaling_button"
             app:layout_constraintStart_toEndOf="@id/time_zoom_in_button"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
-        <ImageButton
+
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/time_autoscaling_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="@dimen/margin_very_small"
-            android:alpha="0.5"
-            android:background="@drawable/ic_recenter_selector"
-            android:backgroundTintMode="add"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha="@fraction/button_alpha"
+            android:background="@color/white"
             android:contentDescription="@string/reset"
-            android:onClick="@{() -> viewModel.onAutoScaling(chartAreaItem)}"
             android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData}"
+            android:onClick="@{() -> viewModel.onAutoScaling(chartAreaItem)}"
+
+            app:fabSize="mini"
+            app:srcCompat="@drawable/ic_recenter_selector"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/time_zoom_out_button"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

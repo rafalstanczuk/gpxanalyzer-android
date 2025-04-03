@@ -1,6 +1,8 @@
 package com.itservices.gpxanalyzer.ui.mapview;
 
 import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.overlay.Marker;
+
 import java.util.List;
 
 /**
@@ -18,7 +20,7 @@ public interface MapOverlayOperations {
      * @param position The geographical position where the marker should be placed
      * @param title The text to display when the marker is tapped
      */
-    void addMarker(GeoPoint position, String title);
+    Marker addMarker(GeoPoint position, String title);
 
     /**
      * Adds a polyline to the map connecting the specified points.

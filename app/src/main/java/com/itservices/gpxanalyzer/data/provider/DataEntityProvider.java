@@ -9,10 +9,10 @@ import java.util.Vector;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.BehaviorSubject;
 
 abstract class DataEntityProvider {
-    protected final PublishSubject<Integer> percentageProgressSubject = PublishSubject.create();
+    protected final BehaviorSubject<Integer> percentageProgressSubject = BehaviorSubject.create();
 
     public Single<Vector<DataEntity>> provideDefault() {
         return Single.just(new Vector<>());

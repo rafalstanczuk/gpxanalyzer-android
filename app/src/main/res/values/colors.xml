@@ -10,6 +10,8 @@
     <color name="white128">#80FFFFFF</color>
 
     <color name="lightGreen128">#8000F200</color>
+    <color name="darkOrange128">#80FF5722</color>
+    <color name="darkOrange">#FF5722</color>
 
     <color name="lightGreen">#00F200</color>
     <color name="darkGreen">#00E700</color>
@@ -19,6 +21,7 @@
     <color name="grayNew">#ADADAD</color>
     <color name="lightBlue">#0000C8</color>
     <color name="darkBlue">#000084</color>
+    <color name="darkBlue128">#80000084</color>
     <color name="veryDarkBlue">#000064</color>
     <color name="veryDarkGray">#646464</color>
 </resources>

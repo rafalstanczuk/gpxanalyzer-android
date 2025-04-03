@@ -28,6 +28,9 @@ public class ChartAreaItem {
     private final ChartController chartController;
     private MutableLiveData<GpxViewMode> viewModeLiveData = new MutableLiveData<>();
 
+    private MutableLiveData<Boolean> drawAscDescSegEnabledLiveData = new MutableLiveData<>();
+    private MutableLiveData<Boolean> drawIconsEnabledLiveData = new MutableLiveData<>();
+
     private ChartSlot chartSlot = null;
 
     /**
@@ -75,7 +78,7 @@ public class ChartAreaItem {
      *
      * @return true if icons are enabled, false otherwise
      */
-    public boolean isDrawIconsEnabled() {
+    public boolean isDrawIconsEnabledFromController() {
         return chartController.isDrawIconsEnabled();
     }
 
@@ -84,8 +87,16 @@ public class ChartAreaItem {
      *
      * @return true if ascent/descent segments are enabled, false otherwise
      */
-    public boolean isDrawAscDescSegEnabled() {
+    public boolean isDrawAscDescSegEnabledFromController() {
         return chartController.isDrawAscDescSegEnabled();
+    }
+
+    public LiveData<Boolean> getIsDrawAscDescSegEnabledLiveData() {
+        return drawAscDescSegEnabledLiveData;
+    }
+
+    public LiveData<Boolean> getIsDrawIconsEnabledLiveData() {
+        return drawIconsEnabledLiveData;
     }
 
     /**
@@ -134,5 +145,13 @@ public class ChartAreaItem {
 
     public ChartSlot getChartSlot() {
         return chartSlot;
+    }
+
+    public void setDrawAscDescSegEnabled(boolean isChecked) {
+        drawAscDescSegEnabledLiveData.setValue(isChecked);
+    }
+
+    public void setDrawIconsEnabled(boolean isChecked) {
+        drawIconsEnabledLiveData.setValue(isChecked);
     }
 }

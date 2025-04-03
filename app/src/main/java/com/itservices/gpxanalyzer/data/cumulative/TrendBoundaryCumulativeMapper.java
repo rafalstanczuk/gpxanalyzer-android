@@ -7,11 +7,10 @@ import android.util.Pair;
 
 import androidx.annotation.NonNull;
 
-import com.itservices.gpxanalyzer.data.TrendType;
 import com.itservices.gpxanalyzer.data.raw.DataEntity;
 import com.itservices.gpxanalyzer.data.raw.DataEntityWrapper;
 import com.itservices.gpxanalyzer.data.extrema.detector.Segment;
-import com.itservices.gpxanalyzer.data.extrema.detector.TrendTypeMapper;
+import com.itservices.gpxanalyzer.data.mapper.TrendTypeMapper;
 
 import java.util.ArrayList;
 import java.util.List;

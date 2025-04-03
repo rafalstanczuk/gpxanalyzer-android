@@ -25,7 +25,7 @@ import com.itservices.gpxanalyzer.data.cumulative.CumulativeProcessedDataType;
 import com.itservices.gpxanalyzer.data.cumulative.CumulativeStatistics;
 import com.itservices.gpxanalyzer.data.cumulative.TrendStatistics;
 import com.itservices.gpxanalyzer.data.raw.DataEntity;
-import com.itservices.gpxanalyzer.data.TrendType;
+import com.itservices.gpxanalyzer.data.cumulative.TrendType;
 import com.itservices.gpxanalyzer.data.raw.DataEntityWrapper;
 import com.itservices.gpxanalyzer.databinding.CustomMarkerViewBinding;
 import com.itservices.gpxanalyzer.utils.common.FormatNumberUtil;

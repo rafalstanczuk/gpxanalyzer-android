@@ -74,6 +74,7 @@ public enum RequestStatus {
      * This indicates that the application is retrieving GPX data from sources.
      */
     LOADING,
+    NEW_DATA_LOADING,
     
     /**
      * State indicating that data has been successfully loaded.

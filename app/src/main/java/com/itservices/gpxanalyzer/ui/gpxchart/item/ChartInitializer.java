@@ -1,8 +1,6 @@
-package com.itservices.gpxanalyzer.usecase;
+package com.itservices.gpxanalyzer.ui.gpxchart.item;
 
 import androidx.annotation.NonNull;
-
-import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItem;
 
 import javax.inject.Inject;
 
@@ -14,7 +12,7 @@ public class ChartInitializer {
     }
 
     @NonNull
-    Single<ChartAreaItem> initChart(ChartAreaItem chartAreaItem) {
+    public Single<ChartAreaItem> initChart(ChartAreaItem chartAreaItem) {
         return chartAreaItem.getChartController()
                 .initChart()
                 .map(status -> chartAreaItem);

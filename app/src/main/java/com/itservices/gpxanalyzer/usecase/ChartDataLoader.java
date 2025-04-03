@@ -8,30 +8,27 @@ import static com.itservices.gpxanalyzer.chart.RequestStatus.PROCESSING;
 
 import android.util.Log;
 
-import androidx.annotation.NonNull;
-import androidx.lifecycle.LiveData;
-
 import com.itservices.gpxanalyzer.chart.RequestStatus;
+import com.itservices.gpxanalyzer.event.MapChartGlobalEventWrapper;
+import com.itservices.gpxanalyzer.data.cache.processed.rawdata.RawDataProcessed;
 import com.itservices.gpxanalyzer.data.cache.rawdata.DataEntityCache;
 import com.itservices.gpxanalyzer.data.provider.DataEntityCachedProvider;
 import com.itservices.gpxanalyzer.data.provider.RawDataProcessedProvider;
 import com.itservices.gpxanalyzer.data.raw.DataEntityWrapper;
 import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItem;
+import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartInitializer;
 import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.GpxViewMode;
 import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.GpxViewModeMapper;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Vector;
 
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.reactivex.SingleSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-import io.reactivex.subjects.PublishSubject;
 
 /**
  * Responsible for loading GPX data and initializing chart components.
@@ -49,7 +46,9 @@ public class ChartDataLoader {
     DataEntityCache dataEntityCache;
     @Inject
     RawDataProcessedProvider rawDataProcessedProvider;
-    private PublishSubject<RequestStatus> requestStatusPublishSubject;
+
+    @Inject
+    MapChartGlobalEventWrapper eventWrapper;
 
     /**
      * Creates a new ChartDataLoader instance.
@@ -57,15 +56,6 @@ public class ChartDataLoader {
      */
     @Inject
     ChartDataLoader() {
-    }
-
-    /**
-     * Sets the PublishSubject for reporting data loading status updates.
-     *
-     * @param requestStatus The PublishSubject to publish status updates to
-     */
-    public void setRequestStatusPublish(PublishSubject<RequestStatus> requestStatus) {
-        requestStatusPublishSubject = requestStatus;
     }
 
     /**
@@ -87,46 +77,20 @@ public class ChartDataLoader {
         }
 
         Log.d(TAG, "Starting data loading for " + chartAreaItemList.size() + " charts");
-        requestStatusPublishSubject.onNext(LOADING);
+        eventWrapper.onNext(LOADING);
 
         return dataEntityCachedProvider.provide()
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.computation())
                 .doOnSuccess(data -> {
                     Log.d(TAG, "Data loaded successfully");
-                    requestStatusPublishSubject.onNext(DATA_LOADED);
+                    eventWrapper.onNext(DATA_LOADED);
                 })
                 .doOnError(throwable -> {
                     Log.e(TAG, "Error loading data", throwable);
-                    requestStatusPublishSubject.onNext(RequestStatus.ERROR);
+                    eventWrapper.onNext(RequestStatus.ERROR);
                 })
-                .flatMapObservable(data ->
-                        Observable.fromIterable(chartAreaItemList)
-                                .flatMapSingle(chartAreaItem -> chartInitializer.initChart(chartAreaItem)
-                                        .subscribeOn(Schedulers.computation())
-                                        .doOnError(e -> Log.e(TAG, "Error initializing chart item", e))
-                                        .doOnSuccess(item -> {
-                                            Log.d(TAG, "Chart item initialized successfully");
-                                            requestStatusPublishSubject.onNext(PROCESSING);
-                                        }))
-                                .flatMapSingle(chartAreaItem ->
-                                        rawDataProcessedProvider.provide(
-                                                        createWrapperFor(chartAreaItem.getViewMode().getValue())
-                                                )
-                                                .observeOn(Schedulers.computation())
-                                                .doOnError(e -> Log.e(TAG, "Error rawDataProcessedProvider", e))
-                                                .doOnSuccess(rawDataProcessed -> {
-                                                    Log.d(TAG, "Chart item initialized successfully");
-                                                    requestStatusPublishSubject.onNext(PROCESSED);
-                                                    requestStatusPublishSubject.onNext(CHART_UPDATING);
-                                                })
-                                                .map(chartAreaItem::updateChart
-                                                ))
-                                .flatMapSingle(requestStatusSingle -> requestStatusSingle)
-                                .flatMapSingle(requestStatus -> {
-                                    Log.d(TAG, "Updating chart with rawDataProcessed requestStatus: " + requestStatus);
-                                    return Single.just(requestStatus);
-                                }))
+                .flatMapObservable(data -> initWithData(chartAreaItemList, chartInitializer))
                 .toList()
                 .observeOn(AndroidSchedulers.mainThread())
                 .flatMapObservable(requestStatusList -> {
@@ -135,18 +99,53 @@ public class ChartDataLoader {
                             .orElse(RequestStatus.ERROR);
 
                     Log.d(TAG, "Data loading completed with status: " + finalStatus);
-                    requestStatusPublishSubject.onNext(finalStatus == RequestStatus.CHART_UPDATED ?
+                    eventWrapper.onNext(finalStatus == RequestStatus.CHART_UPDATED ?
                             RequestStatus.DONE : finalStatus);
                     return Observable.just(finalStatus == RequestStatus.CHART_UPDATED ?
                             RequestStatus.DONE : finalStatus);
                 })
                 .doOnError(error -> {
                     Log.e(TAG, "Fatal error in data loading chain", error);
-                    requestStatusPublishSubject.onNext(RequestStatus.ERROR);
+                    eventWrapper.onNext(RequestStatus.ERROR);
                 })
                 .doOnComplete(() -> {
                     Log.d(TAG, "Data loading chain completed");
-                    requestStatusPublishSubject.onNext(RequestStatus.DONE);
+                    eventWrapper.onNext(RequestStatus.DONE);
+                });
+    }
+
+    private Observable<RequestStatus> initWithData(List<ChartAreaItem> chartAreaItemList, ChartInitializer chartInitializer) {
+        return Observable.fromIterable(chartAreaItemList)
+                .flatMapSingle(chartAreaItem -> chartInitializer.initChart(chartAreaItem)
+                        .subscribeOn(Schedulers.computation())
+                        .doOnError(e -> Log.e(TAG, "Error initializing chart item", e))
+                        .doOnSuccess(item -> {
+                            Log.d(TAG, "Chart item initialized successfully");
+                            eventWrapper.onNext(PROCESSING);
+                        }))
+                .flatMapSingle(this::updateWithData)
+                .flatMapSingle(requestStatusSingle -> requestStatusSingle)
+                .flatMapSingle(requestStatus -> {
+                    Log.d(TAG, "Updating chart with rawDataProcessed requestStatus: " + requestStatus);
+                    return Single.just(requestStatus);
+                });
+    }
+
+    private Single<Single<RequestStatus>> updateWithData(ChartAreaItem chartAreaItem) {
+        return provideDataFor(chartAreaItem)
+                .map(chartAreaItem::updateChart);
+    }
+
+    private Single<RawDataProcessed> provideDataFor(ChartAreaItem chartAreaItem) {
+        return rawDataProcessedProvider.provide(
+                        createWrapperFor(chartAreaItem.getViewMode().getValue())
+                )
+                .observeOn(Schedulers.computation())
+                .doOnError(e -> Log.e(TAG, "Error rawDataProcessedProvider", e))
+                .doOnSuccess(rawDataProcessed -> {
+                    Log.d(TAG, "rawDataProcessed successfully");
+                    eventWrapper.onNext(PROCESSED);
+                    eventWrapper.onNext(CHART_UPDATING);
                 });
     }
 
@@ -154,30 +153,5 @@ public class ChartDataLoader {
         int primaryKeyIndex = viewModeMapper.mapToPrimaryKeyIndexList(viewMode);
 
         return new DataEntityWrapper(primaryKeyIndex, dataEntityCache);
-    }
-
-    /*                .flatMap(status -> {
-            GpxViewMode iChartViewMode = chartAreaItem.getViewMode().getValue();
-
-            if (iChartViewMode == null) {
-                Log.w("MultipleSyncedGpxChartUseCase", "ViewMode is null for chart item");
-                return chartAreaItem;
-            }
-
-            int primaryKeyIndex = viewModeMapper.mapToPrimaryKeyIndexList(iChartViewMode);
-
-            DataEntityWrapper dataEntityWrapper = new DataEntityWrapper(primaryKeyIndex, dataEntityCache);
-
-            return rawDataProcessedProvider.provide(dataEntityWrapper);
-        });*/
-    @NonNull
-    private Vector<DataEntityWrapper> createDataEntityWrappers() {
-        int n = dataEntityCache.getDataEntitityVector().firstElement().getMeasures().size();
-        Vector<DataEntityWrapper> wrappersVector = new Vector<>(n);
-
-        for (int i = 0; i < n; i++) {
-            wrappersVector.add(new DataEntityWrapper(i, dataEntityCache));
-        }
-        return wrappersVector;
     }
 }

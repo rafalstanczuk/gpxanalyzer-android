@@ -1,7 +1,5 @@
 package com.itservices.gpxanalyzer.data.cache.processed.chart;
 
-import static java.util.Map.Entry.comparingByKey;
-
 import android.util.Log;
 
 import com.github.mikephil.charting.data.LineDataSet;
@@ -70,27 +68,6 @@ public class EntryCacheMap {
      */
     public BaseEntry get(long timestampMillis) {
         return entryMap.get(timestampMillis);
-    }
-
-    /**
-     * Retrieves all entries with timestamps within the specified range.
-     * <p>
-     * The returned list is sorted by timestamp in ascending order.
-     *
-     * @param timestampMillisStart The start timestamp (inclusive)
-     * @param timestampMillisEnd The end timestamp (inclusive)
-     * @return A list of BaseEntry objects within the specified timestamp range
-     */
-    public List<BaseEntry> get(long timestampMillisStart, long timestampMillisEnd) {
-        if (timestampMillisEnd < timestampMillisStart) {
-            return new ArrayList<>();
-        }
-
-        return entryMap.entrySet()
-                .stream().sorted( Map.Entry.comparingByKey() )
-                .filter(entry -> entry.getKey() >= timestampMillisStart && entry.getKey() <= timestampMillisEnd)
-                .map(Map.Entry::getValue)
-                .collect(Collectors.toList());
     }
 
     /**

@@ -13,5 +13,5 @@ public interface MapOperations {
     void setBoundingBox(BoundingBox boundingBox, int paddingPx, long animationDurationMs);
     void setBoundingBoxWithPadding(BoundingBox boundingBox, double paddingPercent);
     void setBoundingBoxWithPadding(BoundingBox boundingBox, double paddingPercent, 
-                                 int paddingPx, long animationDurationMs);
+                                 int paddingPx, boolean animated, long animationDurationMs);
 } 

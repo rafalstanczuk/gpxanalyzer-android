@@ -4,8 +4,12 @@ import com.itservices.gpxanalyzer.data.raw.DataEntity;
 import com.itservices.gpxanalyzer.data.statistics.DataEntityStatistics;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -14,7 +18,7 @@ import javax.inject.Singleton;
  * A singleton provider class that manages cached DataEntity objects and their statistics.
  * This class maintains a thread-safe collection of DataEntity objects and provides
  * methods for adding, retrieving, and analyzing the data.
- *
+ * <p>
  * The class uses AtomicReference for thread-safe access to the data collection and
  * maintains running statistics for the data entities. It is designed to be used with
  * dependency injection and provides a centralized cache for data entities.
@@ -22,7 +26,9 @@ import javax.inject.Singleton;
 @Singleton
 public class DataEntityCache {
 
-    private AtomicReference<Vector<DataEntity>> dataEntityVector = new AtomicReference<>(new Vector<>());
+    private final ConcurrentMap<Long, DataEntity> dataEntityMap = new ConcurrentHashMap<>();
+
+    private final AtomicReference<Vector<DataEntity>> dataEntityVector = new AtomicReference<>(new Vector<>());
     private DataEntityStatistics dataEntityStatistics;
 
     /**
@@ -41,6 +47,7 @@ public class DataEntityCache {
     public void init(int nPrimaryIndexes) {
         dataEntityStatistics = new DataEntityStatistics(nPrimaryIndexes);
         dataEntityVector.get().clear();
+        dataEntityMap.clear();
     }
 
     /**
@@ -50,6 +57,8 @@ public class DataEntityCache {
      */
     public void accept(DataEntity dataEntity) {
         dataEntityVector.get().add(dataEntity);
+        dataEntityMap.put(dataEntity.timestampMillis(), dataEntity);
+
         dataEntityStatistics.accept(dataEntity);
     }
 
@@ -60,7 +69,7 @@ public class DataEntityCache {
      * @param dataEntityList The list of DataEntity objects to add
      */
     public void acceptAll(List<DataEntity> dataEntityList) {
-        if(dataEntityList.isEmpty()) {
+        if (dataEntityList.isEmpty()) {
             return;
         }
         this.dataEntityVector.get().clear();
@@ -76,6 +85,7 @@ public class DataEntityCache {
     public void reset() {
         this.dataEntityVector.get().clear();
         dataEntityStatistics.reset();
+        dataEntityMap.clear();
     }
 
     /**
@@ -103,5 +113,30 @@ public class DataEntityCache {
      */
     public Vector<DataEntity> getDataEntitityVector() {
         return dataEntityVector.get();
+    }
+
+    public DataEntity getDataEntityForTime(long timestampMillis) {
+        return dataEntityMap.get(timestampMillis);
+    }
+
+    public Vector<DataEntity> get(long timestampMillisStart, long timestampMillisEnd) {
+        if (timestampMillisEnd < timestampMillisStart) {
+            return new Vector<>();
+        }
+
+        Vector<DataEntity> allDataEntity = getDataEntitityVector();
+
+        if (allDataEntity.firstElement().timestampMillis() == timestampMillisStart
+                &&
+                allDataEntity.lastElement().timestampMillis() == timestampMillisEnd
+        ) {
+            return allDataEntity;
+        }
+
+        return dataEntityMap.entrySet()
+                .stream()
+                .filter(entry -> entry.getKey() >= timestampMillisStart && entry.getKey() <= timestampMillisEnd)
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toCollection(Vector::new));
     }
 }

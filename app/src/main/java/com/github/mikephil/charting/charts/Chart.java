@@ -501,6 +501,10 @@ public abstract class Chart<T extends ChartData<? extends IDataSet<? extends Ent
         return mIndicesToHighlight;
     }
 
+    public void clearHighlighted() {
+        mIndicesToHighlight = null;
+    }
+
     /**
      * Returns true if values can be highlighted via tap gesture, false if not.
      *

@@ -718,27 +718,28 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
 
     }
 
-    public void animateFitScreen(long duration) {
+    public void animateFitScreen(long duration, Animator.AnimatorListener listener) {
         animateZoomToCenter(0.0001f,0.0001f, duration,
                 new Animator.AnimatorListener() {
                     @Override
                     public void onAnimationStart(@NonNull Animator animation) {
-
+                        listener.onAnimationStart(animation);
                     }
 
                     @Override
                     public void onAnimationEnd(@NonNull Animator animation) {
                         fitScreen();
+                        listener.onAnimationEnd(animation);
                     }
 
                     @Override
                     public void onAnimationCancel(@NonNull Animator animation) {
-
+                        listener.onAnimationCancel(animation);
                     }
 
                     @Override
                     public void onAnimationRepeat(@NonNull Animator animation) {
-
+                        listener.onAnimationRepeat(animation);
                     }
                 }
         );

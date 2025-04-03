@@ -1,5 +1,6 @@
 package com.itservices.gpxanalyzer.chart;
 
+import android.animation.Animator;
 import android.util.Log;
 import android.view.MotionEvent;
 
@@ -14,52 +15,29 @@ import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.itservices.gpxanalyzer.chart.entry.BaseEntry;
+import com.itservices.gpxanalyzer.chart.entry.CurveEntry;
+import com.itservices.gpxanalyzer.event.EventEntrySelection;
+import com.itservices.gpxanalyzer.event.EventVisibleChartEntriesTimestamp;
+import com.itservices.gpxanalyzer.event.MapChartGlobalEventWrapper;
 import com.itservices.gpxanalyzer.data.cache.processed.chart.EntryCacheMap;
 import com.itservices.gpxanalyzer.data.cache.processed.rawdata.RawDataProcessed;
+import com.itservices.gpxanalyzer.utils.common.ConcurrentUtil;
 
 import java.util.Objects;
 
 import javax.inject.Inject;
 
-import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.reactivex.subjects.PublishSubject;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
-/**
- * Controls the behavior and appearance of GPX data charts.
- * <p>
- * This class provides a high-level interface for managing charts, handling user interactions,
- * configuring visual properties, and managing the data displayed in charts. It serves as the 
- * primary façade that other application components use to interact with the charting system.
- * <p>
- * Key responsibilities include:
- * <ul>
- *   <li>Binding to and initializing chart views</li>
- *   <li>Handling chart interactions (touch events, gestures, value selection)</li>
- *   <li>Controlling visual properties (icons, filling, etc.)</li>
- *   <li>Updating charts with new GPX data</li>
- *   <li>Broadcasting selection events to enable synchronized selection across multiple charts</li>
- *   <li>Managing animations and visual transitions</li>
- * </ul>
- * <p>
- * ChartController implements listeners for chart value selection and gestures,
- * enabling synchronized selection between multiple charts and providing
- * reactive streams of selection events to observers through RxJava.
- * <p>
- * It delegates most implementation details to specialized components like {@link ChartProvider},
- * following a layered architecture that separates high-level control from low-level rendering
- * and data processing. This separation allows for easier testing and maintenance of the
- * chart visualization system.
- * <p>
- * This class is typically injected into UI components like fragments that need to display GPX data.
- */
-public class ChartController implements OnChartValueSelectedListener, OnChartGestureListener {
+public class ChartController implements OnChartValueSelectedListener, OnChartGestureListener, Animator.AnimatorListener {
+    private static final String TAG = ChartController.class.getSimpleName();
 
-    /**
-     * Subject for publishing selection events when chart entries are selected.
-     * Allows observers to receive notifications about user selections on charts.
-     */
-    private final PublishSubject<BaseEntry> baseEntrySelectionPublishSubject = PublishSubject.create();
+    @Inject
+    MapChartGlobalEventWrapper mapChartGlobalEventWrapper;
+    private Disposable disposableSelectionObserveGlobal;
     
     /**
      * The chart provider that manages the actual chart instances and data.
@@ -96,6 +74,8 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
         chartBindings.setOnChartGestureListener(this);
 
         chartProvider.registerBinding(chartBindings);
+
+        setupSelectionObserve();
     }
 
     /**
@@ -141,6 +121,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     @UiThread
     public void setDrawIconsEnabled(boolean isChecked) {
         chartProvider.getSettings().setDrawIconsEnabled(isChecked);
+
         chartProvider.updateDataChart().subscribe();
     }
 
@@ -167,6 +148,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     @UiThread
     public void setDrawAscDescSegEnabled(boolean isChecked) {
         chartProvider.getSettings().setDrawAscDescSegEnabled(isChecked);
+
         chartProvider.updateDataChart().subscribe();
     }
 
@@ -181,7 +163,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
      * @param duration The animation duration in milliseconds
      */
     public void animateZoomToCenter(final float targetScaleX, final float targetScaleY, long duration) {
-        Objects.requireNonNull(chartProvider.getChart()).animateZoomToCenter(targetScaleX, targetScaleY, duration);
+        Objects.requireNonNull(chartProvider.getChart()).animateZoomToCenter(targetScaleX, targetScaleY, duration, this);
     }
 
     /**
@@ -193,7 +175,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
      * @param duration The animation duration in milliseconds
      */
     public void animateFitScreen(long duration) {
-        Objects.requireNonNull(chartProvider.getChart()).animateFitScreen(duration);
+        Objects.requireNonNull(chartProvider.getChart()).animateFitScreen(duration, this);
     }
 
     /**
@@ -224,19 +206,6 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     }
 
     /**
-     * Gets an Observable that emits selection events when chart entries are selected.
-     * <p>
-     * This can be used to synchronize selection between multiple charts or to respond
-     * to user selections in other parts of the application. Observers will receive a
-     * BaseEntry object whenever a point on the chart is selected.
-     *
-     * @return An Observable that emits BaseEntry objects when selections occur
-     */
-    public Observable<BaseEntry> getSelection() {
-        return baseEntrySelectionPublishSubject;
-    }
-
-    /**
      * Programmatically selects a data point at the specified timestamp.
      * <p>
      * This will highlight the corresponding entry on the chart and center the
@@ -247,6 +216,56 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
      */
     public void select(long selectedTimeMillis) {
         manualSelectEntryOnSelectedTime(Objects.requireNonNull(chartProvider.getChart()), selectedTimeMillis, true, false);
+    }
+
+    private void setupSelectionObserve() {
+        Log.d(TAG, "setupSelectionObserve() called");
+
+        ConcurrentUtil.tryToDispose(disposableSelectionObserveGlobal);
+
+        disposableSelectionObserveGlobal =
+                mapChartGlobalEventWrapper.getEventEntrySelection()
+                        .subscribeOn(Schedulers.newThread())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .doOnNext(this::handleEvent)
+                        .doOnError(throwable -> Log.e(TAG, "Error in chart sync", throwable))
+                        .subscribe();
+    }
+
+    private void handleEvent(EventEntrySelection event) {
+        if (event == null){
+            return;
+        }
+
+        if (chartProvider.getChart() == null) {
+            Log.w(TAG, "Chart is null in handleEvent selection");
+            return;
+        }
+
+        if (event.chartSlot() == Objects.requireNonNull(chartProvider.getChart()).getChartSlot()) {
+            return;
+        }
+
+        CurveEntry curveEntry = event.curveEntry();
+
+        if (curveEntry == null) {
+            Log.w(TAG, "Received null curveEntry in handleEvent selection");
+            return;
+        }
+
+        if (curveEntry.getDataEntity() == null) {
+            Log.w(TAG, "Received null DataEntity in handleEvent curveEntry");
+            return;
+        }
+
+        long timestamp = curveEntry.getDataEntity().timestampMillis();
+
+        try {
+            select(timestamp);
+        } catch (Exception e) {
+            Log.e(TAG, String.format("Error selecting timestamp %d",
+                    timestamp), e);
+        }
     }
 
     /**
@@ -291,10 +310,6 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
             setSelectionEntry(entryFound, callListeners);
             chart.highlightValue(entryFound.getX(), entryFound.getY(), entryFound.getDataSetIndex(), callListeners);
 
-            if (chart.getHighlighted() != null) {
-                chartProvider.setSelectionHighlight(chart.getHighlighted()[0]);
-            }
-
             if (centerViewToSelection) {
                 chart.centerViewTo(entryFound.getX(), entryFound.getY(), YAxis.AxisDependency.LEFT);
             }
@@ -324,8 +339,15 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
 
         if (publishSelection && (entry instanceof BaseEntry)) {
             //Log.d(ChartController.class.getSimpleName(), "Publishing selection for entry: " + entry);
-            baseEntrySelectionPublishSubject.onNext((BaseEntry) entry);
+
+            publishSelectionGlobal((CurveEntry) entry, chart);
         }
+    }
+
+    private void publishSelectionGlobal(CurveEntry entry, DataEntityLineChart chart) {
+        mapChartGlobalEventWrapper.onNext(
+                    new EventEntrySelection(chart.getChartSlot(), entry)
+        );
     }
 
     /**
@@ -338,7 +360,6 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
      * @param chart The chart to reset
      */
     private void resetMarkerAndClearSelection(DataEntityLineChart chart) {
-        chartProvider.setSelectionHighlight(null);
         chart.setHighlightedEntry(null);
 
         manualSelectEntryOnSelectedTime(chart, -1, false, true);
@@ -368,6 +389,9 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
      */
     @Override
     public void onChartGestureEnd(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) {
+        //Log.d(ChartController.class.getSimpleName(), "onChartGestureEnd() called with: me = [" + me + "], lastPerformedGesture = [" + lastPerformedGesture + "]");
+
+        publishVisibleBoundaryEntriesTimestamps();
     }
 
     /**
@@ -433,6 +457,9 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
      */
     @Override
     public void onChartScale(MotionEvent me, float scaleX, float scaleY) {
+        //Log.d(ChartController.class.getSimpleName(), "onChartScale() called with: me = [" + me + "], scaleX = [" + scaleX + "], scaleY = [" + scaleY + "]");
+
+        publishVisibleBoundaryEntriesTimestamps();
     }
 
     /**
@@ -448,7 +475,11 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
      */
     @Override
     public void onChartTranslate(MotionEvent me, float dX, float dY) {
+        //Log.d(ChartController.class.getSimpleName(), "onChartTranslate() called with: me = [" + me + "], dX = [" + dX + "], dY = [" + dY + "]");
+
         Objects.requireNonNull(chartProvider.getChart()).highlightCenterValueInTranslation();
+
+        publishVisibleBoundaryEntriesTimestamps();
     }
 
     /**
@@ -465,7 +496,19 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     public void onValueSelected(Entry e, Highlight h) {
         //Log.d(ChartController.class.getSimpleName(), "Value selected: " + e + ", highlight: " + h);
         setSelectionEntry(e, true);
-        chartProvider.setSelectionHighlight(h);
+
+        //publishVisibleBoundaryEntriesTimestamps();
+    }
+
+    private void publishVisibleBoundaryEntriesTimestamps() {
+        DataEntityLineChart chart = Objects.requireNonNull(chartProvider.getChart());
+
+        mapChartGlobalEventWrapper.onNext(
+                new EventVisibleChartEntriesTimestamp(
+                        chart.getChartSlot(),
+                        chart.getVisibleEntriesBoundaryTimestamps()
+                )
+        );
     }
 
     /**
@@ -497,5 +540,27 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
         }
 
         return null;
+    }
+
+    @Override
+    public void onAnimationStart(@NonNull Animator animation) {
+
+    }
+
+    @Override
+    public void onAnimationEnd(@NonNull Animator animation) {
+        //Log.d(ChartController.class.getSimpleName(), "onAnimationEnd() called with: animation = [" + animation + "]");
+
+        publishVisibleBoundaryEntriesTimestamps();
+    }
+
+    @Override
+    public void onAnimationCancel(@NonNull Animator animation) {
+
+    }
+
+    @Override
+    public void onAnimationRepeat(@NonNull Animator animation) {
+
     }
 }

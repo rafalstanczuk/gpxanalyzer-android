@@ -5,16 +5,13 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 
-import com.github.mikephil.charting.highlight.Highlight;
 import com.itservices.gpxanalyzer.chart.settings.LineChartSettings;
 import com.itservices.gpxanalyzer.data.cache.processed.chart.EntryCacheMap;
 import com.itservices.gpxanalyzer.data.cache.processed.chart.ChartProcessedData;
 import com.itservices.gpxanalyzer.data.cache.processed.rawdata.RawDataProcessed;
 import com.itservices.gpxanalyzer.data.provider.ChartProcessedDataProvider;
-import com.itservices.gpxanalyzer.data.raw.DataEntityWrapper;
 
 import java.lang.ref.WeakReference;
-import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 
@@ -22,29 +19,8 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
-/**
- * Provides chart functionality and manages the lifecycle of chart components.
- * <p>
- * This class serves as the bridge between high-level chart controllers and the
- * actual chart implementation. It maintains a weak reference to the chart view,
- * handles initialization and updating of charts, and manages chart settings and data.
- * <p>
- * Key responsibilities include:
- * <ul>
- *   <li>Initializing charts with settings and empty data</li>
- *   <li>Updating charts with new data from {@link DataEntityWrapper} objects</li>
- *   <li>Managing chart highlights and selections</li>
- *   <li>Handling concurrent updates using RxJava for thread management</li>
- *   <li>Providing access to chart components like settings and entry cache</li>
- * </ul>
- * <p>
- * This class uses weak references to avoid memory leaks when charts are destroyed,
- * and atomic references to ensure thread safety for concurrent operations.
- */
 class ChartProvider {
     private static final String TAG = ChartProvider.class.getSimpleName();
-
-    private final AtomicReference<Highlight> currentHighlightRef = new AtomicReference<>();
 
     @Inject
     ChartProcessedDataProvider chartProcessedDataProvider;
@@ -92,6 +68,8 @@ class ChartProvider {
             return Single.just(RequestStatus.CHART_WEAK_REFERENCE_IS_NULL);
         }
 
+        chartWeakReference.get().clearHighlighted();
+
         return chartWeakReference.get().initChart(chartComponents)
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -104,19 +82,6 @@ class ChartProvider {
                     }
                     return Single.just(RequestStatus.CHART_INITIALIZED);
                 });
-    }
-
-    /**
-     * Sets the current selection highlight on the chart.
-     * <p>
-     * This is used to maintain selection state across chart updates.
-     * When the chart is redrawn (e.g., after data changes), the highlight
-     * can be reapplied to preserve user selection context.
-     *
-     * @param h The highlight to set, or null to clear the highlight
-     */
-    public void setSelectionHighlight(Highlight h) {
-        currentHighlightRef.set(h);
     }
 
     /**
@@ -149,7 +114,7 @@ class ChartProvider {
                                 .provide(rawDataProcessed, chartComponents.settings, palette))
                         .subscribeOn(Schedulers.computation())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .flatMap(lineData -> updateChart(lineData, currentHighlightRef.get()))
+                        .flatMap(lineData -> updateChart(lineData))
                         .observeOn(Schedulers.io());
     }
 
@@ -171,7 +136,7 @@ class ChartProvider {
                 .doOnEvent((chartProcessedData, throwable) -> chartComponents.settings.updateSettingsFor(chartProcessedData.lineData().get()))
                 .observeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
-                .flatMap(chartProcessedData -> updateChart(chartProcessedData, currentHighlightRef.get()));
+                .flatMap(chartProcessedData -> updateChart(chartProcessedData));
     }
 
     /**
@@ -180,7 +145,7 @@ class ChartProvider {
      * Returns the chart view that was previously registered with this provider.
      * If no chart is registered or if the weak reference has been cleared,
      * this method returns null.
-     * 
+     *
      * @return The current chart view, or null if no chart is registered
      */
     @Nullable
@@ -197,7 +162,7 @@ class ChartProvider {
      * Returns the LineChartSettings instance that controls the visual appearance
      * and behavior of the chart. This method is synchronized to ensure thread safety
      * when accessing settings.
-     * 
+     *
      * @return The LineChartSettings instance
      */
     public synchronized LineChartSettings getSettings() {
@@ -210,7 +175,7 @@ class ChartProvider {
      * The entry cache map provides fast access to chart entries by timestamp.
      * This is useful for operations that need to lookup or manipulate specific
      * chart entries, such as highlighting points or retrieving data for tooltips.
-     * 
+     *
      * @return The EntryCacheMap, or null if no chart data is available
      */
     @Nullable
@@ -222,21 +187,7 @@ class ChartProvider {
         return null;
     }
 
-    /**
-     * Updates the chart with processed data and applies a highlight.
-     * <p>
-     * This method sets the processed data in the chart, applies chart settings,
-     * applies the highlight (if provided), and invalidates the chart to trigger a redraw.
-     * <p>
-     * This is an internal method used by the public update methods to perform the actual
-     * chart update on the UI thread.
-     * 
-     * @param chartProcessedData The processed chart data to display
-     * @param highlight The highlight to apply, or null for no highlight
-     * @return A Single that emits the status of the update operation
-     */
-    private Single<RequestStatus> updateChart(ChartProcessedData chartProcessedData,
-                                              Highlight highlight) {
+    private Single<RequestStatus> updateChart(ChartProcessedData chartProcessedData) {
         return Single.fromCallable(() -> {
 
             if (chartWeakReference == null)
@@ -248,10 +199,11 @@ class ChartProvider {
                 return RequestStatus.CHART_IS_NULL;
 
             synchronized (chart) {
-                //chart.clear();
+                //chart.clearHighlighted();
+
                 chart.setData(chartProcessedData.lineData().get());
                 chartComponents.loadChartSettings(chart);
-                chart.highlightValue(highlight, true);
+
                 chart.invalidate();
 
                 Log.i(TAG, "updateChart: INVALIDATED!!!");
@@ -259,5 +211,4 @@ class ChartProvider {
             return RequestStatus.CHART_UPDATED;
         });
     }
-
 }
