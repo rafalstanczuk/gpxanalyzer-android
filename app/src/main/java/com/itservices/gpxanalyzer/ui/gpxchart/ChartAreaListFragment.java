@@ -39,13 +39,15 @@ public class ChartAreaListFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        viewModel = new ViewModelProvider(this.requireActivity()).get(ChartAreaListViewModel.class);
     }
 
     @Override
     public View onCreateView(
             @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState
     ) {
+
+        viewModel = new ViewModelProvider(this.requireActivity()).get(ChartAreaListViewModel.class);
+        viewModel.bind();
 
         binding = FragmentChartAreaListBinding.inflate(inflater, container, false);
         binding.setViewModel(viewModel);
@@ -57,7 +59,6 @@ public class ChartAreaListFragment extends Fragment {
 
         binding.gpxChartsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-        viewModel.bind();
 
         if (viewModel.getChartAreaItemListLiveData().getValue()==null || viewModel.getChartAreaItemListLiveData().getValue().isEmpty() ) {
             List<ChartAreaItem> immutableList = Arrays.asList(

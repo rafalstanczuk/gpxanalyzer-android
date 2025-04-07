@@ -32,33 +32,26 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
+            style="@style/Widget.App.FloatingActionButton.Mini.Circular"
             android:id="@+id/switchModeButton"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
             android:layout_marginStart="@dimen/margin_small"
             android:alpha="@fraction/button_alpha"
-            android:background="@color/white"
             android:contentDescription="@{ chartAreaItem.getViewMode().name}"
             android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData}"
             android:onClick="@{() -> viewModel.onSwitchViewMode(chartAreaItem)}"
-            app:ensureMinTouchTargetSize="true"
-            app:fabSize="mini"
             app:imageResource="@{ chartAreaItem.getViewMode().getDrawableIconResId  }"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
+            style="@style/Widget.App.FloatingActionButton.Mini.Circular"
             android:id="@+id/drawAscDescSegFab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/margin_small"
             android:alpha="@fraction/button_alpha"
-            android:background="@color/white"
             android:contentDescription="@string/draw_asc_desc_segments"
             android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData}"
             android:onClick="@{() -> viewModel.onDrawAscDescSegCheckBoxChanged(chartAreaItem, !chartAreaItem.drawAscDescSegEnabledFromController)}"
-            app:fabSize="mini"
             app:imageResource="@{chartAreaItem.getIsDrawAscDescSegEnabledLiveData ? R.drawable.ic_checkbox_ascdescseg_fill1 : R.drawable.ic_checkbox_ascdescseg_fill0}"
             app:layout_constraintStart_toEndOf="@+id/switchModeButton"
             app:layout_constraintTop_toTopOf="parent"
@@ -66,16 +59,13 @@
 
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
+            style="@style/Widget.App.FloatingActionButton.Mini.Circular"
             android:id="@+id/onOffColorizedCirclesCheckBox"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/margin_small"
             android:alpha="@fraction/button_alpha"
-            android:background="@color/white"
             android:contentDescription="@string/on_off_colorized_circles"
             android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData}"
             android:onClick="@{() -> viewModel.onOnOffColorizedCirclesCheckBoxChanged(chartAreaItem, !chartAreaItem.drawIconsEnabledFromController)}"
-            app:fabSize="mini"
             app:imageResource="@{chartAreaItem.getIsDrawIconsEnabledLiveData ? R.drawable.ic_dots_fill1 : R.drawable.ic_dots_fill0}"
             app:layout_constraintStart_toEndOf="@+id/drawAscDescSegFab"
             app:layout_constraintTop_toTopOf="parent" />

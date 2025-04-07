@@ -121,13 +121,13 @@ public class LineChartSettings {
             HourMinutesAxisValueFormatter hourMinutesAxisValueFormatter,
             AxisValueFormatter dataEntityAxisValueFormatter
     ) {
-        primaryColor = ContextCompat.getColor(context, R.color.lightBlue);
+        primaryColor = ContextCompat.getColor(context, R.color.lineChartPrimary);
+        paintGridBg.setStyle(Paint.Style.FILL);
+        paintGridBg.setColor(ContextCompat.getColor(context, R.color.lineChartBackground));
+
         this.customMarker = customMarker;
         this.hourMinutesAxisValueFormatter = hourMinutesAxisValueFormatter;
         this.dataEntityAxisValueFormatter = dataEntityAxisValueFormatter;
-
-        paintGridBg.setStyle(Paint.Style.FILL);
-        paintGridBg.setColor(Color.WHITE);
     }
 
     public static void updateLineDataSetWithSettings(LineDataSet lineDataSet, LineChartSettings settings) {

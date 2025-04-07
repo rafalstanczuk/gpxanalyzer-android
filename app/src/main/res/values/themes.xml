@@ -1,16 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Theme.GpxAnalyzer" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
-        <!-- Primary brand color. -->
+    <!-- Base application theme (Material 2 - Light) -->
+    <style name="Theme.GpxAnalyzer" parent="Theme.MaterialComponents.Light.DarkActionBar">
+        <!-- M2 Primary brand color -->
         <item name="colorPrimary">@color/veryDarkGray</item>
         <item name="colorPrimaryVariant">@color/veryDarkGray</item>
         <item name="colorOnPrimary">@color/white</item>
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/lightGray</item>
-        <item name="colorSecondaryVariant">@color/lightGray</item>
-        <item name="colorOnSecondary">@color/black</item>
-        <!-- Status bar color. -->
+        <!-- M2 Secondary brand color -->
+        <item name="colorSecondary">@color/white</item>
+        <item name="colorSecondaryVariant">@color/white</item>
+        <item name="colorOnSecondary">@color/veryDarkGray</item>
+        <!-- M2 Background color -->
+        <item name="android:colorBackground">@color/white</item>
+        <item name="colorOnBackground">@color/black</item>
+        <!-- M2 Surface color -->
+        <item name="colorSurface">@color/white</item>
+        <item name="colorOnSurface">@color/black</item>
+        <!-- M2 Error color -->
+        <item name="colorError">@color/md_theme_light_error</item>
+        <item name="colorOnError">@color/md_theme_light_onError</item>
+        <!-- Status bar color -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <item name="android:windowLightStatusBar">true</item>
         <!-- Customize your theme here. -->
+    </style>
+
+    <!-- Custom Style for Circular Mini FAB (M2 Base) -->
+    <style name="Widget.App.FloatingActionButton.Mini.Circular" parent="Widget.MaterialComponents.FloatingActionButton">
+        <!-- Shape -->
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+        <!-- M2 Colors -->
+        <item name="backgroundTint">?attr/colorSecondary</item>
+        <item name="tint">?attr/colorOnBackground</item>
+        <item name="rippleColor">?attr/colorOnSecondary</item>
+        <!-- Size attributes -->
+        <item name="fabSize">mini</item>
+        <item name="iconSize">@dimen/fab_custom_icon_size</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <!-- Elevation -->
+        <item name="android:elevation">6dp</item>
     </style>
 </resources>
