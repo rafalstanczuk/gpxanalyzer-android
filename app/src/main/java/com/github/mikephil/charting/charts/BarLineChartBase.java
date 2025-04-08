@@ -701,6 +701,12 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
     public void zoomToCenter(float scaleX, float scaleY) {
         MPPointF center = mViewPortHandler.getContentCenter();
 
+        if (mIndicesToHighlight != null && mIndicesToHighlight.length > 0) {
+            float[] pos = getMarkerPosition(mIndicesToHighlight[0]);
+
+            center = MPPointF.getInstance(pos[0], pos[1]);
+        }
+
         mViewPortHandler.zoom(scaleX, scaleY, center.x, -center.y, mZoomMatrixBuffer);
         mViewPortHandler.refresh(mZoomMatrixBuffer, this, false);
 

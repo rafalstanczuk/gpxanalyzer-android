@@ -25,50 +25,61 @@
             card_view:contentPadding="0dp">-->
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            style="@style/Widget.App.FloatingActionButton.Mini.Circular"
-            android:id="@+id/switchModeButton"
-            android:layout_marginStart="@dimen/margin_small"
-            android:alpha="@fraction/button_alpha"
-            android:contentDescription="@{ chartAreaItem.getViewMode().name}"
-            android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData}"
-            android:onClick="@{() -> viewModel.onSwitchViewMode(chartAreaItem)}"
-            app:imageResource="@{ chartAreaItem.getViewMode().getDrawableIconResId  }"
-            app:layout_constraintBottom_toBottomOf="parent"
+        <!-- All FABs are now placed in a vertical linear layout on the left -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:gravity="start"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            style="@style/Widget.App.FloatingActionButton.Mini.Circular"
-            android:id="@+id/drawAscDescSegFab"
-            android:layout_marginStart="@dimen/margin_small"
-            android:alpha="@fraction/button_alpha"
-            android:contentDescription="@string/draw_asc_desc_segments"
-            android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData}"
-            android:onClick="@{() -> viewModel.onDrawAscDescSegCheckBoxChanged(chartAreaItem, !chartAreaItem.drawAscDescSegEnabledFromController)}"
-            app:imageResource="@{chartAreaItem.getIsDrawAscDescSegEnabledLiveData ? R.drawable.ic_checkbox_ascdescseg_fill1 : R.drawable.ic_checkbox_ascdescseg_fill0}"
-            app:layout_constraintStart_toEndOf="@+id/switchModeButton"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintBottom_toBottomOf="parent">
 
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                style="@style/Widget.App.FloatingActionButton.Mini.Circular"
+                android:id="@+id/switchModeButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:alpha="@fraction/button_alpha"
+                android:contentDescription="@{ chartAreaItem.getViewMode().name}"
+                android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData}"
+                android:onClick="@{() -> viewModel.onSwitchViewMode(chartAreaItem)}"
+                app:imageResource="@{ chartAreaItem.getViewMode().getDrawableIconResId  }" />
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            style="@style/Widget.App.FloatingActionButton.Mini.Circular"
-            android:id="@+id/onOffColorizedCirclesCheckBox"
-            android:layout_marginStart="@dimen/margin_small"
-            android:alpha="@fraction/button_alpha"
-            android:contentDescription="@string/on_off_colorized_circles"
-            android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData}"
-            android:onClick="@{() -> viewModel.onOnOffColorizedCirclesCheckBoxChanged(chartAreaItem, !chartAreaItem.drawIconsEnabledFromController)}"
-            app:imageResource="@{chartAreaItem.getIsDrawIconsEnabledLiveData ? R.drawable.ic_dots_fill1 : R.drawable.ic_dots_fill0}"
-            app:layout_constraintStart_toEndOf="@+id/drawAscDescSegFab"
-            app:layout_constraintTop_toTopOf="parent" />
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                style="@style/Widget.App.FloatingActionButton.Mini.Circular"
+                android:id="@+id/drawAscDescSegFab"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:alpha="@fraction/button_alpha"
+                android:contentDescription="@string/draw_asc_desc_segments"
+                android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData}"
+                android:onClick="@{() -> viewModel.onDrawAscDescSegCheckBoxChanged(chartAreaItem, !chartAreaItem.drawAscDescSegEnabledFromController)}"
+                app:imageResource="@{chartAreaItem.getIsDrawAscDescSegEnabledLiveData ? R.drawable.ic_checkbox_ascdescseg_fill1 : R.drawable.ic_checkbox_ascdescseg_fill0}" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                style="@style/Widget.App.FloatingActionButton.Mini.Circular"
+                android:id="@+id/onOffColorizedCirclesCheckBox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:alpha="@fraction/button_alpha"
+                android:contentDescription="@string/on_off_colorized_circles"
+                android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData}"
+                android:onClick="@{() -> viewModel.onOnOffColorizedCirclesCheckBoxChanged(chartAreaItem, !chartAreaItem.drawIconsEnabledFromController)}"
+                app:imageResource="@{chartAreaItem.getIsDrawIconsEnabledLiveData ? R.drawable.ic_dots_fill1 : R.drawable.ic_dots_fill0}" />
+
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

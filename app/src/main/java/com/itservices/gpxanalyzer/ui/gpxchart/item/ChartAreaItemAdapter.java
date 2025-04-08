@@ -13,8 +13,11 @@ import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.data.cache.processed.chart.ChartSlot;
 import com.itservices.gpxanalyzer.databinding.ChartAreaItemBinding;
 import com.itservices.gpxanalyzer.ui.gpxchart.ChartAreaListViewModel;
+import com.itservices.gpxanalyzer.utils.ui.speeddial.SpeedDialFabHelperZoom;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * RecyclerView adapter for displaying ChartAreaItems.
@@ -29,18 +32,18 @@ public class ChartAreaItemAdapter extends RecyclerView.Adapter<ChartAreaItemAdap
     private final List<ChartAreaItem> chartAreaItems;
     private final ChartAreaListViewModel viewModel;
     private final LifecycleOwner viewLifecycleOwner;
+    private final Map<Integer, SpeedDialFabHelperZoom> speedDialZoomMap = new HashMap<>();
 
     /**
      * Creates a new ChartAreaItemAdapter.
-     * 
-     * @param chartAreaItems The list of chart items to display
-     * @param viewModel The view model providing business logic for the chart list
+     *
+     * @param chartAreaItems     The list of chart items to display
+     * @param viewModel          The view model providing business logic for the chart list
      * @param viewLifecycleOwner The lifecycle owner for observing LiveData
      */
     public ChartAreaItemAdapter(List<ChartAreaItem> chartAreaItems, ChartAreaListViewModel viewModel, LifecycleOwner viewLifecycleOwner) {
         this.chartAreaItems = chartAreaItems;
         this.viewModel = viewModel;
-
         this.viewLifecycleOwner = viewLifecycleOwner;
 
         AdapterDataObserverImpl adapterDataObserver = new AdapterDataObserverImpl(chartAreaItems);
@@ -51,8 +54,8 @@ public class ChartAreaItemAdapter extends RecyclerView.Adapter<ChartAreaItemAdap
 
     /**
      * Creates a new view holder when needed by the RecyclerView.
-     * 
-     * @param parent The parent ViewGroup
+     *
+     * @param parent   The parent ViewGroup
      * @param viewType The type of view
      * @return A new ChartAreaItemViewHolder
      */
@@ -66,26 +69,50 @@ public class ChartAreaItemAdapter extends RecyclerView.Adapter<ChartAreaItemAdap
 
     /**
      * Binds data to an existing view holder.
-     * 
-     * @param holder The view holder to bind data to
+     *
+     * @param holder   The view holder to bind data to
      * @param position The position of the item in the data set
      */
     @Override
     public void onBindViewHolder(@NonNull ChartAreaItemViewHolder holder, int position) {
         try {
-            ChartSlot chartSlot = ChartSlot.fromPosition(position);
+            if (holder.binding != null) {
+                holder.binding.chartAreaItemScaleControlLayout.settingsSpeedDialFabZoom.closeMenu();
 
-            ChartAreaItem item = chartAreaItems.get(position);
-            item.setChartSlot(chartSlot);
-            holder.bind(item, viewModel, viewLifecycleOwner);
+                ChartSlot chartSlot = ChartSlot.fromPosition(position);
+
+                ChartAreaItem item = chartAreaItems.get(position);
+                item.setChartSlot(chartSlot);
+                holder.bind(item, viewModel, viewLifecycleOwner);
+
+                configureSpeedDialFabZoom(holder.binding, position, item);
+            }
         } catch (IndexOutOfBoundsException e) {
             Log.e(TAG, "onBindViewHolder: ", e);
         }
     }
 
+    private void configureSpeedDialFabZoom(@NonNull ChartAreaItemBinding binding, int position, ChartAreaItem item) {
+        // Make sure any old helper is disposed first
+        SpeedDialFabHelperZoom oldZoomHelper = speedDialZoomMap.get(position);
+        if (oldZoomHelper != null) {
+            oldZoomHelper.dispose();
+        }
+
+        // Create and configure the SpeedDialFabView helper
+        SpeedDialFabHelperZoom helper = new SpeedDialFabHelperZoom(viewModel, viewLifecycleOwner);
+
+        helper.configureSpeedDialFab(binding.chartAreaItemScaleControlLayout, item);
+
+        // Store the helper for later cleanup
+        speedDialZoomMap.put(position, helper);
+
+        Log.d(TAG, "Configured SpeedDialFabView for position " + position);
+    }
+
     /**
      * Gets the total number of items in the data set.
-     * 
+     *
      * @return The number of chart items
      */
     @Override
@@ -95,11 +122,59 @@ public class ChartAreaItemAdapter extends RecyclerView.Adapter<ChartAreaItemAdap
 
     /**
      * Gets the list of chart items managed by this adapter.
-     * 
+     *
      * @return The list of ChartAreaItems
      */
     public List<ChartAreaItem> getItems() {
         return chartAreaItems;
+    }
+
+    /**
+     * Called when a view holder is recycled.
+     * Cleans up resources associated with the view holder.
+     *
+     * @param holder The view holder being recycled
+     */
+    @Override
+    public void onViewRecycled(@NonNull ChartAreaItemViewHolder holder) {
+        super.onViewRecycled(holder);
+
+        // First ensure the SpeedDialFabView is closed
+        if (holder.binding != null) {
+            // Force the SpeedDialFabView to close menu when recycled
+            holder.binding.chartAreaItemScaleControlLayout.settingsSpeedDialFabZoom.closeMenu();
+        }
+
+        // Then dispose of helper resources
+        int position = holder.getAdapterPosition();
+        if (position != RecyclerView.NO_POSITION) {
+            Log.d(TAG, "Recycling view at position: " + position);
+            recycleSpeedDialFabZoom(position);
+        }
+    }
+
+    private void recycleSpeedDialFabZoom(int position) {
+        SpeedDialFabHelperZoom helper = speedDialZoomMap.get(position);
+        if (helper != null) {
+            helper.dispose();
+            speedDialZoomMap.remove(position);
+        }
+    }
+
+    /**
+     * Called when the adapter is detached from the RecyclerView.
+     * Cleans up all resources.
+     *
+     * @param recyclerView The RecyclerView the adapter was attached to
+     */
+    @Override
+    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView);
+        // Clean up all speed dial helpers
+        for (SpeedDialFabHelperZoom helper : speedDialZoomMap.values()) {
+            helper.dispose();
+        }
+        speedDialZoomMap.clear();
     }
 
     /**
@@ -108,11 +183,11 @@ public class ChartAreaItemAdapter extends RecyclerView.Adapter<ChartAreaItemAdap
      * handling the binding of data to the view elements.
      */
     public static class ChartAreaItemViewHolder extends RecyclerView.ViewHolder {
-        private final ChartAreaItemBinding binding;
+        final ChartAreaItemBinding binding;
 
         /**
          * Creates a new ChartAreaItemViewHolder.
-         * 
+         *
          * @param binding The data binding for the chart area item view
          */
         ChartAreaItemViewHolder(@NonNull ChartAreaItemBinding binding) {
@@ -124,9 +199,9 @@ public class ChartAreaItemAdapter extends RecyclerView.Adapter<ChartAreaItemAdap
          * Binds a chart area item to this view holder.
          * Connects the chart controller to the chart view and sets up data binding
          * for all components in the chart area layout.
-         * 
-         * @param item The chart area item to bind
-         * @param viewModel The view model providing business logic
+         *
+         * @param item               The chart area item to bind
+         * @param viewModel          The view model providing business logic
          * @param viewLifecycleOwner The lifecycle owner for observing LiveData
          */
         void bind(ChartAreaItem item, ChartAreaListViewModel viewModel, LifecycleOwner viewLifecycleOwner) {
