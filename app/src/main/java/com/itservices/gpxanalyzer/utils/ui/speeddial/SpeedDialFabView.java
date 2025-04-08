@@ -33,8 +33,6 @@ public class SpeedDialFabView extends FloatingActionButton {
 
     // Animation constants
     private static final long ANIMATION_DURATION = 800; // milliseconds
-    private static final float MAIN_FAB_ROTATE_DEGREES = 360f;
-    private static final float SECONDARY_FAB_ALPHA = 0.8f;
     private static final float SECONDARY_FAB_ELEVATION = 11f;
 
     // Static registry of all instances to ensure only one menu is open at a time
@@ -47,6 +45,9 @@ public class SpeedDialFabView extends FloatingActionButton {
     private boolean isMenuOpen = false;
     private UnfoldDirection unfoldDirection = UnfoldDirection.UP;
     private float translationDistance = 180f; // Default distance in dp
+
+    private float mainFabRotateDegrees = 45f;
+    private float secondaryFabsTargetAlpha = 1.0f;
 
     // Constructors
     public SpeedDialFabView(@NonNull Context context) {
@@ -109,7 +110,7 @@ public class SpeedDialFabView extends FloatingActionButton {
         this.translationDistance = dpToPx(distanceDp);
     }
 
-    public void bindActionsToExistingFabs(List<FabSetup> fabActionList) {
+    public void bindActionsToExistingFabs(List<FloatingActionButton> fabActionList) {
         Log.d(TAG, "Binding actions to existing FABs, count: " + fabActionList.size());
 
         // First, clear any existing bindings
@@ -123,42 +124,22 @@ public class SpeedDialFabView extends FloatingActionButton {
             return;
         }
 
-        for (FabSetup fabAction : fabActionList) {
-
-            FloatingActionButton fab = fabAction.floatingActionButton();
+        for (FloatingActionButton fab : fabActionList) {
 
             // Store reference to FAB
             secondaryFabs.add(fab);
 
             // Configure the FAB
-            fab.setImageResource(fabAction.iconResId());
             fab.setVisibility(View.GONE);
             fab.setAlpha(0f);
             fab.setScaleX(0f);
             fab.setScaleY(0f);
-
-            // Set up click listener
-            final int actionId = fabAction.actionId();
-            fab.setOnClickListener(v -> {
-                Log.d(TAG, "Secondary FAB clicked, action ID: " + actionId);
-                try {
-                    actionClicks.onNext(actionId);
-                } catch (Exception e) {
-                    Log.e(TAG, "Error emitting action click", e);
-                }
-                //closeMenu(); // Close menu after action
-            });
 
             // Make sure the click ripple effect is visible
             fab.setRippleColor(getResources().getColorStateList(android.R.color.darker_gray, null));
         }
 
         Log.d(TAG, "Successfully bound " + secondaryFabs.size() + " FABs to actions");
-    }
-
-    public void setupWithCommonActions(List<FabSetup> fabActionList) {
-
-        bindActionsToExistingFabs(fabActionList);
     }
 
     /**
@@ -261,7 +242,7 @@ public class SpeedDialFabView extends FloatingActionButton {
     }
 
     private void rotateMainFab(boolean opening) {
-        float targetRotation = opening ? MAIN_FAB_ROTATE_DEGREES : 0f;
+        float targetRotation = opening ? mainFabRotateDegrees : 0f;
 
         this.animate()
                 .rotation(targetRotation)
@@ -312,7 +293,7 @@ public class SpeedDialFabView extends FloatingActionButton {
                 .rotation(targetRotation)
                 .scaleX(1.0f)
                 .scaleY(1.0f)
-                .alpha(SECONDARY_FAB_ALPHA)
+                .alpha(secondaryFabsTargetAlpha)
                 .setInterpolator(new OvershootInterpolator(1.0f))
                 .setDuration(ANIMATION_DURATION)
                 .withEndAction(() -> setFabEnabled(fab, true))
@@ -410,4 +391,12 @@ public class SpeedDialFabView extends FloatingActionButton {
 
         super.onDetachedFromWindow();
     }
-} 
+
+    public void setMainFabRotateDegrees(float degrees) {
+        mainFabRotateDegrees = degrees;
+    }
+
+    public void setSecondaryFabsTargetAlpha(float secondaryFabsTargetAlpha) {
+        this.secondaryFabsTargetAlpha = secondaryFabsTargetAlpha;
+    }
+}

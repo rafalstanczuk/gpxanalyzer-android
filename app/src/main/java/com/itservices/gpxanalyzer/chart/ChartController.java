@@ -16,11 +16,11 @@ import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.itservices.gpxanalyzer.chart.entry.BaseEntry;
 import com.itservices.gpxanalyzer.chart.entry.CurveEntry;
+import com.itservices.gpxanalyzer.data.cache.processed.chart.EntryCacheMap;
+import com.itservices.gpxanalyzer.data.cache.processed.rawdata.RawDataProcessed;
 import com.itservices.gpxanalyzer.event.EventEntrySelection;
 import com.itservices.gpxanalyzer.event.EventVisibleChartEntriesTimestamp;
 import com.itservices.gpxanalyzer.event.MapChartGlobalEventWrapper;
-import com.itservices.gpxanalyzer.data.cache.processed.chart.EntryCacheMap;
-import com.itservices.gpxanalyzer.data.cache.processed.rawdata.RawDataProcessed;
 import com.itservices.gpxanalyzer.utils.common.ConcurrentUtil;
 
 import java.util.Objects;
@@ -37,14 +37,13 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
 
     @Inject
     MapChartGlobalEventWrapper mapChartGlobalEventWrapper;
-    private Disposable disposableSelectionObserveGlobal;
-    
     /**
      * The chart provider that manages the actual chart instances and data.
      * Injected by Dagger to promote separation of concerns and testability.
      */
     @Inject
     ChartProvider chartProvider;
+    private Disposable disposableSelectionObserveGlobal;
 
     /**
      * Creates a new ChartController instance.
@@ -81,7 +80,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     /**
      * Initializes the chart with default settings.
      * <p>
-     * This should be called before displaying the chart to ensure it has proper visual 
+     * This should be called before displaying the chart to ensure it has proper visual
      * configuration. The initialization process sets up the chart's appearance, behavior,
      * and empty data containers.
      *
@@ -153,7 +152,9 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     }
 
     public void animateZoomAndCenterToHighlighted(final float targetScaleX, final float targetScaleY, long duration) {
-        Objects.requireNonNull(chartProvider.getChart()).zoomAndCenterToHighlightedAnimated(targetScaleX, targetScaleY, duration, this);
+        if (chartProvider.getChart() != null) {
+            chartProvider.getChart().zoomAndCenterToHighlightedAnimated(targetScaleX, targetScaleY, duration, this);
+        }
     }
 
     /**
@@ -165,7 +166,9 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
      * @param duration The animation duration in milliseconds
      */
     public void animateFitScreen(long duration) {
-        Objects.requireNonNull(chartProvider.getChart()).animateFitScreen(duration, this);
+        if (chartProvider.getChart() != null) {
+            chartProvider.getChart().animateFitScreen(duration, this);
+        }
     }
 
     /**
@@ -223,7 +226,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     }
 
     private void handleEvent(EventEntrySelection event) {
-        if (event == null){
+        if (event == null) {
             return;
         }
 
@@ -265,10 +268,10 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
      * and optionally centering the view on the selection. It provides more
      * control over the selection behavior than the public select() method.
      *
-     * @param chart The chart to select on
-     * @param selectedTimeMillis The timestamp to select
+     * @param chart                 The chart to select on
+     * @param selectedTimeMillis    The timestamp to select
      * @param centerViewToSelection Whether to center the chart view on the selection
-     * @param callListeners Whether to notify selection listeners
+     * @param callListeners         Whether to notify selection listeners
      */
     private void manualSelectEntryOnSelectedTime(DataEntityLineChart chart, long selectedTimeMillis, boolean centerViewToSelection, boolean callListeners) {
         if (chart == null) {
@@ -294,7 +297,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
             return;
         }
 
-        BaseEntry entryFound = (BaseEntry) entryCacheMap.get(selectedTimeMillis);
+        BaseEntry entryFound = entryCacheMap.get(selectedTimeMillis);
         if (entryFound != null) {
             //Log.d(ChartController.class.getSimpleName(), "Found entry for timestamp: " + selectedTimeMillis);
             setSelectionEntry(entryFound, callListeners);
@@ -315,7 +318,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
      * observers about the new selection. This is used both for user-initiated selections
      * and programmatic selections.
      *
-     * @param entry The entry to select
+     * @param entry            The entry to select
      * @param publishSelection Whether to publish a selection event
      */
     private void setSelectionEntry(Entry entry, boolean publishSelection) {
@@ -336,7 +339,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
 
     private void publishSelectionGlobal(CurveEntry entry, DataEntityLineChart chart) {
         mapChartGlobalEventWrapper.onNext(
-                    new EventEntrySelection(chart.getChartSlot(), entry)
+                new EventEntrySelection(chart.getChartSlot(), entry)
         );
     }
 
@@ -360,8 +363,8 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
      * <p>
      * Implementation of OnChartGestureListener.
      * Override this method to add custom behavior when a gesture begins.
-     * 
-     * @param me The MotionEvent that triggered the gesture
+     *
+     * @param me                   The MotionEvent that triggered the gesture
      * @param lastPerformedGesture The type of gesture that was performed
      */
     @Override
@@ -373,8 +376,8 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
      * <p>
      * Implementation of OnChartGestureListener.
      * Override this method to add custom behavior when a gesture completes.
-     * 
-     * @param me The MotionEvent that completed the gesture
+     *
+     * @param me                   The MotionEvent that completed the gesture
      * @param lastPerformedGesture The type of gesture that was performed
      */
     @Override
@@ -389,7 +392,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
      * <p>
      * Implementation of OnChartGestureListener.
      * Override this method to add custom behavior for long-press gestures.
-     * 
+     *
      * @param me The MotionEvent for the long press
      */
     @Override
@@ -401,7 +404,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
      * <p>
      * Implementation of OnChartGestureListener.
      * Override this method to add custom behavior for double-tap gestures.
-     * 
+     *
      * @param me The MotionEvent for the double tap
      */
     @Override
@@ -413,7 +416,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
      * <p>
      * Implementation of OnChartGestureListener.
      * Override this method to add custom behavior for single-tap gestures.
-     * 
+     *
      * @param me The MotionEvent for the single tap
      */
     @Override
@@ -425,9 +428,9 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
      * <p>
      * Implementation of OnChartGestureListener.
      * Override this method to add custom behavior for fling gestures.
-     * 
-     * @param me1 The initial MotionEvent that started the fling
-     * @param me2 The final MotionEvent that completed the fling
+     *
+     * @param me1    The initial MotionEvent that started the fling
+     * @param me2    The final MotionEvent that completed the fling
      * @param speedX The horizontal speed of the fling
      * @param speedY The vertical speed of the fling
      */
@@ -440,8 +443,8 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
      * <p>
      * Implementation of OnChartGestureListener.
      * Override this method to add custom behavior for scaling gestures.
-     * 
-     * @param me The MotionEvent that triggered the scaling
+     *
+     * @param me     The MotionEvent that triggered the scaling
      * @param scaleX The horizontal scale factor
      * @param scaleY The vertical scale factor
      */
@@ -458,7 +461,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
      * Implementation of OnChartGestureListener.
      * This method highlights the center value during translation to provide
      * visual feedback about the current position in the data.
-     * 
+     *
      * @param me The MotionEvent that triggered the translation
      * @param dX The distance translated in X direction
      * @param dY The distance translated in Y direction
@@ -478,7 +481,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
      * Implementation of OnChartValueSelectedListener.
      * Updates the selection state and publishes a selection event to notify
      * other components about the selection.
-     * 
+     *
      * @param e The entry that was selected
      * @param h The highlight object representing the selection
      */

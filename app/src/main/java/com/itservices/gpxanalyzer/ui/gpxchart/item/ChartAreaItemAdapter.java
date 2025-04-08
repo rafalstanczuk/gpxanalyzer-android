@@ -13,7 +13,6 @@ import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.data.cache.processed.chart.ChartSlot;
 import com.itservices.gpxanalyzer.databinding.ChartAreaItemBinding;
 import com.itservices.gpxanalyzer.ui.gpxchart.ChartAreaListViewModel;
-import com.itservices.gpxanalyzer.utils.ui.speeddial.SpeedDialFabHelperZoom;
 
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +32,7 @@ public class ChartAreaItemAdapter extends RecyclerView.Adapter<ChartAreaItemAdap
     private final ChartAreaListViewModel viewModel;
     private final LifecycleOwner viewLifecycleOwner;
     private final Map<Integer, SpeedDialFabHelperZoom> speedDialZoomMap = new HashMap<>();
+    private final Map<Integer, SpeedDialFabHelperChartSettings> speedDialSettingsMap = new HashMap<>();
 
     /**
      * Creates a new ChartAreaItemAdapter.
@@ -78,6 +78,7 @@ public class ChartAreaItemAdapter extends RecyclerView.Adapter<ChartAreaItemAdap
         try {
             if (holder.binding != null) {
                 holder.binding.chartAreaItemScaleControlLayout.settingsSpeedDialFabZoom.closeMenu();
+                holder.binding.chartAreaItemPropertiesControlLayout.settingsSpeedDialFabChartSettings.closeMenu();
 
                 ChartSlot chartSlot = ChartSlot.fromPosition(position);
 
@@ -86,6 +87,7 @@ public class ChartAreaItemAdapter extends RecyclerView.Adapter<ChartAreaItemAdap
                 holder.bind(item, viewModel, viewLifecycleOwner);
 
                 configureSpeedDialFabZoom(holder.binding, position, item);
+                configureSpeedDialFabSettings(holder.binding, position, item);
             }
         } catch (IndexOutOfBoundsException e) {
             Log.e(TAG, "onBindViewHolder: ", e);
@@ -93,19 +95,27 @@ public class ChartAreaItemAdapter extends RecyclerView.Adapter<ChartAreaItemAdap
     }
 
     private void configureSpeedDialFabZoom(@NonNull ChartAreaItemBinding binding, int position, ChartAreaItem item) {
-        // Make sure any old helper is disposed first
-        SpeedDialFabHelperZoom oldZoomHelper = speedDialZoomMap.get(position);
-        if (oldZoomHelper != null) {
-            oldZoomHelper.dispose();
-        }
 
         // Create and configure the SpeedDialFabView helper
-        SpeedDialFabHelperZoom helper = new SpeedDialFabHelperZoom(viewModel, viewLifecycleOwner);
+        SpeedDialFabHelperZoom helper = new SpeedDialFabHelperZoom();
 
         helper.configureSpeedDialFab(binding.chartAreaItemScaleControlLayout, item);
 
         // Store the helper for later cleanup
         speedDialZoomMap.put(position, helper);
+
+        Log.d(TAG, "Configured SpeedDialFabView for position " + position);
+    }
+
+    private void configureSpeedDialFabSettings(@NonNull ChartAreaItemBinding binding, int position, ChartAreaItem item) {
+
+        // Create and configure the SpeedDialFabView helper
+        SpeedDialFabHelperChartSettings helperSettings = new SpeedDialFabHelperChartSettings();
+
+        helperSettings.configureSpeedDialFab(binding.chartAreaItemPropertiesControlLayout, item);
+
+        // Store the helper for later cleanup
+        speedDialSettingsMap.put(position, helperSettings);
 
         Log.d(TAG, "Configured SpeedDialFabView for position " + position);
     }
@@ -143,6 +153,7 @@ public class ChartAreaItemAdapter extends RecyclerView.Adapter<ChartAreaItemAdap
         if (holder.binding != null) {
             // Force the SpeedDialFabView to close menu when recycled
             holder.binding.chartAreaItemScaleControlLayout.settingsSpeedDialFabZoom.closeMenu();
+            holder.binding.chartAreaItemPropertiesControlLayout.settingsSpeedDialFabChartSettings.closeMenu();
         }
 
         // Then dispose of helper resources
@@ -150,14 +161,20 @@ public class ChartAreaItemAdapter extends RecyclerView.Adapter<ChartAreaItemAdap
         if (position != RecyclerView.NO_POSITION) {
             Log.d(TAG, "Recycling view at position: " + position);
             recycleSpeedDialFabZoom(position);
+            recycleSpeedDialFabSettings(position);
         }
     }
 
     private void recycleSpeedDialFabZoom(int position) {
         SpeedDialFabHelperZoom helper = speedDialZoomMap.get(position);
         if (helper != null) {
-            helper.dispose();
             speedDialZoomMap.remove(position);
+        }
+    }
+    private void recycleSpeedDialFabSettings(int position) {
+        SpeedDialFabHelperChartSettings helper = speedDialSettingsMap.get(position);
+        if (helper != null) {
+            speedDialSettingsMap.remove(position);
         }
     }
 
@@ -170,11 +187,9 @@ public class ChartAreaItemAdapter extends RecyclerView.Adapter<ChartAreaItemAdap
     @Override
     public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
         super.onDetachedFromRecyclerView(recyclerView);
-        // Clean up all speed dial helpers
-        for (SpeedDialFabHelperZoom helper : speedDialZoomMap.values()) {
-            helper.dispose();
-        }
+
         speedDialZoomMap.clear();
+        speedDialSettingsMap.clear();
     }
 
     /**

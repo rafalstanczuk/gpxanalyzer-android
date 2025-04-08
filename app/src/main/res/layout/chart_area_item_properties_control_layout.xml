@@ -11,7 +11,7 @@
         <variable
             name="viewModel"
             type="com.itservices.gpxanalyzer.ui.gpxchart.ChartAreaListViewModel" />
-            
+
         <import type="com.itservices.gpxanalyzer.R" />
     </data>
 
@@ -25,64 +25,70 @@
             card_view:contentPadding="0dp">-->
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/chart_settings_control_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:clipChildren="false"
-        android:clipToPadding="false"
+        android:layout_marginStart="@dimen/margin_very_small"
+        android:paddingStart="@dimen/margin_medium_small"
+        android:paddingEnd="200dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <!-- All FABs are now placed in a vertical linear layout on the left -->
-        <LinearLayout
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/switchModeButton"
+            style="@style/Widget.App.FloatingActionButton.Mini.Circular"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:gravity="start"
+            android:alpha="@fraction/button_alpha"
+            android:contentDescription="@{ chartAreaItem.getViewMode().name}"
+            android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData}"
+            android:onClick="@{() -> viewModel.onSwitchViewMode(chartAreaItem)}"
+            app:imageResource="@{ chartAreaItem.getViewMode().getDrawableIconResId  }"
+            app:layout_constraintBottom_toBottomOf="@id/settings_speed_dial_fab_chart_settings"
+            app:layout_constraintEnd_toEndOf="@id/settings_speed_dial_fab_chart_settings" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/drawAscDescSegFab"
+            style="@style/Widget.App.FloatingActionButton.Mini.Circular"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha="@fraction/button_alpha"
+            android:contentDescription="@string/draw_asc_desc_segments"
+            android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData}"
+            android:onClick="@{() -> viewModel.onDrawAscDescSegCheckBoxChanged(chartAreaItem, !chartAreaItem.drawAscDescSegEnabledFromController)}"
+            app:imageResource="@{chartAreaItem.getIsDrawAscDescSegEnabledLiveData ? R.drawable.ic_checkbox_ascdescseg_fill1 : R.drawable.ic_checkbox_ascdescseg_fill0}"
+            app:layout_constraintBottom_toBottomOf="@id/settings_speed_dial_fab_chart_settings"
+            app:layout_constraintEnd_toEndOf="@id/settings_speed_dial_fab_chart_settings" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/onOffColorizedCirclesCheckBox"
+            style="@style/Widget.App.FloatingActionButton.Mini.Circular"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha="@fraction/button_alpha"
+            android:contentDescription="@string/on_off_colorized_circles"
+            android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData}"
+            android:onClick="@{() -> viewModel.onOnOffColorizedCirclesCheckBoxChanged(chartAreaItem, !chartAreaItem.drawIconsEnabledFromController)}"
+            app:imageResource="@{chartAreaItem.getIsDrawIconsEnabledLiveData ? R.drawable.ic_dots_fill1 : R.drawable.ic_dots_fill0}"
+            app:layout_constraintBottom_toBottomOf="@id/settings_speed_dial_fab_chart_settings"
+            app:layout_constraintEnd_toEndOf="@id/settings_speed_dial_fab_chart_settings" />
+
+
+        <com.itservices.gpxanalyzer.utils.ui.speeddial.SpeedDialFabView
+            android:id="@+id/settings_speed_dial_fab_chart_settings"
+            style="@style/Widget.App.FloatingActionButton.Mini.Circular"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha="@fraction/button_alpha"
+            android:elevation="10dp"
+            android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData}"
+            android:visibility="visible"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent">
-
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                style="@style/Widget.App.FloatingActionButton.Mini.Circular"
-                android:id="@+id/switchModeButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:alpha="@fraction/button_alpha"
-                android:contentDescription="@{ chartAreaItem.getViewMode().name}"
-                android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData}"
-                android:onClick="@{() -> viewModel.onSwitchViewMode(chartAreaItem)}"
-                app:imageResource="@{ chartAreaItem.getViewMode().getDrawableIconResId  }" />
-
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                style="@style/Widget.App.FloatingActionButton.Mini.Circular"
-                android:id="@+id/drawAscDescSegFab"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:alpha="@fraction/button_alpha"
-                android:contentDescription="@string/draw_asc_desc_segments"
-                android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData}"
-                android:onClick="@{() -> viewModel.onDrawAscDescSegCheckBoxChanged(chartAreaItem, !chartAreaItem.drawAscDescSegEnabledFromController)}"
-                app:imageResource="@{chartAreaItem.getIsDrawAscDescSegEnabledLiveData ? R.drawable.ic_checkbox_ascdescseg_fill1 : R.drawable.ic_checkbox_ascdescseg_fill0}" />
-
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                style="@style/Widget.App.FloatingActionButton.Mini.Circular"
-                android:id="@+id/onOffColorizedCirclesCheckBox"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:alpha="@fraction/button_alpha"
-                android:contentDescription="@string/on_off_colorized_circles"
-                android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData}"
-                android:onClick="@{() -> viewModel.onOnOffColorizedCirclesCheckBoxChanged(chartAreaItem, !chartAreaItem.drawIconsEnabledFromController)}"
-                app:imageResource="@{chartAreaItem.getIsDrawIconsEnabledLiveData ? R.drawable.ic_dots_fill1 : R.drawable.ic_dots_fill0}" />
-
-        </LinearLayout>
+            app:maxImageSize="24dp"
+            app:srcCompat="@drawable/ic_settings_selector" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <!--</androidx.cardview.widget.CardView>-->
 
 </layout>

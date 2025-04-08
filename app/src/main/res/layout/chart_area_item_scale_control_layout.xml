@@ -17,53 +17,64 @@
         android:id="@+id/scale_control_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/margin_small"
         android:paddingStart="200dp"
-        android:paddingEnd="@dimen/margin_medium_small"
-        android:layout_marginEnd="@dimen/margin_small">
+        android:paddingEnd="@dimen/margin_medium_small">
 
         <!-- Secondary FABs - Initially hidden but will be shown by SpeedDialFabView -->
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            style="@style/Widget.App.FloatingActionButton.Mini.Circular"
             android:id="@+id/time_zoom_in_button"
+            style="@style/Widget.App.FloatingActionButton.Mini.Circular"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:contentDescription="@string/zoom_in"
+            android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData}"
+            android:onClick="@{() -> viewModel.onZoomIn(chartAreaItem)}"
             android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/settings_speed_dial_fab_zoom"
             app:layout_constraintEnd_toEndOf="@id/settings_speed_dial_fab_zoom"
-            app:layout_constraintBottom_toBottomOf="@id/settings_speed_dial_fab_zoom" />
+            app:srcCompat="@drawable/ic_zoom_in_selector" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            style="@style/Widget.App.FloatingActionButton.Mini.Circular"
             android:id="@+id/time_zoom_out_button"
+            style="@style/Widget.App.FloatingActionButton.Mini.Circular"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:contentDescription="@string/zoom_out"
+            android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData}"
+            android:onClick="@{() -> viewModel.onZoomOut(chartAreaItem)}"
             android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/settings_speed_dial_fab_zoom"
             app:layout_constraintEnd_toEndOf="@id/settings_speed_dial_fab_zoom"
-            app:layout_constraintBottom_toBottomOf="@id/settings_speed_dial_fab_zoom" />
+            app:srcCompat="@drawable/ic_zoom_out_selector" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            style="@style/Widget.App.FloatingActionButton.Mini.Circular"
             android:id="@+id/time_autoscaling_button"
+            style="@style/Widget.App.FloatingActionButton.Mini.Circular"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:contentDescription="@string/time_autoscaling"
+            android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData}"
+            android:onClick="@{() -> viewModel.onAutoScaling(chartAreaItem)}"
             android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/settings_speed_dial_fab_zoom"
             app:layout_constraintEnd_toEndOf="@id/settings_speed_dial_fab_zoom"
-            app:layout_constraintBottom_toBottomOf="@id/settings_speed_dial_fab_zoom" />
+            app:srcCompat="@drawable/ic_recenter_selector" />
 
-        <!-- Main FAB that will control the secondary FABs -->
         <com.itservices.gpxanalyzer.utils.ui.speeddial.SpeedDialFabView
             android:id="@+id/settings_speed_dial_fab_zoom"
             style="@style/Widget.App.FloatingActionButton.Mini.Circular"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:alpha="@fraction/button_alpha"
             android:elevation="10dp"
+            android:enabled="@{viewModel.buttonsEnabledByRequestStatusLiveData}"
             android:visibility="visible"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:maxImageSize="24dp" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:maxImageSize="24dp"
+            app:srcCompat="@drawable/ic_zoom_settings_selector" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
