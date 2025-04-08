@@ -152,18 +152,8 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
         chartProvider.updateDataChart().subscribe();
     }
 
-    /**
-     * Animates the chart zoom to center with the specified scale.
-     * <p>
-     * This method allows smooth transitions between different zoom levels,
-     * keeping the current center point at the center of the view.
-     *
-     * @param targetScaleX The target X-axis scale factor
-     * @param targetScaleY The target Y-axis scale factor
-     * @param duration The animation duration in milliseconds
-     */
-    public void animateZoomToCenter(final float targetScaleX, final float targetScaleY, long duration) {
-        Objects.requireNonNull(chartProvider.getChart()).animateZoomToCenter(targetScaleX, targetScaleY, duration, this);
+    public void animateZoomAndCenterToHighlighted(final float targetScaleX, final float targetScaleY, long duration) {
+        Objects.requireNonNull(chartProvider.getChart()).zoomAndCenterToHighlightedAnimated(targetScaleX, targetScaleY, duration, this);
     }
 
     /**

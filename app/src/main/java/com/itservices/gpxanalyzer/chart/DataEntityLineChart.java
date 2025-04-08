@@ -358,21 +358,6 @@ public class DataEntityLineChart extends LineChart {
         }
     }
 
-
-    /**
-     * Animates the chart zoom to center with the specified scale.
-     * <p>
-     * This method smoothly zooms the chart to a specified scale level, centered
-     * on the current center point of the visible area.
-     *
-     * @param targetScaleX The target X-axis scale
-     * @param targetScaleY The target Y-axis scale
-     * @param duration     The animation duration in milliseconds
-     */
-    public void animateZoomToCenter(final float targetScaleX, final float targetScaleY, long duration, Animator.AnimatorListener listener) {
-        super.animateZoomToCenter(targetScaleX, targetScaleY, duration, listener);
-    }
-
     /**
      * Called when the view is detached from its window.
      * <p>

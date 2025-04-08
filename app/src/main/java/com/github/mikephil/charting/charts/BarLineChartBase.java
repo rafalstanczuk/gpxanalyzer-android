@@ -1,4 +1,3 @@
-
 package com.github.mikephil.charting.charts;
 
 import android.animation.Animator;
@@ -29,7 +28,6 @@ import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.dataprovider.BarLineScatterCandleBubbleDataProvider;
 import com.github.mikephil.charting.interfaces.datasets.IBarLineScatterCandleBubbleDataSet;
 import com.github.mikephil.charting.jobs.AnimatedMoveViewJob;
-import com.github.mikephil.charting.jobs.AnimatedZoomJob;
 import com.github.mikephil.charting.jobs.MoveViewJob;
 import com.github.mikephil.charting.jobs.ZoomJob;
 import com.github.mikephil.charting.listener.BarLineChartTouchListener;
@@ -392,7 +390,8 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
         mXAxis.calculate(mData.getXMin(), mData.getXMax());
 
         // calculate axis range (min / max) according to provided data
-        mAxisLeft.calculate(mData.getYMin(AxisDependency.LEFT), mData.getYMax(AxisDependency.LEFT));
+        mAxisLeft.calculate(mData.getYMin(AxisDependency.LEFT), mData.getYMax(AxisDependency
+                .LEFT));
         mAxisRight.calculate(mData.getYMin(AxisDependency.RIGHT), mData.getYMax(AxisDependency
                 .RIGHT));
     }
@@ -700,7 +699,6 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
      * @param scaleY
      */
     public void zoomToCenter(float scaleX, float scaleY) {
-
         MPPointF center = mViewPortHandler.getContentCenter();
 
         mViewPortHandler.zoom(scaleX, scaleY, center.x, -center.y, mZoomMatrixBuffer);
@@ -713,8 +711,6 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
         // So we need to recalculate offsets.
         calculateOffsets();
         postInvalidate();
-
-
 
     }
 
@@ -792,19 +788,102 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
      * @param yValue
      * @param axis
      * @param duration
+     * @param animatorListener
      */
     @TargetApi(11)
     public void zoomAndCenterAnimated(float scaleX, float scaleY, float xValue, float yValue, AxisDependency axis,
-                                      long duration) {
+                                      long duration, Animator.AnimatorListener animatorListener) {
+        final float startScaleX = 1.0f;
+        final float startScaleY = 1.0f;
 
-        MPPointD origin = getValuesByTouchPoint(mViewPortHandler.contentLeft(), mViewPortHandler.contentTop(), axis);
+        // Create a ValueAnimator going from 0 to 1
+        ValueAnimator animator = ValueAnimator.ofFloat(0f, 1f);
+        animator.setDuration(duration);
+        animator.setInterpolator(new DecelerateInterpolator());
 
-        Runnable job = AnimatedZoomJob.getInstance(mViewPortHandler, this, getTransformer(axis), getAxis(axis), mXAxis
-                        .mAxisRange, scaleX, scaleY, mViewPortHandler.getScaleX(), mViewPortHandler.getScaleY(),
-                xValue, yValue, (float) origin.x, (float) origin.y, duration);
-        addViewportJob(job);
+        MPPointF center = mViewPortHandler.getContentCenter();
+        // Get initial positions
+        final MPPointD origin = getValuesByTouchPoint(center.getX(), center.getY(), axis);
+        final float startX = (float) origin.x;
+        final float startY = (float) origin.y;
+
+        // Update the zoom and position on each frame
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                float fraction = (float) animation.getAnimatedValue();
+
+                // Interpolate between the start and target scales
+                float currentScaleX = startScaleX + (scaleX - startScaleX) * fraction;
+                float currentScaleY = startScaleY + (scaleY - startScaleY) * fraction;
+
+
+                // Interpolate between the start and target positions
+                float currentX = startX + (xValue - startX) * fraction;
+                float currentY = startY + (yValue - startY) * fraction;
+
+                // Apply zoom and centering
+                zoom(currentScaleX, currentScaleY, currentX, currentY, axis);
+            }
+        });
+
+        if (animatorListener != null) {
+            animator.addListener(animatorListener);
+        }
+
+        // Start the animation
+        animator.start();
 
         MPPointD.recycleInstance(origin);
+    }
+
+
+    /**
+     * Zooms by the specified scale factors to the currently highlighted position,
+     * or to the center of the chart if no highlight is available.
+     *
+     * @param scaleX   scale factor for x-axis
+     * @param scaleY   scale factor for y-axis
+     * @param duration animation duration in milliseconds
+     */
+    @TargetApi(11)
+    public void zoomAndCenterToHighlightedAnimated(float scaleX, float scaleY, long duration,  Animator.AnimatorListener animatorListener) {
+        zoomAndCenterToHighlightedAnimated(scaleX, scaleY, AxisDependency.LEFT, duration, animatorListener);
+    }
+
+    /**
+     * Zooms by the specified scale factors to the currently highlighted position,
+     * or to the center of the chart if no highlight is available.
+     *
+     * @param scaleX   scale factor for x-axis
+     * @param scaleY   scale factor for y-axis
+     * @param axis     axis dependency to use
+     * @param duration animation duration in milliseconds
+     */
+    @TargetApi(11)
+    public void zoomAndCenterToHighlightedAnimated(float scaleX, float scaleY, AxisDependency axis, long duration, Animator.AnimatorListener animatorListener) {
+
+        if (mIndicesToHighlight != null && mIndicesToHighlight.length > 0) {
+            // Use the first highlighted point as the center point
+            Highlight highlight = mIndicesToHighlight[0];
+            Entry entry = mData.getEntryForHighlight(highlight);
+
+            if (entry != null) {
+                float xValue = entry.getX();
+                float yValue = entry.getY();
+                zoomAndCenterAnimated(scaleX, scaleY, xValue, yValue, axis, duration, animatorListener);
+                return;
+            }
+        }
+
+        // If no highlight or entry found, use the center of the chart
+        MPPointF center = mViewPortHandler.getContentCenter();
+        MPPointD valuePoint = getValuesByTouchPoint(center.x, center.y, axis);
+
+        zoomAndCenterAnimated(scaleX, scaleY, (float) valuePoint.x, (float) valuePoint.y, axis, duration, animatorListener);
+
+        MPPointF.recycleInstance(center);
+        MPPointD.recycleInstance(valuePoint);
     }
 
     protected Matrix mFitScreenMatrixBuffer = new Matrix();
