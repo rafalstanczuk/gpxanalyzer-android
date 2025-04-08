@@ -239,11 +239,11 @@ public class ChartAreaListViewModel extends ViewModel {
     }
 
     public void onZoomIn(ChartAreaItem item) {
-        item.getChartController().animateZoomToCenter(1.1f, 1.0f, 200);
+        item.getChartController().animateZoomAndCenterToHighlighted(1.5f, 1.0f, 200);
     }
 
     public void onZoomOut(ChartAreaItem item) {
-        item.getChartController().animateZoomToCenter(0.90f, 1.0f, 200);
+        item.getChartController().animateZoomAndCenterToHighlighted(0.50f, 1.0f, 200);
     }
 
     public void onAutoScaling(ChartAreaItem item) {
