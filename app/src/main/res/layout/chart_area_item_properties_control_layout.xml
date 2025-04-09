@@ -28,9 +28,8 @@
         android:id="@+id/chart_settings_control_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/margin_very_small"
-        android:paddingStart="@dimen/margin_medium_small"
-        android:paddingEnd="200dp"
+        android:paddingStart="0dp"
+        android:paddingEnd="@dimen/speed_dial_fab_padding"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 

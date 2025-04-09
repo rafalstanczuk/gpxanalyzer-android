@@ -30,7 +30,7 @@ public class LimitLinesBoundaries {
         line.setLabelPosition(labelPosition);
         line.setTextColor(DEFAULT_LIMIT_LINES_COLOR);
         line.setLineWidth(0.4f);
-        line.setTextSize(6f);
+        line.setTextSize(10f);
         line.enableDashedLine(10f, 5f, 0f);
         line.setLineColor(ColorUtil.setAlphaInIntColor(Color.GRAY, 128));
         return line;

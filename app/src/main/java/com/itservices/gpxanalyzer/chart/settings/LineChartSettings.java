@@ -46,12 +46,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext;
  * - Interactive elements (markers, highlight behavior)
  */
 public class LineChartSettings {
-
-    /**
-     * Granularity for X-axis labels, represents 1 second in hour fraction format
-     */
-    private static final float GRANULARITY = HourMinutesAxisValueFormatter.getFractionOfFullHourFromSeconds(1);
-
     /**
      * Custom marker view for displaying details when highlighting chart points
      */
@@ -256,12 +250,12 @@ public class LineChartSettings {
         xAxis.setDrawGridLines(false);
         xAxis.setDrawLabels(drawXLabels);
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setGranularity(GRANULARITY);
-        xAxis.setLabelCount(12, false);
+        xAxis.setGranularity(HourMinutesAxisValueFormatter.GRANULARITY);
+        xAxis.setLabelCount(HourMinutesAxisValueFormatter.LABEL_COUNT, false);
         xAxis.setValueFormatter(hourMinutesAxisValueFormatter);
-
-        xAxis.setLabelRotationAngle(-45.0f);
+        xAxis.setLabelRotationAngle(HourMinutesAxisValueFormatter.LABEL_ROTATION_ANGLE);
         xAxis.setTextColor(Color.BLACK);
+        xAxis.setTextSize(10f);
     }
 
     /**
@@ -319,6 +313,8 @@ public class LineChartSettings {
         yAxisLeft.setValueFormatter(dataEntityAxisValueFormatter);
         yAxisLeft.setEnabled(true);
         yAxisLeft.setTextColor(primaryColor);
+        yAxisLeft.resetAxisMinimum();
+        yAxisLeft.setSpaceBottom(0);
 
         yAxisLeft.removeAllLimitLines();
 

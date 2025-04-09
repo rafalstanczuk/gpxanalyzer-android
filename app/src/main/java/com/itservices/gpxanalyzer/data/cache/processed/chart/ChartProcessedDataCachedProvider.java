@@ -125,8 +125,8 @@ public class ChartProcessedDataCachedProvider {
         });
     }
 
-    public void add(LineChartSettings settings, RawDataProcessed rawDataProcessed, ChartProcessedData chartProcessedData) {
-        if (settings == null || rawDataProcessed == null || chartProcessedData == null) {
+    public void add(ChartSlot chartSlot, RawDataProcessed rawDataProcessed, ChartProcessedData chartProcessedData) {
+        if (chartSlot == null || rawDataProcessed == null || chartProcessedData == null) {
             return;
         }
 
@@ -139,11 +139,6 @@ public class ChartProcessedDataCachedProvider {
         }
 
         DataEntityWrapper dataEntityWrapper = rawDataProcessed.dataEntityWrapperAtomic().get();
-
-        ChartSlot chartSlot = settings.getChartSlot();
-        if (chartSlot == null) {
-            return;
-        }
 
         GpxViewMode gpxViewMode = GpxViewMode.from(dataEntityWrapper.getPrimaryDataIndex());
         ConcurrentMap<GpxViewMode, AtomicReference<ChartProcessedData>> chartSlotMap;

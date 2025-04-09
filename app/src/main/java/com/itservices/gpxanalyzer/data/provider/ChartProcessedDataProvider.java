@@ -83,7 +83,7 @@ public class ChartProcessedDataProvider {
                             GpxViewMode gpxViewMode = GpxViewMode.from(rawDataProcessed.dataEntityWrapperAtomic().get().getPrimaryDataIndex());
                             Log.i(TAG, "provideInternal: PROCESSED ChartProcessedData for ChartSlot: " + chartSlot + ", and GpxViewMode: " + gpxViewMode);
 
-                            chartProcessedDataCachedProvider.add(settings, rawDataProcessed, chartProcessedData);
+                            chartProcessedDataCachedProvider.add(chartSlot, rawDataProcessed, chartProcessedData);
 
                             chartProcessedDataAtomicReference.set(chartProcessedData);
 

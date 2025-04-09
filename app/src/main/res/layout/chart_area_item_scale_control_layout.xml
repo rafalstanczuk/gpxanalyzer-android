@@ -17,9 +17,8 @@
         android:id="@+id/scale_control_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/margin_small"
-        android:paddingStart="200dp"
-        android:paddingEnd="@dimen/margin_medium_small">
+        android:paddingStart="@dimen/speed_dial_fab_padding"
+        android:paddingEnd="0dp">
 
         <!-- Secondary FABs - Initially hidden but will be shown by SpeedDialFabView -->
         <com.google.android.material.floatingactionbutton.FloatingActionButton

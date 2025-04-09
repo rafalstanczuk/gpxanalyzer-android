@@ -44,16 +44,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_margin="@dimen/margin_small"
-
                 app:cardCornerRadius="@dimen/margin_medium"
-
                 app:cardElevation="@dimen/margin_small"
                 app:layout_constraintEnd_toEndOf="parent"
-
                 app:layout_constraintHeight_percent="0.3"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-
                 app:strokeColor="?attr/colorPrimary"
                 app:strokeWidth="1dp">
 

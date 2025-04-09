@@ -12,6 +12,14 @@ import java.util.Calendar;
 import javax.inject.Inject;
 
 public class HourMinutesAxisValueFormatter implements IAxisValueFormatter, IValueFormatter {
+	/**
+	 * Granularity for X-axis labels, represents 1 second in hour fraction format
+	 */
+	public static final float GRANULARITY = HourMinutesAxisValueFormatter.getFractionOfFullHourFromSeconds(1);
+
+	public static final float LABEL_ROTATION_ANGLE = -45.0f;
+	public static final int LABEL_COUNT = 12;
+
 	public static final float MAX_X_SCALED_TIME = 23f + getFractionOfFullHourFromMinutes(59) + getFractionOfFullHourFromSeconds(59);
 	public static final float MIN_X_SCALED_TIME = 0.0f;
 

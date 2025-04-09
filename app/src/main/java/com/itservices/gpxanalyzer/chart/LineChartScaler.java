@@ -105,14 +105,14 @@ class LineChartScaler {
      * This method performs the following steps:
      * <ol>
      *   <li>Calculates the data range from the data entity wrapper</li>
-     *   <li>Adds a small offset (10% of range) to create visual padding</li>
+     *   <li>Adds a small offset to create visual padding</li>
      *   <li>Collects values from both data and limit lines to determine the overall scale</li>
      *   <li>Sets the minimum and maximum Y-axis values on the chart with appropriate padding</li>
      * </ol>
      * <p>
      * The method ensures that both the actual data range and any limit lines are
      * visible within the chart's Y-axis range. It adds extra padding at the top
-     * of the chart (20% of range) to provide room for data labels and to improve
+     * of the chart to provide room for data labels and to improve
      * visual aesthetics.
      * <p>
      * If no data entity wrapper is set, this method has no effect to prevent
@@ -154,9 +154,6 @@ class LineChartScaler {
                 ));
         valYList.addAll(limitLinesValues);
 
-        //combinedChart.setAutoScaleMinMaxEnabled(true);
-        //lineChart.setVisibleXRangeMinimum(0);
-
         double minY = valYList.stream().min(Comparator.naturalOrder()).get();
         double maxY = valYList.stream().max(Comparator.naturalOrder()).get();
 
@@ -167,11 +164,13 @@ class LineChartScaler {
 
             // Calculate range and additional offset for visual padding
             double range = maxY - minY;
-            double offset = range * 0.1f;
+            double offset = range * 0.025f;
 
             // Apply calculated values to chart's Y-axis
             YAxis leftAxis = lineChart.getAxisLeft();
-            leftAxis.setAxisMinimum((float) (minY - offset));
+            //leftAxis.setAxisMinimum((float) (minY + 3.0f * offset));
+            leftAxis.resetAxisMinimum();
+            leftAxis.setSpaceBottom(0);
 
             // Ensure adequate headroom above the highest value
             if (PrecisionUtil.isGreaterEqual((float) maxStatisticsY, (float) maxY, PrecisionUtil.NDIG_PREC_COMP)) {

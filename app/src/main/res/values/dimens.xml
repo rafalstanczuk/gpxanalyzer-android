@@ -8,4 +8,5 @@
     <dimen name="text_margin">16dp</dimen>
     <integer name="button_clicked_stroke_width">40</integer>
     <dimen name="fab_custom_icon_size">24dp</dimen>
+    <dimen name="speed_dial_fab_padding">200dp</dimen>
 </resources>
