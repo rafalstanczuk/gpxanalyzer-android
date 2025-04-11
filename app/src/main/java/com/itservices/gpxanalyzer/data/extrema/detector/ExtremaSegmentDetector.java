@@ -1,44 +1,85 @@
 package com.itservices.gpxanalyzer.data.extrema.detector;
 
-import android.util.Log;
 import android.util.Pair;
 
 import androidx.annotation.NonNull;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Comparator;
+import java.util.Vector;
 import java.util.concurrent.TimeUnit;
 
 public final class ExtremaSegmentDetector {
 
-    private List<PrimitiveDataEntity> filtered;
-    private List<PrimitiveDataEntity> smoothed;
-    private List<Extremum> extrema;
+    private static final String TAG = ExtremaSegmentDetector.class.getSimpleName();
+    private Vector<PrimitiveDataEntity> filtered;
+    private Vector<PrimitiveDataEntity> smoothed;
+    private Vector<Extremum> extrema;
 
-    public List<Segment> addMissingSegments(List<Segment> extremumSegmentList, SegmentThresholds segmentThresholds) {
+    // --------------------------------------------------------------------------
+    // 1) PREPROCESS
+    // --------------------------------------------------------------------------
+    public static Vector<PrimitiveDataEntity> preProcessPrimitiveDataEntity(
+            Vector<PrimitiveDataEntity> data,
+            float maxValueAccuracy
+    ) {
+        Vector<PrimitiveDataEntity> result = new Vector<>();
+        if (data == null || data.isEmpty()) return result;
 
-        List<Segment> newExtremumSegmentList = new ArrayList<>();
-        if (extremumSegmentList.isEmpty()) {
-            return extremumSegmentList;
-        }
-        newExtremumSegmentList.add(extremumSegmentList.get(0));
-
-        for (int i = 1; i < extremumSegmentList.size(); i++) {
-
-            Segment prevSegment = extremumSegmentList.get(i - 1);
-            Segment segment = extremumSegmentList.get(i);
-
-            if (prevSegment.endTime() != segment.startTime()) {
-
-                Segment missingSegment = getMissingSegment(segment, prevSegment, segmentThresholds);
-
-                newExtremumSegmentList.add(missingSegment);
+        for (PrimitiveDataEntity entity : data) {
+            if (entity == null) continue;
+            // skip if no accuracy or beyond threshold
+            if (!entity.hasAccuracy()) continue;
+            if (entity.getAccuracy() <= maxValueAccuracy) {
+                result.add(entity);
             }
+        }
+        return result;
+    }
 
-            newExtremumSegmentList.add(segment);
+    // --------------------------------------------------------------------------
+    // 2) SMOOTHING
+    // --------------------------------------------------------------------------
+    public static Vector<PrimitiveDataEntity> applyMovingFilter(
+            Vector<PrimitiveDataEntity> data,
+            double[] weights
+    ) {
+        if (data == null || data.size() < 3) return data;
+        if (weights == null || weights.length < 3 || (weights.length % 2 == 0)) {
+            throw new IllegalArgumentException(
+                    "weights array must be non-null, odd length >= 3"
+            );
         }
 
-        return newExtremumSegmentList;
+        int n = data.size();
+        int windowSize = weights.length;
+        int half = windowSize / 2;
+        Vector<PrimitiveDataEntity> smoothedList = new Vector<>(n);
+
+        // Copy original data
+        for (PrimitiveDataEntity e : data) {
+            smoothedList.add(PrimitiveDataEntity.copy(e));
+        }
+
+        // Weighted average
+        for (int i = 0; i < n; i++) {
+            double weightedSum = 0.0;
+            double usedWeightSum = 0.0;
+
+            for (int j = i - half; j <= i + half; j++) {
+                if (j < 0 || j >= n) {
+                    continue;
+                }
+                int offset = j - i + half;
+                double w = weights[offset];
+                double val = data.get(j).getValue();
+
+                weightedSum += (val * w);
+                usedWeightSum += w;
+            }
+            double smoothedValue = weightedSum / usedWeightSum;
+            smoothedList.get(i).setValue(smoothedValue);
+        }
+        return smoothedList;
     }
 
     @NonNull
@@ -82,168 +123,7 @@ public final class ExtremaSegmentDetector {
         MIN, MAX
     }
 
-    // Container for an extremum (local min or local max)
-    private record Extremum(int index,         // index in the smoothed data
-                            ExtremaType type // MIN or MAX
-    ) {
-    }
-
-
-    // --------------------------------------------------------------------------
-    // PUBLIC DETECTION METHODS
-    // --------------------------------------------------------------------------
-
-    public void preprocessAndFindExtrema(
-            final List<PrimitiveDataEntity> originalData,
-            float maxValueAccuracy,
-            double[] windowWeights
-    ) {
-        // 1) Preprocess by accuracy
-        filtered = preProcessPrimitiveDataEntity(originalData, maxValueAccuracy);
-
-        // 2) Smooth
-        smoothed = applyMovingFilter(filtered, windowWeights);
-
-        // 3) Find local minima / maxima
-        extrema = findLocalExtrema(smoothed);
-    }
-
-    // --------------------------------------------------------------------------
-    // SINGLE-PASS DETECTION OF ASC/DESC
-    // --------------------------------------------------------------------------
-
-    /**
-     * Detects both ascending (MIN->MAX) and descending (MAX->MIN) segments
-     * in one pass through the extrema list, preventing overlaps.
-     *
-     * @param segmentThresholds
-     * @return A single list of non-overlapping segments (UP or DOWN).
-     * @see SegmentThresholds
-     */
-    public List<Segment> detectSegmentsOneRun(
-            SegmentThresholds segmentThresholds
-    ) {
-
-        // 4) Build segments from consecutive pairs of extrema
-        List<Segment> segments = new ArrayList<>();
-
-        for (int i = 0; i < extrema.size() - 1; i++) {
-            Extremum e1 = extrema.get(i);
-            Extremum e2 = extrema.get(i + 1);
-
-            //Log.d(ExtremaSegmentDetector.class.getSimpleName(), "detectSegmentsOneRun() e1 = [" + e1.index + "], e2 = [" + e2.index + "]");
-
-            // e1 must come before e2 in time
-/*            if (e2.index <= e1.index) {
-                continue;
-            }*/
-
-            // Get the start/end points
-            PrimitiveDataEntity p1 = smoothed.get(e1.index);
-            PrimitiveDataEntity p2 = smoothed.get(e2.index);
-
-            double amplitude = Math.abs(p2.getValue() - p1.getValue());
-            long dtMillis = p2.getTimestamp() - p1.getTimestamp();
-            if (dtMillis <= 0) {
-                continue;
-            }
-            double dtSec = dtMillis / 1000.0;
-            double avgDerivative = amplitude / dtSec;
-
-            // Check if (MIN -> MAX)
-            if (e1.type == ExtremaType.MIN && e2.type == ExtremaType.MAX) {
-                // ascending candidate
-                if ((p2.getValue() > p1.getValue()) &&
-                        (amplitude >= segmentThresholds.deviationThreshold())) {
-
-                    segments.add(new Segment(e1.index, e2.index, p1.getTimestamp(), p2.getTimestamp(), p1.getValue(), p2.getValue(), SegmentTrendType.UP));
-                }
-            }
-            // or (MAX -> MIN)
-            else if (e1.type == ExtremaType.MAX && e2.type == ExtremaType.MIN) {
-                // descending candidate
-                if ((p1.getValue() > p2.getValue()) &&
-                        (amplitude >= segmentThresholds.deviationThreshold())) {
-
-                    segments.add(new Segment(e1.index, e2.index, p1.getTimestamp(), p2.getTimestamp(), p1.getValue(), p2.getValue(), SegmentTrendType.DOWN));
-                }
-            }
-        }
-
-        // Because this uses consecutive pairs of extrema in chronological order,
-        // none of these segments overlap in time.
-        return segments;
-    }
-
-    // --------------------------------------------------------------------------
-    // 1) PREPROCESS
-    // --------------------------------------------------------------------------
-    public static List<PrimitiveDataEntity> preProcessPrimitiveDataEntity(
-            List<PrimitiveDataEntity> data,
-            float maxValueAccuracy
-    ) {
-        List<PrimitiveDataEntity> result = new ArrayList<>();
-        if (data == null || data.isEmpty()) return result;
-
-        for (PrimitiveDataEntity entity : data) {
-            if (entity == null) continue;
-            // skip if no accuracy or beyond threshold
-            if (!entity.hasAccuracy()) continue;
-            if (entity.getAccuracy() <= maxValueAccuracy) {
-                result.add(entity);
-            }
-        }
-        return result;
-    }
-
-    // --------------------------------------------------------------------------
-    // 2) SMOOTHING
-    // --------------------------------------------------------------------------
-    public static List<PrimitiveDataEntity> applyMovingFilter(
-            List<PrimitiveDataEntity> data,
-            double[] weights
-    ) {
-        if (data == null || data.size() < 3) return data;
-        if (weights == null || weights.length < 3 || (weights.length % 2 == 0)) {
-            throw new IllegalArgumentException(
-                    "weights array must be non-null, odd length >= 3"
-            );
-        }
-
-        int n = data.size();
-        int windowSize = weights.length;
-        int half = windowSize / 2;
-        List<PrimitiveDataEntity> smoothedList = new ArrayList<>(n);
-
-        // Copy original data
-        for (PrimitiveDataEntity e : data) {
-            smoothedList.add(PrimitiveDataEntity.copy(e));
-        }
-
-        // Weighted average
-        for (int i = 0; i < n; i++) {
-            double weightedSum = 0.0;
-            double usedWeightSum = 0.0;
-
-            for (int j = i - half; j <= i + half; j++) {
-                if (j < 0 || j >= n) {
-                    continue;
-                }
-                int offset = j - i + half;
-                double w = weights[offset];
-                double val = data.get(j).getValue();
-
-                weightedSum += (val * w);
-                usedWeightSum += w;
-            }
-            double smoothedValue = weightedSum / usedWeightSum;
-            smoothedList.get(i).setValue(smoothedValue);
-        }
-        return smoothedList;
-    }
-
-
-    private static double[] derivativeRungeKutta(List<PrimitiveDataEntity> smoothed) {
+    private static double[] derivativeRungeKutta(Vector<PrimitiveDataEntity> smoothed) {
         double[] derivative = new double[smoothed.size() - 1];
         for (int i = 0; i < smoothed.size() - 1; i++) {
             PrimitiveDataEntity next = smoothed.get(i + 1);
@@ -257,11 +137,16 @@ public final class ExtremaSegmentDetector {
         return derivative;
     }
 
+
+    // --------------------------------------------------------------------------
+    // PUBLIC DETECTION METHODS
+    // --------------------------------------------------------------------------
+
     // --------------------------------------------------------------------------
     // 3) FIND LOCAL EXTREMA
     // --------------------------------------------------------------------------
-    private static List<Extremum> findLocalExtrema(List<PrimitiveDataEntity> smoothed) {
-        List<Extremum> result = new ArrayList<>();
+    private static Vector<Extremum> findLocalExtrema(Vector<PrimitiveDataEntity> smoothed, Vector<PrimitiveDataEntity> originalData) {
+        Vector<Extremum> result = new Vector<>();
         if (smoothed == null || smoothed.size() < 3) return result;
 
         int n = smoothed.size();
@@ -286,11 +171,13 @@ public final class ExtremaSegmentDetector {
 
             // local minimum => slope from negative to positive
             if (prevSign < 0 && currSign > 0) {
-                result.add(new Extremum(i, ExtremaType.MIN));
+                Extremum extremum = new Extremum(i, ExtremaType.MIN);
+                result.add(extremum);
             }
             // local maximum => slope from positive to negative
             else if (prevSign > 0 && currSign < 0) {
-                result.add(new Extremum(i, ExtremaType.MAX));
+                Extremum extremum = new Extremum(i, ExtremaType.MAX);
+                result.add(extremum);
             }
         }
 
@@ -305,12 +192,14 @@ public final class ExtremaSegmentDetector {
             switch (beforeLastOne.type) {
                 case MIN -> {
                     if (lastOne.type == ExtremaType.MAX) {
-                        result.add(new Extremum(lastIndex, ExtremaType.MIN));
+                        Extremum extremum = new Extremum(lastIndex, ExtremaType.MIN);
+                        result.add(extremum);
                     }
                 }
                 case MAX -> {
                     if (lastOne.type == ExtremaType.MIN) {
-                        result.add(new Extremum(lastIndex, ExtremaType.MAX));
+                        Extremum extremum = new Extremum(lastIndex, ExtremaType.MAX);
+                        result.add(extremum);
                     }
                 }
             }
@@ -319,25 +208,20 @@ public final class ExtremaSegmentDetector {
         return result;
     }
 
-    /**
-     * Sign with dead-zone: values in [-eps, +eps] => 0
-     */
-    private static double signWithEpsilon(double value, double eps) {
-        if (value > eps) return 1.0;
-        if (value < -eps) return -1.0;
-        return 0.0;
-    }
+    // --------------------------------------------------------------------------
+    // SINGLE-PASS DETECTION OF ASC/DESC
+    // --------------------------------------------------------------------------
 
     // --------------------------------------------------------------------------
     // 4) ASCENDING SEGMENT FORMATION
     // --------------------------------------------------------------------------
-    private static List<Pair<Long, Long>> findAscendingSegmentsFromExtrema(
-            List<PrimitiveDataEntity> smoothed,
-            List<Extremum> extrema,
+    private static Vector<Pair<Long, Long>> findAscendingSegmentsFromExtrema(
+            Vector<PrimitiveDataEntity> smoothed,
+            Vector<Extremum> extrema,
             double minAmp,
             double minDerivative
     ) {
-        List<Pair<Long, Long>> segments = new ArrayList<>();
+        Vector<Pair<Long, Long>> segments = new Vector<>();
 
         for (int i = 0; i < extrema.size(); i++) {
             Extremum minExt = extrema.get(i);
@@ -380,13 +264,13 @@ public final class ExtremaSegmentDetector {
     // --------------------------------------------------------------------------
     // 5) DESCENDING SEGMENT FORMATION
     // --------------------------------------------------------------------------
-    private static List<Pair<Long, Long>> findDescendingSegmentsFromExtrema(
-            List<PrimitiveDataEntity> smoothed,
-            List<Extremum> extrema,
+    private static Vector<Pair<Long, Long>> findDescendingSegmentsFromExtrema(
+            Vector<PrimitiveDataEntity> smoothed,
+            Vector<Extremum> extrema,
             double minAmp,
             double minDerivative
     ) {
-        List<Pair<Long, Long>> segments = new ArrayList<>();
+        Vector<Pair<Long, Long>> segments = new Vector<>();
 
         for (int i = 0; i < extrema.size(); i++) {
             Extremum maxExt = extrema.get(i);
@@ -423,6 +307,176 @@ public final class ExtremaSegmentDetector {
             }
         }
         return segments;
+    }
+
+    public Vector<Segment> addMissingSegments(Vector<Segment> extremumSegmentList, SegmentThresholds segmentThresholds) {
+
+        Vector<Segment> newExtremumSegmentList = new Vector<>();
+        if (extremumSegmentList.isEmpty()) {
+            return extremumSegmentList;
+        }
+        newExtremumSegmentList.add(extremumSegmentList.get(0));
+
+        for (int i = 1; i < extremumSegmentList.size(); i++) {
+
+            Segment prevSegment = extremumSegmentList.get(i - 1);
+            Segment segment = extremumSegmentList.get(i);
+
+            if (prevSegment.endTime() != segment.startTime()) {
+
+                Segment missingSegment = getMissingSegment(segment, prevSegment, segmentThresholds);
+
+                newExtremumSegmentList.add(missingSegment);
+            }
+
+            newExtremumSegmentList.add(segment);
+        }
+
+        newExtremumSegmentList.sort(Comparator.comparingLong(Segment::startTime));
+
+        return newExtremumSegmentList;
+    }
+
+
+    public void preprocessAndFindExtrema(
+            final Vector<PrimitiveDataEntity> originalData,
+            float maxValueAccuracy,
+            double[] windowWeights
+    ) {
+        //Log.d("Extema", "preprocessAndFindExtrema() originalData.size() = [" + originalData.size() + "]");
+        //Log.d("Extema", "preprocessAndFindExtrema() originalData.get(0).getTimestamp() = [" + originalData.get(0).getTimestamp() + "]");
+        // 1) Preprocess by accuracy
+        filtered = preProcessPrimitiveDataEntity(originalData, maxValueAccuracy);
+
+        //Log.d("Extema", "preprocessAndFindExtrema() originalData.get(0).getTimestamp() = [" + originalData.get(0).getTimestamp() + "]");
+        // 2) Smooth
+        smoothed = applyMovingFilter(filtered, windowWeights);
+
+        //Log.d("Extema", "preprocessAndFindExtrema() smoothed.get(0).getTimestamp() = [" + smoothed.get(0).getTimestamp() + "]");
+
+        // 3) Find local minima / maxima
+        extrema = findLocalExtrema(smoothed, originalData);
+    }
+
+    /**
+     * Sign with dead-zone: values in [-eps, +eps] => 0
+     */
+    private static double signWithEpsilon(double value, double eps) {
+        if (value > eps) return 1.0;
+        if (value < -eps) return -1.0;
+        return 0.0;
+    }
+
+    /**
+     * Detects both ascending (MIN->MAX) and descending (MAX->MIN) segments
+     * in one pass through the extrema list, preventing overlaps.
+     *
+     * @param segmentThresholds
+     * @return A single list of non-overlapping segments (UP or DOWN).
+     * @see SegmentThresholds
+     */
+    public Vector<Segment> detectSegmentsOneRun(
+            SegmentThresholds segmentThresholds
+    ) {
+        // 4) Build segments from consecutive pairs of extrema
+        Vector<Segment> segments = new Vector<>();
+
+        findAndAddMissingStartingSegment(segments);
+
+        for (int i = 0; i < extrema.size() - 1; i++) {
+            Extremum e1 = extrema.get(i);
+            Extremum e2 = extrema.get(i + 1);
+
+            // Get the start/end points
+            PrimitiveDataEntity p1 = smoothed.get(e1.index);
+            PrimitiveDataEntity p2 = smoothed.get(e2.index);
+
+            double amplitude = Math.abs(p2.getValue() - p1.getValue());
+            long dtMillis = p2.getTimestamp() - p1.getTimestamp();
+            if (dtMillis <= 0) {
+                continue;
+            }
+            double dtSec = dtMillis / 1000.0;
+            double avgDerivative = amplitude / dtSec;
+
+            // Check if (MIN -> MAX)
+            if (e1.type == ExtremaType.MIN && e2.type == ExtremaType.MAX) {
+                // ascending candidate
+                if ((p2.getValue() > p1.getValue()) &&
+                        (amplitude >= segmentThresholds.deviationThreshold())) {
+
+                    segments.add(new Segment(e1.index, e2.index, p1.getTimestamp(), p2.getTimestamp(), p1.getValue(), p2.getValue(), SegmentTrendType.UP));
+                }
+            }
+            // or (MAX -> MIN)
+            else if (e1.type == ExtremaType.MAX && e2.type == ExtremaType.MIN) {
+                // descending candidate
+                if ((p1.getValue() > p2.getValue()) &&
+                        (amplitude >= segmentThresholds.deviationThreshold())) {
+
+                    segments.add(new Segment(e1.index, e2.index, p1.getTimestamp(), p2.getTimestamp(), p1.getValue(), p2.getValue(), SegmentTrendType.DOWN));
+                }
+            }
+        }
+
+        findAndAddMissingEndingSegment(segments);
+
+        segments.sort(Comparator.comparingLong(Segment::startIndex));
+
+
+        return segments;
+    }
+
+    private void findAndAddMissingStartingSegment(Vector<Segment> segments) {
+        int start0Index = 0;
+        Extremum startExtremum = extrema.firstElement();
+        int start1Index = startExtremum.index;
+
+        PrimitiveDataEntity start0 = smoothed.get(start0Index);
+        PrimitiveDataEntity start1 = smoothed.get(start1Index);
+        if (start1Index > start0Index) {
+            SegmentTrendType startSegmentTrendType = SegmentTrendType.CONSTANT;
+            switch (startExtremum.type) {
+                case MIN -> {
+                    startSegmentTrendType = SegmentTrendType.CONSTANT;
+                }
+                case MAX -> {
+                    startSegmentTrendType = SegmentTrendType.CONSTANT;
+                }
+            }
+            Segment startSegment = new Segment(start0Index, start1Index,
+                    start0.getTimestamp(), start1.getTimestamp(), start0.getValue(), start1.getValue(), startSegmentTrendType);
+
+            segments.add(startSegment);
+        }
+    }
+
+    private void findAndAddMissingEndingSegment(Vector<Segment> segments) {
+        Segment lastSegment = segments.lastElement();
+        SegmentTrendType lastSegmentTrendType = lastSegment.type();
+
+        int end0Index = lastSegment.endIndex();
+        int end1Index = smoothed.size() - 1;
+
+        PrimitiveDataEntity end0 = smoothed.get(end0Index);
+        PrimitiveDataEntity end1 = smoothed.get(end1Index);
+        //Log.d(TAG, "findAndAddMissingEndingSegment() called with: end0Index = [" + end0Index + "]");
+        //Log.d(TAG, "findAndAddMissingEndingSegment() called with: end1Index = [" + end1Index + "]");
+
+        if (end0Index < end1Index) {
+            SegmentTrendType endSegmentTrendType = SegmentTrendType.CONSTANT;
+
+            Segment endSegment = new Segment(end0Index, end1Index,
+                    end0.getTimestamp(), end1.getTimestamp(), end0.getValue(), end1.getValue(), endSegmentTrendType);
+
+            segments.add(endSegment);
+        }
+    }
+
+    // Container for an extremum (local min or local max)
+    public record Extremum(int index,         // index in the smoothed data
+                            ExtremaType type // MIN or MAX
+    ) {
     }
 
     // --------------------------------------------------------------------------

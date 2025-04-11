@@ -10,40 +10,54 @@ import com.itservices.gpxanalyzer.data.extrema.detector.SegmentThresholds;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
 import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.Vector;
 
 import io.reactivex.Single;
 
 public class ExtremaSegmentListProvider {
 
-    public static Single<List<Segment>> provide(DataEntityWrapper dataEntityWrapper) {
+    public static Single<Vector<Segment>> provide(DataEntityWrapper dataEntityWrapper) {
         return Single.fromCallable(() -> {
-            List<PrimitiveDataEntity> primitiveList = DataPrimitiveMapper.mapFrom(dataEntityWrapper);
+            //Log.i("ExtremaSegmentListProvider", "provide() called with: dataEntityWrapper.getPrimaryDataIndex() = [" + dataEntityWrapper.getPrimaryDataIndex() + "]");
+            //Log.i("ExtremaSegmentListProvider", "provide() called with: dataEntityWrapper.getDataHash() = [" + dataEntityWrapper.getDataHash() + "]");
+            //Log.i("ExtremaSegmentListProvider", "provide() called with: dataEntityWrapper.getData().size() = [" + dataEntityWrapper.getData().size() + "]");
+            //Log.i("ExtremaSegmentListProvider", "provide() called with: dataEntityWrapper.getData().firstElement().timestampMillis() = [" + dataEntityWrapper.getData().firstElement().timestampMillis() + "]");
+            //Log.i("ExtremaSegmentListProvider", "provide() called with: dataEntityWrapper.getData().lastElement().timestampMillis() = [" + dataEntityWrapper.getData().lastElement().timestampMillis() + "]");
 
-            primitiveList.sort(Comparator.comparingLong(PrimitiveDataEntity::getTimestamp));
+            Vector<PrimitiveDataEntity> primitiveVector = DataPrimitiveMapper.mapFrom(dataEntityWrapper);
+
+            //Log.i("ExtremaSegmentListProvider", "provide() primitiveVector = [" + primitiveVector.size() + "]");
+
+            //Log.i("ExtremaSegmentListProvider", "provide() primitiveVector.firstElement().getTimestamp() = [" + primitiveVector.firstElement().getTimestamp() + "]");
+            //Log.i("ExtremaSegmentListProvider", "provide() primitiveVector.lastElement().getTimestamp() = [" + primitiveVector.lastElement().getTimestamp() + "]");
 
             ExtremaSegmentDetector segmentDetector = new ExtremaSegmentDetector();
 
-            double stdDev = getStandardDeviation(primitiveList);
+            double stdDev = getStandardDeviation(primitiveVector);
 
             double[] windowFunction = WaveletLagDataSmoother.computeAdaptiveWindowFunction(
-                    primitiveList, stdDev, ExtremaSegmentDetector.WindowType.GAUSSIAN);
+                    primitiveVector, stdDev, ExtremaSegmentDetector.WindowType.GAUSSIAN);
 
             System.out.println("Optimal Adaptive Window Size (Wavelet-based): windowFunction: " + Arrays.toString(windowFunction));
             System.out.println("Optimal Adaptive Window Size (Wavelet-based): size: " + windowFunction.length);
-            System.out.println("Optimal Adaptive Window Size (Wavelet-based): data size: " + primitiveList.size());
+            System.out.println("Optimal Adaptive Window Size (Wavelet-based): data size: " + primitiveVector.size());
             System.out.println("Optimal Adaptive Window Size (Wavelet-based): stdDev: " + stdDev);
 
-            segmentDetector.preprocessAndFindExtrema(primitiveList, ExtremaSegmentDetector.DEFAULT_MAX_VALUE_ACCURACY, windowFunction);
+            segmentDetector.preprocessAndFindExtrema(primitiveVector, ExtremaSegmentDetector.DEFAULT_MAX_VALUE_ACCURACY, windowFunction);
 
             SegmentThresholds segmentThresholds = new SegmentThresholds(stdDev * 0.2);
 
-            List<Segment> extremaSegmentList
+            Vector<Segment> extremaSegmentList
                     = segmentDetector.detectSegmentsOneRun(segmentThresholds);
+
+            //Log.i("ExtremaSegmentListProvider", "provide() detectSegmentsOneRun extremaSegmentList.firstElement().startTime() = [" + extremaSegmentList.firstElement().startTime() + "]" + dataEntityWrapper.getPrimaryDataIndex());
+            //Log.i("ExtremaSegmentListProvider", "provide() detectSegmentsOneRun extremaSegmentList.lastElement().endTime() = [" + extremaSegmentList.lastElement().endTime() + "]" + dataEntityWrapper.getPrimaryDataIndex());
 
             extremaSegmentList
                     = segmentDetector.addMissingSegments(extremaSegmentList, segmentThresholds);
+
+            //Log.i("ExtremaSegmentListProvider", "provide() addMissingSegments extremaSegmentList.firstElement().startTime() = [" + extremaSegmentList.firstElement().startTime() + "]" + dataEntityWrapper.getPrimaryDataIndex());
+            //Log.i("ExtremaSegmentListProvider", "provide() addMissingSegments extremaSegmentList.lastElement().endTime() = [" + extremaSegmentList.lastElement().endTime() + "]" + dataEntityWrapper.getPrimaryDataIndex());
 
             return extremaSegmentList;
         });
@@ -55,7 +69,7 @@ public class ExtremaSegmentListProvider {
      *
      * @return The standard deviation of the values.
      */
-    private static double getStandardDeviation(List<PrimitiveDataEntity> primitiveList) {
+    private static double getStandardDeviation(Vector<PrimitiveDataEntity> primitiveList) {
         if (primitiveList == null || primitiveList.isEmpty()) {
             return 0.0; // Return 0 if there are no values to avoid errors
         }

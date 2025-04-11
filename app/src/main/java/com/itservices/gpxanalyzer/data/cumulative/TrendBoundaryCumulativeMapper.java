@@ -60,7 +60,7 @@ public final class TrendBoundaryCumulativeMapper {
      * @param extremaSegmentList The list of extrema segments to process
      * @return A list of trend boundary data entities with cumulative statistics
      */
-    public static List<TrendBoundaryDataEntity> mapFrom(DataEntityWrapper dataEntityWrapper, List<Segment> extremaSegmentList) {
+    public static List<TrendBoundaryDataEntity> mapFrom(DataEntityWrapper dataEntityWrapper, Vector<Segment> extremaSegmentList) {
 
             Vector<DataEntity> dataEntityVector = dataEntityWrapper.getData();
 

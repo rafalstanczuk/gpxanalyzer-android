@@ -93,21 +93,4 @@ public class EntryCacheMap {
     public void clear() {
         entryMap.clear();
     }
-
-    /**
-     * Updates the cache with entries from the provided line data sets.
-     * <p>
-     * This method clears the existing cache and adds all entries from the
-     * provided line data sets to the cache, using each entry's timestamp as the key.
-     *
-     * @param lineDataSetList The list of LineDataSet objects containing entries to cache
-     */
-    public void update(List<LineDataSet> lineDataSetList) {
-        clear();
-        lineDataSetList.forEach(lineDataSet -> {
-            lineDataSet.getEntries().forEach(entry -> {
-                add(((BaseEntry) entry).getDataEntity().timestampMillis(), (BaseEntry)entry);
-            });
-        });
-    }
 }

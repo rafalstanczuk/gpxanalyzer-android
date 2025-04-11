@@ -6,7 +6,7 @@ import com.itservices.gpxanalyzer.data.extrema.detector.PrimitiveDataEntity;
 
 import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.transform.*;
-import java.util.List;
+import java.util.Vector;
 
 public class WaveletLagDataSmoother {
 
@@ -20,7 +20,7 @@ public class WaveletLagDataSmoother {
      * @return A double array representing the computed noise-filtered window function.
      */
     public static double[] computeAdaptiveWindowFunction(
-            List<PrimitiveDataEntity> dataEntities,
+            Vector<PrimitiveDataEntity> dataEntities,
             double stdDev,
             ExtremaSegmentDetector.WindowType windowType) {
 
@@ -40,7 +40,7 @@ public class WaveletLagDataSmoother {
     /**
      * Computes an adaptive lag that minimizes smoothing when amplitude changes are high.
      */
-    private static int computeAdaptiveLag(List<PrimitiveDataEntity> dataEntities, int dataSize, double stdDev) {
+    private static int computeAdaptiveLag(Vector<PrimitiveDataEntity> dataEntities, int dataSize, double stdDev) {
         int N = dataEntities.size();
         if (N < 10) return 3;
 
@@ -87,7 +87,7 @@ public class WaveletLagDataSmoother {
     /**
      * Generates an adaptive window function using FFT to remove high-frequency noise.
      */
-    private static double[] generateAdaptiveWindowFunction(int size, ExtremaSegmentDetector.WindowType type, int dataSize, double stdDev, List<PrimitiveDataEntity> dataEntities) {
+    private static double[] generateAdaptiveWindowFunction(int size, ExtremaSegmentDetector.WindowType type, int dataSize, double stdDev, Vector<PrimitiveDataEntity> dataEntities) {
         int maxAllowedWindowSize = Math.max(3, dataSize / 200);
         if (size > maxAllowedWindowSize) {
             size = maxAllowedWindowSize;
@@ -115,7 +115,7 @@ public class WaveletLagDataSmoother {
      * @param dataEntities The input signal as a list of PrimitiveDataEntity.
      * @return FFT-transformed array of magnitudes.
      */
-    private static double[] applyFFT(List<PrimitiveDataEntity> dataEntities) {
+    private static double[] applyFFT(Vector<PrimitiveDataEntity> dataEntities) {
         int N = dataEntities.size();
         int fftSize = nextPowerOf2(N); // Fix: Pad to next power of 2
 
