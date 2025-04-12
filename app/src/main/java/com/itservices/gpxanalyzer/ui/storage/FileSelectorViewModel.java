@@ -1,6 +1,7 @@
 package com.itservices.gpxanalyzer.ui.storage;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
@@ -8,6 +9,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.itservices.gpxanalyzer.data.parser.gpxfileinfo.GpxFileInfo;
 import com.itservices.gpxanalyzer.usecase.SelectGpxFileUseCase;
 import com.itservices.gpxanalyzer.utils.common.ConcurrentUtil;
 
@@ -18,42 +20,62 @@ import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 @HiltViewModel
 public class FileSelectorViewModel extends ViewModel {
 
+    private final MutableLiveData<Boolean> requestPermissionsLiveData = new MutableLiveData<>();
+    private final MutableLiveData<Integer> searchProgressLiveData = new MutableLiveData<>(0);
+    private final MutableLiveData<List<GpxFileInfo>> filesInfoLiveData = new MutableLiveData<>();
+    private final CompositeDisposable disposables = new CompositeDisposable();
     @Inject
     SelectGpxFileUseCase selectGpxFileUseCase;
-    private final MutableLiveData<List<File>> filesLiveData = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> isFileFoundLiveData = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> requestPermissionsLiveData = new MutableLiveData<>();
-
-    private Disposable disposableLoadLocal;
-    private Disposable disposableIsFileFound;
-
-    private Disposable disposableFileListFound;
     private Disposable disposableRequestPermissions;
-
     private Disposable disposableCheckAndRequestPermissions;
-
-    public LiveData<List<File>> getFoundFileList() {
-        return filesLiveData;
-    }
+    private Disposable disposableSearchProgress;
 
     @Inject
     public FileSelectorViewModel() {
     }
 
+    public LiveData<List<GpxFileInfo>> getFoundFileListLiveData() {
+        return filesInfoLiveData;
+    }
 
-    public void loadLocalFiles(Context context) {
-        ConcurrentUtil.tryToDispose(disposableLoadLocal);
+    public void receiveRecentFoundFileList() {
+        filesInfoLiveData.setValue(selectGpxFileUseCase.getGpxFileInfoList());
+    }
 
-        disposableLoadLocal = selectGpxFileUseCase.loadLocalGpxFiles(context)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(filesLiveData::setValue);
+    public LiveData<Integer> getSearchProgress() {
+        return searchProgressLiveData;
+    }
+
+    public void searchGpxFilesRecursively(Context context) {
+        Log.d(FileSelectorViewModel.class.getSimpleName(), "searchGpxFilesRecursively() called with: context = [" + context + "]");
+
+        // Clear previous search progress
+        searchProgressLiveData.setValue(0);
+
+        // Subscribe to search progress
+        disposableSearchProgress = selectGpxFileUseCase.getSearchProgress()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(searchProgressLiveData::setValue);
+
+        // Start the recursive search
+        disposables.add(selectGpxFileUseCase.searchAndParseGpxFilesRecursively(context)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        filesInfoLiveData::setValue,
+                        error -> {
+                            Log.e("FileSelectorViewModel", "Error searching for GPX files", error);
+                            filesInfoLiveData.setValue(null);
+                        }
+                ));
     }
 
     @NonNull
@@ -63,10 +85,6 @@ public class FileSelectorViewModel extends ViewModel {
 
     public Boolean getPermissionsGranted() {
         return requestPermissionsLiveData.getValue() != null ? requestPermissionsLiveData.getValue() : false;
-    }
-
-    public LiveData<Boolean> getFileFound() {
-        return isFileFoundLiveData;
     }
 
     public void selectFile(File gpxFile) {
@@ -86,22 +104,19 @@ public class FileSelectorViewModel extends ViewModel {
     }
 
     public void init() {
-        ConcurrentUtil.tryToDispose(disposableIsFileFound);
-        disposableIsFileFound = selectGpxFileUseCase.getIsGpxFileFound()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(isFileFoundLiveData::setValue);
-
         ConcurrentUtil.tryToDispose(disposableRequestPermissions);
         disposableRequestPermissions = selectGpxFileUseCase.getPermissionsGranted()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(requestPermissionsLiveData::setValue);
+    }
 
-        ConcurrentUtil.tryToDispose(disposableFileListFound);
-        disposableFileListFound = selectGpxFileUseCase.getGpxFileFoundList()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(filesLiveData::setValue);
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        disposables.clear();
+        ConcurrentUtil.tryToDispose(disposableRequestPermissions);
+        ConcurrentUtil.tryToDispose(disposableCheckAndRequestPermissions);
+        ConcurrentUtil.tryToDispose(disposableSearchProgress);
     }
 }

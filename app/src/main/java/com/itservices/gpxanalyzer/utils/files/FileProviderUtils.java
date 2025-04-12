@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.utils;
+package com.itservices.gpxanalyzer.utils.files;
 
 import android.content.ContentResolver;
 import android.content.Context;

@@ -381,7 +381,7 @@ public final class ExtremaSegmentDetector {
         // 4) Build segments from consecutive pairs of extrema
         Vector<Segment> segments = new Vector<>();
 
-        findAndAddMissingStartingSegment(segments);
+        findAndAddMissingStartingSegment(segments, segmentThresholds);
 
         for (int i = 0; i < extrema.size() - 1; i++) {
             Extremum e1 = extrema.get(i);
@@ -419,7 +419,7 @@ public final class ExtremaSegmentDetector {
             }
         }
 
-        findAndAddMissingEndingSegment(segments);
+        findAndAddMissingEndingSegment(segments, segmentThresholds);
 
         segments.sort(Comparator.comparingLong(Segment::startIndex));
 
@@ -427,7 +427,7 @@ public final class ExtremaSegmentDetector {
         return segments;
     }
 
-    private void findAndAddMissingStartingSegment(Vector<Segment> segments) {
+    private void findAndAddMissingStartingSegment(Vector<Segment> segments, SegmentThresholds segmentThresholds) {
         int start0Index = 0;
         Extremum startExtremum = extrema.firstElement();
         int start1Index = startExtremum.index;
@@ -436,14 +436,17 @@ public final class ExtremaSegmentDetector {
         PrimitiveDataEntity start1 = smoothed.get(start1Index);
         if (start1Index > start0Index) {
             SegmentTrendType startSegmentTrendType = SegmentTrendType.CONSTANT;
-            switch (startExtremum.type) {
-                case MIN -> {
-                    startSegmentTrendType = SegmentTrendType.CONSTANT;
-                }
-                case MAX -> {
-                    startSegmentTrendType = SegmentTrendType.CONSTANT;
+
+            double diff = start1.getValue() - start0.getValue();
+            double amplitude = Math.abs(diff);
+            if (amplitude >= segmentThresholds.deviationThreshold()) {
+                if (diff > 0) {
+                    startSegmentTrendType = SegmentTrendType.UP;
+                } else {
+                    startSegmentTrendType = SegmentTrendType.DOWN;
                 }
             }
+
             Segment startSegment = new Segment(start0Index, start1Index,
                     start0.getTimestamp(), start1.getTimestamp(), start0.getValue(), start1.getValue(), startSegmentTrendType);
 
@@ -451,7 +454,9 @@ public final class ExtremaSegmentDetector {
         }
     }
 
-    private void findAndAddMissingEndingSegment(Vector<Segment> segments) {
+    private void findAndAddMissingEndingSegment(Vector<Segment> segments, SegmentThresholds segmentThresholds) {
+        Extremum extremum = extrema.lastElement();
+
         Segment lastSegment = segments.lastElement();
         SegmentTrendType lastSegmentTrendType = lastSegment.type();
 
@@ -465,6 +470,16 @@ public final class ExtremaSegmentDetector {
 
         if (end0Index < end1Index) {
             SegmentTrendType endSegmentTrendType = SegmentTrendType.CONSTANT;
+
+            double diff = end1.getValue() - end0.getValue();
+            double amplitude = Math.abs(diff);
+            if (amplitude >= segmentThresholds.deviationThreshold()) {
+                if (diff > 0) {
+                    endSegmentTrendType = SegmentTrendType.UP;
+                } else {
+                    endSegmentTrendType = SegmentTrendType.DOWN;
+                }
+            }
 
             Segment endSegment = new Segment(end0Index, end1Index,
                     end0.getTimestamp(), end1.getTimestamp(), end0.getValue(), end1.getValue(), endSegmentTrendType);

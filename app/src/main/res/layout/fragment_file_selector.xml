@@ -11,19 +11,22 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-
+        app:backgroundTint="?attr/colorPrimary"
         app:icon="@drawable/ic_files_fill0"
         app:iconGravity="textStart"
-        app:iconTint="@android:color/white"
-        android:text="@string/search_for_file" />
+        app:iconTint="?attr/colorOnPrimary"
+        android:textColor="?attr/colorOnPrimary"
+        android:text="@string/search_for_file"
+        app:rippleColor="?attr/colorOnPrimary" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_margin="8dp"
         android:clipToPadding="false"
         android:padding="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btnSelectFile" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

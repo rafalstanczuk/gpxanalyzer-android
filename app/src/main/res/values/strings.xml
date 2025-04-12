@@ -36,5 +36,16 @@
     <string name="disabled">disabled</string>
     <string name="on_off_colorized_circles">On/Off colorized circles</string>
     <string name="time_autoscaling">Time autoscaling</string>
+    <string name="file_size_format_string_d_kb">%d kB</string>
+
+    <string name="searching_files">Searching for files…</string>
+    <string name="searching_files_progress">Searching… %1$d%%</string>
+    <string name="no_gpx_files_found">No GPX files found</string>
+    <string name="found_gpx_files">Found %1$d GPX files</string>
+    <string name="error_searching_files">Error searching for files</string>
+
+    <string name="creator_format_string">Creator: %s</string>
+    <string name="author_format_string">Author: %s</string>
+    <string name="first_point_lat_s_lon_s_ele_s">First point: Lat=%s, Lon=%s, Ele=%s</string>
 
 </resources>

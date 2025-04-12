@@ -42,4 +42,16 @@
         <!-- Elevation -->
         <item name="android:elevation">6dp</item>
     </style>
+
+    <style name="FullScreenDialog" parent="ThemeOverlay.MaterialComponents.Dialog">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:windowIsFloating">false</item>
+        <!--<item name="android:windowBackground">?attr/colorPrimary</item>-->
+
+
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowMinWidthMajor">80%</item>
+        <item name="android:windowMinWidthMinor">80%</item>
+    </style>
 </resources>

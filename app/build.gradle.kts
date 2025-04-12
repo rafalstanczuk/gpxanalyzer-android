@@ -32,8 +32,18 @@ android {
         versionCode = versionProps["VERSION_CODE"].toString().toInt()
         versionName = versionProps["VERSION_NAME"].toString()
 
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Room schema export location
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += mapOf(
+                    "room.schemaLocation" to "$projectDir/schemas",
+                    "room.incremental" to "true",
+                    "room.expandProjection" to "true"
+                )
+            }
+        }
     }
 
     // Define product flavors.
@@ -130,6 +140,11 @@ dependencies {
     implementation(libs.protolite.well.known.types)
 
     implementation(libs.math3)
+
+    // Room dependencies
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.rxjava2)
+    annotationProcessor(libs.androidx.room.compiler)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

@@ -133,8 +133,8 @@ class ChartProvider {
     public Single<RequestStatus> updateDataChart() {
         return Single.just(chartProcessedDataProvider.provide())
                 .subscribeOn(Schedulers.io())
-                .doOnEvent((chartProcessedData, throwable) -> chartComponents.settings.updateSettingsFor(chartProcessedData.lineData().get()))
                 .observeOn(Schedulers.computation())
+                .doOnEvent((chartProcessedData, throwable) -> chartComponents.settings.updateSettingsFor(chartProcessedData.lineData().get()))
                 .observeOn(AndroidSchedulers.mainThread())
                 .flatMap(chartProcessedData -> updateChart(chartProcessedData));
     }

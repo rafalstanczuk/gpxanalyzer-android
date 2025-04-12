@@ -239,18 +239,18 @@ public class ChartAreaListViewModel extends ViewModel {
     }
 
     public void onZoomIn(ChartAreaItem item) {
-        item.getChartController().animateZoomAndCenterToHighlighted(1.5f, 1.0f, 200);
+        item.getChartController().animateZoomAndCenterToHighlighted(1.2f, 1.0f, 200);
     }
 
     public void onZoomOut(ChartAreaItem item) {
-        item.getChartController().animateZoomAndCenterToHighlighted(0.50f, 1.0f, 200);
+        item.getChartController().animateZoomAndCenterToHighlighted(1f/1.2f, 1.0f, 200);
     }
 
     public void onAutoScaling(ChartAreaItem item) {
         item.getChartController().animateFitScreen(1000);
     }
 
-    public void onPause() {
+    public void dispose() {
         multipleSyncedGpxChartUseCase.disposeAll();
 
         ConcurrentUtil.tryToDispose(observeReloadEventDisposable);
@@ -260,5 +260,9 @@ public class ChartAreaListViewModel extends ViewModel {
 
     public void setDefaultChartAreaItemList(List<ChartAreaItem> immutableList) {
         this.immutableList = immutableList;
+    }
+
+    public void onResume() {
+       // postEventLoadData();
     }
 }

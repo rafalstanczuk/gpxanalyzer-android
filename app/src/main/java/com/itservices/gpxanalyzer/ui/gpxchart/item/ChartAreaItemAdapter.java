@@ -197,7 +197,7 @@ public class ChartAreaItemAdapter extends RecyclerView.Adapter<ChartAreaItemAdap
      * This inner class manages the view for a single chart area,
      * handling the binding of data to the view elements.
      */
-    public static class ChartAreaItemViewHolder extends RecyclerView.ViewHolder {
+    static class ChartAreaItemViewHolder extends RecyclerView.ViewHolder {
         final ChartAreaItemBinding binding;
 
         /**

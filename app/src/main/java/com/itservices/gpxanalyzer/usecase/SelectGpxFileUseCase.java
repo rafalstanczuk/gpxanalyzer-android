@@ -2,6 +2,8 @@ package com.itservices.gpxanalyzer.usecase;
 
 import android.content.Context;
 import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
 import android.util.Log;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -9,9 +11,12 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 
-import com.itservices.gpxanalyzer.utils.FileProviderUtils;
-import com.itservices.gpxanalyzer.utils.PermissionUtils;
+import com.itservices.gpxanalyzer.data.parser.gpxfileinfo.GpxFileInfo;
+import com.itservices.gpxanalyzer.data.parser.gpxfileinfo.GpxFileInfoParser;
 import com.itservices.gpxanalyzer.utils.common.ConcurrentUtil;
+import com.itservices.gpxanalyzer.utils.files.FileProviderUtils;
+import com.itservices.gpxanalyzer.utils.files.FileSearcherUtil;
+import com.itservices.gpxanalyzer.utils.files.PermissionUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -34,27 +39,29 @@ import io.reactivex.subjects.PublishSubject;
  * - Opening the system file picker
  * - Copying selected files to the app's storage
  * - Tracking available GPX files
- * 
+ * <p>
  * The class acts as a central point for managing GPX file selection and access.
  * It is implemented as a singleton to maintain consistent file selection state
  * across the application.
  */
 @Singleton
 public class SelectGpxFileUseCase {
-    public static final String GPX_FILE_EXTENSION = ".gpx";
-    private File selectedFile = null;
+    private static final String TAG = SelectGpxFileUseCase.class.getSimpleName();
+
+    private static final String GPX_FILE_EXTENSION = ".gpx";
+    private static final String[] MEDIA_STORE_SELECTION_ARGS = new String[]{"application/gpx+xml", "text/xml", "%.gpx"};
     private final PublishSubject<Boolean> isGpxFileFound = PublishSubject.create();
     private final PublishSubject<File> gpxFileFound = PublishSubject.create();
-
     private final PublishSubject<Boolean> permissionsGranted = PublishSubject.create();
-    private List<File> fileFoundList = new ArrayList<>();
-
-    private final PublishSubject<List<File>> gpxFileFoundList = PublishSubject.create();
 
     ActivityResultLauncher<String[]> filePickerLauncher;
     Disposable filePickerLauncherDisposable;
-
     ActivityResultLauncher<String[]> permissionLauncher;
+    @Inject
+    FileSearcherUtil fileSearcherUtil;
+    private File selectedFile = null;
+    private List<File> fileFoundList = new ArrayList<>();
+    private List<GpxFileInfo> gpxFileInfoList;
 
     /**
      * Creates a new SelectGpxFileUseCase.
@@ -66,7 +73,7 @@ public class SelectGpxFileUseCase {
 
     /**
      * Returns an Observable that emits a boolean indicating whether a GPX file has been found.
-     * 
+     *
      * @return Observable emitting true when a GPX file is found, false otherwise
      */
     public Observable<Boolean> getIsGpxFileFound() {
@@ -75,34 +82,34 @@ public class SelectGpxFileUseCase {
 
     /**
      * Returns an Observable that emits the permission grant status.
-     * 
+     *
      * @return Observable emitting true when permissions are granted, false otherwise
      */
     public Observable<Boolean> getPermissionsGranted() {
         return permissionsGranted;
     }
 
-    /**
-     * Returns an Observable that emits the list of found GPX files whenever it changes.
-     * 
-     * @return Observable emitting the current list of GPX files
-     */
-    public Observable<List<File>> getGpxFileFoundList() {
-        return gpxFileFoundList;
+    public List<GpxFileInfo> getGpxFileInfoList() {
+        return gpxFileInfoList;
     }
 
-    /**
-     * Sets the currently selected GPX file.
-     * 
-     * @param file The GPX file to set as selected
-     */
-    public void setSelectedFile(File file) {
-        selectedFile = file;
+    public Single<List<GpxFileInfo>> searchAndParseGpxFilesRecursively(Context context) {
+        return fileSearcherUtil.searchAndParseFilesWithExtensionRecursively(
+                        context, GpxFileInfoParser::parse,
+                        GPX_FILE_EXTENSION, MEDIA_STORE_SELECTION_ARGS
+                )
+                .map(newParsedFileList -> {
+                    List<GpxFileInfo> newGpxFileList = new ArrayList<>();
+                    newParsedFileList.forEach(parsedFile -> newGpxFileList.add((GpxFileInfo) parsedFile));
+                    gpxFileInfoList = newGpxFileList;
+                    return newGpxFileList;
+                })
+                .subscribeOn(Schedulers.io());
     }
 
     /**
      * Gets the currently selected GPX file.
-     * 
+     *
      * @return The currently selected file, or null if none is selected
      */
     @Nullable
@@ -111,8 +118,17 @@ public class SelectGpxFileUseCase {
     }
 
     /**
+     * Sets the currently selected GPX file.
+     *
+     * @param file The GPX file to set as selected
+     */
+    public void setSelectedFile(File file) {
+        selectedFile = file;
+    }
+
+    /**
      * Gets the list of all GPX files found in the app's storage.
-     * 
+     *
      * @return List of GPX files
      */
     public List<File> getFileFoundList() {
@@ -121,7 +137,7 @@ public class SelectGpxFileUseCase {
 
     /**
      * Loads all GPX files from the app's local storage.
-     * 
+     *
      * @param context The context used to access file storage
      * @return Single that emits the list of found GPX files
      */
@@ -136,9 +152,9 @@ public class SelectGpxFileUseCase {
      * Adds a file to the app's storage from a content URI.
      * This method copies the file from the URI to the app's private storage,
      * and adds it to the list of available GPX files.
-     * 
+     *
      * @param context The context used to access file storage
-     * @param uri The URI of the file to add
+     * @param uri     The URI of the file to add
      * @return Single that emits the added file, or null if the file could not be added
      */
     public Single<File> addFile(Context context, Uri uri) {
@@ -147,7 +163,6 @@ public class SelectGpxFileUseCase {
             if (file != null) {
                 if (fileFoundList != null && !fileFoundList.contains(file)) {
                     fileFoundList.add(file);
-                    gpxFileFoundList.onNext(fileFoundList);
                 }
             }
             return file;
@@ -157,32 +172,31 @@ public class SelectGpxFileUseCase {
     /**
      * Registers activity result launchers for file picker and permissions with a FragmentActivity.
      * This method sets up launchers for handling file selection and permission requests.
-     * 
+     *
      * @param fragmentActivity The activity to register the launchers with
      */
     public void registerLauncherOn(FragmentActivity fragmentActivity) {
-        permissionLauncher =
-                fragmentActivity.registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
-                    boolean allGranted = result.values().stream().allMatch(granted -> granted);
+        permissionLauncher = fragmentActivity.registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
+            boolean allGranted = result.values().stream().allMatch(granted -> granted);
 
-                    permissionsGranted.onNext(allGranted);
-                });
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()) {
+                // For Android 11+, we need to request MANAGE_EXTERNAL_STORAGE permission
+                PermissionUtils.requestManageExternalStoragePermission(fragmentActivity);
+            }
+
+            permissionsGranted.onNext(allGranted);
+        });
 
         filePickerLauncher = fragmentActivity.registerForActivityResult(new ActivityResultContracts.OpenDocument(), uri -> {
             if (uri != null) {
                 ConcurrentUtil.tryToDispose(filePickerLauncherDisposable);
 
-                filePickerLauncherDisposable = addFile(fragmentActivity, uri)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(Schedulers.io())
-                        .subscribe(file -> {
-
-                            isGpxFileFound.onNext(file != null);
-
-                            if (file != null) {
-                                gpxFileFound.onNext(file);
-                            }
-                        });
+                filePickerLauncherDisposable = addFile(fragmentActivity, uri).subscribeOn(Schedulers.io()).observeOn(Schedulers.io()).subscribe(file -> {
+                    isGpxFileFound.onNext(file != null);
+                    if (file != null) {
+                        gpxFileFound.onNext(file);
+                    }
+                });
             } else {
                 Log.d("FileSelector", "No file selected");
             }
@@ -191,35 +205,38 @@ public class SelectGpxFileUseCase {
 
     /**
      * Checks for necessary file access permissions and requests them if not granted.
-     * 
+     *
      * @param requireActivity The activity to request permissions from
      * @return Observable that emits true when permissions are granted, false otherwise
      */
     public Observable<Boolean> checkAndRequestPermissions(FragmentActivity requireActivity) {
-        // Check and request storage permissions if needed
         if (PermissionUtils.hasFileAccessPermissions(requireActivity)) {
             return Observable.just(true);
         } else {
             PermissionUtils.requestFileAccessPermissions(permissionLauncher);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()) {
+                PermissionUtils.requestManageExternalStoragePermission(requireActivity);
+            }
+            return permissionsGranted;
         }
-
-        return permissionsGranted;
     }
 
     /**
      * Opens the system file picker for selecting a GPX file.
-     * 
+     *
      * @return true if the file picker was launched successfully, false otherwise
      */
     public boolean openFilePicker() {
         if (filePickerLauncher != null) {
-            String[] mimeTypes = new String[]{
-                    "*/*"
-            };
-            // Launch the file picker with MIME type filters
+            String[] mimeTypes = new String[]{"application/gpx+xml", "text/xml"};
             filePickerLauncher.launch(mimeTypes);
+            return true;
         }
+        return false;
+    }
 
-        return filePickerLauncher != null;
+    public Observable<Integer> getSearchProgress() {
+        return fileSearcherUtil.getSearchProgress();
     }
 }
+
