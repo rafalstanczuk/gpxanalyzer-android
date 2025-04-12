@@ -110,11 +110,12 @@ class ChartProvider {
                             components.init(rawDataProcessed.dataEntityWrapperAtomic().get());
                             return components.getPaletteColorDeterminer();
                         })
+                        .subscribeOn(Schedulers.computation())
+                        .observeOn(Schedulers.computation())
                         .flatMap(palette -> chartProcessedDataProvider
                                 .provide(rawDataProcessed, chartComponents.settings, palette))
-                        .subscribeOn(Schedulers.computation())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .flatMap(lineData -> updateChart(lineData))
+                        .flatMap(this::updateChart)
                         .observeOn(Schedulers.io());
     }
 
@@ -134,9 +135,12 @@ class ChartProvider {
         return Single.just(chartProcessedDataProvider.provide())
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.computation())
-                .doOnEvent((chartProcessedData, throwable) -> chartComponents.settings.updateSettingsFor(chartProcessedData.lineData().get()))
+                .map(chartProcessedData -> {
+                    chartComponents.settings.updateSettingsFor(chartProcessedData.lineData().get());
+                    return chartProcessedData;
+                })
                 .observeOn(AndroidSchedulers.mainThread())
-                .flatMap(chartProcessedData -> updateChart(chartProcessedData));
+                .flatMap(this::updateChart);
     }
 
     /**
