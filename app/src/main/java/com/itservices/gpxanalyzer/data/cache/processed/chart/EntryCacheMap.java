@@ -2,16 +2,11 @@ package com.itservices.gpxanalyzer.data.cache.processed.chart;
 
 import android.util.Log;
 
-import com.github.mikephil.charting.data.LineDataSet;
-import com.itservices.gpxanalyzer.chart.entry.BaseEntry;
+import com.itservices.gpxanalyzer.ui.components.chart.entry.BaseEntry;
 import com.itservices.gpxanalyzer.data.raw.DataEntityWrapper;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 

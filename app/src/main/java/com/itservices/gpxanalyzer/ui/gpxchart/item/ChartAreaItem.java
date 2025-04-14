@@ -4,8 +4,8 @@ import android.util.Log;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.itservices.gpxanalyzer.chart.ChartController;
-import com.itservices.gpxanalyzer.chart.RequestStatus;
+import com.itservices.gpxanalyzer.ui.components.chart.ChartController;
+import com.itservices.gpxanalyzer.events.RequestStatus;
 import com.itservices.gpxanalyzer.data.cache.processed.chart.ChartSlot;
 import com.itservices.gpxanalyzer.data.cache.processed.rawdata.RawDataProcessed;
 import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.GpxViewMode;

@@ -10,6 +10,9 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.itservices.gpxanalyzer.data.parser.gpxfileinfo.GpxFileInfo;
+import com.itservices.gpxanalyzer.events.EventProgress;
+import com.itservices.gpxanalyzer.events.GlobalEventWrapper;
+import com.itservices.gpxanalyzer.usecase.SearchFileUseCase;
 import com.itservices.gpxanalyzer.usecase.SelectGpxFileUseCase;
 import com.itservices.gpxanalyzer.utils.common.ConcurrentUtil;
 
@@ -27,12 +30,16 @@ import io.reactivex.schedulers.Schedulers;
 @HiltViewModel
 public class FileSelectorViewModel extends ViewModel {
 
-    private final MutableLiveData<Boolean> requestPermissionsLiveData = new MutableLiveData<>();
-    private final MutableLiveData<Integer> searchProgressLiveData = new MutableLiveData<>(0);
-    private final MutableLiveData<List<GpxFileInfo>> filesInfoLiveData = new MutableLiveData<>();
-    private final CompositeDisposable disposables = new CompositeDisposable();
     @Inject
     SelectGpxFileUseCase selectGpxFileUseCase;
+    @Inject
+    GlobalEventWrapper globalEventWrapper;
+
+    private final MutableLiveData<Boolean> requestPermissionsLiveData = new MutableLiveData<>();
+    private final MutableLiveData<Integer> searchFilesProgressLiveData = new MutableLiveData<>(0);
+    private final MutableLiveData<List<GpxFileInfo>> filesInfoLiveData = new MutableLiveData<>();
+    private final CompositeDisposable disposables = new CompositeDisposable();
+
     private Disposable disposableRequestPermissions;
     private Disposable disposableCheckAndRequestPermissions;
     private Disposable disposableSearchProgress;
@@ -49,21 +56,20 @@ public class FileSelectorViewModel extends ViewModel {
         filesInfoLiveData.setValue(selectGpxFileUseCase.getGpxFileInfoList());
     }
 
-    public LiveData<Integer> getSearchProgress() {
-        return searchProgressLiveData;
+    public LiveData<Integer> getSearchFilesProgress() {
+        return searchFilesProgressLiveData;
     }
 
     public void searchGpxFilesRecursively(Context context) {
         Log.d(FileSelectorViewModel.class.getSimpleName(), "searchGpxFilesRecursively() called with: context = [" + context + "]");
 
         // Clear previous search progress
-        searchProgressLiveData.setValue(0);
+        searchFilesProgressLiveData.setValue(0);
 
         // Subscribe to search progress
-        disposableSearchProgress = selectGpxFileUseCase.getSearchProgress()
-                .subscribeOn(Schedulers.io())
+        disposableSearchProgress = globalEventWrapper.getEventProgressFrom(SearchFileUseCase.class)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(searchProgressLiveData::setValue);
+                .subscribe(this::accept);
 
         // Start the recursive search
         disposables.add(selectGpxFileUseCase.searchAndParseGpxFilesRecursively(context)
@@ -118,5 +124,9 @@ public class FileSelectorViewModel extends ViewModel {
         ConcurrentUtil.tryToDispose(disposableRequestPermissions);
         ConcurrentUtil.tryToDispose(disposableCheckAndRequestPermissions);
         ConcurrentUtil.tryToDispose(disposableSearchProgress);
+    }
+
+    private void accept(EventProgress event) {
+        searchFilesProgressLiveData.setValue(event.percentage());
     }
 }

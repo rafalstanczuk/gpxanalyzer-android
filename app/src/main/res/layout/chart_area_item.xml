@@ -40,7 +40,7 @@
                 android:layout_height="match_parent"
                 app:layout_constraintTop_toTopOf="parent">
 
-                <com.itservices.gpxanalyzer.chart.DataEntityLineChart
+                <com.itservices.gpxanalyzer.ui.components.chart.DataEntityLineChart
                     android:id="@+id/line_chart"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"

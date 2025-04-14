@@ -74,7 +74,7 @@
             app:layout_constraintEnd_toEndOf="@id/settings_speed_dial_fab_chart_settings" />
 
 
-        <com.itservices.gpxanalyzer.utils.ui.speeddial.SpeedDialFabView
+        <com.itservices.gpxanalyzer.ui.components.fab.SpeedDialFabView
             android:id="@+id/settings_speed_dial_fab_chart_settings"
             style="@style/Widget.App.FloatingActionButton.Mini.Circular"
             android:layout_width="wrap_content"

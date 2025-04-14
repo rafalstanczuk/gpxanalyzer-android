@@ -82,7 +82,7 @@ public class FileSelectorFragment extends DialogFragment {
         binding.btnSelectFile.setText(R.string.searching_files);
 
         // Observe search progress
-        viewModel.getSearchProgress().observe(getViewLifecycleOwner(), progress -> {
+        viewModel.getSearchFilesProgress().observe(getViewLifecycleOwner(), progress -> {
             binding.btnSelectFile.setText(getString(R.string.searching_files_progress, progress));
         });
 

@@ -41,7 +41,23 @@
         <item name="android:layout_height">wrap_content</item>
         <!-- Elevation -->
         <item name="android:elevation">6dp</item>
+
+        <item name="circularProgressIndicatorStyle">@style/Widget.App.LoadingDataFromFileCircularProgressIndicator</item>
+
     </style>
+
+    <style name="Widget.App.LoadingDataFromFileCircularProgressIndicator" parent="Widget.MaterialComponents.CircularProgressIndicator">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.App.CircularProgressIndicator</item>
+        <item name="trackThickness">10dp</item>
+        <item name="trackCornerRadius">10dp</item>
+        <item name="indicatorSize">50dp</item>
+        <item name="android:alpha">0.8</item>
+    </style>
+
+    <style name="ThemeOverlay.App.CircularProgressIndicator" parent="">
+        <item name="colorPrimary">@color/black</item>
+    </style>
+
 
     <style name="FullScreenDialog" parent="ThemeOverlay.MaterialComponents.Dialog">
         <item name="android:windowNoTitle">true</item>
@@ -49,9 +65,9 @@
         <item name="android:windowIsFloating">false</item>
         <!--<item name="android:windowBackground">?attr/colorPrimary</item>-->
 
-
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowMinWidthMajor">80%</item>
         <item name="android:windowMinWidthMinor">80%</item>
     </style>
+
 </resources>

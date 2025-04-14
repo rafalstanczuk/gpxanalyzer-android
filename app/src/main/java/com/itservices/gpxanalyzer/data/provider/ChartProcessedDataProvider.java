@@ -7,16 +7,17 @@ import android.util.Log;
 
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
-import com.itservices.gpxanalyzer.chart.settings.LineChartSettings;
+import com.itservices.gpxanalyzer.ui.components.chart.settings.LineChartSettings;
 import com.itservices.gpxanalyzer.data.cache.processed.chart.ChartSlot;
 import com.itservices.gpxanalyzer.data.cache.processed.chart.EntryCacheMap;
 import com.itservices.gpxanalyzer.data.cache.processed.chart.TrendBoundaryEntry;
 import com.itservices.gpxanalyzer.data.cache.processed.chart.TrendBoundaryEntryProvider;
-import com.itservices.gpxanalyzer.chart.palette.PaletteColorDeterminer;
+import com.itservices.gpxanalyzer.ui.components.chart.palette.PaletteColorDeterminer;
 import com.itservices.gpxanalyzer.data.cache.processed.chart.ChartProcessedData;
 import com.itservices.gpxanalyzer.data.cache.processed.rawdata.RawDataProcessed;
 import com.itservices.gpxanalyzer.data.cumulative.TrendStatistics;
 import com.itservices.gpxanalyzer.data.cache.processed.chart.ChartProcessedDataCachedProvider;
+import com.itservices.gpxanalyzer.data.mapper.LineDataSetMapper;
 import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.GpxViewMode;
 
 import java.util.List;
@@ -38,9 +39,6 @@ public class ChartProcessedDataProvider {
     
     @Inject
     ChartProcessedDataCachedProvider chartProcessedDataCachedProvider;
-
-    @Inject
-    RawDataProcessedProvider rawDataProcessedProvider;
 
     @Inject
     public ChartProcessedDataProvider() {

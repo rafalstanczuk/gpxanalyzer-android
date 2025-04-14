@@ -1,7 +1,6 @@
 package com.itservices.gpxanalyzer.data.cache.rawdata;
 
 
-import com.itservices.gpxanalyzer.data.extrema.detector.PrimitiveDataEntity;
 import com.itservices.gpxanalyzer.data.raw.GeoPointEntity;
 import com.itservices.gpxanalyzer.data.statistics.GeoPointStatistics;
 

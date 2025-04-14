@@ -8,7 +8,7 @@ import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.transform.*;
 import java.util.Vector;
 
-public class WaveletLagDataSmoother {
+class WaveletLagDataSmoother {
 
     /**
      * Computes an adaptive window function that highlights amplitude changes

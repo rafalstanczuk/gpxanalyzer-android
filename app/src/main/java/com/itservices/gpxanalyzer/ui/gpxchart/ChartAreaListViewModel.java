@@ -3,14 +3,18 @@ package com.itservices.gpxanalyzer.ui.gpxchart;
 import static java.util.Objects.requireNonNull;
 
 import android.content.res.Configuration;
+import android.opengl.Visibility;
 import android.util.Log;
+import android.view.View;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.itservices.gpxanalyzer.chart.RequestStatus;
-import com.itservices.gpxanalyzer.event.MapChartGlobalEventWrapper;
+import com.itservices.gpxanalyzer.data.provider.file.GpxFileDataEntityProvider;
+import com.itservices.gpxanalyzer.events.EventProgress;
+import com.itservices.gpxanalyzer.events.RequestStatus;
+import com.itservices.gpxanalyzer.events.GlobalEventWrapper;
 import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItem;
 import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.GpxViewMode;
 import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.ViewModeSeverity;
@@ -35,7 +39,7 @@ public class ChartAreaListViewModel extends ViewModel {
     @Inject
     MultipleSyncedGpxChartUseCase multipleSyncedGpxChartUseCase;
     @Inject
-    MapChartGlobalEventWrapper eventWrapper;
+    GlobalEventWrapper eventWrapper;
 
     public static final float DEFAULT_PERCENT_VALUE = 0.5f;
     public final MutableLiveData<Float> chartPercentageHeightLiveData = new MutableLiveData<>(DEFAULT_PERCENT_VALUE);
@@ -44,13 +48,14 @@ public class ChartAreaListViewModel extends ViewModel {
     public final MutableLiveData<Float> mapViewPercentageHeightLiveData = new MutableLiveData<>(DEFAULT_PERCENT_VALUE);
     private final MutableLiveData<Boolean> mapViewEnabledLiveData = new MutableLiveData<>(true);
     private final MutableLiveData<Boolean> buttonsEnabledLiveData = new MutableLiveData<>(true);
-    private final MutableLiveData<Integer> percentageProcessingLiveData = new MutableLiveData<>(0);
+    private final MutableLiveData<Integer> percentageLoadingFileLiveData = new MutableLiveData<>(0);
+    private final MutableLiveData<Integer> percentageLoadingFileIndicatorVisibilityLiveData = new MutableLiveData<>(0);
     private final MutableLiveData<List<ChartAreaItem>> chartAreaItemListLiveData = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<ViewModeSeverity> viewModeSeverityLiveData = new MutableLiveData<>(ViewModeSeverity.TWO_CHARTS);
     private final PublishSubject<List<ChartAreaItem>> reloadItems = PublishSubject.create();
     private Disposable observeReloadEventDisposable;
     private Disposable observeRequestStatusDisposable;
-    private Disposable observeProgressDisposable;
+    private Disposable observeLoadingFileProgressDisposable;
     private List<ChartAreaItem> immutableList;
 
     @Inject
@@ -67,7 +72,7 @@ public class ChartAreaListViewModel extends ViewModel {
 
     public void bind() {
 
-        observeProgressOnLiveData(multipleSyncedGpxChartUseCase.getPercentageProgress());
+        observeLoadingFileProgressOnLiveData(eventWrapper.getEventProgressFrom(GpxFileDataEntityProvider.class));
         observeRequestStatusOnLiveData(eventWrapper.getRequestStatus());
 
         observeReloadItemsRequestOn(reloadItems);
@@ -165,8 +170,12 @@ public class ChartAreaListViewModel extends ViewModel {
         return viewModeSeverityLiveData;
     }
 
-    public LiveData<Integer> getPercentageProcessingLiveData() {
-        return percentageProcessingLiveData;
+    public LiveData<Integer> getPercentageLoadingFileLiveData() {
+        return percentageLoadingFileLiveData;
+    }
+
+    public LiveData<Integer> getPercentageLoadingVisibilityLiveData() {
+        return percentageLoadingFileIndicatorVisibilityLiveData;
     }
 
     private void observeReloadItemsRequestOn(PublishSubject<List<ChartAreaItem>> listPublishSubject) {
@@ -190,8 +199,12 @@ public class ChartAreaListViewModel extends ViewModel {
                 .subscribe(
                         request -> {
                             Log.d("requestStatus", "request = [" + request.name() + "]");
-
-                            buttonsEnabledLiveData.postValue(getButtonEnabled(request));
+                            boolean uiButtonsEnabled = getButtonEnabled(request);
+                            buttonsEnabledLiveData.postValue(uiButtonsEnabled);
+                            percentageLoadingFileIndicatorVisibilityLiveData
+                                    .postValue(
+                                            uiButtonsEnabled ? View.GONE : View.VISIBLE
+                                    );
                         },
                         onError -> Log.e("requestStatus", onError.toString())
                 );
@@ -207,14 +220,14 @@ public class ChartAreaListViewModel extends ViewModel {
         };
     }
 
-    private void observeProgressOnLiveData(Observable<Integer> integerObservable) {
-        ConcurrentUtil.tryToDispose(observeProgressDisposable);
-        observeProgressDisposable = integerObservable
-                .subscribeOn(Schedulers.io())
+    private void observeLoadingFileProgressOnLiveData(Observable<EventProgress> eventProgressObservable) {
+        ConcurrentUtil.tryToDispose(observeLoadingFileProgressDisposable);
+        observeLoadingFileProgressDisposable = eventProgressObservable
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnNext(percent -> {
-                    if (percent != null) {
-                        percentageProcessingLiveData.setValue(percent);
+                .doOnNext(eventProgress -> {
+                    Log.d("LoadingFileProgress", "observeLoadingFileProgressOnLiveData() called with: eventProgress = [" + eventProgress + "]");
+                    if (eventProgress != null) {
+                        percentageLoadingFileLiveData.setValue(eventProgress.percentage());
                     }
                 })
                 .doOnError(Throwable::printStackTrace)
@@ -255,7 +268,7 @@ public class ChartAreaListViewModel extends ViewModel {
 
         ConcurrentUtil.tryToDispose(observeReloadEventDisposable);
         ConcurrentUtil.tryToDispose(observeRequestStatusDisposable);
-        ConcurrentUtil.tryToDispose(observeProgressDisposable);
+        ConcurrentUtil.tryToDispose(observeLoadingFileProgressDisposable);
     }
 
     public void setDefaultChartAreaItemList(List<ChartAreaItem> immutableList) {

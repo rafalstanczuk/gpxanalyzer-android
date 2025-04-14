@@ -5,8 +5,8 @@ import android.view.View;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.itservices.gpxanalyzer.databinding.ChartAreaItemPropertiesControlLayoutBinding;
-import com.itservices.gpxanalyzer.utils.ui.speeddial.SpeedDialFabView;
-import com.itservices.gpxanalyzer.utils.ui.speeddial.UnfoldDirection;
+import com.itservices.gpxanalyzer.ui.components.fab.SpeedDialFabView;
+import com.itservices.gpxanalyzer.ui.components.fab.UnfoldDirection;
 
 import java.util.Arrays;
 import java.util.List;

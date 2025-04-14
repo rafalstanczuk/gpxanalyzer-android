@@ -9,7 +9,7 @@ import com.itservices.gpxanalyzer.data.cache.processed.rawdata.RawDataProcessed;
 import com.itservices.gpxanalyzer.data.cache.processed.rawdata.RawDataProcessedCachedProvider;
 import com.itservices.gpxanalyzer.data.cumulative.TrendBoundaryCumulativeMapper;
 import com.itservices.gpxanalyzer.data.cumulative.TrendBoundaryDataEntity;
-import com.itservices.gpxanalyzer.data.extrema.ExtremaSegmentListProvider;
+import com.itservices.gpxanalyzer.data.extrema.ExtremaSegmentListMapper;
 import com.itservices.gpxanalyzer.data.raw.DataEntityWrapper;
 import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.GpxViewMode;
 
@@ -52,7 +52,7 @@ public class RawDataProcessedProvider {
     }
 
     private Single<RawDataProcessed> provideInternal(DataEntityWrapper dataEntityWrapper) {
-        return ExtremaSegmentListProvider.provide(dataEntityWrapper)
+        return ExtremaSegmentListMapper.mapFrom(dataEntityWrapper)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(Schedulers.computation())
                 .map(segmentList -> TrendBoundaryCumulativeMapper.mapFrom(dataEntityWrapper, segmentList))

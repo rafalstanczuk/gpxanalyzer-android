@@ -5,7 +5,7 @@ import static com.itservices.gpxanalyzer.data.raw.DataEntityWrapper.isNotEqualBy
 import android.util.Log;
 
 import com.github.mikephil.charting.data.LineData;
-import com.itservices.gpxanalyzer.chart.settings.LineChartSettings;
+import com.itservices.gpxanalyzer.ui.components.chart.settings.LineChartSettings;
 import com.itservices.gpxanalyzer.data.cache.processed.rawdata.RawDataProcessed;
 import com.itservices.gpxanalyzer.data.raw.DataEntityWrapper;
 import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.GpxViewMode;

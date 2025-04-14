@@ -60,7 +60,7 @@
             app:layout_constraintEnd_toEndOf="@id/settings_speed_dial_fab_zoom"
             app:srcCompat="@drawable/ic_recenter_selector" />
 
-        <com.itservices.gpxanalyzer.utils.ui.speeddial.SpeedDialFabView
+        <com.itservices.gpxanalyzer.ui.components.fab.SpeedDialFabView
             android:id="@+id/settings_speed_dial_fab_zoom"
             style="@style/Widget.App.FloatingActionButton.Mini.Circular"
             android:layout_width="wrap_content"

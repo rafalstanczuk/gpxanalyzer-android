@@ -1,14 +1,12 @@
 package com.itservices.gpxanalyzer.ui.gpxchart.item;
 
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.View;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.databinding.ChartAreaItemScaleControlLayoutBinding;
-import com.itservices.gpxanalyzer.utils.ui.speeddial.SpeedDialFabView;
-import com.itservices.gpxanalyzer.utils.ui.speeddial.UnfoldDirection;
+import com.itservices.gpxanalyzer.ui.components.fab.SpeedDialFabView;
+import com.itservices.gpxanalyzer.ui.components.fab.UnfoldDirection;
 
 import java.util.Arrays;
 import java.util.List;

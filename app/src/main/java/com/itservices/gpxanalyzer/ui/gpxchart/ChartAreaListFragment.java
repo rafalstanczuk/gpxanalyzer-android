@@ -86,7 +86,7 @@ public class ChartAreaListFragment extends Fragment {
 
         topBarLayoutBinding.selectFileButton.setOnClickListener(view -> {
             FileSelectorFragment fileSelectorFragment = new FileSelectorFragment();
-            fileSelectorFragment.setStyle(DialogFragment.STYLE_NORMAL, R.style.FullScreenDialog);
+            fileSelectorFragment.setStyle(DialogFragment.STYLE_NO_FRAME, R.style.FullScreenDialog);
             fileSelectorFragment.show(getChildFragmentManager(), FileSelectorFragment.class.getSimpleName());
         });
 

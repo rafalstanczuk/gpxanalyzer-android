@@ -1,10 +1,10 @@
 package com.itservices.gpxanalyzer.data.cache.processed.chart;
 
 import com.github.mikephil.charting.data.Entry;
-import com.itservices.gpxanalyzer.chart.entry.CurveEntry;
+import com.itservices.gpxanalyzer.ui.components.chart.entry.CurveEntry;
 import com.itservices.gpxanalyzer.data.cache.processed.rawdata.RawDataProcessed;
 import com.itservices.gpxanalyzer.data.cumulative.TrendBoundaryDataEntity;
-import com.itservices.gpxanalyzer.chart.palette.PaletteColorDeterminer;
+import com.itservices.gpxanalyzer.ui.components.chart.palette.PaletteColorDeterminer;
 import com.itservices.gpxanalyzer.data.raw.DataEntity;
 import com.itservices.gpxanalyzer.data.raw.DataEntityWrapper;
 

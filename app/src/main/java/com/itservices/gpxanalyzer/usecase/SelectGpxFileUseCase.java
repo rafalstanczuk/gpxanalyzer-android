@@ -15,7 +15,6 @@ import com.itservices.gpxanalyzer.data.parser.gpxfileinfo.GpxFileInfo;
 import com.itservices.gpxanalyzer.data.parser.gpxfileinfo.GpxFileInfoParser;
 import com.itservices.gpxanalyzer.utils.common.ConcurrentUtil;
 import com.itservices.gpxanalyzer.utils.files.FileProviderUtils;
-import com.itservices.gpxanalyzer.utils.files.FileSearcherUtil;
 import com.itservices.gpxanalyzer.utils.files.PermissionUtils;
 
 import java.io.File;
@@ -50,15 +49,15 @@ public class SelectGpxFileUseCase {
 
     private static final String GPX_FILE_EXTENSION = ".gpx";
     private static final String[] MEDIA_STORE_SELECTION_ARGS = new String[]{"application/gpx+xml", "text/xml", "%.gpx"};
-    private final PublishSubject<Boolean> isGpxFileFound = PublishSubject.create();
-    private final PublishSubject<File> gpxFileFound = PublishSubject.create();
+    private final PublishSubject<Boolean> isGpxFilePickedAndFound = PublishSubject.create();
+    private final PublishSubject<File> gpxFilePickedAndFound = PublishSubject.create();
     private final PublishSubject<Boolean> permissionsGranted = PublishSubject.create();
 
     ActivityResultLauncher<String[]> filePickerLauncher;
     Disposable filePickerLauncherDisposable;
     ActivityResultLauncher<String[]> permissionLauncher;
     @Inject
-    FileSearcherUtil fileSearcherUtil;
+    SearchFileUseCase searchFileUseCase;
     private File selectedFile = null;
     private List<File> fileFoundList = new ArrayList<>();
     private List<GpxFileInfo> gpxFileInfoList;
@@ -76,8 +75,8 @@ public class SelectGpxFileUseCase {
      *
      * @return Observable emitting true when a GPX file is found, false otherwise
      */
-    public Observable<Boolean> getIsGpxFileFound() {
-        return isGpxFileFound;
+    public Observable<Boolean> getIsGpxFilePickedAndFound() {
+        return isGpxFilePickedAndFound;
     }
 
     /**
@@ -94,7 +93,7 @@ public class SelectGpxFileUseCase {
     }
 
     public Single<List<GpxFileInfo>> searchAndParseGpxFilesRecursively(Context context) {
-        return fileSearcherUtil.searchAndParseFilesWithExtensionRecursively(
+        return searchFileUseCase.searchAndParseFilesRecursively(
                         context, GpxFileInfoParser::parse,
                         GPX_FILE_EXTENSION, MEDIA_STORE_SELECTION_ARGS
                 )
@@ -191,12 +190,14 @@ public class SelectGpxFileUseCase {
             if (uri != null) {
                 ConcurrentUtil.tryToDispose(filePickerLauncherDisposable);
 
-                filePickerLauncherDisposable = addFile(fragmentActivity, uri).subscribeOn(Schedulers.io()).observeOn(Schedulers.io()).subscribe(file -> {
-                    isGpxFileFound.onNext(file != null);
-                    if (file != null) {
-                        gpxFileFound.onNext(file);
-                    }
-                });
+                filePickerLauncherDisposable = addFile(fragmentActivity, uri)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(Schedulers.io()).subscribe(file -> {
+                            isGpxFilePickedAndFound.onNext(file != null);
+                            if (file != null) {
+                                gpxFilePickedAndFound.onNext(file);
+                            }
+                        });
             } else {
                 Log.d("FileSelector", "No file selected");
             }
@@ -233,10 +234,6 @@ public class SelectGpxFileUseCase {
             return true;
         }
         return false;
-    }
-
-    public Observable<Integer> getSearchProgress() {
-        return fileSearcherUtil.getSearchProgress();
     }
 }
 

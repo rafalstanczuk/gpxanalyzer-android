@@ -2,9 +2,8 @@ package com.itservices.gpxanalyzer.usecase;
 
 import android.util.Log;
 
-import com.itservices.gpxanalyzer.data.provider.DataEntityCachedProvider;
+import com.itservices.gpxanalyzer.data.provider.GpxDataEntityCachedProvider;
 import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItem;
-import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartInitializer;
 import com.itservices.gpxanalyzer.utils.common.ConcurrentUtil;
 
 import java.util.List;
@@ -12,7 +11,6 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -22,15 +20,15 @@ public class MultipleSyncedGpxChartUseCase {
     private static final String TAG = MultipleSyncedGpxChartUseCase.class.getSimpleName();
 
     @Inject
-    DataEntityCachedProvider dataEntityCachedProvider;
+    GpxDataEntityCachedProvider dataEntityCachedProvider;
 
-    private final ChartDataLoader chartDataLoader;
-    private final ChartInitializer chartInitializer;
+    private final LoadChartDataUseCase chartDataLoader;
+    private final ChartInitializerUseCase chartInitializer;
 
     private Disposable loadDataDisposable;
 
     @Inject
-    public MultipleSyncedGpxChartUseCase(ChartDataLoader chartDataLoader, ChartInitializer chartInitializer) {
+    public MultipleSyncedGpxChartUseCase(LoadChartDataUseCase chartDataLoader, ChartInitializerUseCase chartInitializer) {
         this.chartDataLoader = chartDataLoader;
         this.chartInitializer = chartInitializer;
     }
@@ -59,10 +57,6 @@ public class MultipleSyncedGpxChartUseCase {
     public void disposeAll() {
         Log.d(TAG, "Disposing all subscriptions");
         ConcurrentUtil.tryToDispose(loadDataDisposable);
-    }
-
-    public Observable<Integer> getPercentageProgress() {
-        return dataEntityCachedProvider.getPercentageProgress();
     }
 }
 
