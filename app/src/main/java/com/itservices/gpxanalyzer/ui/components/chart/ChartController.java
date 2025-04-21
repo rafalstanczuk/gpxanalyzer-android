@@ -30,41 +30,53 @@ import javax.inject.Inject;
 
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
+/**
+ * Controller responsible for managing the interactions, data flow, and overall behavior
+ * of a {@link DataEntityLineChart} instance.
+ * It acts as the primary interface for interacting with a chart component.
+ *
+ * Key responsibilities:
+ * - Binding to a specific {@link DataEntityLineChart} instance.
+ * - Providing access to the underlying {@link ChartProvider} for data and settings.
+ * - Handling user gestures on the chart (tap, scale, translate) via {@link OnChartGestureListener} and {@link OnChartValueSelectedListener}.
+ * - Managing value selection and highlighting on the chart.
+ * - Synchronizing chart state (selection, visible range) with other components via {@link GlobalEventWrapper}.
+ * - Toggling chart features like drawing icons or ascent/descent segments.
+ * - Initiating chart animations (zoom, fit screen).
+ * - Managing RxJava subscriptions for event observation.
+ */
 public class ChartController implements OnChartValueSelectedListener, OnChartGestureListener, Animator.AnimatorListener {
     private static final String TAG = ChartController.class.getSimpleName();
 
+    /** Global event bus for publishing/subscribing to application-wide events (e.g., selection sync). */
     @Inject
     GlobalEventWrapper mapChartGlobalEventWrapper;
     /**
-     * The chart provider that manages the actual chart instances and data.
-     * Injected by Dagger to promote separation of concerns and testability.
+     * The chart provider that manages the actual chart instance and its data.
+     * Injected by Hilt.
      */
     @Inject
     ChartProvider chartProvider;
-    private Disposable disposableSelectionObserveGlobal;
+    /** Manages RxJava subscriptions for this controller. */
+    private CompositeDisposable compositeDisposable;
 
     /**
      * Creates a new ChartController instance.
-     * <p>
-     * Uses Dagger for dependency injection of required components.
-     * This constructor is intended to be called by the dependency injection framework,
-     * not directly by application code.
+     * Constructor used by Dagger/Hilt for dependency injection.
      */
     @Inject
     public ChartController() {
     }
 
     /**
-     * Binds this controller to a chart view.
-     * <p>
-     * Sets up listeners for user interactions with the chart and registers the chart with the provider.
-     * This method should be called after the chart view has been created and before it is displayed
-     * to the user. It establishes the connection between the controller and the actual chart UI component.
+     * Binds this controller to a specific {@link DataEntityLineChart} view.
+     * Sets up chart listeners (value selection, gestures) and registers the chart with the {@link ChartProvider}.
+     * Initializes RxJava subscriptions for observing external events (e.g., selections from other charts).
      *
-     * @param chartBindings The chart view to bind to this controller
+     * @param chartBindings The {@link DataEntityLineChart} view to bind to this controller.
      */
     @UiThread
     public void bindChart(@NonNull DataEntityLineChart chartBindings) {
@@ -75,29 +87,27 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
 
         chartProvider.registerBinding(chartBindings);
 
+        ConcurrentUtil.tryToDispose(compositeDisposable);
+        compositeDisposable = new CompositeDisposable();
+
         setupSelectionObserve();
     }
 
     /**
-     * Initializes the chart with default settings.
-     * <p>
-     * This should be called before displaying the chart to ensure it has proper visual
-     * configuration. The initialization process sets up the chart's appearance, behavior,
-     * and empty data containers.
+     * Initializes the chart via the {@link ChartProvider}.
+     * Ensures the chart has a basic structure and default settings applied before data is loaded.
      *
-     * @return A Single that emits the status of the initialization operation
+     * @return A {@link Single} that emits the {@link RequestStatus} of the initialization operation.
      */
     public Single<RequestStatus> initChart() {
         return chartProvider.initChart();
     }
 
     /**
-     * Checks if drawing icons on the chart is enabled.
-     * <p>
-     * Icons can be drawn at data points to highlight specific features or properties
-     * of the GPX data being displayed.
+     * Checks if drawing value-dependent icons (e.g., colored circles) on the chart is enabled.
+     * Checks the state from the underlying chart data if available, otherwise falls back to settings.
      *
-     * @return true if icons are enabled, false otherwise
+     * @return {@code true} if icons are enabled, {@code false} otherwise.
      */
     @UiThread
     public boolean isDrawIconsEnabled() {
@@ -111,12 +121,10 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     }
 
     /**
-     * Sets whether to enable drawing icons on the chart.
-     * <p>
-     * This will update the chart to reflect the change immediately. Icons can provide
-     * visual indicators at specific data points on the chart.
+     * Enables or disables the drawing of value-dependent icons on the chart.
+     * Updates the setting in the {@link ChartProvider} and triggers a chart refresh.
      *
-     * @param isChecked true to enable icons, false to disable them
+     * @param isChecked {@code true} to enable icons, {@code false} to disable them.
      */
     @UiThread
     public void setDrawIconsEnabled(boolean isChecked) {
@@ -126,24 +134,19 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     }
 
     /**
-     * Checks if drawing ascent/descent segments on the chart is enabled.
-     * <p>
-     * When enabled, areas between the chart line and the axis are filled with color
-     * to highlight uphill (ascent) and downhill (descent) sections of the track.
+     * Checks if drawing filled ascent/descent segments below the chart line is enabled.
      *
-     * @return true if ascent/descent segments are enabled, false otherwise
+     * @return {@code true} if ascent/descent segments are enabled, {@code false} otherwise.
      */
     public boolean isDrawAscDescSegEnabled() {
         return chartProvider.getSettings().isDrawAscDescSegEnabled();
     }
 
     /**
-     * Sets whether to enable drawing ascent/descent segments on the chart.
-     * <p>
-     * This will update the chart to reflect the change immediately. These segments
-     * provide a visual indication of elevation changes throughout the track.
+     * Enables or disables the drawing of filled ascent/descent segments below the chart line.
+     * Updates the setting in the {@link ChartProvider} and triggers a chart refresh.
      *
-     * @param isChecked true to enable segments, false to disable them
+     * @param isChecked {@code true} to enable segments, {@code false} to disable them.
      */
     @UiThread
     public void setDrawAscDescSegEnabled(boolean isChecked) {
@@ -152,6 +155,13 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
         chartProvider.updateDataChart().subscribe();
     }
 
+    /**
+     * Initiates an animated zoom and centers the view on the currently highlighted entry.
+     *
+     * @param targetScaleX The target scale factor for the X-axis.
+     * @param targetScaleY The target scale factor for the Y-axis.
+     * @param duration     The animation duration in milliseconds.
+     */
     public void animateZoomAndCenterToHighlighted(final float targetScaleX, final float targetScaleY, long duration) {
         if (chartProvider.getChart() != null) {
             chartProvider.getChart().zoomAndCenterToHighlightedAnimated(targetScaleX, targetScaleY, duration, this);
@@ -159,12 +169,9 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     }
 
     /**
-     * Animates the chart to fit all data on screen.
-     * <p>
-     * This is useful after loading new data or when resetting the view to show
-     * the entire track at once. The animation provides a smooth transition.
+     * Initiates an animation to adjust the chart's viewport to fit all data.
      *
-     * @param duration The animation duration in milliseconds
+     * @param duration The animation duration in milliseconds.
      */
     public void animateFitScreen(long duration) {
         if (chartProvider.getChart() != null) {
@@ -173,59 +180,58 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     }
 
     /**
-     * Sets whether to draw X-axis labels on the chart.
-     * <p>
-     * X-axis labels typically show time or distance values along the horizontal axis.
-     * This setting can be useful when displaying multiple charts vertically stacked,
-     * where only the bottom chart might need X-axis labels.
+     * Sets whether the X-axis labels should be drawn.
+     * Updates the setting in the {@link ChartProvider}.
      *
-     * @param drawX true to show X-axis labels, false to hide them
+     * @param drawX {@code true} to show X-axis labels, {@code false} to hide them.
      */
     public void setDrawXLabels(boolean drawX) {
         chartProvider.getSettings().setDrawXLabels(drawX);
     }
 
     /**
-     * Updates the chart with new data.
-     * <p>
-     * This method should be called whenever new GPX data becomes available or
-     * when switching to a different data set. It triggers data processing and
-     * visualization updates on the chart.
+     * Updates the chart with new processed data via the {@link ChartProvider}.
      *
-     * @param rawDataProcessed The data wrapper containing GPX data to visualize
-     * @return A Single that emits the status of the update operation
+     * @param rawDataProcessed The new data to display.
+     * @return A {@link Single} that emits the {@link RequestStatus} of the update operation.
      */
     public Single<RequestStatus> updateChartData(RawDataProcessed rawDataProcessed) {
         return chartProvider.updateChartData(rawDataProcessed);
     }
 
     /**
-     * Programmatically selects a data point at the specified timestamp.
-     * <p>
-     * This will highlight the corresponding entry on the chart and center the
-     * chart view on that point. This is useful for synchronizing multiple charts
-     * or responding to external selection events.
+     * Programmatically selects a data point on the chart corresponding to the given timestamp.
+     * Highlights the entry and optionally centers the view on it.
      *
-     * @param selectedTimeMillis The timestamp (in milliseconds) to select
+     * @param selectedTimeMillis The timestamp (in milliseconds) of the entry to select.
      */
     public void select(long selectedTimeMillis) {
         manualSelectEntryOnSelectedTime(Objects.requireNonNull(chartProvider.getChart()), selectedTimeMillis, true, false);
     }
 
+    /**
+     * Sets up the RxJava observer to listen for {@link EventEntrySelection} events from the global event bus,
+     * allowing this chart to react to selections made on other charts.
+     */
     private void setupSelectionObserve() {
         Log.d(TAG, "setupSelectionObserve() called");
 
-        ConcurrentUtil.tryToDispose(disposableSelectionObserveGlobal);
-
-        disposableSelectionObserveGlobal =
+        compositeDisposable.add(
                 mapChartGlobalEventWrapper.getEventEntrySelection()
                         .subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
                         .doOnNext(this::handleEvent)
                         .doOnError(throwable -> Log.e(TAG, "Error in chart sync", throwable))
-                        .subscribe();
+                        .subscribe()
+        );
     }
 
+    /**
+     * Handles incoming {@link EventEntrySelection} events from other components.
+     * If the event is not from this chart, it selects the corresponding entry locally.
+     *
+     * @param event The selection event.
+     */
     private void handleEvent(EventEntrySelection event) {
         if (event == null) {
             return;
@@ -263,16 +269,13 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     }
 
     /**
-     * Selects an entry on the chart based on timestamp.
-     * <p>
-     * This method handles finding the appropriate entry, highlighting it,
-     * and optionally centering the view on the selection. It provides more
-     * control over the selection behavior than the public select() method.
+     * Manually selects an entry on the chart based on a timestamp.
+     * Finds the closest entry, highlights it, optionally centers the view, and optionally notifies listeners.
      *
-     * @param chart                 The chart to select on
-     * @param selectedTimeMillis    The timestamp to select
-     * @param centerViewToSelection Whether to center the chart view on the selection
-     * @param callListeners         Whether to notify selection listeners
+     * @param chart                 The chart instance.
+     * @param selectedTimeMillis    The target timestamp.
+     * @param centerViewToSelection If true, center the chart view on the selected entry.
+     * @param callListeners         If true, trigger the {@link OnChartValueSelectedListener#onValueSelected(Entry, Highlight)} callback.
      */
     private void manualSelectEntryOnSelectedTime(DataEntityLineChart chart, long selectedTimeMillis, boolean centerViewToSelection, boolean callListeners) {
         if (chart == null) {
@@ -313,14 +316,10 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     }
 
     /**
-     * Sets the currently selected entry and optionally publishes a selection event.
-     * <p>
-     * This method updates the internal selection state and, if requested, notifies
-     * observers about the new selection. This is used both for user-initiated selections
-     * and programmatic selections.
+     * Sets the selected entry internally and optionally publishes the selection globally.
      *
-     * @param entry            The entry to select
-     * @param publishSelection Whether to publish a selection event
+     * @param entry           The entry that was selected.
+     * @param publishSelection If true, publish an {@link EventEntrySelection} via the {@link GlobalEventWrapper}.
      */
     private void setSelectionEntry(Entry entry, boolean publishSelection) {
         DataEntityLineChart chart = chartProvider.getChart();
@@ -338,6 +337,12 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
         }
     }
 
+    /**
+     * Publishes the selected entry event to the global event bus.
+     *
+     * @param entry The selected {@link CurveEntry}.
+     * @param chart The chart instance where the selection occurred.
+     */
     private void publishSelectionGlobal(CurveEntry entry, DataEntityLineChart chart) {
         mapChartGlobalEventWrapper.onNext(
                 new EventEntrySelection(chart.getChartSlot(), entry)
@@ -345,13 +350,9 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     }
 
     /**
-     * Resets the marker and clears the current selection.
-     * <p>
-     * This method removes any highlighting or selection from the chart,
-     * returning it to an unselected state. This is typically called when
-     * the user taps in an empty area of the chart.
+     * Resets the selection marker and clears the highlighted value on the chart.
      *
-     * @param chart The chart to reset
+     * @param chart The chart instance.
      */
     private void resetMarkerAndClearSelection(DataEntityLineChart chart) {
         chart.setHighlightedEntry(null);
@@ -359,27 +360,19 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
         manualSelectEntryOnSelectedTime(chart, -1, false, true);
     }
 
+    // --- OnChartGestureListener Implementation --- //
+
     /**
-     * Called when a chart gesture starts.
-     * <p>
-     * Implementation of OnChartGestureListener.
-     * Override this method to add custom behavior when a gesture begins.
-     *
-     * @param me                   The MotionEvent that triggered the gesture
-     * @param lastPerformedGesture The type of gesture that was performed
+     * Called when a gesture starts (e.g., touch start after scaling or dragging).
+     * Logs the event.
      */
     @Override
     public void onChartGestureStart(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) {
     }
 
     /**
-     * Called when a chart gesture ends.
-     * <p>
-     * Implementation of OnChartGestureListener.
-     * Override this method to add custom behavior when a gesture completes.
-     *
-     * @param me                   The MotionEvent that completed the gesture
-     * @param lastPerformedGesture The type of gesture that was performed
+     * Called when a gesture ends (e.g., touch release after scaling or dragging).
+     * Publishes the current visible timestamp boundaries via {@link #publishVisibleBoundaryEntriesTimestamps()}.
      */
     @Override
     public void onChartGestureEnd(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) {
@@ -390,11 +383,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
 
     /**
      * Called when the chart is long-pressed.
-     * <p>
-     * Implementation of OnChartGestureListener.
-     * Override this method to add custom behavior for long-press gestures.
-     *
-     * @param me The MotionEvent for the long press
+     * Logs the event.
      */
     @Override
     public void onChartLongPressed(MotionEvent me) {
@@ -402,11 +391,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
 
     /**
      * Called when the chart is double-tapped.
-     * <p>
-     * Implementation of OnChartGestureListener.
-     * Override this method to add custom behavior for double-tap gestures.
-     *
-     * @param me The MotionEvent for the double tap
+     * Logs the event.
      */
     @Override
     public void onChartDoubleTapped(MotionEvent me) {
@@ -414,11 +399,7 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
 
     /**
      * Called when the chart is single-tapped.
-     * <p>
-     * Implementation of OnChartGestureListener.
-     * Override this method to add custom behavior for single-tap gestures.
-     *
-     * @param me The MotionEvent for the single tap
+     * Logs the event.
      */
     @Override
     public void onChartSingleTapped(MotionEvent me) {
@@ -426,28 +407,15 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
 
     /**
      * Called when the chart is flung.
-     * <p>
-     * Implementation of OnChartGestureListener.
-     * Override this method to add custom behavior for fling gestures.
-     *
-     * @param me1    The initial MotionEvent that started the fling
-     * @param me2    The final MotionEvent that completed the fling
-     * @param speedX The horizontal speed of the fling
-     * @param speedY The vertical speed of the fling
+     * Logs the event.
      */
     @Override
     public void onChartFling(MotionEvent me1, MotionEvent me2, float speedX, float speedY) {
     }
 
     /**
-     * Called when the chart is scaled.
-     * <p>
-     * Implementation of OnChartGestureListener.
-     * Override this method to add custom behavior for scaling gestures.
-     *
-     * @param me     The MotionEvent that triggered the scaling
-     * @param scaleX The horizontal scale factor
-     * @param scaleY The vertical scale factor
+     * Called when the chart is scaled via pinch gesture.
+     * Logs the event.
      */
     @Override
     public void onChartScale(MotionEvent me, float scaleX, float scaleY) {
@@ -457,15 +425,8 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     }
 
     /**
-     * Called when the chart is translated (panned).
-     * <p>
-     * Implementation of OnChartGestureListener.
-     * This method highlights the center value during translation to provide
-     * visual feedback about the current position in the data.
-     *
-     * @param me The MotionEvent that triggered the translation
-     * @param dX The distance translated in X direction
-     * @param dY The distance translated in Y direction
+     * Called when the chart is translated (dragged).
+     * Logs the event.
      */
     @Override
     public void onChartTranslate(MotionEvent me, float dX, float dY) {
@@ -476,15 +437,11 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
         publishVisibleBoundaryEntriesTimestamps();
     }
 
+    // --- OnChartValueSelectedListener Implementation --- //
+
     /**
-     * Called when a value is selected on the chart.
-     * <p>
-     * Implementation of OnChartValueSelectedListener.
-     * Updates the selection state and publishes a selection event to notify
-     * other components about the selection.
-     *
-     * @param e The entry that was selected
-     * @param h The highlight object representing the selection
+     * Called when a value is selected by tapping on the chart.
+     * Updates the internal selection state and publishes the selection globally.
      */
     @Override
     public void onValueSelected(Entry e, Highlight h) {
@@ -494,6 +451,10 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
         //publishVisibleBoundaryEntriesTimestamps();
     }
 
+    /**
+     * Publishes the current visible timestamp range of the chart to the {@link GlobalEventWrapper}.
+     * This allows other components (like the map) to synchronize with the chart's viewport.
+     */
     private void publishVisibleBoundaryEntriesTimestamps() {
         DataEntityLineChart chart = Objects.requireNonNull(chartProvider.getChart());
 
@@ -506,11 +467,8 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     }
 
     /**
-     * Called when no value is selected on the chart.
-     * <p>
-     * Implementation of OnChartValueSelectedListener.
-     * Resets the selection state when the user taps in an empty area or
-     * otherwise clears the selection.
+     * Called when nothing is selected anymore (e.g., tapping outside the data).
+     * Resets the selection marker and clears highlighting.
      */
     @Override
     public void onNothingSelected() {
@@ -519,12 +477,9 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
     }
 
     /**
-     * Gets a unique identifier for the chart managed by this controller.
-     * <p>
-     * This can be used to track and identify charts in multi-chart scenarios,
-     * such as when synchronizing selection between multiple charts.
+     * Gets a string representation of the chart's memory address (for debugging/logging).
      *
-     * @return A string representing the chart's address, or null if no chart is bound
+     * @return String representing the chart address, or "null" if the chart is not available.
      */
     public String getChartAddress() {
         DataEntityLineChart chart = chartProvider.getChart();
@@ -536,11 +491,15 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
         return null;
     }
 
+    // --- Animator.AnimatorListener Implementation --- //
+
+    /** Called when a chart animation starts. Publishes visible boundaries. */
     @Override
     public void onAnimationStart(@NonNull Animator animation) {
 
     }
 
+    /** Called when a chart animation ends. Publishes visible boundaries. */
     @Override
     public void onAnimationEnd(@NonNull Animator animation) {
         //Log.d(ChartController.class.getSimpleName(), "onAnimationEnd() called with: animation = [" + animation + "]");
@@ -548,11 +507,13 @@ public class ChartController implements OnChartValueSelectedListener, OnChartGes
         publishVisibleBoundaryEntriesTimestamps();
     }
 
+    /** Called when a chart animation is cancelled. Publishes visible boundaries. */
     @Override
     public void onAnimationCancel(@NonNull Animator animation) {
 
     }
 
+    /** Called when a chart animation repeats (typically not used for chart animations). */
     @Override
     public void onAnimationRepeat(@NonNull Animator animation) {
 

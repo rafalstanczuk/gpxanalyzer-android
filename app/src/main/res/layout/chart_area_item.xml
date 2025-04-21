@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
@@ -81,6 +82,22 @@
 
 
             </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <ImageView
+                android:id="@+id/overlay_view_to_reload_imageview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:focusable="true"
+                android:visibility="@{ viewModel.overlayViewToReloadIndicatorVisibilityLiveData }"
+                android:contentDescription="@string/map_miniature_preview"
+                android:scaleType="fitCenter"
+                android:foregroundGravity="top"
+                android:clickable="true"
+                android:background="@color/veryDarkGray"
+                android:alpha="0.5"
+                android:src="@drawable/ic_sync_load_fill1"
+                app:tint="@color/white"
+                tools:srcCompat="@drawable/ic_sync_load_fill1" />
 
         </com.google.android.material.card.MaterialCardView>
     </androidx.constraintlayout.widget.ConstraintLayout>

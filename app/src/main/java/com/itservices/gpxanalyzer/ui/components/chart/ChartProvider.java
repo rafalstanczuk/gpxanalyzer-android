@@ -20,35 +20,40 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
+/**
+ * Provides and manages data for a specific {@link DataEntityLineChart} instance.
+ * Acts as a mediator between the chart view and the data processing layer ({@link ChartProcessedDataProvider}).
+ * It handles chart registration, initialization, data updates, and access to chart settings and components.
+ * Uses a {@link WeakReference} to the chart to avoid memory leaks.
+ */
 class ChartProvider {
     private static final String TAG = ChartProvider.class.getSimpleName();
 
+    /** Provider for accessing/creating processed chart data. Injected by Hilt. */
     @Inject
     ChartProcessedDataProvider chartProcessedDataProvider;
 
+    /** Holder for shared chart components like settings and palettes. Injected by Hilt. */
     @Inject
     ChartComponents chartComponents;
 
+    /** Weak reference to the chart view managed by this provider. */
     private WeakReference<DataEntityLineChart> chartWeakReference;
 
     /**
      * Creates a new ChartProvider instance.
-     * <p>
-     * Uses Dagger for dependency injection to obtain required components
-     * like {@link LineChartSettings} and {@link ChartProcessedDataProvider}.
+     * Constructor used by Dagger/Hilt for dependency injection.
      */
     @Inject
     public ChartProvider() {
     }
 
     /**
-     * Registers a chart view with this provider.
-     * <p>
-     * Stores a weak reference to the chart view and initializes it.
-     * If a previous chart was registered, it is cleared to avoid memory leaks.
-     * After registration, the chart is initialized with empty data and default settings.
+     * Registers a {@link DataEntityLineChart} view with this provider.
+     * Stores a weak reference to the chart and initiates its initialization via {@link #initChart()}.
+     * Clears any previously held weak reference.
      *
-     * @param chart The chart view to register, typically a {@link DataEntityLineChart}
+     * @param chart The {@link DataEntityLineChart} view to register.
      */
     public void registerBinding(DataEntityLineChart chart) {
         if (chart != null) {
@@ -62,6 +67,13 @@ class ChartProvider {
         }
     }
 
+    /**
+     * Initializes the registered chart view.
+     * Clears any previous highlighting, initializes the chart structure via {@link DataEntityLineChart#initChart(ChartComponents)},
+     * and potentially triggers an initial data update using {@link #updateDataChart()} if processed data is already available.
+     *
+     * @return A {@link Single} emitting the {@link RequestStatus} of the initialization (e.g., CHART_INITIALIZED, CHART_UPDATED, error statuses).
+     */
     public Single<RequestStatus> initChart() {
         Log.d(ChartProvider.class.getSimpleName(), "initChart chartWeakReference = [" + chartWeakReference + "]");
 
@@ -86,18 +98,18 @@ class ChartProvider {
     }
 
     /**
-     * Updates the chart with new data.
-     * <p>
-     * This method updates the data wrapper in the chart, processes the data,
-     * and applies it to the chart view. The operation is performed asynchronously
-     * using RxJava with computation for data processing and main thread for UI updates.
-     * <p>
-     * This method should be called when new GPX data is available for visualization.
+     * Updates the registered chart with new raw processed data.
+     * This involves:
+     * <ol>
+     *     <li>Initializing chart components based on the raw data wrapper.</li>
+     *     <li>Providing/processing the raw data into chart-specific format via {@link ChartProcessedDataProvider}.</li>
+     *     <li>Applying the processed data to the chart view via {@link #updateChart(ChartProcessedData)}.</li>
+     * </ol>
+     * Operations are scheduled on appropriate RxJava Schedulers.
      *
-     * @param rawDataProcessed The data wrapper containing GPX data to visualize
-     * @return A Single that emits the status of the update operation
+     * @param rawDataProcessed The raw processed data (containing wrapper and entities) to visualize.
+     * @return A {@link Single} emitting the {@link RequestStatus} of the update operation (e.g., CHART_UPDATED, error statuses).
      */
-    @UiThread
     public Single<RequestStatus> updateChartData(RawDataProcessed rawDataProcessed) {
         Log.d(ChartProvider.class.getSimpleName(), "updateChartData() called with: rawDataProcessed ");
 
@@ -121,16 +133,11 @@ class ChartProvider {
     }
 
     /**
-     * Updates the chart with the currently processed data.
-     * <p>
-     * This method is used when settings have changed but the underlying data remains the same.
-     * It retrieves the current processed data, updates settings based on the data,
-     * and applies the data to the chart view.
-     * <p>
-     * This method is particularly useful for applying visual changes (like chart style or
-     * format settings) without needing to reprocess the entire dataset.
+     * Refreshes the chart view using the currently available processed data.
+     * This is typically used after settings changes that affect chart appearance but not the data itself.
+     * It retrieves the existing {@link ChartProcessedData}, updates settings based on it, and applies it to the chart.
      *
-     * @return A Single that emits the status of the update operation
+     * @return A {@link Single} emitting the {@link RequestStatus} of the update operation (e.g., CHART_UPDATED, error statuses).
      */
     public Single<RequestStatus> updateDataChart() {
         return Single.just(chartProcessedDataProvider.provide())
@@ -145,13 +152,9 @@ class ChartProvider {
     }
 
     /**
-     * Gets the current chart view.
-     * <p>
-     * Returns the chart view that was previously registered with this provider.
-     * If no chart is registered or if the weak reference has been cleared,
-     * this method returns null.
+     * Gets the {@link DataEntityLineChart} currently registered with this provider.
      *
-     * @return The current chart view, or null if no chart is registered
+     * @return The {@link DataEntityLineChart} instance, or null if none is registered or the reference has been cleared.
      */
     @Nullable
     public DataEntityLineChart getChart() {
@@ -162,26 +165,19 @@ class ChartProvider {
     }
 
     /**
-     * Gets the chart settings.
-     * <p>
-     * Returns the LineChartSettings instance that controls the visual appearance
-     * and behavior of the chart. This method is synchronized to ensure thread safety
-     * when accessing settings.
+     * Gets the shared {@link LineChartSettings} instance associated with the chart.
      *
-     * @return The LineChartSettings instance
+     * @return The {@link LineChartSettings} instance.
      */
     public synchronized LineChartSettings getSettings() {
         return chartComponents.settings;
     }
 
     /**
-     * Gets the entry cache map for the current chart data.
-     * <p>
-     * The entry cache map provides fast access to chart entries by timestamp.
-     * This is useful for operations that need to lookup or manipulate specific
-     * chart entries, such as highlighting points or retrieving data for tooltips.
+     * Gets the {@link EntryCacheMap} associated with the current chart data, if available.
+     * The cache allows efficient lookup of chart entries.
      *
-     * @return The EntryCacheMap, or null if no chart data is available
+     * @return The {@link EntryCacheMap}, or null if no processed data is currently available.
      */
     @Nullable
     public EntryCacheMap getEntryCacheMap() {
@@ -192,6 +188,14 @@ class ChartProvider {
         return null;
     }
 
+    /**
+     * Applies the fully processed chart data ({@link ChartProcessedData}) to the registered chart view.
+     * Sets the data on the chart, applies settings, and invalidates the chart to trigger a redraw.
+     * This operation is synchronized on the chart object.
+     *
+     * @param chartProcessedData The processed data (LineData, cache map) to display.
+     * @return A {@link Single} emitting the final {@link RequestStatus} (typically CHART_UPDATED or an error status).
+     */
     private Single<RequestStatus> updateChart(ChartProcessedData chartProcessedData) {
         return Single.fromCallable(() -> {
 

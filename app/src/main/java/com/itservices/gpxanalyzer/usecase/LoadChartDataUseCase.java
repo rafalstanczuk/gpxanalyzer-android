@@ -35,39 +35,67 @@ import io.reactivex.schedulers.Schedulers;
  * handling the full data loading pipeline from data retrieval to chart initialization and updating.
  * It publishes status updates during the loading process.
  */
-class LoadChartDataUseCase {
+public class LoadChartDataUseCase {
     private static final String TAG = LoadChartDataUseCase.class.getSimpleName();
+
+    /**
+     * Mapper to convert {@link GpxViewMode} to data indices.
+     */
     @Inject
     public GpxViewModeMapper viewModeMapper;
+
+    /**
+     * Provider for accessing cached GPX data entities.
+     */
     @Inject
     public GpxDataEntityCachedProvider dataEntityCachedProvider;
+
+    /**
+     * Cache holding raw GPX data entities.
+     */
     @Inject
     DataEntityCache dataEntityCache;
+
+    /**
+     * Provider for accessing processed raw data suitable for charts.
+     */
     @Inject
     RawDataProcessedProvider rawDataProcessedProvider;
 
+    /**
+     * Global event bus for publishing status updates (e.g., loading progress, errors).
+     */
     @Inject
     GlobalEventWrapper eventWrapper;
 
     /**
-     * Creates a new ChartDataLoader instance.
-     * Uses Dagger for dependency injection.
+     * Creates a new {@code LoadChartDataUseCase} instance.
+     * Constructor is used by Dagger for dependency injection.
      */
     @Inject
     LoadChartDataUseCase() {
     }
 
     /**
-     * Loads data for multiple chart items.
-     * This method orchestrates the data loading, chart initialization, and update process:
-     * 1. Loads data from the cached provider
-     * 2. Initializes each chart item with the loaded data
-     * 3. Updates each chart to display the data
-     * 4. Reports progress and status through the PublishSubject
+     * Loads data for a list of {@link ChartAreaItem} instances and updates their corresponding charts.
+     * This method orchestrates the entire data loading pipeline using RxJava:
+     * <ol>
+     *     <li>Fetches raw GPX data entities using {@link #dataEntityCachedProvider}.</li>
+     *     <li>Publishes {@link RequestStatus#LOADING} and {@link RequestStatus#DATA_LOADED} events.</li>
+     *     <li>Initializes each chart using the provided {@link ChartInitializerUseCase}.</li>
+     *     <li>Publishes {@link RequestStatus#PROCESSING} event during initialization.</li>
+     *     <li>Fetches processed data specific to each chart's view mode using {@link #provideDataFor(ChartAreaItem)}.</li>
+     *     <li>Publishes {@link RequestStatus#PROCESSED} and {@link RequestStatus#CHART_UPDATING} events.</li>
+     *     <li>Updates each chart with the processed data via {@link ChartAreaItem#updateChart(RawDataProcessed)}.</li>
+     *     <li>Collects the final status of each chart update.</li>
+     *     <li>Publishes the overall final status ({@link RequestStatus#DONE} or an error status) via the {@link #eventWrapper}.</li>
+     * </ol>
+     * All operations are performed on appropriate Schedulers (IO for data fetching, Computation for processing, MainThread for final status emission).
      *
-     * @param chartAreaItemList List of chart items to load data for
-     * @param chartInitializer  Initializer component to prepare charts with data
-     * @return Observable emitting the final status of the loading process
+     * @param chartAreaItemList The list of {@link ChartAreaItem} objects representing the charts to load data into.
+     * @param chartInitializer  The use case responsible for the initial setup of each chart before data is loaded.
+     * @return An {@link Observable} that emits the final overall {@link RequestStatus} of the data loading process (e.g., {@code DONE}, {@code ERROR}).
+     *         Returns {@code Observable.just(RequestStatus.ERROR)} immediately if the input list is null or empty.
      */
     public Observable<RequestStatus> loadData(List<ChartAreaItem> chartAreaItemList, ChartInitializerUseCase chartInitializer) {
         if (chartAreaItemList == null || chartAreaItemList.isEmpty()) {
@@ -113,6 +141,14 @@ class LoadChartDataUseCase {
                 });
     }
 
+    /**
+     * Initializes a list of charts sequentially and then updates them with data.
+     * Helper method used within the {@link #loadData(List, ChartInitializerUseCase)} chain.
+     *
+     * @param chartAreaItemList List of chart items to initialize and update.
+     * @param chartInitializer  The use case for initializing charts.
+     * @return An Observable emitting the {@link RequestStatus} after each chart update.
+     */
     private Observable<RequestStatus> initWithData(List<ChartAreaItem> chartAreaItemList, ChartInitializerUseCase chartInitializer) {
         return Observable.fromIterable(chartAreaItemList)
                 .flatMapSingle(chartAreaItem -> chartInitializer.initChart(chartAreaItem)
@@ -130,11 +166,27 @@ class LoadChartDataUseCase {
                 });
     }
 
+    /**
+     * Fetches processed data for a specific {@link ChartAreaItem} and triggers its chart update.
+     * Helper method used within the {@link #initWithData(List, ChartInitializerUseCase)} chain.
+     *
+     * @param chartAreaItem The chart item to update.
+     * @return A {@link Single} emitting another {@link Single} which, upon subscription, updates the chart
+     *         and emits the resulting {@link RequestStatus}.
+     */
     private Single<Single<RequestStatus>> updateWithData(ChartAreaItem chartAreaItem) {
         return provideDataFor(chartAreaItem)
                 .map(chartAreaItem::updateChart);
     }
 
+    /**
+     * Provides the processed data required for a specific chart based on its view mode.
+     * Uses the {@link RawDataProcessedProvider} and creates a {@link DataEntityWrapper} specific
+     * to the chart's required data columns.
+     *
+     * @param chartAreaItem The chart item for which to provide data.
+     * @return A {@link Single} emitting the {@link RawDataProcessed} data for the chart.
+     */
     private Single<RawDataProcessed> provideDataFor(ChartAreaItem chartAreaItem) {
         return rawDataProcessedProvider.provide(
                         createWrapperFor(chartAreaItem.getViewMode().getValue())
@@ -148,6 +200,14 @@ class LoadChartDataUseCase {
                 });
     }
 
+    /**
+     * Creates a {@link DataEntityWrapper} for a given {@link GpxViewMode}.
+     * This wrapper tells the data provider which specific columns (primary key index)
+     * are needed from the raw data cache for the given view mode.
+     *
+     * @param viewMode The {@link GpxViewMode} determining the required data.
+     * @return A {@link DataEntityWrapper} configured for the view mode.
+     */
     private DataEntityWrapper createWrapperFor(GpxViewMode viewMode) {
         int primaryKeyIndex = viewModeMapper.mapToPrimaryKeyIndexList(viewMode);
 

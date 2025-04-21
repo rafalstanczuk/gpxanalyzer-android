@@ -15,32 +15,39 @@ import dagger.assisted.AssistedInject;
 import io.reactivex.Single;
 
 /**
- * Represents a chart area displaying GPX data in the application.
- * This class acts as a model for individual chart components, handling the connection
- * between the data layer (DataEntityWrapper) and the chart visualization (ChartController).
- * It manages chart configuration, data binding, and chart update operations.
+ * Represents a single chart area item within the chart list UI.
+ * This class acts as a model for an individual chart component, holding its state and
+ * providing an interface to interact with its underlying {@link ChartController}.
+ * It bridges the gap between the ViewModel/data layer and the specific chart view.
  *
- * The class supports different view modes for displaying various aspects of GPX data,
- * and maintains state for visual properties like axis labels and icons.
+ * Key responsibilities include:
+ * - Holding the current {@link GpxViewMode} for the chart.
+ * - Managing state for chart drawing options (e.g., draw icons, draw ascent/descent segments) via LiveData.
+ * - Providing access to the {@link ChartController} for initialization and updates.
+ * - Storing the associated {@link ChartSlot} for event identification.
  */
 public class ChartAreaItem {
 
+    /** The controller responsible for managing the actual chart view (e.g., MPAndroidChart). */
     private final ChartController chartController;
+    /** LiveData holding the current {@link GpxViewMode} (e.g., Altitude vs. Time). */
     private MutableLiveData<GpxViewMode> viewModeLiveData = new MutableLiveData<>();
 
-    private MutableLiveData<Boolean> drawAscDescSegEnabledLiveData = new MutableLiveData<>();
-    private MutableLiveData<Boolean> drawIconsEnabledLiveData = new MutableLiveData<>();
+    /** LiveData indicating whether drawing ascent/descent segments is enabled. */
+    private MutableLiveData<Boolean> drawAscDescSegEnabledLiveData = new MutableLiveData<>(false);
+    /** LiveData indicating whether drawing value-dependent icons (e.g., colored circles) is enabled. */
+    private MutableLiveData<Boolean> drawIconsEnabledLiveData = new MutableLiveData<>(false);
 
+    /** Identifier for the specific slot this chart occupies, used for event routing. */
     private ChartSlot chartSlot = null;
 
     /**
-     * Creates a new ChartAreaItem with the specified configuration.
-     * Uses Dagger's assisted injection to provide required dependencies.
+     * Creates a new ChartAreaItem using Dagger's assisted injection.
      *
-     * @param viewMode The initial view mode for this chart
-     * @param drawX Whether to draw X-axis labels
-     * @param drawIconsEnabled Whether to enable drawing of icons on the chart
-     * @param chartController The controller for the underlying chart component
+     * @param viewMode           The initial {@link GpxViewMode} for this chart.
+     * @param drawX              Whether to initially draw X-axis labels.
+     * @param drawIconsEnabled   Whether to initially enable drawing of icons on the chart.
+     * @param chartController    The controller for the underlying chart component (injected).
      */
     @AssistedInject
     public ChartAreaItem(@Assisted GpxViewMode viewMode,
@@ -53,57 +60,75 @@ public class ChartAreaItem {
 
         this.chartController.setDrawIconsEnabled(drawIconsEnabled);
         this.chartController.setDrawXLabels(drawX);
+
+        // Initialize LiveData based on initial controller state if needed, or ensure consistency
+        this.drawIconsEnabledLiveData.setValue(this.chartController.isDrawIconsEnabled());
+        this.drawAscDescSegEnabledLiveData.setValue(this.chartController.isDrawAscDescSegEnabled());
     }
 
     /**
-     * Gets the chart controller associated with this chart area.
+     * Gets the chart controller associated with this chart area item.
      *
-     * @return The ChartController instance
+     * @return The {@link ChartController} instance.
      */
     public ChartController getChartController() {
         return chartController;
     }
 
     /**
-     * Gets the view mode for this chart as a LiveData object.
+     * Gets the LiveData holding the current view mode for this chart.
      *
-     * @return LiveData containing the current view mode
+     * @return {@link LiveData} containing the current {@link GpxViewMode}.
      */
     public LiveData<GpxViewMode> getViewMode() {
         return viewModeLiveData;
     }
 
     /**
-     * Checks if drawing icons on the chart is enabled.
+     * Checks directly with the controller if drawing icons on the chart is currently enabled.
+     * Note: Prefer observing {@link #getIsDrawIconsEnabledLiveData()} for UI updates.
      *
-     * @return true if icons are enabled, false otherwise
+     * @return true if icons are enabled in the controller, false otherwise.
      */
     public boolean isDrawIconsEnabledFromController() {
         return chartController.isDrawIconsEnabled();
     }
 
     /**
-     * Checks if drawing ascent/descent segments on the chart is enabled.
+     * Checks directly with the controller if drawing ascent/descent segments is currently enabled.
+     * Note: Prefer observing {@link #getIsDrawAscDescSegEnabledLiveData()} for UI updates.
      *
-     * @return true if ascent/descent segments are enabled, false otherwise
+     * @return true if ascent/descent segments are enabled in the controller, false otherwise.
      */
     public boolean isDrawAscDescSegEnabledFromController() {
         return chartController.isDrawAscDescSegEnabled();
     }
 
+    /**
+     * Gets the LiveData indicating whether drawing ascent/descent segments is enabled.
+     * UI components should observe this for state changes.
+     *
+     * @return {@link LiveData} containing the boolean state.
+     */
     public LiveData<Boolean> getIsDrawAscDescSegEnabledLiveData() {
         return drawAscDescSegEnabledLiveData;
     }
 
+    /**
+     * Gets the LiveData indicating whether drawing value-dependent icons is enabled.
+     * UI components should observe this for state changes.
+     *
+     * @return {@link LiveData} containing the boolean state.
+     */
     public LiveData<Boolean> getIsDrawIconsEnabledLiveData() {
         return drawIconsEnabledLiveData;
     }
 
     /**
      * Sets the view mode for this chart area.
-     * The view mode determines which aspect of the GPX data will be visualized.
+     * Updates the {@link #viewModeLiveData}.
      *
-     * @param viewMode The new view mode to set
+     * @param viewMode The new {@link GpxViewMode} to set. Must not be null.
      */
     public void setViewMode(GpxViewMode viewMode) {
         if (viewMode == null) {
@@ -115,9 +140,9 @@ public class ChartAreaItem {
     }
 
     /**
-     * Sets whether to draw X-axis labels on the chart.
+     * Sets whether to draw X-axis labels on the chart via the controller.
      *
-     * @param drawX true to show X-axis labels, false to hide them
+     * @param drawX true to show X-axis labels, false to hide them.
      */
     public void setDrawX(boolean drawX) {
         Log.d(ChartAreaItem.class.getSimpleName(), "Setting drawX: " + drawX);
@@ -125,10 +150,12 @@ public class ChartAreaItem {
     }
 
     /**
-     * Updates the chart with current data.
-     * This triggers a refresh of the chart visualization using the current data wrapper.
+     * Updates the chart with new processed data.
+     * Delegates the update call to the {@link ChartController#updateChartData(RawDataProcessed)}.
      *
-     * @return A Single that emits the RequestStatus of the update operation
+     * @param rawDataProcessed The processed data to display on the chart.
+     * @return A {@link Single} that emits the {@link RequestStatus} of the update operation (e.g., CHART_UPDATED, ERROR).
+     *         Returns {@code Single.just(RequestStatus.ERROR)} if {@code rawDataProcessed} is null.
      */
     public Single<RequestStatus> updateChart(RawDataProcessed rawDataProcessed) {
         if (rawDataProcessed == null) {
@@ -139,18 +166,41 @@ public class ChartAreaItem {
          return chartController.updateChartData(rawDataProcessed);
     }
 
+    /**
+     * Sets the {@link ChartSlot} associated with this chart item.
+     * This identifier is used to route events related to this specific chart.
+     *
+     * @param chartSlot The {@link ChartSlot} identifier.
+     */
     public void setChartSlot(ChartSlot chartSlot) {
         this.chartSlot = chartSlot;
     }
 
+    /**
+     * Gets the {@link ChartSlot} associated with this chart item.
+     *
+     * @return The {@link ChartSlot} identifier.
+     */
     public ChartSlot getChartSlot() {
         return chartSlot;
     }
 
+    /**
+     * Sets the enabled state for drawing ascent/descent segments.
+     * Updates the corresponding LiveData {@link #drawAscDescSegEnabledLiveData}.
+     *
+     * @param isChecked {@code true} to enable, {@code false} to disable.
+     */
     public void setDrawAscDescSegEnabled(boolean isChecked) {
         drawAscDescSegEnabledLiveData.setValue(isChecked);
     }
 
+    /**
+     * Sets the enabled state for drawing value-dependent icons.
+     * Updates the corresponding LiveData {@link #drawIconsEnabledLiveData}.
+     *
+     * @param isChecked {@code true} to enable, {@code false} to disable.
+     */
     public void setDrawIconsEnabled(boolean isChecked) {
         drawIconsEnabledLiveData.setValue(isChecked);
     }

@@ -1,9 +1,13 @@
 package com.itservices.gpxanalyzer.ui.components.chart;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.Log;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
@@ -33,25 +37,16 @@ import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.Single;
 
 /**
- * Specialized LineChart for displaying GPX data.
- * <p>
- * This class extends MPAndroidChart's LineChart to provide custom functionality
- * for displaying and interacting with GPX data. It integrates with the application's
- * chart styling, data handling, and interaction components.
- * <p>
- * Key features include:
- * <ul>
- *   <li>Custom background grid drawing with GPX-specific styling</li>
- *   <li>Enhanced highlighting of data points with selectable behaviors</li>
- *   <li>Integration with application-specific data structures like {@link DataEntityWrapper}</li>
- *   <li>Specialized touch handling for GPX data exploration</li>
- *   <li>Support for limit lines showing important thresholds or boundaries</li>
- *   <li>Customized scaling and zooming behavior for GPX tracks</li>
- * </ul>
- * <p>
- * This chart component is designed to work with the broader GPX Analyzer application
- * architecture, including dependency injection through Dagger Hilt and reactive
- * programming patterns with RxJava.
+ * A specialized {@link LineChart} subclass tailored for displaying GPX track data.
+ * Extends the base MPAndroidChart LineChart to integrate custom drawing, highlighting,
+ * and interaction logic specific to the GPX Analyzer application.
+ *
+ * Key features and customizations:
+ * - Integrates with {@link ChartComponents} for settings, scaling, palettes, etc.
+ * - Uses {@link GridBackgroundDrawer} for a custom background.
+ * - Employs {@link StaticChartHighlighter} for custom value highlighting.
+ * - Provides methods for managing chart state related to GPX data (e.g., visible boundaries).
+ * - Includes specialized touch handling and animation methods.
  */
 @AndroidEntryPoint
 public class DataEntityLineChart extends LineChart {
@@ -59,24 +54,19 @@ public class DataEntityLineChart extends LineChart {
 /*	@Inject
 	DataEntityInfoLayoutView dataEntityInfoLayoutView;*/
 
-    /**
-     * Handles drawing of the chart's background grid.
-     * <p>
-     * This component is responsible for rendering the grid background with
-     * custom styling appropriate for GPX data visualization.
-     */
+    /** Component responsible for drawing the custom grid background. Injected by Hilt. */
     @Inject
     GridBackgroundDrawer gridBackgroundDrawer;
 
+    /** Identifier for the slot this chart occupies in a multi-chart layout. */
     private ChartSlot chartSlot = null;
+    /** Weak reference to the container holding shared chart components (settings, scaler, etc.). */
     private WeakReference<ChartComponents> chartComponentsWeakReference;
 
     /**
-     * Creates a new DataEntityLineChart with the specified context.
-     * <p>
-     * This constructor is typically used when creating the chart programmatically.
+     * Constructor.
      *
-     * @param context The context in which the chart is running
+     * @param context The context the view is running in.
      */
     public DataEntityLineChart(Context context) {
         super(context);
@@ -84,12 +74,10 @@ public class DataEntityLineChart extends LineChart {
     }
 
     /**
-     * Creates a new DataEntityLineChart with the specified context and attributes.
-     * <p>
-     * This constructor is typically used when the chart is inflated from XML.
+     * Constructor that is called when inflating a view from XML.
      *
-     * @param context The context in which the chart is running
-     * @param attrs   The attribute set defining XML attributes for the chart
+     * @param context The context the view is running in.
+     * @param attrs   The attributes of the XML tag that is inflating the view.
      */
     public DataEntityLineChart(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -98,13 +86,11 @@ public class DataEntityLineChart extends LineChart {
     }
 
     /**
-     * Creates a new DataEntityLineChart with the specified context, attributes, and style.
-     * <p>
-     * This constructor is typically used when the chart is inflated from XML with a specific style.
+     * Constructor that is called when inflating a view from XML with a specific style.
      *
-     * @param context  The context in which the chart is running
-     * @param attrs    The attribute set defining XML attributes for the chart
-     * @param defStyle The default style resource ID
+     * @param context  The context the view is running in.
+     * @param attrs    The attributes of the XML tag that is inflating the view.
+     * @param defStyle The default style resource ID.
      */
     public DataEntityLineChart(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
@@ -113,10 +99,7 @@ public class DataEntityLineChart extends LineChart {
     }
 
     /**
-     * Initializes the data entity info layout view.
-     * <p>
-     * This method is currently commented out in the implementation, but would
-     * normally set up an overlay view to display information about selected data points.
+     * Initializes the (currently commented out) overlay view for displaying data point info.
      */
     private void initDataEntityInfoLayoutView() {
         //dataEntityInfoLayoutView.setDrawingCacheEnabled(true);
@@ -128,28 +111,24 @@ public class DataEntityLineChart extends LineChart {
     }
 
     /**
-     * Draws the chart on the canvas.
-     * <p>
-     * This method overrides the parent implementation to handle exceptions gracefully.
-     * Any exceptions during drawing are caught and ignored to prevent application crashes.
+     * Overrides the default drawing behavior to catch and ignore potential exceptions during drawing,
+     * preventing crashes.
      *
-     * @param canvas The canvas to draw on
+     * @param canvas The canvas to draw on.
      */
     @Override
     protected void onDraw(Canvas canvas) {
         try {
             super.onDraw(canvas);
+
         } catch (Exception ignore) {
         }
     }
 
     /**
-     * Draws the grid background.
-     * <p>
-     * This method overrides the parent implementation to use the custom grid background drawer.
-     * The custom drawer adds GPX-specific styling and visual elements to the grid background.
+     * Overrides the default grid background drawing to use the custom {@link GridBackgroundDrawer}.
      *
-     * @param canvas The canvas to draw on
+     * @param canvas The canvas to draw on.
      */
     @Override
     protected void drawGridBackground(Canvas canvas) {
@@ -163,16 +142,7 @@ public class DataEntityLineChart extends LineChart {
     }
 
     /**
-     * Called when the layout changes.
-     * <p>
-     * This method overrides the parent implementation to handle layout of child views.
-     * Currently, the data entity info layout view positioning is commented out.
-     *
-     * @param changed True if the layout has changed
-     * @param left    Left position of this view
-     * @param top     Top position of this view
-     * @param right   Right position of this view
-     * @param bottom  Bottom position of this view
+     * Overrides the default layout behavior. (Currently, custom layout logic is commented out).
      */
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
@@ -185,13 +155,7 @@ public class DataEntityLineChart extends LineChart {
     }
 
     /**
-     * Called to measure the view and its content.
-     * <p>
-     * This method overrides the parent implementation to handle measurement of child views.
-     * Currently, the data entity info layout view measurement is commented out.
-     *
-     * @param widthMeasureSpec  Horizontal space requirements as imposed by the parent
-     * @param heightMeasureSpec Vertical space requirements as imposed by the parent
+     * Overrides the default measurement behavior. (Currently, custom measurement logic is commented out).
      */
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -203,13 +167,11 @@ public class DataEntityLineChart extends LineChart {
     }
 
     /**
-     * Initializes the chart with the specified settings.
-     * <p>
-     * This method sets up the highlighter, initializes empty data, and applies settings.
-     * It returns a Single that emits the status of the initialization operation, making
-     * it compatible with reactive programming patterns.
+     * Initializes the chart structure and appearance using the provided {@link ChartComponents}.
+     * Sets up the custom highlighter, clears existing data, applies settings, and invalidates the view.
      *
-     * @return A Single that emits the status of the initialization operation
+     * @param chartComponents The container holding chart settings, scaler, palette, etc.
+     * @return A {@link Single} that emits {@link RequestStatus#DONE} upon successful initialization.
      */
     public Single<RequestStatus> initChart(ChartComponents chartComponents) {
         return Single.fromCallable(() -> {
@@ -229,22 +191,17 @@ public class DataEntityLineChart extends LineChart {
     }
 
     /**
-     * Gets the chart's touch listener.
-     * <p>
-     * This method provides access to the touch listener that handles user interactions
-     * with the chart, such as dragging, zooming, and tapping.
+     * Gets the chart's primary touch listener, responsible for handling gestures like drag, scale, and tap.
      *
-     * @return The BarLineChartTouchListener for this chart
+     * @return The {@link BarLineChartTouchListener} for this chart.
      */
     public BarLineChartTouchListener getChartTouchListener() {
         return (BarLineChartTouchListener) mChartTouchListener;
     }
 
     /**
-     * Highlights the value at the center of the current view.
-     * <p>
-     * This method is called during chart translation to maintain highlight on the center value.
-     * It determines which data point is at the center of the visible area and highlights it.
+     * Highlights the data entry closest to the vertical center of the current chart viewport.
+     * This is often used during scrolling/translation to provide context.
      */
     public void highlightCenterValueInTranslation() {
         MPPointF pointFCenter = mViewPortHandler.getContentCenter();
@@ -260,6 +217,12 @@ public class DataEntityLineChart extends LineChart {
         }
     }
 
+    /**
+     * Determines the timestamp range of the data entries currently visible within the chart's viewport.
+     *
+     * @return A {@link Vector} containing two Long values: the minimum and maximum timestamps (in milliseconds)
+     *         of the visible entries. Returns null if the chart data is not available.
+     */
     public Vector<Long> getVisibleEntriesBoundaryTimestamps() {
 
         MPPointF pointFCenter = mViewPortHandler.getContentCenter();
@@ -290,12 +253,10 @@ public class DataEntityLineChart extends LineChart {
     }
 
     /**
-     * Sets the currently highlighted entry.
-     * <p>
-     * This method is called when a value is selected on the chart. It updates
-     * highlight indicators based on the type of gesture used for selection.
+     * Sets the currently highlighted entry on the chart.
+     * Updates the chart's internal highlighted values and redraws the highlight indicator.
      *
-     * @param selectedEntry The entry to highlight, or null to clear highlight
+     * @param selectedEntry The {@link Entry} to highlight.
      */
     public void setHighlightedEntry(Entry selectedEntry) {
         if (!(selectedEntry instanceof BaseEntry)) {
@@ -308,12 +269,10 @@ public class DataEntityLineChart extends LineChart {
     }
 
     /**
-     * Determines whether to draw highlight indicators based on the chart gesture.
-     * <p>
-     * This method controls the appearance of highlight indicators based on the user's interaction.
-     * Different gestures (tap, drag, zoom) may result in different highlight behaviors.
+     * Determines the appearance of the highlight indicator based on the last performed gesture.
+     * For example, it might show a specific indicator during drag/translation.
      *
-     * @param chartGesture The last gesture performed on the chart
+     * @param chartGesture The last gesture performed on the chart.
      */
     private void determineSettingsDataEntityCurveLineHighlightIndicator(
             ChartTouchListener.ChartGesture chartGesture
@@ -358,10 +317,8 @@ public class DataEntityLineChart extends LineChart {
     }
 
     /**
-     * Called when the view is detached from its window.
-     * <p>
-     * This method ensures proper cleanup of resources, particularly the chart renderer's bitmap.
-     * Releasing the bitmap prevents memory leaks when the chart is no longer visible.
+     * Cleans up resources when the view is detached from the window.
+     * Calls the superclass implementation.
      */
     @Override
     protected void onDetachedFromWindow() {
@@ -371,10 +328,20 @@ public class DataEntityLineChart extends LineChart {
         super.onDetachedFromWindow();
     }
 
+    /**
+     * Gets the {@link ChartSlot} identifier associated with this chart instance.
+     *
+     * @return The {@link ChartSlot}.
+     */
     public ChartSlot getChartSlot() {
         return chartSlot;
     }
 
+    /**
+     * Sets the {@link ChartSlot} identifier for this chart instance.
+     *
+     * @param chartSlot The {@link ChartSlot} to associate with this chart.
+     */
     public void setChartSlot(ChartSlot chartSlot) {
         this.chartSlot = chartSlot;
     }

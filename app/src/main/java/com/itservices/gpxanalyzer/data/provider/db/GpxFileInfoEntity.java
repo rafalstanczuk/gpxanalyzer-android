@@ -3,67 +3,133 @@ package com.itservices.gpxanalyzer.data.provider.db;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
-import java.io.File;
+
 import java.util.Date;
+import java.util.Objects;
+
 
 @Entity(tableName = "gpx_files")
 @TypeConverters(Converters.class)
-public class GpxFileInfoEntity {
+public final class GpxFileInfoEntity {
     @PrimaryKey(autoGenerate = true)
-    private long id;
-    
-    private File file;
-    private String creator;
-    private String authorName;
-    private String firstPointLat;
-    private String firstPointLon;
-    private String firstPointEle;
-    private String firstPointTime;
-    private long fileSize;
-    private Date lastFileModified;
+    long id;
+    final String fileAbsolutePathBase64;
+    final String creator;
+    final String authorName;
+    final String firstPointLat;
+    final String firstPointLon;
+    final String firstPointEle;
+    final long firstPointTimeMillis;
+    final String miniatureBitmapBase64;
+    final long fileSize;
+    final Date lastFileModified;
 
-    public GpxFileInfoEntity(File file, String creator, String authorName, 
-                           String firstPointLat, String firstPointLon, 
-                           String firstPointEle, String firstPointTime) {
-        this.file = file;
+    public GpxFileInfoEntity(
+            String fileAbsolutePathBase64,
+            String creator,
+            String authorName,
+            String firstPointLat,
+            String firstPointLon,
+            String firstPointEle,
+            long firstPointTimeMillis,
+            String miniatureBitmapBase64,
+            long fileSize,
+            Date lastFileModified
+    ) {
+        this.fileAbsolutePathBase64 = fileAbsolutePathBase64;
         this.creator = creator;
         this.authorName = authorName;
         this.firstPointLat = firstPointLat;
         this.firstPointLon = firstPointLon;
         this.firstPointEle = firstPointEle;
-        this.firstPointTime = firstPointTime;
-        this.fileSize = file.length();
-        this.lastFileModified = new Date(file.lastModified());
+        this.firstPointTimeMillis = firstPointTimeMillis;
+        this.miniatureBitmapBase64 = miniatureBitmapBase64;
+        this.fileSize = fileSize;
+        this.lastFileModified = lastFileModified;
     }
 
-    // Getters and setters
-    public long getId() { return id; }
-    public void setId(long id) { this.id = id; }
-    
-    public File getFile() { return file; }
-    public void setFile(File file) { this.file = file; }
-    
-    public String getCreator() { return creator; }
-    public void setCreator(String creator) { this.creator = creator; }
-    
-    public String getAuthorName() { return authorName; }
-    public void setAuthorName(String authorName) { this.authorName = authorName; }
-    
-    public String getFirstPointLat() { return firstPointLat; }
-    public void setFirstPointLat(String firstPointLat) { this.firstPointLat = firstPointLat; }
-    
-    public String getFirstPointLon() { return firstPointLon; }
-    public void setFirstPointLon(String firstPointLon) { this.firstPointLon = firstPointLon; }
-    
-    public String getFirstPointEle() { return firstPointEle; }
-    public void setFirstPointEle(String firstPointEle) { this.firstPointEle = firstPointEle; }
-    
-    public String getFirstPointTime() { return firstPointTime; }
-    public void setFirstPointTime(String firstPointTime) { this.firstPointTime = firstPointTime; }
-    
-    public long getFileSize() { return fileSize; }
-    public void setFileSize(long fileSize) { this.fileSize = fileSize; }
-    
-    public Date getLastFileModified() { return lastFileModified; }
-    public void setLastFileModified(Date lastFileModified) { this.lastFileModified = lastFileModified; }
-} 
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String fileAbsolutePathBase64() {
+        return fileAbsolutePathBase64;
+    }
+
+    public String creator() {
+        return creator;
+    }
+
+    public String authorName() {
+        return authorName;
+    }
+
+    public String firstPointLat() {
+        return firstPointLat;
+    }
+
+    public String firstPointLon() {
+        return firstPointLon;
+    }
+
+    public String firstPointEle() {
+        return firstPointEle;
+    }
+
+    public long firstPointTimeMillis() {
+        return firstPointTimeMillis;
+    }
+
+    public String miniatureBitmapBase64() {
+        return miniatureBitmapBase64;
+    }
+
+    public long fileSize() {
+        return fileSize;
+    }
+
+    public Date lastFileModified() {
+        return lastFileModified;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (GpxFileInfoEntity) obj;
+        return Objects.equals(this.fileAbsolutePathBase64, that.fileAbsolutePathBase64) &&
+                Objects.equals(this.creator, that.creator) &&
+                Objects.equals(this.authorName, that.authorName) &&
+                Objects.equals(this.firstPointLat, that.firstPointLat) &&
+                Objects.equals(this.firstPointLon, that.firstPointLon) &&
+                Objects.equals(this.firstPointEle, that.firstPointEle) &&
+                this.firstPointTimeMillis == that.firstPointTimeMillis &&
+                Objects.equals(this.miniatureBitmapBase64, that.miniatureBitmapBase64) &&
+                this.fileSize == that.fileSize &&
+                Objects.equals(this.lastFileModified, that.lastFileModified);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(fileAbsolutePathBase64, creator, authorName, firstPointLat, firstPointLon, firstPointEle, firstPointTimeMillis, miniatureBitmapBase64, fileSize, lastFileModified);
+    }
+
+    @Override
+    public String toString() {
+        return "GpxFileInfo[" +
+                "fileAbsolutePathBase64=" + fileAbsolutePathBase64 + ", " +
+                "creator=" + creator + ", " +
+                "authorName=" + authorName + ", " +
+                "firstPointLat=" + firstPointLat + ", " +
+                "firstPointLon=" + firstPointLon + ", " +
+                "firstPointEle=" + firstPointEle + ", " +
+                "firstPointTimeMillis=" + firstPointTimeMillis + ", " +
+                "miniatureBitmapBase64=" + miniatureBitmapBase64 + ", " +
+                "fileSize=" + fileSize + ", " +
+                "lastFileModified=" + lastFileModified + ']';
+    }
+}

@@ -13,6 +13,7 @@ import com.itservices.gpxanalyzer.events.GlobalEventWrapper;
 import com.itservices.gpxanalyzer.data.cache.rawdata.GeoPointCache;
 import com.itservices.gpxanalyzer.data.raw.GeoPointEntity;
 import com.itservices.gpxanalyzer.utils.common.ConcurrentUtil;
+import com.itservices.gpxanalyzer.utils.ui.DrawableUtil;
 
 import org.osmdroid.api.IMapController;
 import org.osmdroid.events.MapListener;
@@ -20,6 +21,8 @@ import org.osmdroid.events.ScrollEvent;
 import org.osmdroid.events.ZoomEvent;
 import org.osmdroid.util.BoundingBox;
 import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.overlay.CopyrightOverlay;
+import org.osmdroid.views.overlay.IconOverlay;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.Polyline;
@@ -39,20 +42,48 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
 
+/**
+ * Controller class responsible for managing the logic, interactions, and data display
+ * for a {@link DataMapView} instance.
+ *
+ * It acts as a bridge between the MapView, data sources ({@link GeoPointCache}),
+ * application-wide events (via {@link GlobalEventWrapper}), and UI actions.
+ *
+ * Key responsibilities:
+ * - Binding to a {@link DataMapView} instance.
+ * - Managing map readiness via {@link MapReadinessManager}.
+ * - Handling map lifecycle events (scroll, zoom) via {@link MapListener}.
+ * - Implementing map control operations (center, zoom, bounding box) via {@link MapOperations}.
+ * - Managing map overlays (markers, polylines) via {@link MapOverlayOperations}.
+ * - Observing application events (chart entry selection, visible range changes, request status)
+ *   and updating the map accordingly (e.g., showing selected point, drawing polylines).
+ * - Loading initial map data (full track polyline, bounding box).
+ * - Handling RxJava subscriptions and resource disposal.
+ */
 public class MapViewController implements MapListener, MapReadinessManager.OnMapReadyCallback, MapOperations, MapOverlayOperations {
     private static final String TAG = MapViewController.class.getSimpleName();
+
+    //private static IconOverlay MAP_ICON_OVERLAY;
     private final List<Marker> markerList = new ArrayList<>();
     private final List<Polyline> polylineList = new ArrayList<>();
+    /** Subject to emit the GeoPointEntity when a point is selected on the map (potentially for future use). */
     private final PublishSubject<GeoPointEntity> selectedPointOnMap = PublishSubject.create();
+    /** Manages RxJava subscriptions for this controller. */
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
     private WeakReference<DataMapView> mapView;
     private List<Overlay> mapOverlays;
     private IMapController mapController;
+    /** Weak reference to the currently selected marker overlay on the map. */
     private WeakReference<Marker> currentSelectedMarker = new WeakReference<>(null);
+    /** Reference to the polyline representing the currently visible segment based on chart interactions. */
     private Polyline boundaryPolyline = null;
+    /** Reference to the polyline representing the full GPX track. */
     private Polyline fullPolyline = null;
+    /** Weak reference to the GeoPointEntity corresponding to the currently selected point. */
     private WeakReference<GeoPointEntity> currentSelectedPoint = new WeakReference<>(null);
+    /** Atomic reference holding the start/end timestamps of the currently visible segment from chart events. */
     private AtomicReference<Vector<Long>> currentVisible = new AtomicReference<>();
+    /** Stores the last received RequestStatus to be processed once the map becomes ready. */
     private final AtomicReference<RequestStatus> requestStatusToHandleOnMapReadyAtomic = new AtomicReference<>();
 
     @Inject
@@ -66,6 +97,13 @@ public class MapViewController implements MapListener, MapReadinessManager.OnMap
     public MapViewController() {
     }
 
+    /**
+     * Helper method to create a new BoundingBox expanded by a percentage.
+     *
+     * @param boundingBox    The original bounding box.
+     * @param paddingPercent The padding percentage (e.g., 0.1 for 10%).
+     * @return A new, padded BoundingBox.
+     */
     private static BoundingBox createPaddedBoundingBox(BoundingBox boundingBox, double paddingPercent) {
         double latPadding = (boundingBox.getLatNorth() - boundingBox.getLatSouth()) * paddingPercent;
         double lonPadding = (boundingBox.getLonEast() - boundingBox.getLonWest()) * paddingPercent;
@@ -78,11 +116,19 @@ public class MapViewController implements MapListener, MapReadinessManager.OnMap
         );
     }
 
+    /**
+     * Binds this controller to a specific {@link DataMapView} instance.
+     * Initializes references to the map, its overlays, and its controller.
+     * Sets up the {@link MapReadinessManager}, map listeners, and observers for application events.
+     *
+     * @param mapView The {@link DataMapView} to control.
+     */
     public void bind(DataMapView mapView) {
         Log.d(TAG, "bind() called with: mapView = [" + mapView + "]");
 
         this.mapView = new WeakReference<>(mapView);
         mapOverlays = mapView.getOverlays();
+        addCopyrightOverlay(mapView);
         mapController = mapView.getController();
 
         readinessManager.bind(mapView);
@@ -94,6 +140,20 @@ public class MapViewController implements MapListener, MapReadinessManager.OnMap
         observeRequestStatus();
     }
 
+    /**
+     * Adds the copyright overlay to the map.
+     *
+     * @param mapView The map view instance.
+     */
+    private void addCopyrightOverlay(DataMapView mapView) {
+        mapOverlays.add(new CopyrightOverlay(mapView.getContext()));
+    }
+
+    /**
+     * Loads the initial map state, including setting the bounding box to fit the track,
+     * drawing the full track polyline, and potentially the initial visible boundary polyline
+     * and selected marker.
+     */
     public void loadInitialData() {
         Log.d(TAG, "loadInitialData() called");
 
@@ -108,9 +168,15 @@ public class MapViewController implements MapListener, MapReadinessManager.OnMap
 
         createOrUpdateSelectedMarker(currentSelectedPoint.get());
 
+        //mapOverlays.remove(MAP_ICON_OVERLAY);
+
         invalidate();
     }
 
+    /**
+     * Subscribes to {@link RequestStatus} updates from the {@link GlobalEventWrapper}
+     * to handle application state changes (e.g., loading, data ready).
+     */
     private void observeRequestStatus() {
         Log.d(TAG, "observeRequestStatus() called");
 
@@ -123,6 +189,14 @@ public class MapViewController implements MapListener, MapReadinessManager.OnMap
                 .subscribe(this::handleAction));
     }
 
+    /**
+     * Handles incoming {@link RequestStatus} events.
+     * If the map is not ready, the status is stored and handled later in {@link #onMapReady()}.
+     * Otherwise, updates the loading overlay visibility and triggers actions like clearing overlays
+     * or loading initial data based on the status.
+     *
+     * @param requestStatus The received status event.
+     */
     private void handleAction(RequestStatus requestStatus) {
         Log.d(TAG, "handleAction() called with: requestStatus = [" + requestStatus + "]");
 
@@ -137,8 +211,10 @@ public class MapViewController implements MapListener, MapReadinessManager.OnMap
 
             requestStatusToHandleOnMapReadyAtomic.set(null);
 
+            mapView.get().overlayViewToReloadLayoutView.handleAction(requestStatus);
+
             switch (requestStatus) {
-                case NEW_DATA_LOADING -> clearOverlays();
+                case NEW_DATA_LOADING, SELECTED_FILE -> clearOverlays();
                 case DATA_LOADED, PROCESSING, PROCESSED, CHART_UPDATING,  DONE -> {
                     if (polylineList.isEmpty()) {
                         loadInitialData();
@@ -152,6 +228,10 @@ public class MapViewController implements MapListener, MapReadinessManager.OnMap
         }
     }
 
+    /**
+     * Subscribes to {@link EventVisibleChartEntriesTimestamp} events from the {@link GlobalEventWrapper}
+     * to update the highlighted polyline segment on the map based on chart visibility changes.
+     */
     private void observeVisibleEntriesBoundaryOnCharts() {
         Log.d(TAG, "observeVisibleEntriesBoundaryOnCharts() called");
 
@@ -162,6 +242,10 @@ public class MapViewController implements MapListener, MapReadinessManager.OnMap
                 .subscribe(this::handleEvent));
     }
 
+    /**
+     * Subscribes to {@link com.itservices.gpxanalyzer.events.EventEntrySelection} events from the {@link GlobalEventWrapper}
+     * to update the selected marker on the map when a point is selected on a chart.
+     */
     private void observeEntrySelectionOnCharts() {
         Log.d(TAG, "observeEntrySelectionOnCharts() called");
 
@@ -182,6 +266,11 @@ public class MapViewController implements MapListener, MapReadinessManager.OnMap
                 ));
     }
 
+    /**
+     * Selects a specific point on the map, updating the internal state and the selected marker overlay.
+     *
+     * @param geoPointEntity The {@link GeoPointEntity} representing the point to select.
+     */
     public void selectPoint(GeoPointEntity geoPointEntity) {
         //Log.d(TAG, "selectPoint() called with: geoPointEntity = [" + geoPointEntity + "]");
         currentSelectedPoint = new WeakReference<>(geoPointEntity);
@@ -189,44 +278,83 @@ public class MapViewController implements MapListener, MapReadinessManager.OnMap
         createOrUpdateSelectedMarker(currentSelectedPoint.get());
     }
 
+    /**
+     * Returns an Observable that emits true when the map is ready.
+     *
+     * @return Observable<Boolean>
+     */
     public Observable<Boolean> getMapReadyObservable() {
         return readinessManager.getMapReadyObservable();
     }
 
+    /**
+     * {@link MapListener} callback for scroll events. Currently unused.
+     */
     @Override
     public boolean onScroll(ScrollEvent event) {
         //Log.d(TAG, "onScroll() called with: event = [" + event + "]");
         return false;
     }
 
+    /**
+     * {@link MapListener} callback for zoom events. Currently unused.
+     */
     @Override
     public boolean onZoom(ZoomEvent event) {
         //Log.d(TAG, "onZoom() called with: event = [" + event + "]");
         return false;
     }
 
+    /**
+     * {@link MapReadinessManager.OnMapReadyCallback} implementation.
+     * Called when the map tiles are considered ready.
+     * Handles any pending {@link RequestStatus} that was received before the map was ready.
+     */
     @Override
     public void onMapReady() {
         Log.d(TAG, "onMapReady() called");
 
+        //mapOverlayMode();
+
         handleAction(requestStatusToHandleOnMapReadyAtomic.get());
     }
 
+/*    private void mapOverlayMode() {
+        MAP_ICON_OVERLAY = new IconOverlay(
+                mapView.get().getMapCenter(),
+                DrawableUtil.createScaledDrawableFitWith(mapView.get(), R.drawable.ic_menu_mapmode)
+        );
+        mapOverlays.add(MAP_ICON_OVERLAY);
+    }*/
+
+    /**
+     * Disposes of the {@link MapReadinessManager} and clears all RxJava subscriptions.
+     * Should be called when the controller is no longer needed (e.g., when the MapView is detached).
+     */
     public void dispose() {
         readinessManager.dispose();
         ConcurrentUtil.tryToDispose(compositeDisposable);
     }
 
+    /**
+     * Clears all markers and polylines currently displayed on the map, except for the copyright overlay.
+     */
     private void clearOverlays() {
         Log.d(TAG, "clearOverlays() called");
 
         mapOverlays.clear();
         polylineList.clear();
         markerList.clear();
+        addCopyrightOverlay(mapView.get());
+
+        //mapOverlayMode();
 
         invalidate();
     }
 
+    /**
+     * Updates the map view to fit the bounding box of the entire track data from the cache.
+     */
     private void updateInitialBoundingBox() {
         try {
             if (geoPointCachedProvider.getGeoPointStatistics().getNortheastCorner() != null) {
@@ -244,6 +372,12 @@ public class MapViewController implements MapListener, MapReadinessManager.OnMap
         }
     }
 
+    /**
+     * Handles {@link EventVisibleChartEntriesTimestamp} events by updating the highlighted
+     * polyline segment on the map ({@link #boundaryPolyline}) to match the visible time range from the chart.
+     *
+     * @param event The event containing the start and end timestamps of the visible range.
+     */
     private void handleEvent(EventVisibleChartEntriesTimestamp event) {
         //Log.d(TAG, "handleEvent() called with: event = [" + event + "]");
 
@@ -283,7 +417,10 @@ public class MapViewController implements MapListener, MapReadinessManager.OnMap
         invalidate();
     }
 
-
+    /**
+     * Adds or updates the polyline representing the full GPX track.
+     * Retrieves points from {@link GeoPointCache} and creates/updates the {@link #fullPolyline}.
+     */
     private void addOrUpdateFullPolyline() {
         List<GeoPoint> points = geoPointCachedProvider.getGeoPointVector();
 
@@ -308,6 +445,12 @@ public class MapViewController implements MapListener, MapReadinessManager.OnMap
         }
     }
 
+    /**
+     * Adds or updates the polyline representing the currently visible segment based on chart interactions.
+     * Creates/updates the {@link #boundaryPolyline}.
+     *
+     * @param points The list of {@link GeoPoint}s for the visible segment.
+     */
     private void addOrUpdateBoundaryPolyline(List<GeoPoint> points) {
         if (boundaryPolyline == null) {
             boundaryPolyline = new Polyline();
@@ -326,6 +469,12 @@ public class MapViewController implements MapListener, MapReadinessManager.OnMap
         }
     }
 
+    /**
+     * Adds an overlay to the map's overlay list, attempting to maintain a specific drawing order
+     * based on {@link OverlayPriority}.
+     *
+     * @param overlay The {@link Overlay} to add.
+     */
     public void addOverlayAndSortWithPriority(Overlay overlay) {
         mapOverlays.add(overlay);
 
@@ -460,6 +609,12 @@ public class MapViewController implements MapListener, MapReadinessManager.OnMap
         mapView.get().zoomToBoundingBox(paddedBox, animated, paddingPx, 20, animationDurationMs);
     }
 
+    /**
+     * Creates a new marker for the selected point or updates the position of the existing selected marker.
+     * Uses {@link CustomSelectedMarkerMap} for the marker type.
+     *
+     * @param geoPointEntity The {@link GeoPointEntity} representing the point to mark as selected.
+     */
     private void createOrUpdateSelectedMarker(GeoPointEntity geoPointEntity) {
         if (geoPointEntity == null) {
             return;
@@ -472,14 +627,28 @@ public class MapViewController implements MapListener, MapReadinessManager.OnMap
         }
     }
 
+    /**
+     * Forces the MapView to redraw itself and its overlays.
+     */
     private void invalidate() {
         mapView.get().invalidate();
     }
 
+    /**
+     * Checks if a given marker is currently present in the map's overlay list.
+     *
+     * @param marker The {@link Marker} to check.
+     * @return True if the marker is on the map, false otherwise.
+     */
     private boolean mapContains(Marker marker) {
         return mapOverlays.contains(marker);
     }
 
+    /**
+     * Updates the position and potentially other properties of the currently selected marker.
+     *
+     * @param geoPointEntity The new {@link GeoPointEntity} data for the selected marker.
+     */
     private void updateMarker(GeoPointEntity geoPointEntity) {
         if (geoPointEntity != null && currentSelectedMarker != null) {
             Marker marker = currentSelectedMarker.get();
@@ -490,12 +659,24 @@ public class MapViewController implements MapListener, MapReadinessManager.OnMap
         }
     }
 
+    /**
+     * Creates a new {@link CustomSelectedMarkerMap}, sets its position and icon, adds it to the map overlays,
+     * and updates the {@link #currentSelectedMarker} reference.
+     *
+     * @param geoPointEntity The {@link GeoPointEntity} to create the marker for.
+     */
     private void createMarkerWithPosition(GeoPointEntity geoPointEntity) {
         currentSelectedMarker
                 = new WeakReference<>(addMarker(geoPointEntity, "SelectedOnChart :)")
         );
     }
 
+    /**
+     * Returns an Observable that emits the {@link GeoPointEntity} whenever a point is selected on the map.
+     * (Currently seems unused based on code, but provides the capability).
+     *
+     * @return Observable<GeoPointEntity>
+     */
     public Observable<GeoPointEntity> observeSelectPoint() {
         return selectedPointOnMap;
     }

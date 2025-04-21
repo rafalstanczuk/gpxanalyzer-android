@@ -181,13 +181,21 @@ public final class ExtremaSegmentDetector {
             }
         }
 
+        if (result.size() > 1) {
+            findMissingEndigExtremum(result, n);
+        }
+
+        return result;
+    }
+
+    private static void findMissingEndigExtremum(Vector<Extremum> result, int n) {
         // Find missing ending extremum :
         Extremum lastOne = result.get( result.size() - 1 );
         Extremum beforeLastOne = result.get( result.size() - 2 );
 
-        int lastIndex = n-1;
+        int lastIndex = n -1;
 
-        if ( lastOne.index < n-1 ) {
+        if ( lastOne.index < n -1 ) {
             //Missing ending extremum!
             switch (beforeLastOne.type) {
                 case MIN -> {
@@ -204,8 +212,6 @@ public final class ExtremaSegmentDetector {
                 }
             }
         }
-
-        return result;
     }
 
     // --------------------------------------------------------------------------

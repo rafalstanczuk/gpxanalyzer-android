@@ -11,28 +11,42 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+@Singleton
 public class GpxFileInfoParser {
     private static final String TAG = GpxFileInfoParser.class.getSimpleName();
 
     private static final SimpleDateFormat GPX_POINT_DATETIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault());
 
-    public static GpxFileInfo parse(File file) {
+
+    @Inject
+    public GpxFileInfoParser() {
+    }
+    public GpxFileInfo parse(File file) {
+        String creator = "Unknown";
+        String authorName = "Unknown";
+        String latStr = "N/A";
+        String lonStr = "N/A";
+        String eleStr = "N/A";
+        String timeStr = "N/A";
+        long timeMillis = 0;
+
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document document = builder.parse(file);
 
             // Get creator
-            String creator = document.getDocumentElement().getAttribute("creator");
+            creator = document.getDocumentElement().getAttribute("creator");
             if (creator.isEmpty()) {
                 creator = "Unknown";
             }
 
             // Get author name
-            String authorName = "Unknown";
             NodeList authorNodes = document.getElementsByTagName("author");
             if (authorNodes.getLength() > 0) {
                 NodeList nameNodes = ((Element) authorNodes.item(0)).getElementsByTagName("name");
@@ -42,38 +56,39 @@ public class GpxFileInfoParser {
             }
 
             // Get first track point
-            String lat = "N/A";
-            String lon = "N/A";
-            String ele = "N/A";
-            String time = "N/A";
-
             NodeList trksegNodes = document.getElementsByTagName("trkseg");
             if (trksegNodes.getLength() > 0) {
                 NodeList trkptNodes = ((Element) trksegNodes.item(0)).getElementsByTagName("trkpt");
                 if (trkptNodes.getLength() > 0) {
                     Element firstPoint = (Element) trkptNodes.item(0);
-                    lat = firstPoint.getAttribute("lat");
-                    lon = firstPoint.getAttribute("lon");
+                    latStr = firstPoint.getAttribute("lat");
+                    lonStr = firstPoint.getAttribute("lon");
 
                     NodeList eleNodes = firstPoint.getElementsByTagName("ele");
                     if (eleNodes.getLength() > 0) {
-                        ele = eleNodes.item(0).getTextContent();
+                        eleStr = eleNodes.item(0).getTextContent();
                     }
 
                     NodeList timeNodes = firstPoint.getElementsByTagName("time");
                     if (timeNodes.getLength() > 0) {
-                        time = timeNodes.item(0).getTextContent();
+                        timeStr = timeNodes.item(0).getTextContent();
                     }
                 }
             }
 
-            Date date = GPX_POINT_DATETIME_FORMAT.parse(time);
-            assert date != null;
+            if (!"N/A".equals(timeStr)) {
+                Date date = GPX_POINT_DATETIME_FORMAT.parse(timeStr);
+                if (date != null) {
+                    timeMillis = date.getTime();
+                }
+            }
 
-            return new GpxFileInfo(file, creator, authorName, lat, lon, ele, date.getTime());
+            // Pass the generated bitmap (can be null if generation failed or no valid point)
+            return new GpxFileInfo(0, file, creator, authorName, latStr, lonStr, eleStr, timeMillis);
         } catch (Exception e) {
             Log.e(TAG, "Error parsing GPX file: " + file.getName(), e);
-            return new GpxFileInfo(file, "Error", "Error", "N/A", "N/A", "N/A", 0);
+            // Return with null bitmap in case of parsing error
+            return new GpxFileInfo(0, file, "Error", "Error", "N/A", "N/A", "N/A", 0);
         }
     }
 }

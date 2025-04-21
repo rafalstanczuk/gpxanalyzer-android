@@ -137,8 +137,8 @@ public final class GpxFileDataEntityProvider extends FileDataEntityProvider {
 
         int maxIteration = segment.getTrackPoints().size() - 1;
 
-        int lastIntPercentageProgress = 0;
-        globalEventWrapper.onNext(new EventProgress(GpxFileDataEntityProvider.class, lastIntPercentageProgress));
+        EventProgress lastEventProgress = EventProgress.create(GpxFileDataEntityProvider.class, 0, maxIteration);
+        globalEventWrapper.onNext(lastEventProgress);
 
         for (int iTrackPoint = 0; iTrackPoint < maxIteration; iTrackPoint++) {
 
@@ -155,25 +155,12 @@ public final class GpxFileDataEntityProvider extends FileDataEntityProvider {
 
             dataCachedProvider.accept(dataEntity);
 
-            int intPercentageProgress = computePercentageProgress((float)(iTrackPoint + 1), (float) maxIteration);
+            EventProgress currentEventProgress = EventProgress.create(GpxFileDataEntityProvider.class, iTrackPoint + 1, maxIteration);
 
-            lastIntPercentageProgress = publishProgressOnChange(lastIntPercentageProgress, intPercentageProgress);
+            lastEventProgress = globalEventWrapper.onNextChanged(lastEventProgress, currentEventProgress);
 
             gpxPointList.add(dataEntity);
         }
-    }
-
-    private static int computePercentageProgress(float value, float maxValue) {
-        return (int) ( 100.0f * ( (value / maxValue) ) );
-    }
-
-    private int publishProgressOnChange(int lastIntPercentageProgress, int intPercentageProgress) {
-        if (lastIntPercentageProgress != intPercentageProgress) {
-            lastIntPercentageProgress = intPercentageProgress;
-
-            globalEventWrapper.onNext(new EventProgress(GpxFileDataEntityProvider.class, intPercentageProgress));
-        }
-        return lastIntPercentageProgress;
     }
 
     @NonNull

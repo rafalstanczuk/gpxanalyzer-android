@@ -17,6 +17,9 @@ public interface GpxFileInfoDao {
     @Query("SELECT * FROM gpx_files WHERE id = :id")
     Single<GpxFileInfoEntity> getById(long id);
 
+    @Query("SELECT * FROM gpx_files WHERE fileAbsolutePathBase64 = :basePathBase64")
+    Single<GpxFileInfoEntity> getByBase64AbsolutePath(String basePathBase64);
+
     @Insert
     Completable insert(GpxFileInfoEntity gpxFileInfo);
 

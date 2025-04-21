@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.usecase;
+package com.itservices.gpxanalyzer.data.provider.file;
 
 import static android.os.Environment.DIRECTORY_ALARMS;
 import static android.os.Environment.DIRECTORY_DCIM;
@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 
@@ -34,8 +35,8 @@ import io.reactivex.Single;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
-public class SearchFileUseCase {
-    private final String TAG = SearchFileUseCase.class.getSimpleName();
+public class DeviceStorageSearchedFileProvider {
+    private final String TAG = DeviceStorageSearchedFileProvider.class.getSimpleName();
     private static final String STORAGE = "storage";
     private static final String EMULATED = "emulated";
     private static final String SELF = "self";
@@ -57,9 +58,10 @@ public class SearchFileUseCase {
     private String[] mediaStoreSelectionArgs = new String[]{""};
 
     private final List<Object> parsedFileList = new ArrayList<>();
+    private AtomicReference<EventProgress> lastEventProgress = new AtomicReference<>();
 
     @Inject
-    public SearchFileUseCase() {
+    public DeviceStorageSearchedFileProvider() {
     }
 
     private static boolean isExists(File dir) {
@@ -186,6 +188,11 @@ public class SearchFileUseCase {
 
         // Search in all storage directories
         processedFiles.set(0); // Reset progress for direct scan
+
+        lastEventProgress.set( EventProgress.create(DeviceStorageSearchedFileProvider.class, processedFiles.get(), totalFiles.get()) );
+
+        globalEventWrapper.onNext(lastEventProgress.get());
+
         for (File storageDir : storageDirs) {
             searchAndParseFilesRecursively(storageDir, fileList, totalFiles, processedFiles);
         }
@@ -345,9 +352,11 @@ public class SearchFileUseCase {
 
     private void updateProgress(AtomicInteger processedFiles, AtomicInteger totalFiles) {
         if (totalFiles.get() > 0) {
-            int progress = (int) ((processedFiles.get() * 100.0) / totalFiles.get());
-            // Log.d(TAG, "Search progress: " + progress + "% (" + processedFiles.get() + "/" + totalFiles.get() + " files)");
-            globalEventWrapper.onNext(new EventProgress(SearchFileUseCase.class, progress));
+
+            EventProgress currentEventProgress
+                    = EventProgress.create(DeviceStorageSearchedFileProvider.class, processedFiles.get(), totalFiles.get());
+
+            lastEventProgress.set(globalEventWrapper.onNextChanged(lastEventProgress.get(), currentEventProgress));
         }
     }
 }

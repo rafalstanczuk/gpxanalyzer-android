@@ -29,15 +29,25 @@ import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
+/**
+ * A {@link Fragment} that displays a list of GPX chart areas ({@link ChartAreaItem}) in a RecyclerView.
+ * It interacts with {@link ChartAreaListViewModel} to manage the chart data, state, and user actions.
+ * The layout includes a top bar with controls for data loading, file selection, and other chart-related actions.
+ * It also manages the lifecycle of an embedded MapView used for miniatures or previews.
+ */
 @AndroidEntryPoint
 public class ChartAreaListFragment extends Fragment {
     private static final String TAG = ChartAreaListFragment.class.getSimpleName();
 
+    /** The ViewModel associated with this Fragment, shared with the Activity. */
     ChartAreaListViewModel viewModel;
+    /** View binding instance for this fragment's layout (fragment_chart_area_list.xml). */
     FragmentChartAreaListBinding binding;
 
+    /** Adapter for the RecyclerView displaying the chart area items. */
     ChartAreaItemAdapter adapter;
 
+    /** Factory for creating instances of {@link ChartAreaItem}. Injected by Hilt. */
     @Inject
     ChartAreaItemFactory chartAreaItemFactory;
 
@@ -46,6 +56,12 @@ public class ChartAreaListFragment extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
+    /**
+     * Inflates the layout, initializes ViewModel, binds data, sets up RecyclerView, and configures UI listeners.
+     * If the ViewModel does not already contain a list of chart items, it initializes a default list
+     * (e.g., Altitude vs. Time, Velocity vs. Time).
+     * Sets up observers for LiveData from the ViewModel to update the RecyclerView adapter.
+     */
     @Override
     public View onCreateView(
             @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState
@@ -101,6 +117,9 @@ public class ChartAreaListFragment extends Fragment {
         return binding.getRoot();
     }
 
+    /**
+     * Pauses the embedded MapView and instructs the ViewModel to dispose of its resources (e.g., RxJava subscriptions).
+     */
     @Override
     public void onPause() {
         Log.d(TAG, "onPause() called");
@@ -110,6 +129,9 @@ public class ChartAreaListFragment extends Fragment {
         viewModel.dispose();
     }
 
+    /**
+     * Resumes the embedded MapView and instructs the ViewModel to re-bind and handle resume logic.
+     */
     @Override
     public void onResume() {
         Log.d(TAG, "onResume() called");
@@ -120,6 +142,10 @@ public class ChartAreaListFragment extends Fragment {
         binding.mapView.onResume();
     }
 
+    /**
+     * Handles detachment, ensuring the embedded MapView is properly cleaned up and the ViewBinding reference is cleared
+     * to prevent memory leaks.
+     */
     @Override
     public void onDetach() {
         Log.d(TAG, "onDetach() called");

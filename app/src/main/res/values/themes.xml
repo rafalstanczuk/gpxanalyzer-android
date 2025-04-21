@@ -58,6 +58,23 @@
         <item name="colorPrimary">@color/black</item>
     </style>
 
+    <!-- ShapeAppearance for Oval Button -->
+    <style name="ShapeAppearance.App.Button.Oval" parent="ShapeAppearance.MaterialComponents.SmallComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
+    <!-- Custom Style for Outlined MaterialButton -->
+    <style name="Widget.App.MaterialButton.Outlined" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="shapeAppearance">@style/ShapeAppearance.App.Button.Oval</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="strokeColor">?attr/colorPrimary</item>
+        <item name="backgroundTint">?attr/colorOnPrimary</item>
+        <item name="iconTint">?attr/colorOnBackground</item>
+        <item name="android:textStyle">normal</item>
+        <item name="layout_constraintWidth_percent">0.9</item>
+        <item name="android:textColor">?attr/colorOnBackground</item>
+    </style>
 
     <style name="FullScreenDialog" parent="ThemeOverlay.MaterialComponents.Dialog">
         <item name="android:windowNoTitle">true</item>

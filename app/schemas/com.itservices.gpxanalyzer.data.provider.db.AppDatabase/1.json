@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "80c4c043c4d10e274e79bfcbe9e5f702",
+    "identityHash": "492b0faa5ebbd356b1d09ec5b2cf206b",
     "entities": [
       {
         "tableName": "gpx_files",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `file` TEXT, `creator` TEXT, `authorName` TEXT, `firstPointLat` TEXT, `firstPointLon` TEXT, `firstPointEle` TEXT, `firstPointTime` TEXT, `fileSize` INTEGER NOT NULL, `lastFileModified` INTEGER)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `fileAbsolutePathBase64` TEXT, `creator` TEXT, `authorName` TEXT, `firstPointLat` TEXT, `firstPointLon` TEXT, `firstPointEle` TEXT, `firstPointTimeMillis` INTEGER NOT NULL, `miniatureBitmapBase64` TEXT, `fileSize` INTEGER NOT NULL, `lastFileModified` INTEGER)",
         "fields": [
           {
             "fieldPath": "id",
@@ -15,8 +15,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "file",
-            "columnName": "file",
+            "fieldPath": "fileAbsolutePathBase64",
+            "columnName": "fileAbsolutePathBase64",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -51,8 +51,14 @@
             "notNull": false
           },
           {
-            "fieldPath": "firstPointTime",
-            "columnName": "firstPointTime",
+            "fieldPath": "firstPointTimeMillis",
+            "columnName": "firstPointTimeMillis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "miniatureBitmapBase64",
+            "columnName": "miniatureBitmapBase64",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -82,7 +88,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '80c4c043c4d10e274e79bfcbe9e5f702')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '492b0faa5ebbd356b1d09ec5b2cf206b')"
     ]
   }
 }

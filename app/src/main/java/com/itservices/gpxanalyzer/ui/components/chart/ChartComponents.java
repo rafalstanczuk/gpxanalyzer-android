@@ -7,50 +7,54 @@ import com.itservices.gpxanalyzer.data.raw.DataEntityWrapper;
 
 import javax.inject.Inject;
 
+/**
+ * Container class holding various components responsible for configuring and managing
+ * the appearance and behavior of a {@link DataEntityLineChart}.
+ * This includes settings, scaling, color palettes, and limit lines.
+ */
 public class ChartComponents {
 
     /**
-     * Manages the limit lines (boundaries) of the chart.
-     * <p>
-     * This component defines horizontal reference lines that indicate important
-     * thresholds or boundaries in the data, such as elevation zones or speed limits.
+     * Manages the limit lines (horizontal boundaries) displayed on the chart.
+     * Injected by Hilt.
      */
     @Inject
     LimitLinesBoundaries limitLinesBoundaries;
 
     /**
-     * Manages scaling and zooming of the chart.
-     * <p>
-     * This component handles the scaling behavior of the chart, ensuring that
-     * GPX data is displayed at appropriate scales and with proper boundaries.
+     * Manages the scaling and zooming behavior of the chart axes.
+     * Injected by Hilt.
      */
     @Inject
     LineChartScaler scaler;
 
     /**
-     * Determines colors for chart elements based on the data being displayed.
-     * <p>
-     * This component provides a consistent color scheme for the chart based on
-     * the type of data being visualized (elevation, speed, etc.).
+     * Determines the appropriate color palette for chart elements based on the displayed data.
+     * Injected by Hilt.
      */
     @Inject
     PaletteColorDeterminer paletteColorDeterminer;
 
+    /**
+     * Manages general chart settings (visual appearance, interactions).
+     * Injected by Hilt.
+     */
     @Inject
     LineChartSettings settings;
 
+    /**
+     * Constructor used by Hilt for dependency injection.
+     */
     @Inject
     public ChartComponents() {
 
     }
 
     /**
-     * Sets the data entity wrapper for this chart.
-     * <p>
-     * This method updates the palette color determiner and scaler with the new data.
-     * The data entity wrapper provides the GPX data that will be visualized on the chart.
+     * Initializes the components that depend on the specific data being displayed.
+     * Updates the {@link PaletteColorDeterminer} and {@link LineChartScaler} with the provided data wrapper.
      *
-     * @param dataEntityWrapper The data entity wrapper containing GPX data to visualize
+     * @param dataEntityWrapper The data entity wrapper containing the GPX data context for the chart.
      */
     public void init(DataEntityWrapper dataEntityWrapper) {
         paletteColorDeterminer.setDataEntityWrapper(dataEntityWrapper);
@@ -58,13 +62,11 @@ public class ChartComponents {
     }
 
     /**
-     * Loads chart settings and applies them to this chart.
-     * <p>
-     * This method initializes limit lines, scales the chart, and applies settings.
-     * It configures all visual and behavioral aspects of the chart according to
-     * the provided settings.
+     * Applies the configurations from all managed components to a specific chart instance.
+     * Initializes limit lines, sets up the scaler, applies general settings, and links
+     * settings with limit lines.
      *
-     * @param chart The chart settings to apply
+     * @param chart The {@link DataEntityLineChart} instance to configure.
      */
     public void loadChartSettings(DataEntityLineChart chart) {
         limitLinesBoundaries.initLimitLines(paletteColorDeterminer);
@@ -76,12 +78,9 @@ public class ChartComponents {
     }
 
     /**
-     * Gets the palette color determiner for this chart.
-     * <p>
-     * The palette color determiner provides consistent colors for chart elements
-     * based on the type of data being visualized.
+     * Gets the {@link PaletteColorDeterminer} instance managed by this container.
      *
-     * @return The PaletteColorDeterminer for this chart
+     * @return The {@link PaletteColorDeterminer}.
      */
     public PaletteColorDeterminer getPaletteColorDeterminer() {
         return paletteColorDeterminer;

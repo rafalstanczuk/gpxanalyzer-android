@@ -1,5 +1,10 @@
 package com.itservices.gpxanalyzer.utils.location;
 
+/**
+ * Utility class for converting between Geodetic coordinates (latitude, longitude, altitude)
+ * and Earth-Centered, Earth-Fixed (ECEF) Cartesian coordinates (X, Y, Z).
+ * This implementation uses the World Geodetic System 1984 (WGS84) ellipsoid model.
+ */
 public class ECEFConverter {
     // WGS84 ellipsoid constants
     private static final double a = 6378137.0;            // Semi-major axis [meters]
@@ -49,7 +54,7 @@ public class ECEFConverter {
         double lon = Math.atan2(y, x);
         double p   = Math.sqrt(x * x + y * y);
 
-        // Bowring’s formula for initial latitude
+        // Bowring's formula for initial latitude
         // theta = atan2(z * a, p * b)
         double theta = Math.atan2(z * a, p * b);
         double sinTheta = Math.sin(theta);

@@ -39,14 +39,30 @@ import javax.inject.Inject;
 
 import dagger.hilt.android.qualifiers.ActivityContext;
 
-@SuppressLint("ViewConstructor")
+/**
+ * Custom {@link MarkerView} implementation for displaying details about a selected
+ * {@link CurveEntry} on a {@link DataEntityLineChart}.
+ * It inflates a custom layout (`custom_marker_view.xml`) and populates it with information
+ * such as time, value, unit, trend statistics (ascent/descent details), and cumulative statistics.
+ * The visibility and content of some sections (like trend/cumulative stats) depend on chart settings.
+ */
+@SuppressLint("ViewConstructor") // Hilt requires @Inject constructor
 public class CustomMarker extends MarkerView {
 
+    /** Layout resource for the marker view content. */
     private static final int layoutResource = R.layout.custom_marker_view;
 
+    /** View binding instance for the custom marker layout. */
     CustomMarkerViewBinding binding;
+    /** Reference to the chart settings, used to control visibility of some marker elements. */
     private LineChartSettings settings;
 
+    /**
+     * Constructor used by Hilt for dependency injection.
+     * Inflates the custom layout using View Binding.
+     *
+     * @param context The activity context provided by Hilt.
+     */
     @Inject
     public CustomMarker(@ActivityContext Context context) {
         super(context);
@@ -57,11 +73,25 @@ public class CustomMarker extends MarkerView {
 
     }
 
+    /**
+     * Returns the offset for drawing the marker relative to the highlighted point.
+     * Positions the marker slightly offset from the highlighted point.
+     *
+     * @return The MPPointF offset.
+     */
     @Override
     public MPPointF getOffset() {
         return new MPPointF(getWidth() * 0.05f, getHeight() * 0.1f);
     }
 
+    /**
+     * Called every time the MarkerView is redrawn. Updates the content based on the highlighted Entry.
+     * Extracts data from the {@link CurveEntry}, formats it, and sets the text of the various TextViews
+     * within the marker layout (time, value, trend stats, cumulative stats).
+     *
+     * @param entry     The Entry selected on the chart.
+     * @param highlight The corresponding highlight object.
+     */
     @Override
     public void refreshContent(Entry entry, Highlight highlight) {
         DataEntityLineChart chartView = (DataEntityLineChart) getChartView();
@@ -92,6 +122,13 @@ public class CustomMarker extends MarkerView {
         super.refreshContent(entry, highlight);
     }
 
+    /**
+     * Sets up the layout section displaying cumulative processed data statistics.
+     * Visibility depends on whether ascent/descent segments are enabled in settings.
+     *
+     * @param dataEntity        The selected data entity.
+     * @param dataEntityWrapper The wrapper for the dataset.
+     */
     private void setupCumulativeProcessedDataTypesLayout(DataEntity dataEntity, DataEntityWrapper dataEntityWrapper) {
         ViewUtil.setVisibility(binding.cumulativeProcessedDataTypesLayout, settings.isDrawAscDescSegEnabled());
         if (settings.isDrawAscDescSegEnabled()) {
@@ -99,6 +136,12 @@ public class CustomMarker extends MarkerView {
         }
     }
 
+    /**
+     * Populates the TextViews related to cumulative statistics (e.g., total ascent/descent, segment ascent/descent).
+     *
+     * @param dataEntity        The selected data entity.
+     * @param dataEntityWrapper The wrapper for the dataset.
+     */
     private void setupCumulativeProcessedDataTypes(DataEntity dataEntity, DataEntityWrapper dataEntityWrapper) {
         fillTextViewWithValueUnit(dataEntity, dataEntityWrapper,
                 FROM_SEGMENT_START_SUM_REAL_DELTA_CUMULATIVE_VALUE,
@@ -109,6 +152,14 @@ public class CustomMarker extends MarkerView {
                 binding.allSumRealDeltaCumulativeValue);
     }
 
+    /**
+     * Helper method to fill a TextView with a formatted cumulative statistic value and its unit.
+     *
+     * @param dataEntity                The selected data entity.
+     * @param dataEntityWrapper         The wrapper for the dataset.
+     * @param cumulativeProcessedDataType The type of cumulative data to display.
+     * @param textView                  The TextView to populate.
+     */
     private static void fillTextViewWithValueUnit(DataEntity dataEntity, DataEntityWrapper dataEntityWrapper, CumulativeProcessedDataType cumulativeProcessedDataType, TextView textView) {
 
         CumulativeStatistics cumulativeStatistics = dataEntityWrapper.getCumulativeStatistics(dataEntity, cumulativeProcessedDataType);
@@ -122,6 +173,13 @@ public class CustomMarker extends MarkerView {
         textView.setText(TextViewUtil.getSpannableStringBuilder(valueString, " " + unit));
     }
 
+    /**
+     * Sets up the layout section displaying trend statistics (ascent/descent).
+     * Visibility depends on whether ascent/descent segments are enabled in settings.
+     *
+     * @param trendStatistics The trend statistics associated with the selected entry.
+     * @param unitString      The unit string for the displayed value.
+     */
     private void setupTrendStatisticsLayout(TrendStatistics trendStatistics, String unitString) {
         ViewUtil.setVisibility(binding.trendStatisticsLayout, settings.isDrawAscDescSegEnabled());
         if (settings.isDrawAscDescSegEnabled()) {

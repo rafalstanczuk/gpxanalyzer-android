@@ -11,17 +11,27 @@ import com.itservices.gpxanalyzer.ui.components.fab.UnfoldDirection;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Helper class dedicated to configuring the Speed Dial FAB component used for
+ * chart settings actions within a {@link ChartAreaItem} layout.
+ * It specifically targets the FABs defined in `chart_area_item_properties_control_layout.xml`.
+ */
 public class SpeedDialFabHelperChartSettings {
     private static final String TAG = SpeedDialFabHelperChartSettings.class.getSimpleName();
 
+    /**
+     * Default constructor.
+     */
     public SpeedDialFabHelperChartSettings() {
     }
 
     /**
-     * Configures the SpeedDialFabView with the chart area item.
+     * Configures the SpeedDialFabView for chart settings actions using the provided binding and chart item data.
+     * Sets unfold direction, translation distance, rotation, alpha, and binds the secondary FABs
+     * (switch mode, draw segments, draw circles) from the layout to the SpeedDialFabView controller.
      *
-     * @param binding       The binding object for the chart area item scale control layout
-     * @param chartAreaItem The chart area item to connect with the speed dial
+     * @param binding       The {@link ChartAreaItemPropertiesControlLayoutBinding} instance containing the SpeedDialFabView and its associated secondary FABs.
+     * @param chartAreaItem The {@link ChartAreaItem} (although not directly used in this version, it's kept for potential future use or context).
      */
     public void configureSpeedDialFab(ChartAreaItemPropertiesControlLayoutBinding binding, ChartAreaItem chartAreaItem) {
         if (binding == null || chartAreaItem == null) {

@@ -2,4 +2,5 @@
 <resources>
    <integer name="palette_number_of_divisions">8</integer>
    <fraction name="button_alpha">0.7</fraction>
+   <drawable name="ic_menu_mapmode">@android:drawable/ic_menu_mapmode</drawable>
 </resources>

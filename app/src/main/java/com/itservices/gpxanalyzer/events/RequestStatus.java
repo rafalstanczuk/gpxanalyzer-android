@@ -68,6 +68,7 @@ public enum RequestStatus {
      * This is the base state before any chart processing begins.
      */
     DEFAULT,
+    SELECTED_FILE,
     
     /**
      * State indicating that data loading has started.

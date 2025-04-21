@@ -1,32 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:layout_marginStart="@dimen/margin_very_small"
+    android:layout_marginEnd="@dimen/margin_very_small">
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnSelectFile"
-        android:layout_width="wrap_content"
+        style="@style/Widget.App.MaterialButton.Outlined"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:backgroundTint="?attr/colorPrimary"
+        android:text="@string/search_for_file"
         app:icon="@drawable/ic_files_fill0"
         app:iconGravity="textStart"
-        app:iconTint="?attr/colorOnPrimary"
-        android:textColor="?attr/colorOnPrimary"
-        android:text="@string/search_for_file"
-        app:rippleColor="?attr/colorOnPrimary" />
+        app:iconSize="@dimen/icon_size_material_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.itservices.gpxanalyzer.ui.components.miniature.MiniatureMapView
+        android:id="@+id/sequential_miniature_renderer"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_marginTop="@dimen/margin_medium"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnSelectFile" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_margin="8dp"
         android:clipToPadding="false"
-        android:padding="8dp"
+        android:fadingEdgeLength="@dimen/margin_medium_bigger"
+        android:requiresFadingEdge="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnSelectFile" />
+        app:layout_constraintTop_toBottomOf="@+id/btnSelectFile"
+        tools:listitem="@layout/item_file" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="20dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

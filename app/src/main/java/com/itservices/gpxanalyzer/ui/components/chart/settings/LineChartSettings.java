@@ -29,85 +29,50 @@ import javax.inject.Inject;
 import dagger.hilt.android.qualifiers.ApplicationContext;
 
 /**
- * Manages and applies configuration settings for GPX data line charts.
- * <p>
- * This class encapsulates all the settings that can be applied to a {@link DataEntityLineChart},
- * including axis configuration, grid appearance, interactions (dragging, zooming, etc.),
- * and visual display options. It provides methods to customize chart behavior and appearance
- * based on application requirements.
- * <p>
- * The settings can be applied to any {@link DataEntityLineChart} instance and can be dynamically
- * modified to update chart appearance during runtime.
- * <p>
- * Key features include:
- * - Axis configuration (labels, granularity, formatters)
- * - Touch and gesture handling (dragging, zooming, pinch)
- * - Visual styling (colors, limit lines, grid)
- * - Interactive elements (markers, highlight behavior)
+ * Manages and applies configuration settings for {@link DataEntityLineChart} instances.
+ * This class centralizes the configuration for axes, grid, interactions, markers,
+ * highlighting, and visual styles (like drawing icons or filled segments).
  */
 public class LineChartSettings {
-    /**
-     * Custom marker view for displaying details when highlighting chart points
-     */
+    /** Custom marker view displayed when a value is selected. Injected by Hilt. */
     private final CustomMarker customMarker;
 
-    /**
-     * Formatter for converting X-axis values to hour:minute format
-     */
+    /** Formatter for X-axis values (time). Injected by Hilt. */
     private final HourMinutesAxisValueFormatter hourMinutesAxisValueFormatter;
 
-    /**
-     * Formatter for Y-axis values based on data entities
-     */
+    /** Formatter for Y-axis values (data entity values like altitude, speed). Injected by Hilt. */
     private final AxisValueFormatter dataEntityAxisValueFormatter;
 
-    /**
-     * Paint used for the chart background
-     */
+    /** Paint object used for drawing the chart grid background. */
     private final Paint paintGridBg = new Paint();
 
-    /**
-     * Primary color used for various chart elements
-     */
+    /** Primary color resource used for styling (e.g., axis labels). */
     private final int primaryColor;
 
-    /**
-     * Manages limit lines (horizontal reference lines) displayed on the chart
-     */
+    /** Manages the horizontal limit lines displayed on the chart. */
     private LimitLinesBoundaries limitLinesBoundaries;
 
-    /**
-     * Flag controlling whether X-axis labels are displayed
-     */
+    // --- Configurable Flags --- //
+    /** Flag controlling whether X-axis labels are displayed. */
     private boolean drawXLabels = true;
-
-    /**
-     * Flag controlling chart deceleration behavior after drag gestures
-     */
+    /** Flag controlling chart deceleration behavior after drag gestures. */
     private boolean dragDecelerationEnabled = false;
-
-    /**
-     * Flag controlling whether icons are displayed on data points
-     */
+    /** Flag controlling whether icons are displayed on data points. */
     private boolean drawIconsEnabled = false;
-
-    /**
-     * Flag controlling whether ascent/descent segment filling is enabled
-     */
+    /** Flag controlling whether ascent/descent segment filling is enabled. */
     private boolean drawAscDescSegEnabled = false;
 
-    /**
-     * Weak reference to the chart this settings object is applied to
-     */
+    /** Weak reference to the chart this settings object is currently applied to. */
     private WeakReference<DataEntityLineChart> lineChartWeakRef;
 
     /**
-     * Creates a new LineChartSettings with default configuration.
+     * Creates a new LineChartSettings instance.
+     * Initializes components using Dagger/Hilt dependency injection.
      *
-     * @param context                       Application context used to retrieve resources
-     * @param customMarker                  The marker view to display when points are highlighted
-     * @param hourMinutesAxisValueFormatter Formatter for the X-axis time values
-     * @param dataEntityAxisValueFormatter  Formatter for the Y-axis data values
+     * @param context                       Application context for resource access.
+     * @param customMarker                  The marker view for highlighted points.
+     * @param hourMinutesAxisValueFormatter Formatter for X-axis (time).
+     * @param dataEntityAxisValueFormatter  Formatter for Y-axis (data value).
      */
     @Inject
     LineChartSettings(
@@ -124,6 +89,14 @@ public class LineChartSettings {
         this.dataEntityAxisValueFormatter = dataEntityAxisValueFormatter;
     }
 
+    /**
+     * Static helper method to apply relevant settings directly to a {@link LineDataSet}.
+     * Configures drawing of filled areas and icons based on the settings.
+     * Also configures the appearance of the highlight line.
+     *
+     * @param lineDataSet The dataset to configure.
+     * @param settings    The {@link LineChartSettings} containing the configuration.
+     */
     public static void updateLineDataSetWithSettings(LineDataSet lineDataSet, LineChartSettings settings) {
         lineDataSet.setDrawFilled(settings.isDrawAscDescSegEnabled());
         lineDataSet.setDrawIcons(settings.isDrawIconsEnabled());
@@ -140,10 +113,9 @@ public class LineChartSettings {
     }
 
     /**
-     * Checks if icon display is enabled for data points.
-     * Icons provide visual indicators at data points on the chart.
+     * Checks if drawing icons on data points is enabled.
      *
-     * @return True if icons should be displayed on data points, false otherwise
+     * @return {@code true} if icons are enabled, {@code false} otherwise.
      */
     public boolean isDrawIconsEnabled() {
         return drawIconsEnabled;
@@ -151,20 +123,18 @@ public class LineChartSettings {
 
     /**
      * Sets whether icons should be displayed on data points.
-     * Icons can enhance the visualization by marking specific points on the chart.
      *
-     * @param drawIconsEnabled True to enable icon display, false to disable
+     * @param drawIconsEnabled {@code true} to enable icon display, {@code false} to disable.
      */
     public void setDrawIconsEnabled(boolean drawIconsEnabled) {
         this.drawIconsEnabled = drawIconsEnabled;
     }
 
     /**
-     * Sets the limit lines boundaries for the chart.
-     * These boundaries determine the horizontal reference lines displayed on the chart,
-     * which can help visualize thresholds or ranges of interest.
+     * Sets the {@link LimitLinesBoundaries} manager for this chart.
+     * Links the Y-axis formatter to the boundaries.
      *
-     * @param limitLinesBoundaries The limit lines boundaries to use
+     * @param limitLinesBoundaries The limit lines boundaries manager.
      */
     public void setLimitLinesBoundaries(LimitLinesBoundaries limitLinesBoundaries) {
         this.limitLinesBoundaries = limitLinesBoundaries;
@@ -173,9 +143,8 @@ public class LineChartSettings {
 
     /**
      * Sets whether X-axis labels should be displayed.
-     * X-axis labels typically represent time values in the GPX data.
      *
-     * @param drawXLabels True to display X-axis labels, false to hide them
+     * @param drawXLabels {@code true} to display X-axis labels, {@code false} to hide them.
      */
     public void setDrawXLabels(boolean drawXLabels) {
         this.drawXLabels = drawXLabels;
@@ -183,24 +152,21 @@ public class LineChartSettings {
 
     /**
      * Sets whether drag deceleration is enabled for the chart.
-     * When enabled, the chart will continue to scroll with decreasing speed after a drag gesture ends,
-     * providing a more fluid user experience.
      *
-     * @param dragDecelerationEnabled True to enable drag deceleration, false to disable
+     * @param dragDecelerationEnabled {@code true} to enable drag deceleration, {@code false} to disable.
      */
     public void setDragDecelerationEnabled(boolean dragDecelerationEnabled) {
         this.dragDecelerationEnabled = dragDecelerationEnabled;
     }
 
     /**
-     * Applies all settings to the specified line chart.
-     * This method configures all aspects of the chart according to the current settings state,
-     * including axes, touch handling, visual appearance, and markers.
+     * Applies all configured settings to the specified {@link DataEntityLineChart}.
+     * This method configures axes, touch behavior, background, borders, markers, highlighting,
+     * and other visual and interactive aspects of the chart.
      *
-     * @param lineChart The chart to apply settings to
+     * @param lineChart The {@link DataEntityLineChart} instance to apply settings to.
      */
     public void setChartSettingsFor(DataEntityLineChart lineChart) {
-
         this.lineChartWeakRef = new WeakReference<>(lineChart);
 
         lineChart.setDragDecelerationEnabled(dragDecelerationEnabled);
@@ -238,11 +204,11 @@ public class LineChartSettings {
     }
 
     /**
-     * Configures the X-axis of the chart.
-     * Sets up position, granularity, formatting, and appearance of the X-axis,
-     * which typically represents time values in GPX data.
+     * Configures the appearance and behavior of the chart's X-axis (bottom axis).
+     * Sets position, granularity, label formatting (using {@link HourMinutesAxisValueFormatter}),
+     * color, and whether labels/gridlines are drawn.
      *
-     * @param lineChart The chart whose X-axis should be configured
+     * @param lineChart The chart whose X-axis needs configuration.
      */
     private void setupXAxis(DataEntityLineChart lineChart) {
         XAxis xAxis = lineChart.getXAxis();
@@ -259,11 +225,10 @@ public class LineChartSettings {
     }
 
     /**
-     * Configures the chart descriptions and legend.
-     * Currently disables both description and legend to focus on the chart data,
-     * though commented code shows how a description could be added if needed.
+     * Configures the chart's description label (typically shown in the bottom-right corner).
+     * Disables the description in this implementation.
      *
-     * @param lineChart The chart whose descriptions should be configured
+     * @param lineChart The chart whose description needs configuration.
      */
     private void setupDescriptions(DataEntityLineChart lineChart) {
         lineChart.getDescription().setEnabled(false);
@@ -283,11 +248,10 @@ public class LineChartSettings {
     }
 
     /**
-     * Configures the right Y-axis of the chart.
-     * Currently disables the right Y-axis completely, as the application
-     * only uses the left Y-axis for data visualization.
+     * Configures the appearance and behavior of the chart's right Y-axis.
+     * Disables the right Y-axis in this implementation.
      *
-     * @param lineChart The chart whose right Y-axis should be configured
+     * @param lineChart The chart whose right Y-axis needs configuration.
      */
     private void setupYAxisRight(DataEntityLineChart lineChart) {
         YAxis yAxisRight = lineChart.getAxisRight();
@@ -297,11 +261,12 @@ public class LineChartSettings {
     }
 
     /**
-     * Configures the left Y-axis of the chart.
-     * Sets up formatting, appearance, and limit lines for the left Y-axis,
-     * which typically represents measurement values (elevation, speed, etc.) in GPX data.
+     * Configures the appearance and behavior of the chart's left Y-axis.
+     * Sets label formatting (using {@link AxisValueFormatter}), color, position,
+     * label count, and enables/disables the zero line and grid lines.
+     * Applies limit lines configured via {@link LimitLinesBoundaries}.
      *
-     * @param lineChart The chart whose left Y-axis should be configured
+     * @param lineChart The chart whose left Y-axis needs configuration.
      */
     private void setupYAxisLeft(DataEntityLineChart lineChart) {
         YAxis yAxisLeft = lineChart.getAxisLeft();
@@ -324,33 +289,28 @@ public class LineChartSettings {
     }
 
     /**
-     * Checks if ascent/descent segment filling is enabled.
-     * When enabled, the area between the line and the axis is filled with color,
-     * making it easier to visualize elevation changes or other metrics.
+     * Checks if drawing filled ascent/descent segments is enabled.
      *
-     * @return True if ascent/descent segment filling is enabled, false otherwise
+     * @return {@code true} if enabled, {@code false} otherwise.
      */
     public boolean isDrawAscDescSegEnabled() {
         return drawAscDescSegEnabled;
     }
 
     /**
-     * Sets whether ascent/descent segment filling is enabled.
-     * When enabled, areas between the line and the axis will be filled with color,
-     * enhancing the visual representation of elevation changes or similar metrics.
+     * Sets whether drawing filled ascent/descent segments is enabled.
      *
-     * @param drawAscDescSegEnabled True to enable segment filling, false to disable
+     * @param drawAscDescSegEnabled {@code true} to enable, {@code false} to disable.
      */
     public void setDrawAscDescSegEnabled(boolean drawAscDescSegEnabled) {
         this.drawAscDescSegEnabled = drawAscDescSegEnabled;
     }
 
     /**
-     * Updates the settings for the specified line data.
-     * Applies current visual settings to all datasets in the line data,
-     * ensuring consistent appearance across the chart.
+     * Updates settings that might depend on the currently loaded data.
+     * Specifically, updates the Y-axis formatter ({@link AxisValueFormatter}) with the new LineData.
      *
-     * @param lineData The line data to update settings for
+     * @param lineData The {@link LineData} currently loaded in the chart.
      */
     public void updateSettingsFor(LineData lineData) {
         List<ILineDataSet> lineDataSetList = lineData.getDataSets();
@@ -362,6 +322,11 @@ public class LineChartSettings {
         );
     }
 
+    /**
+     * Gets the {@link ChartSlot} associated with the currently configured chart.
+     *
+     * @return The {@link ChartSlot}, or null if no chart is currently referenced.
+     */
     public ChartSlot getChartSlot() {
         if (lineChartWeakRef == null || lineChartWeakRef.get() == null) {
             return null;
