@@ -146,7 +146,9 @@ public class FileSelectorFragment extends DialogFragment {
                 }
                 fileAdapter.setFiles(FileInfoItemMapper.mapFrom(gpxFileInfoList));
             } else {
-                Toast.makeText(requireContext(), getString(R.string.found_gpx_files, gpxFileInfoList.size()), Toast.LENGTH_SHORT).show();
+                if (viewModel.getSearchWasRequested()) {
+                    Toast.makeText(requireContext(), getString(R.string.found_gpx_files, gpxFileInfoList.size()), Toast.LENGTH_SHORT).show();
+                }
                 fileAdapter.setFiles(FileInfoItemMapper.mapFrom(gpxFileInfoList));
             }
         });

@@ -73,7 +73,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileViewHolder
                 TextViewUtil.getSpannableStringBuilderWithBoldPrefix(
                         context.getString(R.string.author_prefix),
                         gpxFileInfo.authorName(),
-                        "\t\t"
+                        "\t"
                 ), TextView.BufferType.SPANNABLE
         );
 

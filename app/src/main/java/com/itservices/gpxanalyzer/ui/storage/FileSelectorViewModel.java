@@ -109,11 +109,13 @@ public class FileSelectorViewModel extends ViewModel {
                                 fileList -> {
                                     fileInfoListLiveData.setValue(fileList);
                                     searchWasRequestedLiveData.setValue(false);
+                                    globalEventWrapper.clearEventProgressState();
                                 },
                                 error -> {
                                     Log.e(TAG, "Error setting filesInfoLiveData in receiveRecentFoundFileList", error);
                                     fileInfoListLiveData.setValue(new ArrayList<>());
                                     searchWasRequestedLiveData.setValue(false);
+                                    globalEventWrapper.clearEventProgressState();
                                 }
                         )
         );

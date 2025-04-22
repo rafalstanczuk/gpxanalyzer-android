@@ -51,9 +51,8 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="0dp"
-                android:layout_height="0dp"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/margin_small"
-                app:layout_constraintBottom_toBottomOf="@+id/mapMiniatureImageViewMaterialCardView"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/mapMiniatureImageViewMaterialCardView"
                 app:layout_constraintTop_toTopOf="@+id/mapMiniatureImageViewMaterialCardView">
@@ -170,20 +169,20 @@
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <TextView
-                    android:id="@+id/fileSize"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="@dimen/margin_medium_small"
-                    android:background="?attr/colorPrimary"
-                    android:padding="@dimen/margin_very_small"
-                    android:textColor="?attr/colorOnPrimary"
-                    android:textSize="11sp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    tools:text="1.2 kB" />
-
             </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <TextView
+                android:id="@+id/fileSize"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_medium_small"
+                android:background="?attr/colorPrimary"
+                android:padding="@dimen/margin_very_small"
+                android:textColor="?attr/colorOnPrimary"
+                android:textSize="11sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                tools:text="1.2 kB" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
