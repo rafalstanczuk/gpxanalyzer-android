@@ -49,7 +49,10 @@ public class FileSelectorViewModel extends ViewModel {
     /** LiveData emitting {@link EventProgress} updates for background operations (searching, miniature generation). */
     private final MutableLiveData<EventProgress> percentageEventProgressLiveData = new MutableLiveData<>(null);
     /** LiveData holding the list of found {@link GpxFileInfo} objects. */
-    private final MutableLiveData<List<GpxFileInfo>> filesInfoLiveData = new MutableLiveData<>(new ArrayList<>());
+    private final MutableLiveData<List<GpxFileInfo>> fileInfoListLiveData = new MutableLiveData<>(new ArrayList<>());
+    private final MutableLiveData<Boolean> searchWasRequestedLiveData = new MutableLiveData<>(null);
+    private final MutableLiveData<FileInfoItem> selectedFileInfoItemLiveData = new MutableLiveData<>(null);
+
     /** Composite disposable to manage RxJava subscriptions. */
     private final CompositeDisposable disposables = new CompositeDisposable();
     @Inject
@@ -77,12 +80,20 @@ public class FileSelectorViewModel extends ViewModel {
      * @return LiveData<List<GpxFileInfo>>
      */
     public LiveData<List<GpxFileInfo>> getFoundFileListLiveData() {
-        return filesInfoLiveData;
+        return fileInfoListLiveData;
+    }
+
+    public LiveData<Boolean> getSearchWasRequestedLiveData() {
+        return searchWasRequestedLiveData;
+    }
+
+    public Boolean getSearchWasRequested() {
+        return searchWasRequestedLiveData.getValue() != null && searchWasRequestedLiveData.getValue();
     }
 
     /**
      * Fetches the most recent list of found/processed GPX files from the {@link GetGpxFileInfoListUseCase}
-     * and updates the {@link #filesInfoLiveData}.
+     * and updates the {@link #fileInfoListLiveData}.
      * Handles potential errors during fetching.
      */
     public void receiveRecentFoundFileList() {
@@ -95,10 +106,14 @@ public class FileSelectorViewModel extends ViewModel {
                         .observeOn(AndroidSchedulers.mainThread())
                         .doOnError(throwable -> Log.e(TAG, "Error fetching GPX file list from use case", throwable))
                         .subscribe(
-                                filesInfoLiveData::setValue,
+                                fileList -> {
+                                    fileInfoListLiveData.setValue(fileList);
+                                    searchWasRequestedLiveData.setValue(false);
+                                },
                                 error -> {
                                     Log.e(TAG, "Error setting filesInfoLiveData in receiveRecentFoundFileList", error);
-                                    filesInfoLiveData.setValue(new ArrayList<>());
+                                    fileInfoListLiveData.setValue(new ArrayList<>());
+                                    searchWasRequestedLiveData.setValue(false);
                                 }
                         )
         );
@@ -127,6 +142,8 @@ public class FileSelectorViewModel extends ViewModel {
      */
     public void searchGpxFilesAndGenerateMiniatures(Context context, MiniatureMapView miniatureRenderer) {
         Log.d(TAG, "searchGpxFilesAndGenerateMiniatures() called with: context = [" + context + "], renderer = [" + miniatureRenderer + "]");
+
+
 
         percentageEventProgressLiveData.setValue(
                 EventProgress.create(STORAGE_SEARCH_PROGRESS, 0)
@@ -166,6 +183,10 @@ public class FileSelectorViewModel extends ViewModel {
         return requestPermissionsLiveData;
     }
 
+    public LiveData<FileInfoItem> getSelectedFileInfoItemLiveData() {
+        return selectedFileInfoItemLiveData;
+    }
+
     /**
      * Gets the current value of the permission granted state.
      *
@@ -178,10 +199,11 @@ public class FileSelectorViewModel extends ViewModel {
     /**
      * Notifies the {@link SelectGpxFileUseCase} that a specific file has been selected by the user.
      *
-     * @param gpxFile The selected {@link File}.
+     * @param fileInfoItem contains the selected {@link File}.
      */
-    public void selectFile(File gpxFile) {
-        selectGpxFileUseCase.setSelectedFile(gpxFile);
+    public void selectFileInfoItem(FileInfoItem fileInfoItem) {
+        selectGpxFileUseCase.setSelectedFile(fileInfoItem.fileInfo().file());
+        selectedFileInfoItemLiveData.setValue(fileInfoItem);
     }
 
     /**

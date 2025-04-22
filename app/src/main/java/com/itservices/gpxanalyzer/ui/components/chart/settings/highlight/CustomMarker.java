@@ -102,14 +102,14 @@ public class CustomMarker extends MarkerView {
         if (entry instanceof CurveEntry curveDataEntityEntry) {
             DataEntity dataEntity = curveDataEntityEntry.getDataEntity();
 
-            SpannableStringBuilder timeLine = TextViewUtil.getSpannableStringBuilder(
-                    FormatNumberUtil.getFormattedTime(dataEntity.timestampMillis()), " h"
-            );
+            SpannableStringBuilder timeLine = TextViewUtil.getSpannableStringBuilderWithBoldPostfix(
+                    FormatNumberUtil.getFormattedTime(dataEntity.timestampMillis()), "h",
+                    " ");
 
             String unitString = curveDataEntityEntry.getDataEntityWrapper().getUnit(dataEntity);
 
-            SpannableStringBuilder valueLine = TextViewUtil.getSpannableStringBuilder(
-                    String.valueOf((int) curveDataEntityEntry.getY()), " " + unitString);
+            SpannableStringBuilder valueLine = TextViewUtil.getSpannableStringBuilderWithBoldPostfix(
+                    String.valueOf((int) curveDataEntityEntry.getY()), unitString, " ");
 
             binding.markerTextViewTime.setText(timeLine, TextView.BufferType.SPANNABLE);
             binding.markerTextViewValue.setText(valueLine, TextView.BufferType.SPANNABLE);
@@ -170,7 +170,7 @@ public class CustomMarker extends MarkerView {
         String valueString =
                 String.format(Locale.getDefault(), "%.2f", value);
 
-        textView.setText(TextViewUtil.getSpannableStringBuilder(valueString, " " + unit));
+        textView.setText(TextViewUtil.getSpannableStringBuilderWithBoldPostfix(valueString, " " + unit, " "));
     }
 
     /**
@@ -206,12 +206,12 @@ public class CustomMarker extends MarkerView {
                 String.format(Locale.getDefault(), "%.2f", trendStatistics.absDeltaVal());
 
 
-        binding.markerTextViewDeltaValue.setText(TextViewUtil.getSpannableStringBuilder(text, " " + unitString));
+        binding.markerTextViewDeltaValue.setText(TextViewUtil.getSpannableStringBuilderWithBoldPostfix(text, " " + unitString, " "));
         binding.markerTextViewDeltaValue.setBackgroundColor(ColorUtil.setAlphaInIntColor(trendType.getFillColor(), 128));
 
         String numberString =
                 String.format(Locale.getDefault(), "%d.", trendStatistics.n());
-        binding.markerTextViewNumber.setText(TextViewUtil.getSpannableStringBuilder(null, numberString));
+        binding.markerTextViewNumber.setText(TextViewUtil.getSpannableStringBuilderWithBoldPostfix(null, numberString, " "));
 
         binding.trendTypeImageView.setImageResource(trendType.getDrawableId());
     }

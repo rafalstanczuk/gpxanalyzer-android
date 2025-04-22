@@ -30,19 +30,23 @@ import io.reactivex.disposables.CompositeDisposable;
 @AndroidEntryPoint
 public class FileSelectorFragment extends DialogFragment {
 
-    /** ViewModel associated with this fragment. */
+    /**
+     * Manages RxJava subscriptions to prevent memory leaks.
+     */
+    private final CompositeDisposable disposables = new CompositeDisposable();
+    /**
+     * ViewModel associated with this fragment.
+     */
     private FileSelectorViewModel viewModel;
-    /** Adapter for the RecyclerView displaying the list of files. */
+    /**
+     * Adapter for the RecyclerView displaying the list of files.
+     */
     private FileAdapter fileAdapter;
-    /** View binding instance for this fragment's layout (fragment_file_selector.xml). */
+    /**
+     * View binding instance for this fragment's layout (fragment_file_selector.xml).
+     */
     private FragmentFileSelectorBinding binding;
 
-    /** Manages RxJava subscriptions to prevent memory leaks. */
-    private final CompositeDisposable disposables = new CompositeDisposable();
-
-    /**
-     * Initializes the ViewModel.
-     */
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,21 +54,12 @@ public class FileSelectorFragment extends DialogFragment {
         viewModel.init();
     }
 
-    /**
-     * Inflates the layout, initializes the RecyclerView adapter, and sets up the basic view structure.
-     * The adapter is configured with a listener that calls {@link FileSelectorViewModel#selectFile(File)}
-     * and dismisses the dialog upon selection.
-     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentFileSelectorBinding.inflate(inflater, container, false);
 
-        fileAdapter = new FileAdapter(file -> {
-            viewModel.selectFile(file);
-            Toast.makeText(requireContext(), getString(R.string.selected) + file.getName(), Toast.LENGTH_SHORT).show();
-            dismiss();
-        });
+        fileAdapter = new FileAdapter(viewModel, getViewLifecycleOwner());
 
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.recyclerView.setAdapter(fileAdapter);
@@ -72,11 +67,6 @@ public class FileSelectorFragment extends DialogFragment {
         return binding.getRoot();
     }
 
-    /**
-     * Called after the view has been created. Initiates permission checks and sets up observers
-     * for ViewModel LiveData (permissions, found files, progress). Configures the button listener
-     * to start the file search or re-request permissions.
-     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -90,9 +80,15 @@ public class FileSelectorFragment extends DialogFragment {
             }
         });
 
+        viewModel.getSelectedFileInfoItemLiveData().observe(getViewLifecycleOwner(), fileInfoItem -> {
+            if (fileInfoItem != null) {
+                dismiss();
+            }
+        });
+
         viewModel.checkAndRequestPermissions(FileSelectorFragment.this.requireActivity());
 
-        binding.btnSelectFile.setOnClickListener(v -> {
+        binding.searchFilesButton.setOnClickListener(v -> {
             if (viewModel.getPermissionsGranted()) {
                 startRecursiveSearchAndGenerateMiniatures();
             } else {
@@ -107,22 +103,22 @@ public class FileSelectorFragment extends DialogFragment {
      * from the ViewModel, and calls the ViewModel's method to begin the search.
      */
     private void startRecursiveSearchAndGenerateMiniatures() {
-        binding.btnSelectFile.setEnabled(false);
-        binding.btnSelectFile.setText(R.string.searching_files);
+        binding.searchFilesButton.setEnabled(false);
+        binding.searchFilesButton.setText(R.string.searching_files);
 
         viewModel.getPercentageEventProgress().observe(getViewLifecycleOwner(), eventProgress -> {
             if (eventProgress == null) {
                 return;
             }
 
-            switch (eventProgress.percentageUpdateEventSourceType()){
+            switch (eventProgress.percentageUpdateEventSourceType()) {
                 case GPX_FILE_DATA_ENTITY_PROVIDER, UNKNOWN_SOURCE -> {
                 }
                 case STORAGE_SEARCH_PROGRESS -> {
-                    binding.btnSelectFile.setText(getString(R.string.searching_files_progress, eventProgress.percentage()));
+                    binding.searchFilesButton.setText(getString(R.string.searching_files_progress, eventProgress.percentage()));
                 }
                 case MINIATURE_GENERATION_PROGRESS -> {
-                    binding.btnSelectFile.setText(getString(R.string.generating_miniatures_progress, eventProgress.percentage()));
+                    binding.searchFilesButton.setText(getString(R.string.generating_miniatures_progress, eventProgress.percentage()));
                 }
             }
         });
@@ -137,14 +133,18 @@ public class FileSelectorFragment extends DialogFragment {
      */
     private void initViewModelObservers() {
         viewModel.getFoundFileListLiveData().observe(getViewLifecycleOwner(), gpxFileInfoList -> {
-            binding.btnSelectFile.setEnabled(true);
-            binding.btnSelectFile.setText(R.string.search_for_file);
+            binding.searchFilesButton.setEnabled(true);
+            binding.searchFilesButton.setText(R.string.search_for_file);
 
             if (gpxFileInfoList == null) {
-                 Toast.makeText(requireContext(), R.string.no_gpx_files_found, Toast.LENGTH_SHORT).show();
+                if (viewModel.getSearchWasRequested()) {
+                    Toast.makeText(requireContext(), R.string.no_gpx_files_found, Toast.LENGTH_SHORT).show();
+                }
             } else if (gpxFileInfoList.isEmpty()) {
-                Toast.makeText(requireContext(), R.string.no_gpx_files_found, Toast.LENGTH_SHORT).show();
-                 fileAdapter.setFiles(FileInfoItemMapper.mapFrom(gpxFileInfoList));
+                if (viewModel.getSearchWasRequested()) {
+                    Toast.makeText(requireContext(), R.string.no_gpx_files_found, Toast.LENGTH_SHORT).show();
+                }
+                fileAdapter.setFiles(FileInfoItemMapper.mapFrom(gpxFileInfoList));
             } else {
                 Toast.makeText(requireContext(), getString(R.string.found_gpx_files, gpxFileInfoList.size()), Toast.LENGTH_SHORT).show();
                 fileAdapter.setFiles(FileInfoItemMapper.mapFrom(gpxFileInfoList));

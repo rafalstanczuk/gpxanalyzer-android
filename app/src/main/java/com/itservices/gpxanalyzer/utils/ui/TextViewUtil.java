@@ -16,21 +16,26 @@ public class TextViewUtil {
     /**
      * Creates a {@link SpannableStringBuilder} by concatenating a prefix string (optional, regular style)
      * and a postfix string (mandatory, bold style).
-     *
+     * <p>
      * Example usage: `getSpannableStringBuilder("Name: ", "John Doe")` would produce "Name: **John Doe**".
      *
-     * @param prefixText The text to appear before the bolded postfix. If null, it is omitted.
+     * @param prefixText  The text to appear before the bolded postfix. If null, it is omitted.
      * @param postFixText The text to appear at the end, formatted in bold. Must not be null.
+     * @param space
      * @return A {@link SpannableStringBuilder} containing the combined text with the postfix styled bold.
      * @throws NullPointerException if {@code postFixText} is null.
      */
     @NonNull
-    public static SpannableStringBuilder getSpannableStringBuilder(String prefixText, String postFixText) {
+    public static SpannableStringBuilder getSpannableStringBuilderWithBoldPostfix(String prefixText, String postFixText, String space) {
         SpannableStringBuilder textLine = new SpannableStringBuilder();
 
         if (prefixText != null) {
             SpannableString prefixTextSpannable = new SpannableString(prefixText);
             textLine.append(prefixTextSpannable);
+        }
+
+        if (space != null) {
+            textLine.append(space);
         }
 
         SpannableString postFixTextSpannable = new SpannableString(postFixText);
@@ -54,13 +59,17 @@ public class TextViewUtil {
      * @throws NullPointerException if {@code prefixText} is null.
      */
     @NonNull
-    public static SpannableStringBuilder getSpannableStringBuilderWithBoldPrefix(String prefixText, String postFixText) {
+    public static SpannableStringBuilder getSpannableStringBuilderWithBoldPrefix(String prefixText, String postFixText, String space) {
         SpannableStringBuilder textLine = new SpannableStringBuilder();
 
         SpannableString prefixTextSpannable = new SpannableString(prefixText);
         int flag = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE;
         prefixTextSpannable.setSpan(new StyleSpan(Typeface.BOLD), 0, prefixTextSpannable.length(), flag);
         textLine.append(prefixTextSpannable);
+
+        if (space != null) {
+            textLine.append(space);
+        }
 
         if (postFixText != null) {
             SpannableString postFixTextSpannable = new SpannableString(postFixText);

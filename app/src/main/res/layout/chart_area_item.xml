@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-
         <variable
             name="chartAreaItem"
             type="com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItem" />
@@ -89,7 +88,7 @@
                 android:layout_height="match_parent"
                 android:focusable="true"
                 android:visibility="@{ viewModel.overlayViewToReloadIndicatorVisibilityLiveData }"
-                android:contentDescription="@string/map_miniature_preview"
+                android:contentDescription="@string/overlay_view_to_reload_imageview"
                 android:scaleType="fitCenter"
                 android:foregroundGravity="top"
                 android:clickable="true"

@@ -12,7 +12,9 @@ import java.util.Locale;
 public final class StringUtils {
     // Date format for displaying timestamps in UI elements.
     // TODO: Determine Locale based on longitude/latitude for more accurate local time representation.
-    private static final SimpleDateFormat itemDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
+    private static final SimpleDateFormat itemDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
+    private static final SimpleDateFormat itemDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+    private static final SimpleDateFormat itemTimeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
 
     /**
      * Formats a timestamp (in milliseconds since the epoch) into a human-readable date and time string
@@ -23,12 +25,38 @@ public final class StringUtils {
      *         otherwise returns "N/A".
      */
     @NonNull
-    public static String getFormattedTimeMillisDate(long timeMillis) {
+    public static String getFormattedDateTimeMillisDate(long timeMillis) {
+        String formattedDate = "N/A";
+        if (timeMillis > 0) {
+            try {
+                Date date = new Date(timeMillis);
+                formattedDate = itemDateTimeFormat.format(date);
+            } catch (Exception ignored) {
+            }
+        }
+        return formattedDate;
+    }
+
+    @NonNull
+    public static String getFormattedDateMillisDate(long timeMillis) {
         String formattedDate = "N/A";
         if (timeMillis > 0) {
             try {
                 Date date = new Date(timeMillis);
                 formattedDate = itemDateFormat.format(date);
+            } catch (Exception ignored) {
+            }
+        }
+        return formattedDate;
+    }
+
+    @NonNull
+    public static String getFormattedTimeMillisDate(long timeMillis) {
+        String formattedDate = "N/A";
+        if (timeMillis > 0) {
+            try {
+                Date date = new Date(timeMillis);
+                formattedDate = itemTimeFormat.format(date);
             } catch (Exception ignored) {
             }
         }

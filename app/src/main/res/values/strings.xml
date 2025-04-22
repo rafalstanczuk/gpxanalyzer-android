@@ -44,11 +44,8 @@
     <string name="found_gpx_files">Found %1$d GPX files</string>
     <string name="error_searching_files">Error searching for files</string>
 
-    <string name="creator_format_string">Creator: %s</string>
-    <string name="creator_prefix">Creator: \t</string>
-    <string name="author_format_string">Author: %s</string>
-    <string name="author_prefix">Author: \t</string>
-    <string name="first_point_lat_s_lon_s_ele_s">First point: Lat=%s, Lon=%s, Ele=%s</string>
+    <string name="creator_prefix">Creator:</string>
+    <string name="author_prefix">Author:</string>
     <string name="map_miniature_preview">map_miniature_preview</string>
     <string name="overlay_view_to_reload_imageview">overlay_view_to_reload_imageview</string>
     <string name="generating_miniatures_progress">Miniatures… %1$d%%</string>
@@ -60,7 +57,6 @@
     <string name="coordinate_east">E</string>
     <string name="coordinate_west">W</string>
     <string name="elevation_unit">m asl.</string>
-    <string name="coordinates_separator">,\n</string>
     <string name="location_start">Start:</string>
     <string name="file_details">File Details</string>
 

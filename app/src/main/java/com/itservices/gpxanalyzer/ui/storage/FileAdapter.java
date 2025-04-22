@@ -2,20 +2,17 @@ package com.itservices.gpxanalyzer.ui.storage;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Typeface;
-import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
-import android.text.Spanned;
-import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.card.MaterialCardView;
 import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.data.parser.gpxfileinfo.GpxFileInfo;
 import com.itservices.gpxanalyzer.databinding.ItemFileBinding;
@@ -36,20 +33,18 @@ import java.util.Locale;
  */
 public class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileViewHolder> {
     private static final String TAG = FileAdapter.class.getSimpleName();
-    /** Listener to be notified when a file item is selected by the user. */
-    private final OnFileSelectedListener fileSelectedListener;
+    private final FileSelectorViewModel viewModel;
+    private final LifecycleOwner viewLifecycleOwner;
+
     /** The list of file information items currently displayed by the adapter. */
     private List<FileInfoItem> fileInfoItemList = new ArrayList<>();
-    /** The currently selected file item. */
-    private FileInfoItem selectedFileInfoItem;
 
     /**
      * Constructs a new {@code FileAdapter}.
-     *
-     * @param listener The listener to be notified upon file selection.
      */
-    public FileAdapter(OnFileSelectedListener listener) {
-        this.fileSelectedListener = listener;
+    public FileAdapter(FileSelectorViewModel viewModel, LifecycleOwner viewLifecycleOwner) {
+        this.viewModel = viewModel;
+        this.viewLifecycleOwner = viewLifecycleOwner;
     }
 
     /**
@@ -59,92 +54,53 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileViewHolder
      * @param gpxFileInfo The {@link GpxFileInfo} data object.
      * @param context     The application context for resolving string resources.
      */
-    private static void configureTextViews(@NonNull FileViewHolder holder, GpxFileInfo gpxFileInfo, Context context) {
+    private void configureTextViews(@NonNull FileViewHolder holder, GpxFileInfo gpxFileInfo, Context context) {
         Log.d(FileAdapter.class.getSimpleName(), "configureTextViews() called with: holder = [" + holder + "], gpxFileInfo = [" + gpxFileInfo + "], context = [" + context + "]");
 
-        // Set filename - most prominent info at the top
         String fileName = gpxFileInfo.file().getName();
         holder.binding.fileName.setText(fileName);
 
-        // Format and set the trackPointInfo with styled text (date and coordinates)
-        holder.binding.trackPointInfo.setText(formatTrackPointInfo(gpxFileInfo, context));
+        configureFirstPointContainer(holder, gpxFileInfo, context);
 
-        // Display creator and author info (secondary metadata)
         holder.binding.creatorInfo.setText(
                 TextViewUtil.getSpannableStringBuilderWithBoldPrefix(
                         context.getString(R.string.creator_prefix), 
-                        gpxFileInfo.creator()
-                )
+                        gpxFileInfo.creator(),
+                        "\t"
+                ), TextView.BufferType.SPANNABLE
         );
         holder.binding.authorInfo.setText(
                 TextViewUtil.getSpannableStringBuilderWithBoldPrefix(
                         context.getString(R.string.author_prefix),
-                        gpxFileInfo.authorName()
-                )
+                        gpxFileInfo.authorName(),
+                        "\t\t"
+                ), TextView.BufferType.SPANNABLE
         );
 
         // Format file size in kB at the bottom
         long fileSizeInKB = gpxFileInfo.fileSize() / 1024;
         holder.binding.fileSize.setText(String.format(Locale.getDefault(),
                 context.getString(R.string.file_size_format_string_d_kb), fileSizeInKB));
-
-        // firstPointDateTime is now redundant as we include it in trackPointInfo
-        // but we'll set it anyway in case visibility is changed later
-        holder.binding.firstPointDateTime.setText(
-                StringUtils.getFormattedTimeMillisDate(
-                        gpxFileInfo.firstPointTimeMillis()
-                )
-        );
     }
 
-    /**
-     * Formats track point information with styling according to requirements.
-     * Displays date/time, coordinates, and elevation in a structured format.
-     *
-     * @param gpxFileInfo The GPX file information to format
-     * @param context Context for accessing resources
-     * @return SpannableStringBuilder containing the formatted text
-     */
-    @NonNull
-    private static SpannableStringBuilder formatTrackPointInfo(GpxFileInfo gpxFileInfo, Context context) {
-        SpannableStringBuilder builder = new SpannableStringBuilder();
-        
-        // Format date/time in italic and add it first with larger font
-        String dateTimeStr = StringUtils.getFormattedTimeMillisDate(gpxFileInfo.firstPointTimeMillis());
-        SpannableString dateTime = new SpannableString(dateTimeStr);
-        dateTime.setSpan(new StyleSpan(Typeface.NORMAL), 0, dateTime.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        builder.append(dateTime);
-        builder.append("\n");
-        
-        // Create the "Start: " prefix in bold
-        SpannableStringBuilder startPrefix = TextViewUtil.getSpannableStringBuilderWithBoldPrefix(
-                context.getString(R.string.location_start) + " ", ""
-        );
-        builder.append(startPrefix);
+    private void configureFirstPointContainer(FileViewHolder holder, GpxFileInfo gpxFileInfo, Context context) {
+        ItemFileBinding binding = holder.binding;
 
-        builder.append("\n\t\t");
-        // Format latitude in DMS and append it
+        String dateStr = StringUtils.getFormattedDateMillisDate(gpxFileInfo.firstPointTimeMillis());
+        String timeStr = StringUtils.getFormattedTimeMillisDate(gpxFileInfo.firstPointTimeMillis());
+        SpannableStringBuilder dateTime
+                = TextViewUtil.getSpannableStringBuilderWithBoldPrefix(dateStr, timeStr, " ");
+
         SpannableStringBuilder latDms = CoordinateFormatter.formatLatitudeDMS(gpxFileInfo.firstPointLat(), context);
-        builder.append(latDms);
-        
-        // Add comma separator
-        builder.append(context.getString(R.string.coordinates_separator));
-        builder.append("\t\t");
-        
-        // Format longitude in DMS and append it
         SpannableStringBuilder lonDms = CoordinateFormatter.formatLongitudeDMS(gpxFileInfo.firstPointLon(), context);
-        builder.append(lonDms);
-        
-        // Add elevation with bold "m asl." unit
-        builder.append(" (");
-        builder.append(gpxFileInfo.firstPointEle());
-        
-        SpannableString mUnit = new SpannableString(context.getString(R.string.elevation_unit));
-        mUnit.setSpan(new StyleSpan(Typeface.BOLD), 0, mUnit.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        builder.append(mUnit);
-        builder.append(")");
-        
-        return builder;
+        SpannableStringBuilder elevation
+                = TextViewUtil.getSpannableStringBuilderWithBoldPostfix(
+                        gpxFileInfo.firstPointEle(), context.getString(R.string.elevation_unit), " ");
+
+        binding.trackPointInfoDatetimeTextview.setText(dateTime, TextView.BufferType.SPANNABLE);
+        binding.trackPointInfoLatitudeTextview.setText(latDms, TextView.BufferType.SPANNABLE);
+        binding.trackPointInfoLongitudeTextview.setText(lonDms, TextView.BufferType.SPANNABLE);
+        binding.trackPointInfoAltitudeTextview.setText(elevation, TextView.BufferType.SPANNABLE);
     }
 
     /**
@@ -194,6 +150,8 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileViewHolder
         Context context = holder.binding.getRoot().getContext();
 
         FileInfoItem fileInfoItem = fileInfoItemList.get(position);
+        holder.bind(fileInfoItem, viewModel, viewLifecycleOwner);
+
         bind(holder, position, fileInfoItem, context);
     }
 
@@ -210,36 +168,12 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileViewHolder
     private void bind(@NonNull FileViewHolder holder, int position, FileInfoItem fileInfoItem, Context context) {
         configureTextViews(holder, fileInfoItem.fileInfo(), context);
 
-        // Directly set the bitmap if available
         ImageView imageView = holder.binding.mapMiniatureImageView;
         if (fileInfoItem.fileInfo().miniatureBitmap().get() != null) {
             imageView.setImageBitmap(fileInfoItem.fileInfo().miniatureBitmap().get());
         } else {
-            // Set placeholder if no bitmap (should have been generated beforehand now)
             imageView.setImageResource(R.drawable.ic_menu_mapmode);
         }
-
-        // Update card state based on selection
-        holder.binding.getRoot().setChecked(fileInfoItem.equals(selectedFileInfoItem));
-        holder.binding.getRoot().setStrokeWidth(fileInfoItem.equals(selectedFileInfoItem) ? 2 : 1);
-
-        holder.binding.getRoot().setOnClickListener(v -> {
-            FileInfoItem previouslySelectedItem = selectedFileInfoItem;
-            int previouslySelectedIndex = -1;
-            if (previouslySelectedItem != null) {
-                 previouslySelectedIndex = fileInfoItemList.indexOf(previouslySelectedItem);
-            }
-
-            selectedFileInfoItem = fileInfoItem;
-            notifyItemChanged(position); // Notify current item changed
-            if (previouslySelectedIndex != -1) {
-                 notifyItemChanged(previouslySelectedIndex); // Notify previous item changed
-            }
-
-            if (fileSelectedListener != null) {
-                fileSelectedListener.onFileSelected(fileInfoItem.fileInfo().file());
-            }
-        });
     }
 
     /**
@@ -280,6 +214,12 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileViewHolder
         FileViewHolder(ItemFileBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
+        }
+
+        public void bind(FileInfoItem fileInfoItem, FileSelectorViewModel viewModel, LifecycleOwner viewLifecycleOwner) {
+            binding.setLifecycleOwner(viewLifecycleOwner);
+            binding.setViewModel(viewModel);
+            binding.setItem(fileInfoItem);
         }
     }
 }

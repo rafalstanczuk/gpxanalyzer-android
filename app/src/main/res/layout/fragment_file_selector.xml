@@ -8,7 +8,7 @@
     android:layout_marginEnd="@dimen/margin_very_small">
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnSelectFile"
+        android:id="@+id/search_files_button"
         style="@style/Widget.App.MaterialButton.Outlined"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -28,7 +28,7 @@
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnSelectFile" />
+        app:layout_constraintTop_toBottomOf="@+id/search_files_button" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
@@ -38,7 +38,7 @@
         android:fadingEdgeLength="@dimen/margin_medium_bigger"
         android:requiresFadingEdge="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnSelectFile"
+        app:layout_constraintTop_toBottomOf="@+id/search_files_button"
         tools:listitem="@layout/item_file" />
 
     <androidx.constraintlayout.widget.Guideline

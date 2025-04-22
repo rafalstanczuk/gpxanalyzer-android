@@ -1,7 +1,5 @@
 package com.itservices.gpxanalyzer.events;
 
-import android.util.Log;
-
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
@@ -111,7 +109,7 @@ public class GlobalEventWrapper {
      */
     public EventProgress onNextChanged(EventProgress lastEventProgress, EventProgress currentEventProgress) {
         if (lastEventProgress.percentage() != currentEventProgress.percentage()) {
-            Log.d(TAG, "onNextChanged() called with: lastEventProgress = [" + lastEventProgress + "], currentEventProgress = [" + currentEventProgress + "]");
+            //Log.d(TAG, "onNextChanged() called with: lastEventProgress = [" + lastEventProgress + "], currentEventProgress = [" + currentEventProgress + "]");
 
             lastEventProgress = currentEventProgress;
 
