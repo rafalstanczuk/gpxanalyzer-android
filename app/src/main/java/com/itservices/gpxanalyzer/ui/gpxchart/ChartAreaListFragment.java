@@ -54,6 +54,8 @@ public class ChartAreaListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        viewModel = new ViewModelProvider(this.requireActivity()).get(ChartAreaListViewModel.class);
     }
 
     /**
@@ -68,8 +70,7 @@ public class ChartAreaListFragment extends Fragment {
     ) {
         Log.d(TAG, "onCreateView() called with: inflater = [" + inflater + "], container = [" + container + "], savedInstanceState = [" + savedInstanceState + "]");
 
-        viewModel = new ViewModelProvider(this.requireActivity()).get(ChartAreaListViewModel.class);
-
+        viewModel.setOrientation(getResources().getConfiguration().orientation);
 
         binding = FragmentChartAreaListBinding.inflate(inflater, container, false);
         binding.setViewModel(viewModel);
@@ -93,8 +94,6 @@ public class ChartAreaListFragment extends Fragment {
             adapter = new ChartAreaItemAdapter(viewModel.getChartAreaItemListLiveData().getValue(), viewModel, getViewLifecycleOwner());
             binding.gpxChartsRecyclerView.setAdapter(adapter);
         }
-
-        viewModel.setOrientation(getResources().getConfiguration().orientation);
 
         topBarLayoutBinding.loadButton.setOnClickListener(view ->
                 viewModel.postEventLoadData()

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme (Material 2 - Night) -->
-    <style name="Theme.GpxAnalyzer" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+    <style name="Theme.GpxAnalyzer" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- M2 Primary brand color -->
         <item name="colorPrimary">@color/veryDarkGray</item>
         <item name="colorPrimaryVariant">@color/veryDarkGray</item>
@@ -20,7 +20,7 @@
         <item name="colorError">@color/md_theme_dark_error</item>
         <item name="colorOnError">@color/md_theme_dark_onError</item>
         <!-- Status bar color -->
-        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <item name="android:statusBarColor">?android:attr/colorBackground</item>
         <item name="android:windowLightStatusBar">false</item>
         <!-- Customize your theme here. -->
     </style>

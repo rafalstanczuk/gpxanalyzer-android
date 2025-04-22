@@ -73,7 +73,7 @@ public class ChartAreaListViewModel extends ViewModel {
     /** LiveData holding the current list of {@link ChartAreaItem}s to be displayed. */
     private final MutableLiveData<List<ChartAreaItem>> chartAreaItemListLiveData = new MutableLiveData<>(new ArrayList<>());
     /** LiveData holding the current chart display severity mode (e.g., how many charts are shown). */
-    private final MutableLiveData<ViewModeSeverity> viewModeSeverityLiveData = new MutableLiveData<>(ViewModeSeverity.TWO_CHARTS);
+    private final MutableLiveData<ViewModeSeverity> viewModeSeverityLiveData = new MutableLiveData<>(ViewModeSeverity.ONE_CHART);
 
     /** RxJava Subject used to trigger a reload of the chart data. */
     private final PublishSubject<List<ChartAreaItem>> reloadItems = PublishSubject.create();
