@@ -100,7 +100,13 @@ public class ChartAreaListViewModel extends ViewModel {
      * @param chartAreaItemList The new list of {@link ChartAreaItem}s.
      */
     public void setChartAreaItemList(List<ChartAreaItem> chartAreaItemList) {
-        chartAreaItemListLiveData.postValue(chartAreaItemList);
+        Log.d(ChartAreaListViewModel.class.getSimpleName(), "setChartAreaItemList() called with: chartAreaItemList = [" + chartAreaItemList + "]");
+
+        ViewModeSeverity viewModeSeverity = getViewModeSeverityLiveData().getValue();
+
+        assert viewModeSeverity != null;
+
+        createOnSeverityMode(viewModeSeverity, chartAreaItemList);
     }
 
     /**
@@ -146,7 +152,8 @@ public class ChartAreaListViewModel extends ViewModel {
         ViewModeSeverity newMode = mode.getNextCyclic();
         viewModeSeverityLiveData.setValue(newMode);
 
-        createOnSeverityMode(newMode);
+        assert chartAreaItemListLiveData.getValue() != null : "Current chart list should not be null";
+        createOnSeverityMode(newMode, chartAreaItemListLiveData.getValue());
 
         // Reload orientation-based percentage heights
         assert orientationLiveData.getValue() != null;
@@ -160,37 +167,33 @@ public class ChartAreaListViewModel extends ViewModel {
      *
      * @param mode The target {@link ViewModeSeverity}.
      */
-    private void createOnSeverityMode(ViewModeSeverity mode) {
-        List<ChartAreaItem> currentList = chartAreaItemListLiveData.getValue();
-        assert currentList != null;
-        
+    private void createOnSeverityMode(ViewModeSeverity mode, List<ChartAreaItem> currentList) {
+        assert immutableList != null : "Immutable chart list must be set before changing severity";
+
         int targetCount = mode.getCount();
         int currentCount = currentList.size();
-        
-        // Build a new list that preserves existing chart items to keep their cached data
-        List<ChartAreaItem> newList;
-        
-        if (targetCount <= currentCount) {
-            // Removing charts: keep the first targetCount items to preserve their cache
-            newList = new ArrayList<>(currentList.subList(0, targetCount));
-        } else {
-            // Adding charts: keep all existing charts and add new ones from immutableList
-            newList = new ArrayList<>(currentList); // Keep all existing charts with cached data
-            
-            // Add any additional charts needed from the immutable list
-            for (int i = currentCount; i < targetCount; i++) {
-                if (i < immutableList.size()) {
-                    newList.add(immutableList.get(i));
-                }
+
+        // Start with the relevant subset of the current list (up to targetCount)
+        // This handles shrinking correctly as subList end index is exclusive.
+        List<ChartAreaItem> newList = new ArrayList<>(currentList.subList(0, Math.min(targetCount, currentCount)));
+
+        // If expanding, add items from the immutable list
+        if (targetCount > currentCount) {
+            int itemsToAdd = targetCount - currentCount;
+            // Calculate how many *new* items can be added from immutableList
+            int availableFromImmutable = Math.max(0, immutableList.size() - currentCount);
+            int limit = Math.min(itemsToAdd, availableFromImmutable);
+
+            // Add items from immutableList starting from the index after the current ones
+            for (int i = 0; i < limit; i++) {
+                newList.add(immutableList.get(currentCount + i));
             }
         }
-        
-        // Update the LiveData with the new list
+
         chartAreaItemListLiveData.setValue(newList);
 
-        // Log the change for debugging
-        Log.d("ChartAreaListViewModel", 
-              "Changed severity mode to " + mode + ", chart count: " + newList.size());
+        Log.d("ChartAreaListViewModel",
+              "Changed severity mode to " + mode + ", target count: " + targetCount + ", new count: " + newList.size());
     }
 
     /**
