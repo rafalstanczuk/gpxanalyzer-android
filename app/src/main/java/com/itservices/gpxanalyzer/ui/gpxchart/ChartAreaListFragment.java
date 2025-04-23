@@ -88,8 +88,8 @@ public class ChartAreaListFragment extends Fragment {
                     chartAreaItemFactory.create(GpxViewMode.V_T_1, true, false)
             );
             List<ChartAreaItem> itemList = new ArrayList<>( immutableList );
-            viewModel.setChartAreaItemList(itemList);
             viewModel.setDefaultChartAreaItemList(immutableList);
+            viewModel.setChartAreaItemList(itemList);
         } else {
             adapter = new ChartAreaItemAdapter(viewModel.getChartAreaItemListLiveData().getValue(), viewModel, getViewLifecycleOwner());
             binding.gpxChartsRecyclerView.setAdapter(adapter);
