@@ -1,10 +1,9 @@
 package com.itservices.gpxanalyzer.data.provider;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.itservices.gpxanalyzer.data.model.gpxfileinfo.GpxFileInfo;
-import com.itservices.gpxanalyzer.data.parser.gpxfileinfo.GpxFileInfoParser;
+import com.itservices.gpxanalyzer.data.provider.file.GpxFileInfoParser;
 import com.itservices.gpxanalyzer.data.provider.db.gpxfileinfo.GpxFileInfoRepository;
 import com.itservices.gpxanalyzer.data.provider.file.GpxFileValidator;
 import com.itservices.gpxanalyzer.data.provider.file.DeviceStorageSearchedFileProvider;

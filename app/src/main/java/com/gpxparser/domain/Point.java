@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.data.parser.gpxparser.domain;
+package com.gpxparser.domain;
 
 import org.joda.time.DateTime;
 

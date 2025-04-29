@@ -15,9 +15,9 @@ import com.itservices.gpxanalyzer.data.raw.DataMeasure;
 import com.itservices.gpxanalyzer.events.EventProgress;
 import com.itservices.gpxanalyzer.events.GlobalEventWrapper;
 import com.itservices.gpxanalyzer.utils.location.LocationCalculatorUtil;
-import com.itservices.gpxanalyzer.data.parser.gpxparser.GPXParser;
-import com.itservices.gpxanalyzer.data.parser.gpxparser.domain.Gpx;
-import com.itservices.gpxanalyzer.data.parser.gpxparser.domain.TrackSegment;
+import com.gpxparser.GPXParser;
+import com.gpxparser.domain.Gpx;
+import com.gpxparser.domain.TrackSegment;
 import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.GpxViewModeMapper;
 
 import org.xmlpull.v1.XmlPullParserException;
