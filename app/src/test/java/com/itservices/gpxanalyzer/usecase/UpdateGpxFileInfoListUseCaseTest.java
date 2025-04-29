@@ -1,14 +1,13 @@
 package com.itservices.gpxanalyzer.usecase;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import android.content.Context;
 import android.util.Log;
 
-import com.itservices.gpxanalyzer.data.parser.gpxfileinfo.GpxFileInfo;
+import com.itservices.gpxanalyzer.data.model.gpxfileinfo.GpxFileInfo;
 import com.itservices.gpxanalyzer.data.provider.GpxFileInfoProvider;
 import com.itservices.gpxanalyzer.events.EventProgress;
 import com.itservices.gpxanalyzer.events.GlobalEventWrapper;
@@ -30,7 +29,6 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 

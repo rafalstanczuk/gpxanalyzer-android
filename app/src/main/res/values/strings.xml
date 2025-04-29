@@ -50,6 +50,9 @@
     <string name="overlay_view_to_reload_imageview">overlay_view_to_reload_imageview</string>
     <string name="generating_miniatures_progress">Miniatures… %1$d%%</string>
 
+    <string name="gathering_geocoded_addresses_progress">Geocoding… %1$d%%</string>
+    <string name="updating_database_progress">Saving… %1$d%%</string>
+
     <!-- Coordinate formatting strings -->
     <string name="coordinate_dms_format">%1$d°%2$d\'%3$.1f\"</string>
     <string name="coordinate_north">N</string>

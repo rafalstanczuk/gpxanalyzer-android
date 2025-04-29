@@ -15,3 +15,6 @@
 local.properties
 /.idea/deploymentTargetSelector.xml
 
+
+# Secure properties file
+app/secure.properties

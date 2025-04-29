@@ -1,7 +1,9 @@
 package com.itservices.gpxanalyzer.events;
 
+import com.itservices.gpxanalyzer.data.provider.GpxFileInfoProvider;
 import com.itservices.gpxanalyzer.data.provider.file.DeviceStorageSearchedFileProvider;
 import com.itservices.gpxanalyzer.data.provider.file.GpxFileDataEntityProvider;
+import com.itservices.gpxanalyzer.data.provider.network.geocoding.GeocodingNetworkRouterRepository;
 import com.itservices.gpxanalyzer.ui.components.miniature.GpxFileInfoMiniatureProvider;
 
 /**
@@ -22,6 +24,9 @@ public enum PercentageUpdateEventSourceType {
      * Indicates progress related to generating GPX file info miniatures, typically handled by {@link GpxFileInfoMiniatureProvider}.
      */
     MINIATURE_GENERATION_PROGRESS(GpxFileInfoMiniatureProvider.class),
+
+    GEOCODING_PROCESSING(GeocodingNetworkRouterRepository.class),
+    UPDATING_RESOURCES_PROCESSING(GpxFileInfoProvider.class),
     /**
      * Represents an unknown or unspecified source for the progress update.
      */

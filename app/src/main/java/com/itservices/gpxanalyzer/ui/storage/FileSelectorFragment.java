@@ -120,6 +120,12 @@ public class FileSelectorFragment extends DialogFragment {
                 case MINIATURE_GENERATION_PROGRESS -> {
                     binding.searchFilesButton.setText(getString(R.string.generating_miniatures_progress, eventProgress.percentage()));
                 }
+                case GEOCODING_PROCESSING -> {
+                    binding.searchFilesButton.setText(getString(R.string.gathering_geocoded_addresses_progress, eventProgress.percentage()));
+                }
+                case UPDATING_RESOURCES_PROCESSING -> {
+                    binding.searchFilesButton.setText(getString(R.string.updating_database_progress, eventProgress.percentage()));
+                }
             }
         });
 

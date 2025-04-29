@@ -44,6 +44,26 @@ android {
                 )
             }
         }
+
+        // Load secure properties
+        val secureProperties = Properties()
+        val securePropertiesFile = rootProject.file("app/secure.properties")
+        if (securePropertiesFile.exists()) {
+            secureProperties.load(FileInputStream(securePropertiesFile))
+        }
+        
+        // Make API keys available in BuildConfig
+        buildConfigField("String", "MAPS_CO_API_KEY_1", "\"${secureProperties.getProperty("MAPS_CO_API_KEY_1", "")}\"")
+        buildConfigField("String", "MAPS_CO_API_KEY_2", "\"${secureProperties.getProperty("MAPS_CO_API_KEY_2", "")}\"")
+        buildConfigField("String", "MAPS_CO_API_KEY_3", "\"${secureProperties.getProperty("MAPS_CO_API_KEY_3", "")}\"")
+        buildConfigField("String", "MAPS_CO_API_KEY_4", "\"${secureProperties.getProperty("MAPS_CO_API_KEY_4", "")}\"")
+        buildConfigField("String", "MAPS_CO_API_KEY_5", "\"${secureProperties.getProperty("MAPS_CO_API_KEY_5", "")}\"")
+        buildConfigField("String", "MAPS_CO_API_KEY_6", "\"${secureProperties.getProperty("MAPS_CO_API_KEY_6", "")}\"")
+        buildConfigField("String", "MAPS_CO_API_KEY_7", "\"${secureProperties.getProperty("MAPS_CO_API_KEY_7", "")}\"")
+        buildConfigField("String", "MAPS_CO_API_KEY_8", "\"${secureProperties.getProperty("MAPS_CO_API_KEY_8", "")}\"")
+        buildConfigField("String", "MAPS_CO_API_KEY_9", "\"${secureProperties.getProperty("MAPS_CO_API_KEY_9", "")}\"")
+        buildConfigField("String", "MAPS_CO_API_KEY_10", "\"${secureProperties.getProperty("MAPS_CO_API_KEY_10", "")}\"")
+
     }
 
     // Define product flavors.
@@ -105,6 +125,7 @@ android {
     buildFeatures {
         dataBinding = true
         viewBinding = true
+        buildConfig = true
     }
 
     // Lint configuration.
@@ -128,6 +149,14 @@ dependencies {
     // RxJava dependencies.
     implementation(libs.rxjava)
     implementation(libs.rxandroid)
+
+    // Networking - Retrofit, OkHttp, Gson
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.adapter.rxjava2) // Use RxJava2 adapter to match project
+    implementation(platform(libs.okhttp.bom)) // Use BOM for consistent OkHttp versions
+    implementation(libs.okhttp)
+    implementation(libs.logging.interceptor) // Optional: For logging network requests
 
     implementation(libs.joda.time)
     implementation(libs.hilt.android)
@@ -156,4 +185,12 @@ dependencies {
     testImplementation(libs.mockito.core)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    // Required for OkHttp
+    implementation("org.bouncycastle:bctls-jdk15on:1.68")
+    implementation("org.conscrypt:conscrypt-android:2.5.2")
+    implementation("org.openjsse:openjsse:1.1.10")
+    
+    // Required for Joda-Time
+    implementation("org.joda:joda-convert:2.2.3")
 }

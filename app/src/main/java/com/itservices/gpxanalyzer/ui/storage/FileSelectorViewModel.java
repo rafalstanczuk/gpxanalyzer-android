@@ -1,7 +1,9 @@
 package com.itservices.gpxanalyzer.ui.storage;
 
+import static com.itservices.gpxanalyzer.events.PercentageUpdateEventSourceType.GEOCODING_PROCESSING;
 import static com.itservices.gpxanalyzer.events.PercentageUpdateEventSourceType.MINIATURE_GENERATION_PROGRESS;
 import static com.itservices.gpxanalyzer.events.PercentageUpdateEventSourceType.STORAGE_SEARCH_PROGRESS;
+import static com.itservices.gpxanalyzer.events.PercentageUpdateEventSourceType.UPDATING_RESOURCES_PROCESSING;
 
 import android.content.Context;
 import android.util.Log;
@@ -12,7 +14,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.itservices.gpxanalyzer.data.parser.gpxfileinfo.GpxFileInfo;
+import com.itservices.gpxanalyzer.data.model.gpxfileinfo.GpxFileInfo;
 import com.itservices.gpxanalyzer.events.EventProgress;
 import com.itservices.gpxanalyzer.events.GlobalEventWrapper;
 import com.itservices.gpxanalyzer.events.PercentageUpdateEventSourceType;
@@ -24,6 +26,7 @@ import com.itservices.gpxanalyzer.utils.common.ConcurrentUtil;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -44,6 +47,12 @@ import io.reactivex.schedulers.Schedulers;
 @HiltViewModel
 public class FileSelectorViewModel extends ViewModel {
     private static final String TAG = FileSelectorViewModel.class.getSimpleName();
+    private static final List<PercentageUpdateEventSourceType> EVENT_PROGRESS_TYPE_TO_HANDLE = Arrays.asList(
+            STORAGE_SEARCH_PROGRESS,
+            MINIATURE_GENERATION_PROGRESS,
+            GEOCODING_PROCESSING,
+            UPDATING_RESOURCES_PROCESSING);
+
     /** LiveData indicating whether necessary file access permissions are granted. */
     private final MutableLiveData<Boolean> requestPermissionsLiveData = new MutableLiveData<>();
     /** LiveData emitting {@link EventProgress} updates for background operations (searching, miniature generation). */
@@ -65,7 +74,6 @@ public class FileSelectorViewModel extends ViewModel {
     GlobalEventWrapper globalEventWrapper;
     private Disposable disposableRequestPermissions;
     private Disposable disposableCheckAndRequestPermissions;
-    private Disposable disposableSearchProgress;
 
     /**
      * Constructor used by Hilt for dependency injection.
@@ -134,8 +142,6 @@ public class FileSelectorViewModel extends ViewModel {
      * Initiates the background process to search for GPX files on storage and generate map miniatures for them.
      * It uses {@link UpdateGpxFileInfoListUseCase} to perform the search and generation.
      * It also sets up observers via {@link GlobalEventWrapper} to listen for progress updates
-     * ({@link PercentageUpdateEventSourceType#STORAGE_SEARCH_PROGRESS} and
-     * {@link PercentageUpdateEventSourceType#MINIATURE_GENERATION_PROGRESS})
      * and updates {@link #percentageEventProgressLiveData} accordingly.
      * Upon completion (success or error), it calls {@link #receiveRecentFoundFileList()} to refresh the displayed list.
      *
@@ -146,17 +152,12 @@ public class FileSelectorViewModel extends ViewModel {
         Log.d(TAG, "searchGpxFilesAndGenerateMiniatures() called with: context = [" + context + "], renderer = [" + miniatureRenderer + "]");
 
 
-
         percentageEventProgressLiveData.setValue(
                 EventProgress.create(STORAGE_SEARCH_PROGRESS, 0)
         );
 
-        ConcurrentUtil.tryToDispose(disposableSearchProgress);
-        disposableSearchProgress = globalEventWrapper.getEventProgressFromType(STORAGE_SEARCH_PROGRESS)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::accept);
-
-        disposables.add(globalEventWrapper.getEventProgressFromType(MINIATURE_GENERATION_PROGRESS)
+        disposables.clear();
+        disposables.add(globalEventWrapper.getEventProgressFromTypes(EVENT_PROGRESS_TYPE_TO_HANDLE)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::accept));
 
@@ -252,7 +253,6 @@ public class FileSelectorViewModel extends ViewModel {
         disposables.clear();
         ConcurrentUtil.tryToDispose(disposableRequestPermissions);
         ConcurrentUtil.tryToDispose(disposableCheckAndRequestPermissions);
-        ConcurrentUtil.tryToDispose(disposableSearchProgress);
     }
 
     /**

@@ -1,6 +1,6 @@
 package com.itservices.gpxanalyzer.usecase;
 
-import com.itservices.gpxanalyzer.data.parser.gpxfileinfo.GpxFileInfo;
+import com.itservices.gpxanalyzer.data.model.gpxfileinfo.GpxFileInfo;
 import com.itservices.gpxanalyzer.data.provider.GpxFileInfoProvider;
 
 import java.util.List;

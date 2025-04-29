@@ -84,7 +84,7 @@ public class DeviceStorageSearchedFileProvider {
         parsedFileList.clear();
 
         return Single.fromCallable(() -> {
-            Log.d(TAG, "Starting file search");
+            //Log.d(TAG, "Starting file search");
             List<File> fileList = new ArrayList<>();
 
             AtomicInteger totalFiles = new AtomicInteger(0);
@@ -99,7 +99,7 @@ public class DeviceStorageSearchedFileProvider {
     }
 
     private List<File> getExternalStorageDirectories(Context context) {
-        Log.d(TAG, "Detecting external storage directories...");
+        //Log.d(TAG, "Detecting external storage directories...");
         List<File> storageDirs = new ArrayList<>();
 
         KNOWN_DIRECTORIES_LIST.forEach(extDir -> {
@@ -111,21 +111,21 @@ public class DeviceStorageSearchedFileProvider {
 
         File externalStorage = Environment.getExternalStorageDirectory();
         if (isExists(externalStorage)) {
-            //Log.d(TAG, "Found standard external storage: " + externalStorage.getAbsolutePath());
+            ////Log.d(TAG, "Found standard external storage: " + externalStorage.getAbsolutePath());
             storageDirs.add(externalStorage);
         }
 
         // Add secondary storage (SD cards)
         File[] externalFilesDirs = context.getExternalFilesDirs(null);
         if (externalFilesDirs != null) {
-            //Log.d(TAG, "Found " + externalFilesDirs.length + " external files dirs.");
+            ////Log.d(TAG, "Found " + externalFilesDirs.length + " external files dirs.");
             for (File dir : externalFilesDirs) {
                 if (dir != null) {
-                    //Log.d(TAG, "Processing external files dir: " + dir.getAbsolutePath());
+                    ////Log.d(TAG, "Processing external files dir: " + dir.getAbsolutePath());
                     // Get the parent directory (actual external storage)
                     File parent = dir.getParentFile();
                     if (parent != null) {
-                        //Log.d(TAG, "Parent of external files dir: " + parent.getAbsolutePath());
+                        ////Log.d(TAG, "Parent of external files dir: " + parent.getAbsolutePath());
                         // Navigate up to the mount point (typically /storage)
                         File storageRoot = parent;
                         File childStorageRoot = parent;
@@ -133,22 +133,22 @@ public class DeviceStorageSearchedFileProvider {
                             childStorageRoot = storageRoot;
                             storageRoot = storageRoot.getParentFile();
                         }
-                        //Log.d(TAG, "Found childStorageRoot root: " + childStorageRoot.getAbsolutePath());
+                        ////Log.d(TAG, "Found childStorageRoot root: " + childStorageRoot.getAbsolutePath());
 
                         if (storageRoot != null && storageRoot.getName().equals(STORAGE)) {
 
-                            //Log.d(TAG, "Found childStorageRoot root: " + childStorageRoot.getAbsolutePath());
-                            //Log.d(TAG, "Found storage root: " + storageRoot.getAbsolutePath());
+                            ////Log.d(TAG, "Found childStorageRoot root: " + childStorageRoot.getAbsolutePath());
+                            ////Log.d(TAG, "Found storage root: " + storageRoot.getAbsolutePath());
 
                             // Add all directories under /storage that aren't the primary storage or self-reference
                             File[] potentialStorageDirs = childStorageRoot.listFiles();
-                            //Log.d(TAG, "Found storage root file potentialStorageDirs: " + Arrays.toString(potentialStorageDirs));
+                            ////Log.d(TAG, "Found storage root file potentialStorageDirs: " + Arrays.toString(potentialStorageDirs));
                             if (potentialStorageDirs != null) {
                                 for (File storageDir : potentialStorageDirs) {
-                                    //Log.d(TAG, "Found storage root file name: " + storageDir.getName());
+                                    ////Log.d(TAG, "Found storage root file name: " + storageDir.getName());
                                     if (storageDir.isDirectory() && !storageDir.getName().equals(EMULATED)
                                             && !storageDir.getName().equals(SELF) && !storageDirs.contains(storageDir)) { // Avoid duplicates
-                                        //Log.d(TAG, "Found potential SD card/secondary storage: " + storageDir.getAbsolutePath());
+                                        ////Log.d(TAG, "Found potential SD card/secondary storage: " + storageDir.getAbsolutePath());
                                         storageDirs.add(storageDir);
                                     }
                                 }
@@ -163,28 +163,28 @@ public class DeviceStorageSearchedFileProvider {
             }
         }
 
-        Log.d(TAG, "Final list of storage directories to scan: "
+/*        Log.d(TAG, "Final list of storage directories to scan: "
                 + storageDirs.stream()
                 .map(File::getAbsolutePath)
                 .reduce((s1, s2) -> s1 + ", " + s2)
-                .orElse("None"));
+                .orElse("None"));*/
         return storageDirs;
     }
 
     private void searchFileSystemDirect(Context context, AtomicInteger totalFiles, AtomicInteger processedFiles, List<File> fileList) {
         // 2. Direct file system search in all storage locations
-        Log.d(TAG, "Starting direct file system search...");
+        //Log.d(TAG, "Starting direct file system search...");
 
         // Get all external storage directories (including SD cards)
         List<File> storageDirs = getExternalStorageDirectories(context);
 
         // Count total files first for progress tracking (only for direct scan)
         totalFiles.set(0); // Reset count for direct scan
-        Log.d(TAG, "Counting files for progress calculation...");
+        //Log.d(TAG, "Counting files for progress calculation...");
         for (File storageDir : storageDirs) {
             countFilesRecursively(storageDir, totalFiles);
         }
-        Log.d(TAG, "Total files to process (direct scan): " + totalFiles.get());
+        //Log.d(TAG, "Total files to process (direct scan): " + totalFiles.get());
 
         // Search in all storage directories
         processedFiles.set(0); // Reset progress for direct scan
@@ -197,17 +197,17 @@ public class DeviceStorageSearchedFileProvider {
             searchAndParseFilesRecursively(storageDir, fileList, totalFiles, processedFiles);
         }
 
-        Log.i(TAG, fileExtension + " file search finished. Total unique files found: " + parsedFileList.size());
+        //Log.i(TAG, fileExtension + " file search finished. Total unique files found: " + parsedFileList.size());
     }
 
     private void searchInMediaStore(Context context, List<File> fileList) {
         // 1. Search using MediaStore (for indexed files)
-        Log.d(TAG, "Searching MediaStore for " + fileExtension + " files");
+        //Log.d(TAG, "Searching MediaStore for " + fileExtension + " files");
         ContentResolver contentResolver = context.getContentResolver();
 
         searchByContentResolver(fileList, contentResolver);
 
-        Log.d(TAG, "MediaStore search finished. Found " + fileList.size() + " unique " + fileExtension + " files so far.");
+        //Log.d(TAG, "MediaStore search finished. Found " + fileList.size() + " unique " + fileExtension + " files so far.");
     }
 
     private void searchByContentResolver(List<File> fileList, ContentResolver contentResolver) {
@@ -226,7 +226,7 @@ public class DeviceStorageSearchedFileProvider {
             if (cursor != null) {
                 searchFilesOnCursor(fileList, contentUri, cursor);
             } else {
-                Log.d(TAG, "MediaStore query returned null cursor for URI: " + contentUri);
+                //Log.d(TAG, "MediaStore query returned null cursor for URI: " + contentUri);
             }
         } catch (Exception ignore) {
             //Log.e(TAG, "Error searching MediaStore for " + fileExtension + " files", e);
@@ -234,7 +234,7 @@ public class DeviceStorageSearchedFileProvider {
     }
 
     private void searchFilesOnCursor(List<File> fileList, Uri contentUri, Cursor cursor) throws Exception {
-        Log.d(TAG, "MediaStore query returned " + cursor.getCount() + " files for URI: " + contentUri);
+        //Log.d(TAG, "MediaStore query returned " + cursor.getCount() + " files for URI: " + contentUri);
 
         int dataColumn = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATA);
         int displayNameColumn = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DISPLAY_NAME);
@@ -252,16 +252,16 @@ public class DeviceStorageSearchedFileProvider {
             if (filePath != null && isFileWithExtensionName(displayName, fileExtension)) {
                 addFileFrom(fileList, filePath);
             }
-            //Log.i(TAG, "MediaStore file exists: " + displayName);
+            ////Log.i(TAG, "MediaStore file exists: " + displayName);
             // We don't increment processedFiles here, only during direct scan
         }
     }
 
     private void addFileFrom(List<File> fileList, String filePath) throws Exception {
-        Log.d(TAG, "MediaStore found potential " + fileExtension + ": " + filePath);
+        //Log.d(TAG, "MediaStore found potential " + fileExtension + ": " + filePath);
         File file = new File(filePath);
         if (file.exists()) {
-            Log.i(TAG, "MediaStore confirmed " + fileExtension + " file exists: " + file.getAbsolutePath());
+            //Log.i(TAG, "MediaStore confirmed " + fileExtension + " file exists: " + file.getAbsolutePath());
 
             // Avoid adding duplicates found by direct search later
             if (fileList.stream().noneMatch(fileItem -> isEquals(fileItem, file))) {
@@ -312,7 +312,7 @@ public class DeviceStorageSearchedFileProvider {
             return;
         }
 
-        //Log.d(TAG, "Searching directory: " + directory.getAbsolutePath());
+        ////Log.d(TAG, "Searching directory: " + directory.getAbsolutePath());
         try {
             File[] files = directory.listFiles();
             if (files != null) {
@@ -335,17 +335,17 @@ public class DeviceStorageSearchedFileProvider {
 
     private void processFile(List<File> fileList, AtomicInteger totalFiles, AtomicInteger processedFiles, File file) throws Exception {
         if (file.getName().toLowerCase().endsWith(fileExtension)) {
-            Log.i(TAG, "Direct search found " + fileExtension + " file: " + file.getAbsolutePath());
+            //Log.i(TAG, "Direct search found " + fileExtension + " file: " + file.getAbsolutePath());
 
             // Avoid adding duplicates found by MediaStore
             if (fileList.stream().noneMatch(fileItem -> isEquals(fileItem, file))) {
                 fileList.add(file);
                 parsedFileList.add(parserFunction.apply(file));
             } else {
-                Log.d(TAG, "Skipping duplicate " + fileExtension + " file found by direct search: " + file.getAbsolutePath());
+                //Log.d(TAG, "Skipping duplicate " + fileExtension + " file found by direct search: " + file.getAbsolutePath());
             }
         }
-        //Log.i(TAG, "Direct search file: " + file.getName());
+        ////Log.i(TAG, "Direct search file: " + file.getName());
         processedFiles.incrementAndGet();
         updateProgress(processedFiles, totalFiles);
     }

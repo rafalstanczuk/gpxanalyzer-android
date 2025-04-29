@@ -11,4 +11,8 @@
     <dimen name="fab_custom_icon_size">24dp</dimen>
     <dimen name="icon_size_material_button">30dp</dimen>
     <dimen name="speed_dial_fab_padding">200dp</dimen>
+    
+    <!-- Text view heights -->
+    <dimen name="text_size_small">20dp</dimen>
+    <dimen name="text_size_medium">24dp</dimen>
 </resources>

@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+
         <variable
             name="item"
             type="com.itservices.gpxanalyzer.ui.storage.FileInfoItem" />
@@ -18,9 +19,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/margin_very_small"
+        android:onClickListener="@{() -> viewModel.selectFileInfoItem(item)}"
         app:cardCornerRadius="@dimen/margin_medium"
-        app:cardElevation="@dimen/margin_small"
-        android:onClickListener="@{() -> viewModel.selectFileInfoItem(item)}">
+        app:cardElevation="@dimen/margin_small">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -60,10 +61,11 @@
                 <TextView
                     android:id="@+id/fileName"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="@dimen/text_size_small"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:singleLine="true"
+                    android:includeFontPadding="false"
+                    android:gravity="center_vertical"
                     android:textColor="?attr/colorOnSurface"
                     android:textSize="14sp"
                     android:textStyle="bold"
@@ -76,10 +78,24 @@
                     android:id="@+id/firstPointContainer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/margin_very_small"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/fileName">
+
+                    <TextView
+                        android:id="@+id/trackPointInfo_geocoded_textview"
+                        android:layout_width="0dp"
+                        android:layout_height="@dimen/text_size_small"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:includeFontPadding="false"
+                        android:gravity="center_vertical"
+                        android:textColor="?attr/colorOnSurface"
+                        android:textSize="12sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:text="Geocoded place name. Geocoded place name. Geocoded place name" />
 
                     <TextView
                         android:id="@+id/trackPointInfo_datetime_textview"
@@ -89,7 +105,7 @@
                         android:textSize="12sp"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/trackPointInfo_geocoded_textview"
                         tools:text="2023-10-27 10:30" />
 
                     <TextView
@@ -175,7 +191,7 @@
                 android:id="@+id/fileSize"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/margin_medium_small"
+                android:layout_marginEnd="@dimen/margin_small"
                 android:background="?attr/colorPrimary"
                 android:padding="@dimen/margin_very_small"
                 android:textColor="?attr/colorOnPrimary"

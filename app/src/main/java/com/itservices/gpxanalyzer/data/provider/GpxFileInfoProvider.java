@@ -3,12 +3,9 @@ package com.itservices.gpxanalyzer.data.provider;
 import android.content.Context;
 import android.util.Log;
 
-import com.itservices.gpxanalyzer.data.parser.gpxfileinfo.GpxFileInfo;
+import com.itservices.gpxanalyzer.data.model.gpxfileinfo.GpxFileInfo;
 import com.itservices.gpxanalyzer.data.parser.gpxfileinfo.GpxFileInfoParser;
-import com.itservices.gpxanalyzer.data.provider.db.AppDatabase;
-import com.itservices.gpxanalyzer.data.provider.db.Converters;
-import com.itservices.gpxanalyzer.data.provider.db.GpxFileInfoEntity;
-import com.itservices.gpxanalyzer.data.provider.db.GpxFileInfoMapper;
+import com.itservices.gpxanalyzer.data.provider.db.gpxfileinfo.GpxFileInfoRepository;
 import com.itservices.gpxanalyzer.data.provider.file.GpxFileValidator;
 import com.itservices.gpxanalyzer.data.provider.file.DeviceStorageSearchedFileProvider;
 
@@ -19,9 +16,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.reactivex.Completable;
-import io.reactivex.CompletableObserver;
 import io.reactivex.Single;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 @Singleton
@@ -35,18 +30,15 @@ public class GpxFileInfoProvider {
     @Inject
     DeviceStorageSearchedFileProvider deviceStorage;
 
-    private final AppDatabase appDatabase;
+    private final GpxFileInfoRepository repository;
 
     @Inject
-    public GpxFileInfoProvider(AppDatabase appDatabase) {
-        this.appDatabase = appDatabase;
+    public GpxFileInfoProvider(GpxFileInfoRepository repository) {
+        this.repository = repository;
     }
 
     public Single<List<GpxFileInfo>> getAllGpxFilesFromDb() {
-        return appDatabase
-                .gpxFileInfoDao()
-                .getAll()
-                .map(GpxFileInfoMapper::fromEntityList);
+        return repository.getAll();
     }
 
     public Single<List<GpxFileInfo>> searchAndParseGpxFilesRecursively(Context context) {
@@ -57,7 +49,6 @@ public class GpxFileInfoProvider {
                 .map(newParsedFileList -> {
                     List<GpxFileInfo> newGpxFileList = new ArrayList<>();
                     newParsedFileList.forEach(parsedFile -> newGpxFileList.add((GpxFileInfo) parsedFile));
-                    //gpxFileInfoList = newGpxFileList;
                     return newGpxFileList;
                 })
                 .subscribeOn(Schedulers.io())
@@ -65,14 +56,8 @@ public class GpxFileInfoProvider {
     }
 
     private Completable insertIntoDb(List<GpxFileInfo> gpxFileInfoList) {
-        Log.d(GpxFileInfoProvider.class.getSimpleName(), "insertIntoDb() called with: gpxFileInfoList = [" + gpxFileInfoList + "]");
-
-        List<GpxFileInfoEntity> gpxFileInfoEntityList = GpxFileInfoMapper.toEntityList(gpxFileInfoList);
-        return insertAllGpxFiles(gpxFileInfoEntityList);
-    }
-
-    public Completable insertAllGpxFiles(List<GpxFileInfoEntity> gpxFileInfos) {
-        return appDatabase.gpxFileInfoDao().insertAll(gpxFileInfos);
+        //Log.d(GpxFileInfoProvider.class.getSimpleName(), "insertIntoDb() called with: gpxFileInfoList = [" + gpxFileInfoList + "]");
+        return repository.insertAll(gpxFileInfoList);
     }
 
     public Single<List<GpxFileInfo>> getAndFilterGpxFiles() {
@@ -80,38 +65,8 @@ public class GpxFileInfoProvider {
                 .map(GpxFileValidator::validateAndFilterFiles);
     }
 
-
-    public Single<GpxFileInfoEntity> getGpxFileById(long id) {
-        return appDatabase.gpxFileInfoDao().getById(id);
-    }
-
-    public Single<GpxFileInfoEntity> getGpxFileByPath(String absolutePath) {
-        return appDatabase
-                .gpxFileInfoDao()
-                .getByBase64AbsolutePath(Converters.toBase64(absolutePath));
-    }
-
-    public Completable insertGpxFile(GpxFileInfoEntity gpxFileInfo) {
-        return appDatabase.gpxFileInfoDao().insert(gpxFileInfo);
-    }
-
-
-    public Completable updateGpxFile(GpxFileInfo gpxFileInfo) {
-        return appDatabase.gpxFileInfoDao()
-                .update(GpxFileInfoMapper.toEntity(gpxFileInfo));
-    }
-
-    public Completable deleteGpxFile(GpxFileInfoEntity gpxFileInfo) {
-        return appDatabase.gpxFileInfoDao().delete(gpxFileInfo);
-    }
-
-    public Completable deleteAllGpxFiles() {
-        return appDatabase.gpxFileInfoDao().deleteAll()
-                .subscribeOn(Schedulers.io());
-    }
-
     public Completable replaceAll(List<GpxFileInfo> gpxFileInfoList) {
-        return deleteAllGpxFiles()
+        return repository.deleteAll()
                 .andThen(insertIntoDb(gpxFileInfoList));
     }
 }

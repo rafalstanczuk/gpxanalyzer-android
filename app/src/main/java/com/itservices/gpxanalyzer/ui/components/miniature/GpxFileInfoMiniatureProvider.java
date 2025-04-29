@@ -4,7 +4,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import com.itservices.gpxanalyzer.data.parser.gpxfileinfo.GpxFileInfo;
+import com.itservices.gpxanalyzer.data.model.gpxfileinfo.GpxFileInfo;
 
 import javax.inject.Inject;
 
@@ -21,16 +21,14 @@ public class GpxFileInfoMiniatureProvider {
 
     public Completable requestForGenerateMiniature(@NonNull MiniatureMapView miniatureMapViewRendererBind, GpxFileInfo gpxFileInfo) {
         return Completable.fromAction(() -> {
-            Log.d(GpxFileInfoMiniatureProvider.class.getSimpleName(), "generateMiniature() called with: miniatureMapViewRendererBind = [" + miniatureMapViewRendererBind + "], gpxFileInfo = [" + gpxFileInfo + "]");
+            //Log.d(GpxFileInfoMiniatureProvider.class.getSimpleName(), "generateMiniature() called with: miniatureMapViewRendererBind = [" + miniatureMapViewRendererBind + "], gpxFileInfo = [" + gpxFileInfo + "]");
 
-            double lat = Double.parseDouble(gpxFileInfo.firstPointLat());
-            double lon = Double.parseDouble(gpxFileInfo.firstPointLon());
-            miniatureMapViewRendererBind.generateBitmap(lat, lon, bitmap -> {
+            miniatureMapViewRendererBind.generateBitmap(gpxFileInfo.firstPointLocation(), bitmap -> {
                 gpxFileInfo.setMiniatureBitmap(bitmap);
 
                 gpxFileInfoPublishSubject.onNext(gpxFileInfo);
 
-                Log.d("GpxFileInfoMiniatureProvider", "generateMiniature() called with: bitmap = [" + bitmap + "]");
+                //Log.d("GpxFileInfoMiniatureProvider", "generateMiniature() called with: bitmap = [" + bitmap + "]");
 
                 return null;
             });

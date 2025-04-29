@@ -2,6 +2,7 @@ package com.itservices.gpxanalyzer.events;
 
 import static com.itservices.gpxanalyzer.events.PercentageUpdateEventSourceType.UNKNOWN_SOURCE;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
@@ -159,6 +160,17 @@ public class GlobalEventWrapper {
                 .hide()
                 .subscribeOn(Schedulers.newThread())
                 .filter(eventProgress -> percentageUpdateEventSourceType == eventProgress.percentageUpdateEventSourceType());
+    }
+
+    public Observable<EventProgress> getEventProgressFromTypes(List<PercentageUpdateEventSourceType> percentageUpdateEventSourceType) {
+        return eventProgressBehaviorSubject
+                .hide()
+                .subscribeOn(Schedulers.newThread())
+                .filter(eventProgress ->
+                        percentageUpdateEventSourceType
+                                .stream()
+                                .anyMatch(type -> type == eventProgress.percentageUpdateEventSourceType())
+                );
     }
 
     public void clearEventProgressState() {

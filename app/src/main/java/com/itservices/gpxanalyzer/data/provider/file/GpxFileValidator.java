@@ -1,16 +1,11 @@
 package com.itservices.gpxanalyzer.data.provider.file;
 
-import com.itservices.gpxanalyzer.data.parser.gpxfileinfo.GpxFileInfo;
+import com.itservices.gpxanalyzer.data.model.gpxfileinfo.GpxFileInfo;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import io.reactivex.Single;
 
 /**
  * Validator class for GpxFileInfo to check file existence and validity.

@@ -5,6 +5,7 @@ import static org.osmdroid.views.drawing.MapSnapshot.Status.CANVAS_OK;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.location.Location;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.AttributeSet;
@@ -99,19 +100,19 @@ public class MiniatureMapView extends MapView implements MapListener, MapView.On
 
     @Override
     public void onFirstLayout(View v, int left, int top, int right, int bottom) {
-        Log.d(TAG, "onFirstLayout() called with: v = [" + v + "], left = [" + left + "], top = [" + top + "], right = [" + right + "], bottom = [" + bottom + "]");
+        //Log.d(TAG, "onFirstLayout() called with: v = [" + v + "], left = [" + left + "], top = [" + top + "], right = [" + right + "], bottom = [" + bottom + "]");
 
     }
 
-    public void generateBitmap(double latitude, double longitude, Function<Bitmap, Void> callback) {
-        Log.d(TAG, "generateBitmap using MapSnapshot: lat=" + latitude + ", lon=" + longitude);
+    public void generateBitmap(Location location, Function<Bitmap, Void> callback) {
+        //Log.d(TAG, "generateBitmap() called with: location = [" + location + "], callback = [" + callback + "]");
 
         handler.post(() -> {
             try {
                 getOverlays().clear();
                 //clearTileCache();
 
-                GeoPoint startPoint = new GeoPoint(latitude, longitude);
+                GeoPoint startPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
                 getController().setZoom(15.0);
                 getController().setCenter(startPoint);
 
@@ -153,7 +154,7 @@ public class MiniatureMapView extends MapView implements MapListener, MapView.On
         MapSnapshot mapSnapshot = new MapSnapshot(snapshotListener, MapSnapshot.INCLUDE_FLAG_UPTODATE, this);
 
         new Thread(mapSnapshot).start();
-        Log.d(TAG, "MapSnapshot task started.");
+        //Log.d(TAG, "MapSnapshot task started.");
     }
 
     public void clearTileCache() {

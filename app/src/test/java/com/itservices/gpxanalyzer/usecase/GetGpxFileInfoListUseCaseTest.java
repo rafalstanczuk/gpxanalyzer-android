@@ -1,6 +1,6 @@
 package com.itservices.gpxanalyzer.usecase;
 
-import com.itservices.gpxanalyzer.data.parser.gpxfileinfo.GpxFileInfo;
+import com.itservices.gpxanalyzer.data.model.gpxfileinfo.GpxFileInfo;
 import com.itservices.gpxanalyzer.data.provider.GpxFileInfoProvider;
 
 import org.junit.Before;
@@ -14,7 +14,6 @@ import org.mockito.junit.MockitoRule;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import io.reactivex.Single;

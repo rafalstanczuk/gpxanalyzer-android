@@ -2,8 +2,8 @@ package com.itservices.gpxanalyzer.ui.storage;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.location.Location;
 import android.text.SpannableStringBuilder;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -14,7 +14,7 @@ import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.itservices.gpxanalyzer.R;
-import com.itservices.gpxanalyzer.data.parser.gpxfileinfo.GpxFileInfo;
+import com.itservices.gpxanalyzer.data.model.gpxfileinfo.GpxFileInfo;
 import com.itservices.gpxanalyzer.databinding.ItemFileBinding;
 import com.itservices.gpxanalyzer.ui.utils.StringUtils;
 import com.itservices.gpxanalyzer.utils.ui.CoordinateFormatter;
@@ -55,7 +55,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileViewHolder
      * @param context     The application context for resolving string resources.
      */
     private void configureTextViews(@NonNull FileViewHolder holder, GpxFileInfo gpxFileInfo, Context context) {
-        Log.d(FileAdapter.class.getSimpleName(), "configureTextViews() called with: holder = [" + holder + "], gpxFileInfo = [" + gpxFileInfo + "], context = [" + context + "]");
+        //Log.d(FileAdapter.class.getSimpleName(), "configureTextViews() called with: holder = [" + holder + "], gpxFileInfo = [" + gpxFileInfo + "], context = [" + context + "]");
 
         String fileName = gpxFileInfo.file().getName();
         holder.binding.fileName.setText(fileName);
@@ -86,21 +86,34 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileViewHolder
     private void configureFirstPointContainer(FileViewHolder holder, GpxFileInfo gpxFileInfo, Context context) {
         ItemFileBinding binding = holder.binding;
 
-        String dateStr = StringUtils.getFormattedDateMillisDate(gpxFileInfo.firstPointTimeMillis());
-        String timeStr = StringUtils.getFormattedTimeMillisDate(gpxFileInfo.firstPointTimeMillis());
-        SpannableStringBuilder dateTime
-                = TextViewUtil.getSpannableStringBuilderWithBoldPrefix(dateStr, timeStr, " ");
+        Location location = gpxFileInfo.firstPointLocation();
+        if (location != null) {
+            String dateStr = StringUtils.getFormattedDateMillisDate(location.getTime());
+            String timeStr = StringUtils.getFormattedTimeMillisDate(location.getTime());
+            SpannableStringBuilder dateTime
+                    = TextViewUtil.getSpannableStringBuilderWithBoldPrefix(dateStr, timeStr, " ");
 
-        SpannableStringBuilder latDms = CoordinateFormatter.formatLatitudeDMS(gpxFileInfo.firstPointLat(), context);
-        SpannableStringBuilder lonDms = CoordinateFormatter.formatLongitudeDMS(gpxFileInfo.firstPointLon(), context);
-        SpannableStringBuilder elevation
-                = TextViewUtil.getSpannableStringBuilderWithBoldPostfix(
-                        gpxFileInfo.firstPointEle(), context.getString(R.string.elevation_unit), " ");
+            SpannableStringBuilder latDms = CoordinateFormatter.formatLatitudeDMS(
+                    String.valueOf(location.getLatitude()), context);
+            SpannableStringBuilder lonDms = CoordinateFormatter.formatLongitudeDMS(
+                    String.valueOf(location.getLongitude()), context);
+            SpannableStringBuilder elevation
+                    = TextViewUtil.getSpannableStringBuilderWithBoldPostfix(
+                            String.valueOf(location.getAltitude()), context.getString(R.string.elevation_unit), " ");
 
-        binding.trackPointInfoDatetimeTextview.setText(dateTime, TextView.BufferType.SPANNABLE);
-        binding.trackPointInfoLatitudeTextview.setText(latDms, TextView.BufferType.SPANNABLE);
-        binding.trackPointInfoLongitudeTextview.setText(lonDms, TextView.BufferType.SPANNABLE);
-        binding.trackPointInfoAltitudeTextview.setText(elevation, TextView.BufferType.SPANNABLE);
+            binding.trackPointInfoGeocodedTextview.setText(gpxFileInfo.geoCodedLocation());
+            binding.trackPointInfoDatetimeTextview.setText(dateTime, TextView.BufferType.SPANNABLE);
+            binding.trackPointInfoLatitudeTextview.setText(latDms, TextView.BufferType.SPANNABLE);
+            binding.trackPointInfoLongitudeTextview.setText(lonDms, TextView.BufferType.SPANNABLE);
+            binding.trackPointInfoAltitudeTextview.setText(elevation, TextView.BufferType.SPANNABLE);
+        } else {
+            // Clear the text views if no location data is available
+            binding.trackPointInfoGeocodedTextview.setText("");
+            binding.trackPointInfoDatetimeTextview.setText("");
+            binding.trackPointInfoLatitudeTextview.setText("");
+            binding.trackPointInfoLongitudeTextview.setText("");
+            binding.trackPointInfoAltitudeTextview.setText("");
+        }
     }
 
     /**
@@ -112,7 +125,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileViewHolder
      */
     @SuppressLint("NotifyDataSetChanged") // Intentional full refresh after sorting/setting new list
     public void setFiles(@NonNull List<FileInfoItem> fileInfoItemList) {
-        fileInfoItemList.sort(Comparator.comparingLong(item -> item.fileInfo().firstPointTimeMillis()));
+        fileInfoItemList.sort(Comparator.comparingLong(item -> item.fileInfo().firstPointLocation().getTime()));
 
         this.fileInfoItemList = fileInfoItemList;
 
@@ -130,7 +143,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileViewHolder
     @NonNull
     @Override
     public FileViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Log.d(TAG, "onCreateViewHolder() called with: parent = [" + parent + "], viewType = [" + viewType + "]");
+        //Log.d(TAG, "onCreateViewHolder() called with: parent = [" + parent + "], viewType = [" + viewType + "]");
 
         ItemFileBinding binding = ItemFileBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
         return new FileViewHolder(binding);
@@ -145,7 +158,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileViewHolder
      */
     @Override
     public void onBindViewHolder(@NonNull FileViewHolder holder, int position) {
-        Log.d(TAG, "onBindViewHolder() called with: holder = [" + holder + "], position = [" + position + "]");
+        //Log.d(TAG, "onBindViewHolder() called with: holder = [" + holder + "], position = [" + position + "]");
 
         Context context = holder.binding.getRoot().getContext();
 

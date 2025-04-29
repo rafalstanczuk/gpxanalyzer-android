@@ -22,7 +22,6 @@ import io.reactivex.Observable;
 import io.reactivex.Scheduler;
 import io.reactivex.android.plugins.RxAndroidPlugins;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.internal.schedulers.ExecutorScheduler;
 import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.Schedulers;
 
@@ -32,11 +31,7 @@ import static org.mockito.Mockito.*;
 import android.util.Log;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-
-import com.github.mikephil.charting.data.LineData;
-import com.itservices.gpxanalyzer.data.parser.gpxfileinfo.GpxFileInfo;
 
 public class MultipleSyncedGpxChartUseCaseTest {
 
