@@ -1,11 +1,12 @@
-package com.itservices.gpxanalyzer.data.provider.network.geocoding;
+package com.itservices.gpxanalyzer.data.provider.geocoding.network;
 
 import com.itservices.gpxanalyzer.data.model.geocoding.ForwardGeocodingResponse;
 import com.itservices.gpxanalyzer.data.model.geocoding.GeocodingResult;
 import com.itservices.gpxanalyzer.data.model.geocoding.ReverseGeocodingResponse;
 import com.itservices.gpxanalyzer.data.network.GeocodingService;
+import com.itservices.gpxanalyzer.data.provider.geocoding.BaseGeocodingRepository;
+import com.itservices.gpxanalyzer.data.provider.geocoding.GeocodingException;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -26,7 +27,7 @@ import android.util.Log;
  * This class manages API rate limits and provides methods for both
  * forward and reverse geocoding.
  */
-public class GeocodingNetworkRepository {
+public class GeocodingNetworkRepository implements BaseGeocodingRepository {
 
     private static final int MAX_DAILY_REQUESTS = 5000;   // Free tier daily limit
     private static final long RETRY_DELAY_MS = 2000; // Initial delay between retries in milliseconds
@@ -52,6 +53,7 @@ public class GeocodingNetworkRepository {
      * @param address Address to geocode
      * @return Single emitting the geocoding result
      */
+    @Override
     public Single<ForwardGeocodingResponse> geocodeAddress(String address) {
         Log.d(TAG, GeocodingNetworkRepository.this.hashCode() + " geocodeAddress() called with: address = [" + address + "]");
 
@@ -100,6 +102,7 @@ public class GeocodingNetworkRepository {
      * @param postalCode Postal code
      * @return Single emitting the geocoding result
      */
+    @Override
     public Single<ForwardGeocodingResponse> geocodeStructuredAddress(
             String street,
             String city,
@@ -156,6 +159,7 @@ public class GeocodingNetworkRepository {
      * 
      * @return Single emitting the reverse geocoding result
      */
+    @Override
     public Single<GeocodingResult> reverseGeocode(Location location) {
         if (isRateLimitExceeded()) {
             return Single.error(new RateLimitException("Daily request limit exceeded"));
@@ -195,6 +199,7 @@ public class GeocodingNetworkRepository {
      * @param addresses List of addresses to geocode
      * @return Single emitting a list of geocoding results
      */
+    @Override
     public Single<ArrayList<ForwardGeocodingResponse>> batchGeocodeAddresses(List<String> addresses) {
         if (addresses == null || addresses.isEmpty()) {
             return Single.just(new ArrayList<>());
@@ -254,9 +259,10 @@ public class GeocodingNetworkRepository {
     /**
      * Batch reverse geocodes multiple locations respecting the rate limits.
      *
-     * @param points List of GeoPoints to reverse geocode
-     * @return Single emitting a list of reverse geocoding results
+     * @param points List of locations to reverse geocode
+     * @return Single emitting a list of geocoding results
      */
+    @Override
     public Single<ArrayList<GeocodingResult>> batchReverseGeocode(List<Location> points) {
         if (points == null || points.isEmpty()) {
             return Single.just(new ArrayList<>());
@@ -340,25 +346,4 @@ public class GeocodingNetworkRepository {
         return apiKey;
     }
 
-    /**
-     * Custom exception for geocoding errors.
-     */
-    public static class GeocodingException extends IOException {
-        public GeocodingException(String message) {
-            super(message);
-        }
-
-        public GeocodingException(String message, Throwable cause) {
-            super(message, cause);
-        }
-    }
-
-    /**
-     * Custom exception for rate limit errors.
-     */
-    public static class RateLimitException extends IOException {
-        public RateLimitException(String message) {
-            super(message);
-        }
-    }
-} 
+}

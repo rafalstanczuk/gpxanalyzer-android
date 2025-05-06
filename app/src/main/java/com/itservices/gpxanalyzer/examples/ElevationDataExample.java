@@ -3,7 +3,7 @@ package com.itservices.gpxanalyzer.examples;
 import android.util.Log;
 
 import com.itservices.gpxanalyzer.data.model.opentopodata.ElevationResult;
-import com.itservices.gpxanalyzer.data.provider.network.altitude.AltitudeRepository;
+import com.itservices.gpxanalyzer.data.provider.altitude.network.AltitudeRepository;
 
 import org.osmdroid.util.GeoPoint;
 

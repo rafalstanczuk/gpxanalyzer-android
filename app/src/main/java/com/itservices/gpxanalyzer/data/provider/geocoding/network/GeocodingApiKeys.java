@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.data.provider.network.geocoding;
+package com.itservices.gpxanalyzer.data.provider.geocoding.network;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;

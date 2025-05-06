@@ -5,9 +5,9 @@ import android.util.Log;
 
 import com.itservices.gpxanalyzer.data.model.geocoding.ForwardGeocodingResponse;
 import com.itservices.gpxanalyzer.data.model.geocoding.GeocodingResult;
-import com.itservices.gpxanalyzer.data.provider.network.geocoding.GeocodingNetworkRepository;
-import com.itservices.gpxanalyzer.data.provider.network.geocoding.GeocodingNetworkRouterRepository;
-import com.itservices.gpxanalyzer.data.provider.network.geocoding.GeocodingRequestQueue.GeocodingException;
+import com.itservices.gpxanalyzer.data.provider.geocoding.network.GeocodingNetworkRepository;
+import com.itservices.gpxanalyzer.data.provider.geocoding.network.GeocodingNetworkRouterRepository;
+import com.itservices.gpxanalyzer.data.provider.geocoding.network.GeocodingRequestQueue.GeocodingException;
 import com.itservices.gpxanalyzer.utils.location.LocationUtils;
 
 import java.util.ArrayList;

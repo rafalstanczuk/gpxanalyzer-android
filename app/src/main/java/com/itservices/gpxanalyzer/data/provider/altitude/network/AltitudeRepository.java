@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.data.provider.network.altitude;
+package com.itservices.gpxanalyzer.data.provider.altitude.network;
 
 import com.itservices.gpxanalyzer.data.model.opentopodata.ElevationResult;
 import com.itservices.gpxanalyzer.data.model.opentopodata.OpenTopoDataResponse;

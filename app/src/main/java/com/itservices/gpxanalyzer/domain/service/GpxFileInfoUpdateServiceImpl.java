@@ -6,9 +6,9 @@ import android.util.Log;
 
 import com.itservices.gpxanalyzer.data.model.geocoding.GeocodingResult;
 import com.itservices.gpxanalyzer.data.model.gpxfileinfo.GpxFileInfo;
+import com.itservices.gpxanalyzer.data.provider.geocoding.android.GeocodingAndroidRepository;
 import com.itservices.gpxanalyzer.data.provider.GpxFileInfoProvider;
 import com.itservices.gpxanalyzer.data.provider.db.geocoding.GeocodingLocalRepository;
-import com.itservices.gpxanalyzer.data.provider.network.geocoding.GeocodingNetworkRouterRepository;
 
 import com.itservices.gpxanalyzer.events.EventProgress;
 import com.itservices.gpxanalyzer.events.GlobalEventWrapper;
@@ -36,7 +36,7 @@ public class GpxFileInfoUpdateServiceImpl implements GpxFileInfoUpdateService {
 
     private final GpxFileInfoProvider gpxFileInfoProvider;
     private final GpxFileInfoMiniatureProvider miniatureProvider;
-    private final GeocodingNetworkRouterRepository geocodingRouterRepository;
+    private final GeocodingAndroidRepository geocodingRepository;
     private final GeocodingLocalRepository geocodingLocalRepository;
     private final GlobalEventWrapper globalEventWrapper;
     private MiniatureMapView miniatureRenderer;
@@ -45,12 +45,12 @@ public class GpxFileInfoUpdateServiceImpl implements GpxFileInfoUpdateService {
     public GpxFileInfoUpdateServiceImpl(
             GpxFileInfoProvider gpxFileInfoProvider,
             GpxFileInfoMiniatureProvider miniatureProvider,
-            GeocodingNetworkRouterRepository geocodingRouterRepository,
+            GeocodingAndroidRepository geocodingRepository,
             GeocodingLocalRepository geocodingLocalRepository,
             GlobalEventWrapper globalEventWrapper) {
         this.gpxFileInfoProvider = gpxFileInfoProvider;
         this.miniatureProvider = miniatureProvider;
-        this.geocodingRouterRepository = geocodingRouterRepository;
+        this.geocodingRepository = geocodingRepository;
         this.geocodingLocalRepository = geocodingLocalRepository;
         this.globalEventWrapper = globalEventWrapper;
     }
@@ -100,15 +100,15 @@ public class GpxFileInfoUpdateServiceImpl implements GpxFileInfoUpdateService {
                 .filter(gpxFileInfo -> gpxFileInfo.firstPointLocation() != null)
                 .flatMapMaybe(this::filterWithMissedGeocoding)
                 .toList()
-                .flatMapCompletable(this::networkRequestForGeocodingLocations);
+                .flatMapCompletable(this::requestForGeocodingLocations);
     }
 
-    private Completable networkRequestForGeocodingLocations(List<Location> locations) {
+    private Completable requestForGeocodingLocations(List<Location> locations) {
         if (locations.isEmpty()) {
             return Completable.complete();
         }
 
-        return geocodingRouterRepository.batchReverseGeocode(locations)
+        return geocodingRepository.batchReverseGeocode(locations)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
                 .doOnError(throwable -> {
