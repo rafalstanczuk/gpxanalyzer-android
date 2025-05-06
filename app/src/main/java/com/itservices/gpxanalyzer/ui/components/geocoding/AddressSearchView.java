@@ -18,7 +18,7 @@ import androidx.appcompat.widget.AppCompatEditText;
 
 import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.data.model.geocoding.GeocodingResult;
-import com.itservices.gpxanalyzer.data.provider.network.geocoding.GeocodingNetworkRepository;
+import com.itservices.gpxanalyzer.data.provider.geocoding.network.GeocodingNetworkRepository;
 
 import java.util.ArrayList;
 import java.util.List;

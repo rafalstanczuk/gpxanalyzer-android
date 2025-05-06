@@ -4,7 +4,7 @@ import android.location.Location;
 import android.util.Log;
 
 import com.itservices.gpxanalyzer.data.model.geocoding.GeocodingResult;
-import com.itservices.gpxanalyzer.data.provider.network.geocoding.GeocodingNetworkRepository;
+import com.itservices.gpxanalyzer.data.provider.geocoding.network.GeocodingNetworkRepository;
 
 import javax.inject.Inject;
 

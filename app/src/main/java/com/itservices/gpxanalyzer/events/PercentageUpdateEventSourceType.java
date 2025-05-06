@@ -3,7 +3,7 @@ package com.itservices.gpxanalyzer.events;
 import com.itservices.gpxanalyzer.data.provider.GpxFileInfoProvider;
 import com.itservices.gpxanalyzer.data.provider.file.DeviceStorageSearchedFileProvider;
 import com.itservices.gpxanalyzer.data.provider.file.GpxFileDataEntityProvider;
-import com.itservices.gpxanalyzer.data.provider.network.geocoding.GeocodingNetworkRouterRepository;
+import com.itservices.gpxanalyzer.data.provider.geocoding.network.GeocodingNetworkRouterRepository;
 import com.itservices.gpxanalyzer.ui.components.miniature.GpxFileInfoMiniatureProvider;
 
 /**

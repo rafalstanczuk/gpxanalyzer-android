@@ -2,11 +2,12 @@ package com.itservices.gpxanalyzer.di;
 
 import com.itservices.gpxanalyzer.BuildConfig;
 import com.itservices.gpxanalyzer.data.network.GeocodingService;
-import com.itservices.gpxanalyzer.data.provider.network.geocoding.GeocodingApiKey;
-import com.itservices.gpxanalyzer.data.provider.network.geocoding.GeocodingApiKeys;
-import com.itservices.gpxanalyzer.data.provider.network.geocoding.GeocodingNetworkRepository;
-import com.itservices.gpxanalyzer.data.provider.network.geocoding.GeocodingNetworkRouterRepository;
-import com.itservices.gpxanalyzer.data.provider.network.geocoding.GeocodingRequestQueue;
+import com.itservices.gpxanalyzer.data.provider.geocoding.BaseGeocodingRepository;
+import com.itservices.gpxanalyzer.data.provider.geocoding.network.GeocodingApiKey;
+import com.itservices.gpxanalyzer.data.provider.geocoding.network.GeocodingApiKeys;
+import com.itservices.gpxanalyzer.data.provider.geocoding.network.GeocodingNetworkRepository;
+import com.itservices.gpxanalyzer.data.provider.geocoding.network.GeocodingNetworkRouterRepository;
+import com.itservices.gpxanalyzer.data.provider.geocoding.network.GeocodingRequestQueue;
 import com.itservices.gpxanalyzer.events.GlobalEventWrapper;
 
 import java.util.ArrayList;
@@ -111,7 +112,7 @@ public class GeocodingModule {
     public GeocodingNetworkRouterRepository provideGeocodingRouterRepository(
             GlobalEventWrapper events,
             @GeocodingApiKeys List<String> apiKeys) {
-        List<GeocodingNetworkRepository> repositories = new ArrayList<>();
+        List<BaseGeocodingRepository> repositories = new ArrayList<>();
         ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(apiKeys.size());
         Scheduler scheduler = Schedulers.from(threadPoolExecutor);
         
