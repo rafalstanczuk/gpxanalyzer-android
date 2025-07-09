@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.itservices.gpxanalyzer.data.model.geocoding.GeocodingResult;
 import com.itservices.gpxanalyzer.data.model.gpxfileinfo.GpxFileInfo;
+import com.itservices.gpxanalyzer.data.provider.geocoding.BaseGeocodingRepository;
 import com.itservices.gpxanalyzer.data.provider.geocoding.android.GeocodingAndroidRepository;
 import com.itservices.gpxanalyzer.data.provider.GpxFileInfoProvider;
 import com.itservices.gpxanalyzer.data.provider.db.geocoding.GeocodingLocalRepository;
@@ -36,7 +37,7 @@ public class GpxFileInfoUpdateServiceImpl implements GpxFileInfoUpdateService {
 
     private final GpxFileInfoProvider gpxFileInfoProvider;
     private final GpxFileInfoMiniatureProvider miniatureProvider;
-    private final GeocodingAndroidRepository geocodingRepository;
+    private final BaseGeocodingRepository geocodingRepository;
     private final GeocodingLocalRepository geocodingLocalRepository;
     private final GlobalEventWrapper globalEventWrapper;
     private MiniatureMapView miniatureRenderer;
