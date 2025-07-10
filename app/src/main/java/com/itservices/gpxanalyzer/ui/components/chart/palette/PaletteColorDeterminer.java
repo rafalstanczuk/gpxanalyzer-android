@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 
 import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.ui.components.chart.legend.BoundaryColorSpan;
-import com.itservices.gpxanalyzer.data.raw.DataEntityWrapper;
+import com.itservices.gpxanalyzer.data.model.entity.DataEntityWrapper;
 import com.itservices.gpxanalyzer.utils.common.PrecisionUtil;
 import com.itservices.gpxanalyzer.utils.ui.IconsUtil;
 

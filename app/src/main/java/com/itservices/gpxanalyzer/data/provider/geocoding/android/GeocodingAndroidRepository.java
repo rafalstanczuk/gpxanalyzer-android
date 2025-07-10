@@ -16,10 +16,6 @@ import com.itservices.gpxanalyzer.data.provider.geocoding.GeocodingException;
 import com.itservices.gpxanalyzer.events.EventProgress;
 import com.itservices.gpxanalyzer.events.GlobalEventWrapper;
 import com.itservices.gpxanalyzer.events.PercentageUpdateEventSourceType;
-// Import for GeocodingService and GeocodingRequestQueue if needed for super constructor,
-// but we'll pass null for now.
-// import com.itservices.gpxanalyzer.data.network.GeocodingService;
-// import com.itservices.gpxanalyzer.data.provider.geocoding.network.GeocodingRequestQueue;
 
 import java.io.IOException;
 import java.util.ArrayList;

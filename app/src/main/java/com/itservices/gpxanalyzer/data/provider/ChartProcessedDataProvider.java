@@ -128,7 +128,7 @@ public class ChartProcessedDataProvider {
 
                     lineDataSet.setDrawValues(false);
 
-                    LineChartSettings.updateLineDataSetWithSettings(lineDataSet, settings);
+                    settings.updateSettingsFor(lineDataSet);
 
                     lineDataSet.setFillColor(trendStatistics.trendType().getFillColor());
                     lineDataSet.setFillAlpha(trendStatistics.trendType().getFillAlpha());

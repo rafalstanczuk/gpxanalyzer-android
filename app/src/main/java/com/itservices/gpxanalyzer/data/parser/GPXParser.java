@@ -1,4 +1,4 @@
-package com.gpxparser;
+package com.itservices.gpxanalyzer.data.parser;
 
 import android.util.Xml;
 
@@ -14,21 +14,21 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import com.gpxparser.domain.Author;
-import com.gpxparser.domain.Bounds;
-import com.gpxparser.domain.Copyright;
-import com.gpxparser.domain.Email;
-import com.gpxparser.domain.Extensions;
-import com.gpxparser.domain.Gpx;
-import com.gpxparser.domain.Link;
-import com.gpxparser.domain.Metadata;
-import com.gpxparser.domain.Point;
-import com.gpxparser.domain.Route;
-import com.gpxparser.domain.RoutePoint;
-import com.gpxparser.domain.Track;
-import com.gpxparser.domain.TrackPoint;
-import com.gpxparser.domain.TrackSegment;
-import com.gpxparser.domain.WayPoint;
+import com.itservices.gpxanalyzer.data.parser.domain.Author;
+import com.itservices.gpxanalyzer.data.parser.domain.Bounds;
+import com.itservices.gpxanalyzer.data.parser.domain.Copyright;
+import com.itservices.gpxanalyzer.data.parser.domain.Email;
+import com.itservices.gpxanalyzer.data.parser.domain.Extensions;
+import com.itservices.gpxanalyzer.data.parser.domain.Gpx;
+import com.itservices.gpxanalyzer.data.parser.domain.Link;
+import com.itservices.gpxanalyzer.data.parser.domain.Metadata;
+import com.itservices.gpxanalyzer.data.parser.domain.Point;
+import com.itservices.gpxanalyzer.data.parser.domain.Route;
+import com.itservices.gpxanalyzer.data.parser.domain.RoutePoint;
+import com.itservices.gpxanalyzer.data.parser.domain.Track;
+import com.itservices.gpxanalyzer.data.parser.domain.TrackPoint;
+import com.itservices.gpxanalyzer.data.parser.domain.TrackSegment;
+import com.itservices.gpxanalyzer.data.parser.domain.WayPoint;
 
 public final class GPXParser {
 

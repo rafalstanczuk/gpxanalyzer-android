@@ -1,6 +1,6 @@
-package com.itservices.gpxanalyzer.data.statistics;
+package com.itservices.gpxanalyzer.data.model.statistics;
 
-import com.itservices.gpxanalyzer.data.raw.DataEntity;
+import com.itservices.gpxanalyzer.data.model.entity.DataEntity;
 
 /**
  * Interface defining operations for collecting and analyzing statistics from DataEntity objects.

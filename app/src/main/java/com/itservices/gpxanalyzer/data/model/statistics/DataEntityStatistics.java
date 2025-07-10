@@ -1,6 +1,6 @@
-package com.itservices.gpxanalyzer.data.statistics;
+package com.itservices.gpxanalyzer.data.model.statistics;
 
-import com.itservices.gpxanalyzer.data.raw.DataEntity;
+import com.itservices.gpxanalyzer.data.model.entity.DataEntity;
 
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 

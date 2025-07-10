@@ -1,6 +1,6 @@
 package com.itservices.gpxanalyzer.data.extrema.detector;
 
-import com.itservices.gpxanalyzer.data.raw.DataEntityWrapper;
+import com.itservices.gpxanalyzer.data.model.entity.DataEntityWrapper;
 
 import java.util.Vector;
 import java.util.stream.Collectors;

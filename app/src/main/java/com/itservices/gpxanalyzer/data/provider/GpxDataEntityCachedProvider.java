@@ -5,7 +5,7 @@ import static com.itservices.gpxanalyzer.events.RequestStatus.NEW_DATA_LOADING;
 import com.itservices.gpxanalyzer.data.provider.file.GpxFileDataEntityProvider;
 import com.itservices.gpxanalyzer.events.GlobalEventWrapper;
 import com.itservices.gpxanalyzer.data.cache.rawdata.DataEntityCache;
-import com.itservices.gpxanalyzer.data.raw.DataEntity;
+import com.itservices.gpxanalyzer.data.model.entity.DataEntity;
 import com.itservices.gpxanalyzer.usecase.SelectGpxFileUseCase;
 
 import java.io.File;

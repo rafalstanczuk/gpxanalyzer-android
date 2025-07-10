@@ -5,8 +5,8 @@ import com.itservices.gpxanalyzer.ui.components.chart.entry.CurveEntry;
 import com.itservices.gpxanalyzer.data.cache.processed.rawdata.RawDataProcessed;
 import com.itservices.gpxanalyzer.data.cumulative.TrendBoundaryDataEntity;
 import com.itservices.gpxanalyzer.ui.components.chart.palette.PaletteColorDeterminer;
-import com.itservices.gpxanalyzer.data.raw.DataEntity;
-import com.itservices.gpxanalyzer.data.raw.DataEntityWrapper;
+import com.itservices.gpxanalyzer.data.model.entity.DataEntity;
+import com.itservices.gpxanalyzer.data.model.entity.DataEntityWrapper;
 
 import java.util.ArrayList;
 import java.util.List;

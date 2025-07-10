@@ -2,11 +2,9 @@ package com.itservices.gpxanalyzer.data.cache.rawdata;
 
 import android.location.Location;
 
-import com.itservices.gpxanalyzer.data.raw.DataEntity;
-import com.itservices.gpxanalyzer.data.raw.GeoPointEntity;
+import com.itservices.gpxanalyzer.data.model.entity.DataEntity;
+import com.itservices.gpxanalyzer.data.model.entity.GeoPointEntity;
 import com.itservices.gpxanalyzer.data.mapper.GeoPointEntityMapper;
-
-import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

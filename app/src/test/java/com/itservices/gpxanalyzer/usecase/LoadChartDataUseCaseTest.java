@@ -4,7 +4,7 @@ import com.itservices.gpxanalyzer.data.cache.rawdata.DataEntityCache;
 import com.itservices.gpxanalyzer.data.cache.processed.rawdata.RawDataProcessed;
 import com.itservices.gpxanalyzer.data.provider.GpxDataEntityCachedProvider;
 import com.itservices.gpxanalyzer.data.provider.RawDataProcessedProvider;
-import com.itservices.gpxanalyzer.data.raw.DataEntityWrapper;
+import com.itservices.gpxanalyzer.data.model.entity.DataEntityWrapper;
 import com.itservices.gpxanalyzer.events.GlobalEventWrapper;
 import com.itservices.gpxanalyzer.events.RequestStatus;
 import com.itservices.gpxanalyzer.ui.components.chart.ChartController;
@@ -25,12 +25,10 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 
-import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.observers.TestObserver;
 import io.reactivex.plugins.RxJavaPlugins;

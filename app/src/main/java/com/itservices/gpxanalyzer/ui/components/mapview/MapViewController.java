@@ -11,9 +11,8 @@ import com.itservices.gpxanalyzer.ui.components.chart.entry.CurveEntry;
 import com.itservices.gpxanalyzer.events.EventVisibleChartEntriesTimestamp;
 import com.itservices.gpxanalyzer.events.GlobalEventWrapper;
 import com.itservices.gpxanalyzer.data.cache.rawdata.GeoPointCache;
-import com.itservices.gpxanalyzer.data.raw.GeoPointEntity;
+import com.itservices.gpxanalyzer.data.model.entity.GeoPointEntity;
 import com.itservices.gpxanalyzer.utils.common.ConcurrentUtil;
-import com.itservices.gpxanalyzer.utils.ui.DrawableUtil;
 
 import org.osmdroid.api.IMapController;
 import org.osmdroid.events.MapListener;
@@ -22,7 +21,6 @@ import org.osmdroid.events.ZoomEvent;
 import org.osmdroid.util.BoundingBox;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.overlay.CopyrightOverlay;
-import org.osmdroid.views.overlay.IconOverlay;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.Polyline;

@@ -4,7 +4,7 @@ import android.location.Location;
 
 import androidx.annotation.NonNull;
 
-import com.gpxparser.domain.TrackPoint;
+import com.itservices.gpxanalyzer.data.parser.domain.TrackPoint;
 
 public class LocationMapper {
     @NonNull

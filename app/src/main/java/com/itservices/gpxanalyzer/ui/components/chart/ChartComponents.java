@@ -3,7 +3,7 @@ package com.itservices.gpxanalyzer.ui.components.chart;
 import com.itservices.gpxanalyzer.ui.components.chart.palette.PaletteColorDeterminer;
 import com.itservices.gpxanalyzer.ui.components.chart.settings.LineChartSettings;
 import com.itservices.gpxanalyzer.ui.components.chart.settings.background.LimitLinesBoundaries;
-import com.itservices.gpxanalyzer.data.raw.DataEntityWrapper;
+import com.itservices.gpxanalyzer.data.model.entity.DataEntityWrapper;
 
 import javax.inject.Inject;
 

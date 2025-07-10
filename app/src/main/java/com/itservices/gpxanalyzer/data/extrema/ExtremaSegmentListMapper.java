@@ -1,6 +1,6 @@
 package com.itservices.gpxanalyzer.data.extrema;
 
-import com.itservices.gpxanalyzer.data.raw.DataEntityWrapper;
+import com.itservices.gpxanalyzer.data.model.entity.DataEntityWrapper;
 import com.itservices.gpxanalyzer.data.extrema.detector.DataPrimitiveMapper;
 import com.itservices.gpxanalyzer.data.extrema.detector.ExtremaSegmentDetector;
 import com.itservices.gpxanalyzer.data.extrema.detector.PrimitiveDataEntity;

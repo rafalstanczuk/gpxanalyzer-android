@@ -3,8 +3,8 @@ package com.itservices.gpxanalyzer.ui.components.chart.entry;
 import android.graphics.drawable.Drawable;
 
 import com.github.mikephil.charting.data.Entry;
-import com.itservices.gpxanalyzer.data.raw.DataEntity;
-import com.itservices.gpxanalyzer.data.raw.DataEntityWrapper;
+import com.itservices.gpxanalyzer.data.model.entity.DataEntity;
+import com.itservices.gpxanalyzer.data.model.entity.DataEntityWrapper;
 
 /**
  * Represents a data point on a GPX chart.

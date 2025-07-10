@@ -1,13 +1,9 @@
 package com.itservices.gpxanalyzer.ui.components.chart;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.graphics.RectF;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.util.Log;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
@@ -23,7 +19,6 @@ import com.itservices.gpxanalyzer.ui.components.chart.entry.BaseEntry;
 import com.itservices.gpxanalyzer.ui.components.chart.settings.background.GridBackgroundDrawer;
 import com.itservices.gpxanalyzer.ui.components.chart.settings.highlight.StaticChartHighlighter;
 import com.itservices.gpxanalyzer.data.cache.processed.chart.ChartSlot;
-import com.itservices.gpxanalyzer.data.raw.DataEntityWrapper;
 
 import java.lang.ref.WeakReference;
 import java.util.Arrays;

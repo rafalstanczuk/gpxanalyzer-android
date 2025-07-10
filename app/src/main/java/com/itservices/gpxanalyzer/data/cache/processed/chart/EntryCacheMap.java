@@ -3,7 +3,7 @@ package com.itservices.gpxanalyzer.data.cache.processed.chart;
 import android.util.Log;
 
 import com.itservices.gpxanalyzer.ui.components.chart.entry.BaseEntry;
-import com.itservices.gpxanalyzer.data.raw.DataEntityWrapper;
+import com.itservices.gpxanalyzer.data.model.entity.DataEntityWrapper;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;

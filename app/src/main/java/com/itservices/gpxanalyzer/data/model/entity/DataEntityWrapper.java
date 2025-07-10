@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.data.raw;
+package com.itservices.gpxanalyzer.data.model.entity;
 
 import android.util.Log;
 
@@ -6,7 +6,6 @@ import com.itservices.gpxanalyzer.data.cache.rawdata.DataEntityCache;
 import com.itservices.gpxanalyzer.data.cumulative.CumulativeProcessedDataType;
 import com.itservices.gpxanalyzer.data.cumulative.CumulativeStatistics;
 
-import java.util.Objects;
 import java.util.Vector;
 
 /**

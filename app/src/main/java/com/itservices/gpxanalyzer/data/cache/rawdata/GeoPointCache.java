@@ -1,8 +1,8 @@
 package com.itservices.gpxanalyzer.data.cache.rawdata;
 
 
-import com.itservices.gpxanalyzer.data.raw.GeoPointEntity;
-import com.itservices.gpxanalyzer.data.statistics.GeoPointStatistics;
+import com.itservices.gpxanalyzer.data.model.entity.GeoPointEntity;
+import com.itservices.gpxanalyzer.data.model.statistics.GeoPointStatistics;
 
 import org.osmdroid.util.GeoPoint;
 

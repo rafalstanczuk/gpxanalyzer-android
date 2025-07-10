@@ -90,18 +90,17 @@ public class LineChartSettings {
     }
 
     /**
-     * Static helper method to apply relevant settings directly to a {@link LineDataSet}.
+     * The method to apply relevant settings directly to a {@link LineDataSet}.
      * Configures drawing of filled areas and icons based on the settings.
      * Also configures the appearance of the highlight line.
      *
      * @param lineDataSet The dataset to configure.
-     * @param settings    The {@link LineChartSettings} containing the configuration.
      */
-    public static void updateLineDataSetWithSettings(LineDataSet lineDataSet, LineChartSettings settings) {
-        lineDataSet.setDrawFilled(settings.isDrawAscDescSegEnabled());
-        lineDataSet.setDrawIcons(settings.isDrawIconsEnabled());
+    public void updateSettingsFor(LineDataSet lineDataSet) {
+        lineDataSet.setDrawFilled(isDrawAscDescSegEnabled());
+        lineDataSet.setDrawIcons(isDrawIconsEnabled());
 
-        if (settings.isDrawAscDescSegEnabled()) {
+        if (isDrawAscDescSegEnabled()) {
             lineDataSet.setHighLightColor(Color.BLACK);
             lineDataSet.enableDashedHighlightLine(30f, 5f, 0f);
             lineDataSet.setHighlightLineWidth(1f);
@@ -317,7 +316,7 @@ public class LineChartSettings {
         lineDataSetList.forEach(
                 iLineDataSet -> {
                     LineDataSet lineDataSet = (LineDataSet) iLineDataSet;
-                    updateLineDataSetWithSettings(lineDataSet, LineChartSettings.this);
+                    updateSettingsFor(lineDataSet);
                 }
         );
     }

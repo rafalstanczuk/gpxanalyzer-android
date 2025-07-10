@@ -10,7 +10,7 @@ import com.itservices.gpxanalyzer.data.cache.processed.rawdata.RawDataProcessedC
 import com.itservices.gpxanalyzer.data.cumulative.TrendBoundaryCumulativeMapper;
 import com.itservices.gpxanalyzer.data.cumulative.TrendBoundaryDataEntity;
 import com.itservices.gpxanalyzer.data.extrema.ExtremaSegmentListMapper;
-import com.itservices.gpxanalyzer.data.raw.DataEntityWrapper;
+import com.itservices.gpxanalyzer.data.model.entity.DataEntityWrapper;
 import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.GpxViewMode;
 
 import java.util.List;

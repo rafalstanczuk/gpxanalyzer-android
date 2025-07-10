@@ -2,7 +2,7 @@ package com.itservices.gpxanalyzer.data.provider.file;
 
 import androidx.annotation.NonNull;
 
-import com.itservices.gpxanalyzer.data.raw.DataEntity;
+import com.itservices.gpxanalyzer.data.model.entity.DataEntity;
 
 import java.io.InputStream;
 import java.util.Vector;

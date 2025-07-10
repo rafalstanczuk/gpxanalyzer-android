@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.data.statistics;
+package com.itservices.gpxanalyzer.data.model.statistics;
 
 import org.osmdroid.util.GeoPoint;
 import java.util.List;

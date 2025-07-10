@@ -14,7 +14,7 @@ import com.itservices.gpxanalyzer.data.cache.processed.rawdata.RawDataProcessed;
 import com.itservices.gpxanalyzer.data.cache.rawdata.DataEntityCache;
 import com.itservices.gpxanalyzer.data.provider.GpxDataEntityCachedProvider;
 import com.itservices.gpxanalyzer.data.provider.RawDataProcessedProvider;
-import com.itservices.gpxanalyzer.data.raw.DataEntityWrapper;
+import com.itservices.gpxanalyzer.data.model.entity.DataEntityWrapper;
 import com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItem;
 import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.GpxViewMode;
 import com.itservices.gpxanalyzer.ui.gpxchart.viewmode.GpxViewModeMapper;
