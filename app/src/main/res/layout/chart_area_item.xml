@@ -6,11 +6,11 @@
     <data>
         <variable
             name="chartAreaItem"
-            type="com.itservices.gpxanalyzer.ui.gpxchart.item.ChartAreaItem" />
+            type="com.itservices.gpxanalyzer.feature.gpxchart.ui.item.ChartAreaItem" />
 
         <variable
             name="viewModel"
-            type="com.itservices.gpxanalyzer.ui.gpxchart.ChartAreaListViewModel" />
+            type="com.itservices.gpxanalyzer.feature.gpxchart.ui.ChartAreaListViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -40,7 +40,7 @@
                 android:layout_height="match_parent"
                 app:layout_constraintTop_toTopOf="parent">
 
-                <com.itservices.gpxanalyzer.ui.components.chart.DataEntityLineChart
+                <com.itservices.gpxanalyzer.core.ui.components.chart.DataEntityLineChart
                     android:id="@+id/line_chart"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"

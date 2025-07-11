@@ -7,11 +7,11 @@
 
         <variable
             name="item"
-            type="com.itservices.gpxanalyzer.ui.storage.FileInfoItem" />
+            type="com.itservices.gpxanalyzer.feature.gpxlist.ui.FileInfoItem" />
 
         <variable
             name="viewModel"
-            type="com.itservices.gpxanalyzer.ui.storage.FileSelectorViewModel" />
+            type="com.itservices.gpxanalyzer.feature.gpxlist.ui.FileSelectorViewModel" />
     </data>
 
     <com.google.android.material.card.MaterialCardView

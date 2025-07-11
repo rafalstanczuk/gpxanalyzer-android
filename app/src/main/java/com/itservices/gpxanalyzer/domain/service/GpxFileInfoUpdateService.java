@@ -2,8 +2,8 @@ package com.itservices.gpxanalyzer.domain.service;
 
 import android.content.Context;
 
-import com.itservices.gpxanalyzer.data.model.gpxfileinfo.GpxFileInfo;
-import com.itservices.gpxanalyzer.ui.components.miniature.MiniatureMapView;
+import com.itservices.gpxanalyzer.feature.gpxlist.data.model.gpxfileinfo.GpxFileInfo;
+import com.itservices.gpxanalyzer.core.ui.components.miniature.MiniatureMapView;
 
 import java.util.List;
 

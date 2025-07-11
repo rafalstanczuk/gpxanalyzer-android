@@ -7,7 +7,7 @@
 
         <variable
             name="viewModel"
-            type="com.itservices.gpxanalyzer.ui.gpxchart.ChartAreaListViewModel" />
+            type="com.itservices.gpxanalyzer.feature.gpxchart.ui.ChartAreaListViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -57,7 +57,7 @@
                 app:strokeColor="@color/black"
                 app:strokeWidth="1dp">
 
-                <com.itservices.gpxanalyzer.ui.components.mapview.DataMapView
+                <com.itservices.gpxanalyzer.core.ui.components.mapview.DataMapView
                     android:id="@+id/mapView"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />

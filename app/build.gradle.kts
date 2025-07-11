@@ -46,23 +46,14 @@ android {
         }
 
         // Load secure properties
-        val secureProperties = Properties()
+/*        val secureProperties = Properties()
         val securePropertiesFile = rootProject.file("app/secure.properties")
         if (securePropertiesFile.exists()) {
             secureProperties.load(FileInputStream(securePropertiesFile))
         }
-        
+
         // Make API keys available in BuildConfig
-        buildConfigField("String", "MAPS_CO_API_KEY_1", "\"${secureProperties.getProperty("MAPS_CO_API_KEY_1", "")}\"")
-        buildConfigField("String", "MAPS_CO_API_KEY_2", "\"${secureProperties.getProperty("MAPS_CO_API_KEY_2", "")}\"")
-        buildConfigField("String", "MAPS_CO_API_KEY_3", "\"${secureProperties.getProperty("MAPS_CO_API_KEY_3", "")}\"")
-        buildConfigField("String", "MAPS_CO_API_KEY_4", "\"${secureProperties.getProperty("MAPS_CO_API_KEY_4", "")}\"")
-        buildConfigField("String", "MAPS_CO_API_KEY_5", "\"${secureProperties.getProperty("MAPS_CO_API_KEY_5", "")}\"")
-        buildConfigField("String", "MAPS_CO_API_KEY_6", "\"${secureProperties.getProperty("MAPS_CO_API_KEY_6", "")}\"")
-        buildConfigField("String", "MAPS_CO_API_KEY_7", "\"${secureProperties.getProperty("MAPS_CO_API_KEY_7", "")}\"")
-        buildConfigField("String", "MAPS_CO_API_KEY_8", "\"${secureProperties.getProperty("MAPS_CO_API_KEY_8", "")}\"")
-        buildConfigField("String", "MAPS_CO_API_KEY_9", "\"${secureProperties.getProperty("MAPS_CO_API_KEY_9", "")}\"")
-        buildConfigField("String", "MAPS_CO_API_KEY_10", "\"${secureProperties.getProperty("MAPS_CO_API_KEY_10", "")}\"")
+        buildConfigField("String", "API_KEY", "\"${secureProperties.getProperty("API_KEY", "")}\"")*/
 
     }
 
