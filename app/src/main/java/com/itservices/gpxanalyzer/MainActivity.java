@@ -8,7 +8,7 @@ import androidx.navigation.NavGraph;
 import androidx.navigation.NavInflater;
 import androidx.navigation.fragment.NavHostFragment;
 
-import com.itservices.gpxanalyzer.usecase.SelectGpxFileUseCase;
+import com.itservices.gpxanalyzer.feature.gpxlist.domain.SelectGpxFileUseCase;
 
 import javax.inject.Inject;
 

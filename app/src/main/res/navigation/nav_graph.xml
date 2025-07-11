@@ -5,20 +5,14 @@
     app:startDestination="@id/chartAreaListFragment"> <!-- Changed to chartAreaListFragment -->
 
     <fragment
-        android:id="@+id/mainMenuFragment"
-        android:name="com.itservices.gpxanalyzer.ui.main.MainMenuFragment"
-        android:label="MainMenuFragment">
-    </fragment>
-
-    <fragment
         android:id="@+id/chartAreaListFragment"
-        android:name="com.itservices.gpxanalyzer.ui.gpxchart.ChartAreaListFragment"
+        android:name="com.itservices.gpxanalyzer.feature.gpxchart.ui.ChartAreaListFragment"
         android:label="ChartAreaListFragment">
     </fragment>
 
     <fragment
         android:id="@+id/fileSelectorFragment"
-        android:name="com.itservices.gpxanalyzer.ui.storage.FileSelectorFragment"
+        android:name="com.itservices.gpxanalyzer.feature.gpxlist.ui.FileSelectorFragment"
         android:label="FileSelectorFragment">
     </fragment>
 
