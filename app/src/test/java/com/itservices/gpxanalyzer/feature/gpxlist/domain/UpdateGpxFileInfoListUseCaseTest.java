@@ -7,12 +7,9 @@ import static org.mockito.Mockito.*;
 import android.content.Context;
 import android.util.Log;
 
-import com.itservices.gpxanalyzer.core.events.EventProgress;
-import com.itservices.gpxanalyzer.core.events.GlobalEventWrapper;
-import com.itservices.gpxanalyzer.core.ui.components.miniature.GpxFileInfoMiniatureProvider;
 import com.itservices.gpxanalyzer.core.ui.components.miniature.MiniatureMapView;
+import com.itservices.gpxanalyzer.domain.service.GpxFileInfoUpdateService;
 import com.itservices.gpxanalyzer.feature.gpxlist.data.model.gpxfileinfo.GpxFileInfo;
-import com.itservices.gpxanalyzer.feature.gpxlist.data.provider.GpxFileInfoProvider;
 
 import org.junit.After;
 import org.junit.Before;
@@ -45,26 +42,19 @@ public class UpdateGpxFileInfoListUseCaseTest {
     @Rule
     public MockitoRule mockitoRule = MockitoJUnit.rule();
 
-    @Mock private GpxFileInfoProvider mockGpxFileInfoProvider;
-    @Mock private GpxFileInfoMiniatureProvider mockMiniatureProvider;
-    @Mock private GlobalEventWrapper mockGlobalEventWrapper;
     @Mock private Context mockContext;
+    @Mock private GpxFileInfoUpdateService mockGpxFileUpdateService;
     private MiniatureMapView mockMiniatureRenderer;
     @Mock private GpxFileInfo mockGpxFileInfo1;
     @Mock private GpxFileInfo mockGpxFileInfo2;
     @Mock private File mockFile1;
     @Mock private File mockFile2;
-    @Mock private EventProgress mockProgressInitial;
-    @Mock private EventProgress mockProgress1;
-    @Mock private EventProgress mockProgress2;
 
     @InjectMocks private UpdateGpxFileInfoListUseCase updateGpxFileInfoListUseCase;
 
     @Captor private ArgumentCaptor<List<GpxFileInfo>> listCaptor;
-    @Captor private ArgumentCaptor<EventProgress> progressCaptor;
 
     private MockedStatic<Log> logMockedStatic;
-    private MockedStatic<EventProgress> eventProgressMockedStatic;
 
     private List<GpxFileInfo> initialList;
 
@@ -75,8 +65,6 @@ public class UpdateGpxFileInfoListUseCaseTest {
         logMockedStatic.when(() -> Log.e(anyString(), anyString())).thenReturn(0);
         logMockedStatic.when(() -> Log.e(anyString(), anyString(), any(Throwable.class))).thenReturn(0);
         logMockedStatic.when(() -> Log.i(anyString(), anyString())).thenReturn(0);
-
-        eventProgressMockedStatic = Mockito.mockStatic(EventProgress.class);
 
         mockMiniatureRenderer = mock(MiniatureMapView.class);
 
@@ -90,144 +78,135 @@ public class UpdateGpxFileInfoListUseCaseTest {
         when(mockFile2.getName()).thenReturn("file2.gpx");
 
         initialList = List.of(mockGpxFileInfo1, mockGpxFileInfo2);
-
-        when(mockGpxFileInfoProvider.searchAndParseGpxFilesRecursively(mockContext))
-                .thenReturn(Single.just(initialList));
-
-        when(mockMiniatureProvider.requestForGenerateMiniature(eq(mockMiniatureRenderer), any(GpxFileInfo.class)))
-                .thenReturn(Completable.complete());
-        when(mockMiniatureProvider.getGpxFileInfoWithMiniature())
-                .thenReturn(Observable.just(mockGpxFileInfo1, mockGpxFileInfo2));
-
-        eventProgressMockedStatic.when(() -> EventProgress.create(eq(GpxFileInfoMiniatureProvider.class), eq(0), eq(2))).thenReturn(mockProgressInitial);
-        eventProgressMockedStatic.when(() -> EventProgress.create(eq(GpxFileInfoMiniatureProvider.class), eq(1), eq(2))).thenReturn(mockProgress1);
-        eventProgressMockedStatic.when(() -> EventProgress.create(eq(GpxFileInfoMiniatureProvider.class), eq(2), eq(2))).thenReturn(mockProgress2);
-
-        when(mockGlobalEventWrapper.onNextChanged(any(), any())).thenAnswer(inv -> inv.getArgument(1));
-
-        when(mockGpxFileInfoProvider.replaceAll(anyList())).thenReturn(Completable.complete());
     }
 
     @Test
     public void updateAndGenerateMiniatures_successPath_searchesGeneratesReplacesAndReportsProgress() {
+        when(mockGpxFileUpdateService.scanFiles(mockContext)).thenReturn(Single.just(initialList));
+        when(mockGpxFileUpdateService.generateMiniatures(anyList())).thenReturn(Completable.complete());
+        when(mockGpxFileUpdateService.performGeocoding(anyList())).thenReturn(Completable.complete());
+        when(mockGpxFileUpdateService.updateWithGeocodedLocations(anyList())).thenReturn(Completable.complete());
+        when(mockGpxFileUpdateService.updateDatabase(anyList())).thenReturn(Completable.complete());
+
         TestObserver<Void> testObserver = updateGpxFileInfoListUseCase.updateAndGenerateMiniatures(mockContext, mockMiniatureRenderer).test();
 
         testObserver.assertComplete();
         testObserver.assertNoErrors();
 
-        InOrder inOrder = inOrder(mockGpxFileInfoProvider, mockMiniatureProvider, mockGlobalEventWrapper);
+        InOrder inOrder = inOrder(mockGpxFileUpdateService);
 
-        inOrder.verify(mockGpxFileInfoProvider).searchAndParseGpxFilesRecursively(mockContext);
-
-        inOrder.verify(mockGlobalEventWrapper).onNext(progressCaptor.capture());
-        assertEquals(mockProgressInitial, progressCaptor.getValue());
-
-        inOrder.verify(mockMiniatureProvider).requestForGenerateMiniature(mockMiniatureRenderer, mockGpxFileInfo1);
-        inOrder.verify(mockGlobalEventWrapper).onNextChanged(mockProgressInitial, mockProgress1);
-
-        inOrder.verify(mockMiniatureProvider).requestForGenerateMiniature(mockMiniatureRenderer, mockGpxFileInfo2);
-        inOrder.verify(mockGlobalEventWrapper).onNextChanged(mockProgress1, mockProgress2);
-
-        inOrder.verify(mockGpxFileInfoProvider).replaceAll(listCaptor.capture());
+        inOrder.verify(mockGpxFileUpdateService).setMiniatureRenderer(mockMiniatureRenderer);
+        inOrder.verify(mockGpxFileUpdateService).scanFiles(mockContext);
+        inOrder.verify(mockGpxFileUpdateService).generateMiniatures(listCaptor.capture());
         assertEquals(initialList, listCaptor.getValue());
+        inOrder.verify(mockGpxFileUpdateService).performGeocoding(initialList);
+        inOrder.verify(mockGpxFileUpdateService).updateWithGeocodedLocations(initialList);
+        inOrder.verify(mockGpxFileUpdateService).updateDatabase(initialList);
 
         inOrder.verifyNoMoreInteractions();
-        
-        verify(mockMiniatureProvider, times(2)).getGpxFileInfoWithMiniature();
     }
 
     @Test
     public void updateAndGenerateMiniatures_whenSearchReturnsEmpty_completesWithoutProcessing() {
-        when(mockGpxFileInfoProvider.searchAndParseGpxFilesRecursively(mockContext)).thenReturn(Single.just(Collections.emptyList()));
+        when(mockGpxFileUpdateService.scanFiles(mockContext)).thenReturn(Single.just(Collections.emptyList()));
 
         TestObserver<Void> testObserver = updateGpxFileInfoListUseCase.updateAndGenerateMiniatures(mockContext, mockMiniatureRenderer).test();
 
         testObserver.assertComplete();
         testObserver.assertNoErrors();
 
-        verify(mockGpxFileInfoProvider).searchAndParseGpxFilesRecursively(mockContext);
-        verifyNoInteractions(mockMiniatureProvider, mockGlobalEventWrapper);
-        verify(mockGpxFileInfoProvider, never()).replaceAll(anyList());
+        verify(mockGpxFileUpdateService).setMiniatureRenderer(mockMiniatureRenderer);
+        verify(mockGpxFileUpdateService).scanFiles(mockContext);
+        verify(mockGpxFileUpdateService, never()).generateMiniatures(anyList());
+        verify(mockGpxFileUpdateService, never()).performGeocoding(anyList());
+        verify(mockGpxFileUpdateService, never()).updateWithGeocodedLocations(anyList());
+        verify(mockGpxFileUpdateService, never()).updateDatabase(anyList());
     }
 
     @Test
     public void updateAndGenerateMiniatures_whenSearchErrors_propagatesError() {
         Throwable searchError = new RuntimeException("Search failed");
-        when(mockGpxFileInfoProvider.searchAndParseGpxFilesRecursively(mockContext)).thenReturn(Single.error(searchError));
+        when(mockGpxFileUpdateService.scanFiles(mockContext)).thenReturn(Single.error(searchError));
 
         TestObserver<Void> testObserver = updateGpxFileInfoListUseCase.updateAndGenerateMiniatures(mockContext, mockMiniatureRenderer).test();
 
         testObserver.assertError(searchError);
 
-        verify(mockGpxFileInfoProvider).searchAndParseGpxFilesRecursively(mockContext);
-        verifyNoInteractions(mockMiniatureProvider, mockGlobalEventWrapper);
-        verify(mockGpxFileInfoProvider, never()).replaceAll(anyList());
+        verify(mockGpxFileUpdateService).setMiniatureRenderer(mockMiniatureRenderer);
+        verify(mockGpxFileUpdateService).scanFiles(mockContext);
+        verify(mockGpxFileUpdateService, never()).generateMiniatures(anyList());
+        verify(mockGpxFileUpdateService, never()).performGeocoding(anyList());
+        verify(mockGpxFileUpdateService, never()).updateWithGeocodedLocations(anyList());
+        verify(mockGpxFileUpdateService, never()).updateDatabase(anyList());
     }
 
     @Test
     public void updateAndGenerateMiniatures_whenMiniatureRequestErrors_propagatesError() {
         Throwable miniatureError = new RuntimeException("Miniature request failed");
-        when(mockMiniatureProvider.requestForGenerateMiniature(mockMiniatureRenderer, mockGpxFileInfo1)).thenReturn(Completable.error(miniatureError));
+        when(mockGpxFileUpdateService.scanFiles(mockContext)).thenReturn(Single.just(initialList));
+        when(mockGpxFileUpdateService.generateMiniatures(anyList())).thenReturn(Completable.error(miniatureError));
 
         TestObserver<Void> testObserver = updateGpxFileInfoListUseCase.updateAndGenerateMiniatures(mockContext, mockMiniatureRenderer).test();
 
         testObserver.assertError(miniatureError);
 
-        InOrder inOrder = inOrder(mockGpxFileInfoProvider, mockMiniatureProvider, mockGlobalEventWrapper);
-        inOrder.verify(mockGpxFileInfoProvider).searchAndParseGpxFilesRecursively(mockContext);
-        inOrder.verify(mockGlobalEventWrapper).onNext(mockProgressInitial);
-        inOrder.verify(mockMiniatureProvider).requestForGenerateMiniature(mockMiniatureRenderer, mockGpxFileInfo1);
+        verify(mockGpxFileUpdateService).setMiniatureRenderer(mockMiniatureRenderer);
+        verify(mockGpxFileUpdateService).scanFiles(mockContext);
+        verify(mockGpxFileUpdateService).generateMiniatures(initialList);
 
-        inOrder.verify(mockMiniatureProvider, never()).requestForGenerateMiniature(mockMiniatureRenderer, mockGpxFileInfo2);
-        inOrder.verify(mockGpxFileInfoProvider, never()).replaceAll(anyList());
+        verify(mockGpxFileUpdateService, never()).performGeocoding(anyList());
+        verify(mockGpxFileUpdateService, never()).updateWithGeocodedLocations(anyList());
+        verify(mockGpxFileUpdateService, never()).updateDatabase(anyList());
     }
 
     @Test
     public void updateAndGenerateMiniatures_whenMiniatureResultErrors_propagatesError() {
-        Throwable resultError = new RuntimeException("Miniature result failed");
-        when(mockMiniatureProvider.getGpxFileInfoWithMiniature()).thenReturn(Observable.error(resultError));
+        Throwable resultError = new RuntimeException("Geocoding failed");
+        when(mockGpxFileUpdateService.scanFiles(mockContext)).thenReturn(Single.just(initialList));
+        when(mockGpxFileUpdateService.generateMiniatures(anyList())).thenReturn(Completable.complete());
+        when(mockGpxFileUpdateService.performGeocoding(anyList())).thenReturn(Completable.error(resultError));
 
         TestObserver<Void> testObserver = updateGpxFileInfoListUseCase.updateAndGenerateMiniatures(mockContext, mockMiniatureRenderer).test();
 
         testObserver.assertError(resultError);
 
-        InOrder inOrder = inOrder(mockGpxFileInfoProvider, mockMiniatureProvider, mockGlobalEventWrapper);
-        inOrder.verify(mockGpxFileInfoProvider).searchAndParseGpxFilesRecursively(mockContext);
-        inOrder.verify(mockGlobalEventWrapper).onNext(mockProgressInitial);
-        inOrder.verify(mockMiniatureProvider).requestForGenerateMiniature(mockMiniatureRenderer, mockGpxFileInfo1);
-        inOrder.verify(mockMiniatureProvider).getGpxFileInfoWithMiniature();
+        InOrder inOrder = inOrder(mockGpxFileUpdateService);
+        inOrder.verify(mockGpxFileUpdateService).setMiniatureRenderer(mockMiniatureRenderer);
+        inOrder.verify(mockGpxFileUpdateService).scanFiles(mockContext);
+        inOrder.verify(mockGpxFileUpdateService).generateMiniatures(initialList);
+        inOrder.verify(mockGpxFileUpdateService).performGeocoding(initialList);
 
-        inOrder.verify(mockMiniatureProvider, never()).requestForGenerateMiniature(mockMiniatureRenderer, mockGpxFileInfo2);
-        inOrder.verify(mockGpxFileInfoProvider, never()).replaceAll(anyList());
+        inOrder.verify(mockGpxFileUpdateService, never()).updateWithGeocodedLocations(anyList());
+        inOrder.verify(mockGpxFileUpdateService, never()).updateDatabase(anyList());
     }
 
     @Test
     public void updateAndGenerateMiniatures_whenReplaceAllErrors_propagatesError() {
-        Throwable replaceError = new RuntimeException("Replace failed");
-        when(mockGpxFileInfoProvider.replaceAll(anyList())).thenReturn(Completable.error(replaceError));
+        Throwable replaceError = new RuntimeException("Database update failed");
+        when(mockGpxFileUpdateService.scanFiles(mockContext)).thenReturn(Single.just(initialList));
+        when(mockGpxFileUpdateService.generateMiniatures(anyList())).thenReturn(Completable.complete());
+        when(mockGpxFileUpdateService.performGeocoding(anyList())).thenReturn(Completable.complete());
+        when(mockGpxFileUpdateService.updateWithGeocodedLocations(anyList())).thenReturn(Completable.complete());
+        when(mockGpxFileUpdateService.updateDatabase(anyList())).thenReturn(Completable.error(replaceError));
 
         TestObserver<Void> testObserver = updateGpxFileInfoListUseCase.updateAndGenerateMiniatures(mockContext, mockMiniatureRenderer).test();
 
         testObserver.assertError(replaceError);
 
-        InOrder inOrder = inOrder(mockGpxFileInfoProvider, mockMiniatureProvider, mockGlobalEventWrapper);
-        inOrder.verify(mockGpxFileInfoProvider).searchAndParseGpxFilesRecursively(mockContext);
-        inOrder.verify(mockGlobalEventWrapper).onNext(mockProgressInitial);
-        inOrder.verify(mockMiniatureProvider).requestForGenerateMiniature(mockMiniatureRenderer, mockGpxFileInfo1);
-        inOrder.verify(mockGlobalEventWrapper).onNextChanged(mockProgressInitial, mockProgress1);
-        inOrder.verify(mockMiniatureProvider).requestForGenerateMiniature(mockMiniatureRenderer, mockGpxFileInfo2);
-        inOrder.verify(mockGlobalEventWrapper).onNextChanged(mockProgress1, mockProgress2);
-        inOrder.verify(mockGpxFileInfoProvider).replaceAll(listCaptor.capture());
+        InOrder inOrder = inOrder(mockGpxFileUpdateService);
+        inOrder.verify(mockGpxFileUpdateService).setMiniatureRenderer(mockMiniatureRenderer);
+        inOrder.verify(mockGpxFileUpdateService).scanFiles(mockContext);
+        inOrder.verify(mockGpxFileUpdateService).generateMiniatures(listCaptor.capture());
         assertEquals(initialList, listCaptor.getValue());
+        inOrder.verify(mockGpxFileUpdateService).performGeocoding(initialList);
+        inOrder.verify(mockGpxFileUpdateService).updateWithGeocodedLocations(initialList);
+        inOrder.verify(mockGpxFileUpdateService).updateDatabase(initialList);
     }
 
     @After
     public void tearDown() {
         RxJavaPlugins.reset();
         RxAndroidPlugins.reset();
-        if (eventProgressMockedStatic != null) {
-            eventProgressMockedStatic.close();
-        }
         if (logMockedStatic != null) {
             logMockedStatic.close();
         }
