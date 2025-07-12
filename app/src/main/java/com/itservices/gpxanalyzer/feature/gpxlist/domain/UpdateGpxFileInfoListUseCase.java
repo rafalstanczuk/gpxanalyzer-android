@@ -60,9 +60,9 @@ public class UpdateGpxFileInfoListUseCase {
                     
                     return Completable.concatArray(
                             gpxFileUpdateService.generateMiniatures(files),
-                            gpxFileUpdateService.performGeocoding(files),
-                            gpxFileUpdateService.updateWithGeocodedLocations(files),
-                            gpxFileUpdateService.updateDatabase(files)
+                            Completable.defer(() -> gpxFileUpdateService.performGeocoding(files)),
+                            Completable.defer(() -> gpxFileUpdateService.updateWithGeocodedLocations(files)),
+                            Completable.defer(() -> gpxFileUpdateService.updateDatabase(files))
                     );
                 })
                 .subscribeOn(Schedulers.io())
