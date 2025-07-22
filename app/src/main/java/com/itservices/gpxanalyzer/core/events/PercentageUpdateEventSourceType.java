@@ -1,7 +1,7 @@
 package com.itservices.gpxanalyzer.core.events;
 
 import com.itservices.gpxanalyzer.feature.gpxlist.data.provider.GpxFileInfoProvider;
-import com.itservices.gpxanalyzer.feature.gpxlist.data.provider.file.DeviceStorageSearchedFileProvider;
+import com.itservices.gpxanalyzer.feature.gpxlist.data.provider.file.DeviceStorageFileProvider;
 import com.itservices.gpxanalyzer.feature.gpxchart.data.provider.file.GpxFileDataEntityProvider;
 import com.itservices.gpxanalyzer.core.data.provider.geocoding.BaseGeocodingRepository;
 import com.itservices.gpxanalyzer.core.ui.components.miniature.GpxFileInfoMiniatureProvider;
@@ -17,9 +17,9 @@ public enum PercentageUpdateEventSourceType {
      */
     GPX_FILE_DATA_ENTITY_PROVIDER(GpxFileDataEntityProvider.class),
     /**
-     * Indicates progress related to searching for files on device storage, typically handled by {@link DeviceStorageSearchedFileProvider}.
+     * Indicates progress related to searching for files on device storage, typically handled by {@link DeviceStorageFileProvider}.
      */
-    STORAGE_SEARCH_PROGRESS(DeviceStorageSearchedFileProvider.class),
+    STORAGE_SEARCH_PROGRESS(DeviceStorageFileProvider.class),
     /**
      * Indicates progress related to generating GPX file info miniatures, typically handled by {@link GpxFileInfoMiniatureProvider}.
      */

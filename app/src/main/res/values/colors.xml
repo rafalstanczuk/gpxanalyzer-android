@@ -27,4 +27,22 @@
     <color name="md_theme_light_onError">#FFFFFF</color>
     <color name="md_theme_dark_error">#CF6679</color> <!-- Lighter red for dark theme -->
     <color name="md_theme_dark_onError">#000000</color>
+
+    <!-- Strava Colors -->
+    <color name="strava_orange">#FC4C02</color>
+    <color name="strava_orange_dark">#E73C02</color>
+    <color name="strava_orange_disabled">#FFAB91</color>
+    
+    <!-- Info Background Colors -->
+    <color name="info_background">#F5F5F5</color>
+    <color name="info_border">#E0E0E0</color>
+    
+    <!-- Strava Status Colors -->
+    <color name="strava_status_background">#FAFAFA</color>
+    <color name="strava_status_border">#E8E8E8</color>
+    
+    <!-- Status Indicator Colors -->
+    <color name="status_connected">#4CAF50</color>
+    <color name="status_disconnected">#9E9E9E</color>
+    <color name="status_error">#F44336</color>
 </resources>

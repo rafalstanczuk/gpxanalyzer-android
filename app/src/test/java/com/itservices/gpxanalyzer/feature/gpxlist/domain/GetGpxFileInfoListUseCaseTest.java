@@ -78,13 +78,13 @@ public class GetGpxFileInfoListUseCaseTest {
 
         // Arrange: Configure the mock provider to return a specific Single
         Single<List<GpxFileInfo>> expectedSingle = Single.just(mockFileInfoList);
-        when(mockGpxFileInfoProvider.getAndFilterGpxFiles()).thenReturn(expectedSingle);
+        when(mockGpxFileInfoProvider.getCached()).thenReturn(expectedSingle);
 
         // Act: Call the method under test
         Single<List<GpxFileInfo>> actualSingle = getGpxFileInfoListUseCase.getGpxFileInfoList();
 
         // Assert: Verify the provider method was called
-        verify(mockGpxFileInfoProvider).getAndFilterGpxFiles();
+        verify(mockGpxFileInfoProvider).getCached();
 
         // Assert: Verify the returned Single emits the expected list
         actualSingle.test()
@@ -96,13 +96,13 @@ public class GetGpxFileInfoListUseCaseTest {
     public void getGpxFileInfoList_whenProviderReturnsEmptyList_shouldReturnEmptyList() {
         // Arrange: Configure the mock provider to return an empty list
         Single<List<GpxFileInfo>> expectedSingle = Single.just(Collections.emptyList());
-        when(mockGpxFileInfoProvider.getAndFilterGpxFiles()).thenReturn(expectedSingle);
+        when(mockGpxFileInfoProvider.getCached()).thenReturn(expectedSingle);
 
         // Act: Call the method under test
         Single<List<GpxFileInfo>> actualSingle = getGpxFileInfoListUseCase.getGpxFileInfoList();
 
         // Assert: Verify the provider method was called
-        verify(mockGpxFileInfoProvider).getAndFilterGpxFiles();
+        verify(mockGpxFileInfoProvider).getCached();
 
         // Assert: Verify the returned Single emits an empty list
         actualSingle.test()
@@ -115,13 +115,13 @@ public class GetGpxFileInfoListUseCaseTest {
         // Arrange: Configure the mock provider to return an error
         Throwable expectedError = new RuntimeException("Provider error");
         Single<List<GpxFileInfo>> expectedSingle = Single.error(expectedError);
-        when(mockGpxFileInfoProvider.getAndFilterGpxFiles()).thenReturn(expectedSingle);
+        when(mockGpxFileInfoProvider.getCached()).thenReturn(expectedSingle);
 
         // Act: Call the method under test
         Single<List<GpxFileInfo>> actualSingle = getGpxFileInfoListUseCase.getGpxFileInfoList();
 
         // Assert: Verify the provider method was called
-        verify(mockGpxFileInfoProvider).getAndFilterGpxFiles();
+        verify(mockGpxFileInfoProvider).getCached();
 
         // Assert: Verify the returned Single emits the expected error
         actualSingle.test()

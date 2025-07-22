@@ -17,6 +17,7 @@ import com.itservices.gpxanalyzer.core.events.GlobalEventWrapper;
 import com.itservices.gpxanalyzer.core.events.PercentageUpdateEventSourceType;
 import com.itservices.gpxanalyzer.core.ui.components.miniature.GpxFileInfoMiniatureProvider;
 import com.itservices.gpxanalyzer.core.ui.components.miniature.MiniatureMapView;
+import com.itservices.gpxanalyzer.feature.gpxlist.data.provider.ProviderType;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -64,7 +65,7 @@ public class GpxFileInfoUpdateServiceImpl implements GpxFileInfoUpdateService {
 
     @Override
     public Single<List<GpxFileInfo>> scanFiles(Context context) {
-        return gpxFileInfoProvider.searchAndParseGpxFilesRecursively(context);
+        return gpxFileInfoProvider.getAndUpdate(context, ProviderType.ONLINE);
     }
 
     @Override
@@ -200,7 +201,7 @@ public class GpxFileInfoUpdateServiceImpl implements GpxFileInfoUpdateService {
     public Completable updateDatabase(List<GpxFileInfo> files) {
         //Log.d(TAG, "updateDatabase() called with: files = [" + files + "]");
 
-        return gpxFileInfoProvider.replaceAll(files)
+        return gpxFileInfoProvider.setCached(files)
                 .doOnSubscribe(disposable -> {
                     globalEventWrapper.onNext(
                             EventProgress.create(PercentageUpdateEventSourceType.UPDATING_RESOURCES_PROCESSING, 0,1)

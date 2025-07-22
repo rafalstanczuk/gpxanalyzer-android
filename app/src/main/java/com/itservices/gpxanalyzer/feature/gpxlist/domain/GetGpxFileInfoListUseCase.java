@@ -38,7 +38,7 @@ public class GetGpxFileInfoListUseCase {
      */
     public Single<List<GpxFileInfo>> getGpxFileInfoList() {
         return gpxFileInfoProvider
-                .getAndFilterGpxFiles();
+                .getCached();
     }
 }
 

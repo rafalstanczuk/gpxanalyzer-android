@@ -45,15 +45,22 @@ android {
             }
         }
 
-        // Load secure properties
-/*        val secureProperties = Properties()
-        val securePropertiesFile = rootProject.file("app/secure.properties")
+        // Load Strava OAuth 2.0 secure properties
+        val secureProperties = Properties()
+        val securePropertiesFile = rootProject.file("app/stravaapi_secure.properties")
         if (securePropertiesFile.exists()) {
             secureProperties.load(FileInputStream(securePropertiesFile))
+        } else {
+            println("Warning: stravaapi_secure.properties file not found. Strava integration will not work.")
         }
-
-        // Make API keys available in BuildConfig
-        buildConfigField("String", "API_KEY", "\"${secureProperties.getProperty("API_KEY", "")}\"")*/
+        
+        // Make Strava OAuth 2.0 configuration available in BuildConfig
+        // See: https://developers.strava.com/docs/getting-started/
+        buildConfigField("String", "STRAVA_CLIENT_ID", "\"${secureProperties.getProperty("STRAVA_CLIENT_ID", "")}\"")
+        buildConfigField("String", "STRAVA_CLIENT_SECRET", "\"${secureProperties.getProperty("STRAVA_CLIENT_SECRET", "")}\"")
+        buildConfigField("String", "STRAVA_ACCESS_TOKEN", "\"${secureProperties.getProperty("STRAVA_ACCESS_TOKEN", "")}\"")
+        buildConfigField("String", "STRAVA_REFRESH_TOKEN", "\"${secureProperties.getProperty("STRAVA_REFRESH_TOKEN", "")}\"")
+        buildConfigField("String", "STRAVA_REDIRECT_URI", "\"${secureProperties.getProperty("STRAVA_REDIRECT_URI", "http://localhost:8080/strava-auth")}\"")
 
     }
 
@@ -178,9 +185,9 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     // Required for OkHttp
-    implementation("org.bouncycastle:bctls-jdk15on:1.68")
-    implementation("org.conscrypt:conscrypt-android:2.5.2")
-    implementation("org.openjsse:openjsse:1.1.10")
+    implementation("org.bouncycastle:bctls-jdk15on:1.68") // TODO: Check if to remove
+    implementation("org.conscrypt:conscrypt-android:2.5.2") // TODO: Check if to remove
+    implementation("org.openjsse:openjsse:1.1.10") // TODO: Check if to remove
     
     // Required for Joda-Time
     implementation("org.joda:joda-convert:2.2.3")

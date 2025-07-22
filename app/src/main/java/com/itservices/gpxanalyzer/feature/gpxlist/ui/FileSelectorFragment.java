@@ -1,12 +1,16 @@
 package com.itservices.gpxanalyzer.feature.gpxlist.ui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
@@ -16,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.itservices.gpxanalyzer.R;
 import com.itservices.gpxanalyzer.databinding.FragmentFileSelectorBinding;
 import com.itservices.gpxanalyzer.core.ui.mapper.FileInfoItemMapper;
+import com.itservices.gpxanalyzer.feature.gpxlist.data.provider.strava.StravaOAuthManager;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.disposables.CompositeDisposable;
@@ -30,10 +35,19 @@ import io.reactivex.disposables.CompositeDisposable;
 @AndroidEntryPoint
 public class FileSelectorFragment extends DialogFragment {
 
+    private static final String TAG = FileSelectorFragment.class.getSimpleName();
+    private static final int STRAVA_OAUTH_REQUEST_CODE = 1010;
+
     /**
      * Manages RxJava subscriptions to prevent memory leaks.
      */
     private final CompositeDisposable disposables = new CompositeDisposable();
+    
+    /**
+     * Activity Result launcher for Strava OAuth flow.
+     */
+    private ActivityResultLauncher<Intent> stravaOAuthLauncher;
+    
     /**
      * ViewModel associated with this fragment.
      */
@@ -52,6 +66,51 @@ public class FileSelectorFragment extends DialogFragment {
         super.onCreate(savedInstanceState);
         viewModel = new ViewModelProvider(this).get(FileSelectorViewModel.class);
         viewModel.init();
+        
+        // Initialize Strava OAuth launcher
+        initializeStravaOAuthLauncher();
+        
+        // Initialize Strava authentication status
+        viewModel.initializeStravaAuthStatus();
+    }
+
+    /**
+     * Initializes the Activity Result launcher for Strava OAuth.
+     */
+    private void initializeStravaOAuthLauncher() {
+        stravaOAuthLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                Log.d(TAG, "Received OAuth result: " + result.getResultCode());
+                StravaOAuthManager.OAuthResult oauthResult = viewModel.handleStravaOAuthResult(
+                    STRAVA_OAUTH_REQUEST_CODE, 
+                    result.getResultCode(), 
+                    result.getData()
+                );
+                handleStravaOAuthResult(oauthResult);
+            }
+        );
+    }
+
+    /**
+     * Handles the result from Strava OAuth flow.
+     */
+    private void handleStravaOAuthResult(StravaOAuthManager.OAuthResult result) {
+        switch (result.type) {
+            case SUCCESS:
+                Toast.makeText(requireContext(), "✅ Connected to Strava successfully!", Toast.LENGTH_LONG).show();
+                Log.i(TAG, "Strava OAuth successful");
+                break;
+            case CANCELLED:
+                Toast.makeText(requireContext(), "❌ Strava connection cancelled", Toast.LENGTH_SHORT).show();
+                Log.i(TAG, "Strava OAuth cancelled");
+                break;
+            case ERROR:
+                String error = result.errorMessage != null ? result.errorMessage : "Unknown error";
+                Toast.makeText(requireContext(), "❌ Strava connection failed: " + error, Toast.LENGTH_LONG).show();
+                Log.e(TAG, "Strava OAuth error: " + error);
+                break;
+        }
     }
 
     @Nullable
@@ -71,10 +130,14 @@ public class FileSelectorFragment extends DialogFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // Initialize all observers
+        initializeObservers();
+
         viewModel.getPermissionsGrantedLiveData().observe(getViewLifecycleOwner(), granted -> {
             if (!granted) {
                 warningNeedsPermissions(FileSelectorFragment.this.requireActivity());
             } else {
+                checkStravaAuthentication();
                 initViewModelObservers();
                 viewModel.receiveRecentFoundFileList();
             }
@@ -96,6 +159,177 @@ public class FileSelectorFragment extends DialogFragment {
             }
         });
     }
+
+    /**
+     * Initializes all LiveData observers for Strava authentication.
+     */
+    private void initializeObservers() {
+        // Observe authentication status changes
+        viewModel.getStravaAuthStatusLiveData().observe(getViewLifecycleOwner(), status -> {
+            Log.d(TAG, "Strava auth status: " + status);
+            handleAuthenticationStatusChange(status);
+        });
+
+        // Observe authentication description changes
+        viewModel.getStravaAuthDescriptionLiveData().observe(getViewLifecycleOwner(), description -> {
+            Log.d(TAG, "Strava auth description: " + description);
+            // Could display this in UI if needed
+        });
+    }
+
+    /**
+     * Handles changes to the Strava authentication status.
+     */
+    private void handleAuthenticationStatusChange(StravaOAuthManager.AuthenticationStatus status) {
+        Log.d(TAG, "Strava auth status: " + status);
+        
+        switch (status) {
+            case AUTHENTICATED:
+                Log.i(TAG, "✅ Strava authenticated successfully - no action needed");
+                break;
+                
+            case NOT_AUTHENTICATED:
+                Log.w(TAG, "⚠️ User not authenticated with Strava");
+                // Only prompt for auth if we haven't already done so
+                if (!isOAuthInProgress()) {
+                    Log.i(TAG, "Prompting for Strava authentication");
+                    promptStravaAuthentication();
+                }
+                break;
+                
+            case TOKEN_EXPIRED:
+                Log.w(TAG, "⚠️ Strava token expired - refreshing");
+                viewModel.refreshStravaToken();
+                break;
+                
+            case SCOPE_MISSING:
+                Log.w(TAG, "⚠️ Strava token missing required scopes - re-authenticating");
+                Toast.makeText(requireContext(), 
+                    "Strava access requires additional permissions. Please reconnect.", 
+                    Toast.LENGTH_LONG).show();
+                promptStravaAuthentication(true);
+                break;
+                
+            case ERROR:
+                Log.e(TAG, "❌ Error with Strava authentication");
+                // Don't auto-prompt on errors to avoid loops
+                break;
+                
+            case NOT_CONFIGURED:
+                Log.d(TAG, "Strava OAuth not configured - ignoring");
+                break;
+        }
+    }
+
+    /**
+     * Checks if OAuth flow is currently in progress to avoid duplicate flows.
+     */
+    private boolean isOAuthInProgress() {
+        // Simple check - could be enhanced with proper state tracking
+        return false; // For now, allow OAuth flows
+    }
+
+    /**
+     * Prompts user for Strava authentication.
+     */
+    private void promptStravaAuthentication() {
+        promptStravaAuthentication(false);
+    }
+    
+    /**
+     * Prompts user for Strava authentication.
+     * @param forceReauth true if re-authentication should be forced
+     */
+    private void promptStravaAuthentication(boolean forceReauth) {
+        Log.i(TAG, "Prompting for Strava authentication (forceReauth=" + forceReauth + ")");
+        
+        // Show informative toast
+        Toast.makeText(requireContext(), 
+            "🔗 Connecting to Strava for enhanced features...", 
+            Toast.LENGTH_SHORT).show();
+            
+        // Start OAuth flow
+        startStravaOAuthFlow(forceReauth);
+    }
+
+    /**
+     * Checks Strava authentication status and handles accordingly.
+     */
+    private void checkStravaAuthentication() {
+        if (viewModel.isStravaOAuthConfigured()) {
+            Log.d(TAG, "Strava OAuth configured, checking authentication...");
+            // Status updates will be handled by LiveData observers
+        } else {
+            Log.d(TAG, "Strava OAuth not configured, skipping authentication check");
+        }
+    }
+
+    /**
+     * Starts the Strava OAuth authentication flow.
+     */
+    private void startStravaOAuthFlow() {
+        startStravaOAuthFlow(false);
+    }
+
+    /**
+     * Starts the Strava OAuth authentication flow.
+     * @param forceReauth true if re-authentication should be forced
+     */
+    private void startStravaOAuthFlow(boolean forceReauth) {
+        if (!viewModel.isStravaOAuthConfigured()) {
+            Toast.makeText(requireContext(), "❌ Strava OAuth not configured", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "Cannot start OAuth - not configured");
+            return;
+        }
+
+        try {
+            Log.i(TAG, "Starting Strava OAuth flow... (forceReauth=" + forceReauth + ")");
+            Intent oauthIntent = new Intent(requireContext(), StravaOAuthActivity.class);
+            if (forceReauth) {
+                oauthIntent.putExtra(StravaOAuthActivity.EXTRA_FORCE_REAUTH, true);
+            }
+            stravaOAuthLauncher.launch(oauthIntent);
+        } catch (Exception e) {
+            Log.e(TAG, "Error starting Strava OAuth", e);
+            Toast.makeText(requireContext(), "❌ Failed to start Strava authentication", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Public method to manually trigger Strava authentication.
+     * Can be called from menu items or other UI elements.
+     */
+    public void triggerStravaAuthentication() {
+        startStravaOAuthFlow();
+    }
+
+    /**
+     * Public method to sign out from Strava.
+     */
+    public void signOutFromStrava() {
+        viewModel.signOutFromStrava();
+        Toast.makeText(requireContext(), "📤 Signed out from Strava", Toast.LENGTH_SHORT).show();
+        Log.i(TAG, "User signed out from Strava");
+    }
+
+    /**
+     * Public method to get current Strava authentication status.
+     */
+    public boolean isStravaAuthenticated() {
+        StravaOAuthManager.AuthenticationStatus currentStatus = viewModel.getStravaAuthStatusLiveData().getValue();
+        return currentStatus == StravaOAuthManager.AuthenticationStatus.AUTHENTICATED;
+    }
+
+    /**
+     * Public method to refresh Strava token manually.
+     */
+    public void refreshStravaToken() {
+        Log.i(TAG, "Manually refreshing Strava token...");
+        viewModel.refreshStravaToken();
+        Toast.makeText(requireContext(), "🔄 Refreshing Strava connection...", Toast.LENGTH_SHORT).show();
+    }
+
+
 
     /**
      * Starts the process of recursively searching for GPX files and generating miniatures.

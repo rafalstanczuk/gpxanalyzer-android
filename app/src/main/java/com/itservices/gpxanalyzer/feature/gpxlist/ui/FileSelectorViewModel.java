@@ -5,10 +5,12 @@ import static com.itservices.gpxanalyzer.core.events.PercentageUpdateEventSource
 import static com.itservices.gpxanalyzer.core.events.PercentageUpdateEventSourceType.STORAGE_SEARCH_PROGRESS;
 import static com.itservices.gpxanalyzer.core.events.PercentageUpdateEventSourceType.UPDATING_RESOURCES_PROCESSING;
 
+import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -22,6 +24,7 @@ import com.itservices.gpxanalyzer.core.ui.components.miniature.MiniatureMapView;
 import com.itservices.gpxanalyzer.feature.gpxlist.domain.GetGpxFileInfoListUseCase;
 import com.itservices.gpxanalyzer.feature.gpxlist.domain.SelectGpxFileUseCase;
 import com.itservices.gpxanalyzer.feature.gpxlist.domain.UpdateGpxFileInfoListUseCase;
+import com.itservices.gpxanalyzer.feature.gpxlist.data.provider.strava.StravaOAuthManager;
 import com.itservices.gpxanalyzer.core.utils.common.ConcurrentUtil;
 
 import java.io.File;
@@ -61,6 +64,10 @@ public class FileSelectorViewModel extends ViewModel {
     private final MutableLiveData<List<GpxFileInfo>> fileInfoListLiveData = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<Boolean> searchWasRequestedLiveData = new MutableLiveData<>(null);
     private final MutableLiveData<FileInfoItem> selectedFileInfoItemLiveData = new MutableLiveData<>(null);
+    /** LiveData for Strava authentication status */
+    private final MutableLiveData<StravaOAuthManager.AuthenticationStatus> stravaAuthStatusLiveData = new MutableLiveData<>(StravaOAuthManager.AuthenticationStatus.NOT_AUTHENTICATED);
+    /** LiveData for Strava authentication status description */
+    private final MutableLiveData<String> stravaAuthDescriptionLiveData = new MutableLiveData<>("Not connected to Strava");
 
     /** Composite disposable to manage RxJava subscriptions. */
     private final CompositeDisposable disposables = new CompositeDisposable();
@@ -72,6 +79,8 @@ public class FileSelectorViewModel extends ViewModel {
     GetGpxFileInfoListUseCase getGpxFileInfoListUseCase;
     @Inject
     GlobalEventWrapper globalEventWrapper;
+    @Inject
+    StravaOAuthManager stravaOAuthManager;
     private Disposable disposableRequestPermissions;
     private Disposable disposableCheckAndRequestPermissions;
 
@@ -242,6 +251,151 @@ public class FileSelectorViewModel extends ViewModel {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(requestPermissionsLiveData::setValue);
+    }
+
+    // Strava OAuth Methods
+
+    /**
+     * Returns LiveData for Strava authentication status.
+     */
+    public LiveData<StravaOAuthManager.AuthenticationStatus> getStravaAuthStatusLiveData() {
+        return stravaAuthStatusLiveData;
+    }
+
+    /**
+     * Returns LiveData for Strava authentication status description.
+     */
+    public LiveData<String> getStravaAuthDescriptionLiveData() {
+        return stravaAuthDescriptionLiveData;
+    }
+
+    /**
+     * Checks if OAuth is properly configured.
+     */
+    public boolean isStravaOAuthConfigured() {
+        return stravaOAuthManager.isOAuthConfigured();
+    }
+
+    /**
+     * Starts the Strava OAuth flow from the given activity.
+     * Note: This method is deprecated in favor of using Activity Result API directly in the Fragment.
+     * Use triggerStravaAuthentication() in the Fragment instead.
+     */
+    @Deprecated
+    public void startStravaOAuth(@NonNull Activity activity, int requestCode) {
+        stravaOAuthManager.startOAuthFlow(activity, requestCode);
+    }
+
+    /**
+     * Checks if OAuth is properly configured and user authentication is needed.
+     * Returns true if OAuth flow should be triggered.
+     */
+    public boolean shouldTriggerStravaOAuth() {
+        if (!isStravaOAuthConfigured()) {
+            return false;
+        }
+        
+        StravaOAuthManager.AuthenticationStatus currentStatus = stravaAuthStatusLiveData.getValue();
+        return currentStatus == StravaOAuthManager.AuthenticationStatus.NOT_AUTHENTICATED ||
+               currentStatus == StravaOAuthManager.AuthenticationStatus.TOKEN_EXPIRED;
+    }
+
+    /**
+     * Gets the current authentication status synchronously (for immediate checks).
+     */
+    public StravaOAuthManager.AuthenticationStatus getCurrentAuthStatus() {
+        StravaOAuthManager.AuthenticationStatus status = stravaAuthStatusLiveData.getValue();
+        return status != null ? status : StravaOAuthManager.AuthenticationStatus.NOT_AUTHENTICATED;
+    }
+
+    /**
+     * Handles OAuth activity result.
+     */
+    public StravaOAuthManager.OAuthResult handleStravaOAuthResult(int requestCode, int resultCode, @Nullable android.content.Intent data) {
+        StravaOAuthManager.OAuthResult result = stravaOAuthManager.handleOAuthResult(requestCode, resultCode, data);
+        
+        // Update authentication status after OAuth completion
+        updateStravaAuthenticationStatus();
+        
+        return result;
+    }
+
+    /**
+     * Signs out from Strava by clearing tokens.
+     */
+    public void signOutFromStrava() {
+        stravaOAuthManager.signOut();
+        updateStravaAuthenticationStatus();
+    }
+
+    /**
+     * Refreshes the current Strava token.
+     */
+    public void refreshStravaToken() {
+        disposables.add(
+            stravaOAuthManager.refreshToken()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    success -> {
+                        if (success) {
+                            Log.i(TAG, "Strava token refreshed successfully");
+                        } else {
+                            Log.w(TAG, "Strava token refresh failed");
+                        }
+                        updateStravaAuthenticationStatus();
+                    },
+                    error -> {
+                        Log.e(TAG, "Error refreshing Strava token", error);
+                        updateStravaAuthenticationStatus();
+                    }
+                )
+        );
+    }
+
+    /**
+     * Updates the Strava authentication status LiveData.
+     */
+    public void updateStravaAuthenticationStatus() {
+        disposables.add(
+            stravaOAuthManager.getAuthenticationStatus()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    status -> {
+                        stravaAuthStatusLiveData.setValue(status);
+                        Log.d(TAG, "Strava auth status updated: " + status);
+                    },
+                    error -> {
+                        Log.e(TAG, "Error getting Strava auth status", error);
+                        stravaAuthStatusLiveData.setValue(StravaOAuthManager.AuthenticationStatus.ERROR);
+                    }
+                )
+        );
+
+        disposables.add(
+            stravaOAuthManager.getAuthenticationStatusDescription()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    description -> {
+                        stravaAuthDescriptionLiveData.setValue(description);
+                        Log.d(TAG, "Strava auth description updated: " + description);
+                    },
+                    error -> {
+                        Log.e(TAG, "Error getting Strava auth description", error);
+                        stravaAuthDescriptionLiveData.setValue("Error checking Strava connection");
+                    }
+                )
+        );
+    }
+
+    /**
+     * Initializes Strava authentication status when ViewModel is created.
+     * Call this from the Fragment/Activity onCreate or onResume.
+     */
+    public void initializeStravaAuthStatus() {
+        updateStravaAuthenticationStatus();
     }
 
     /**

@@ -1,4 +1,4 @@
-package com.itservices.gpxanalyzer.feature.gpxlist.data.provider.file;
+package com.itservices.gpxanalyzer.feature.gpxlist.data.provider.parser;
 
 import android.location.Location;
 import android.util.Log;

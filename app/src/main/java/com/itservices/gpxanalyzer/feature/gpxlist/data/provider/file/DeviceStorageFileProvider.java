@@ -19,8 +19,11 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 
+import androidx.core.content.FileProvider;
+
 import com.itservices.gpxanalyzer.core.events.EventProgress;
 import com.itservices.gpxanalyzer.core.events.GlobalEventWrapper;
+import com.itservices.gpxanalyzer.feature.gpxlist.data.model.gpxfileinfo.GpxFileInfo;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -35,8 +38,8 @@ import io.reactivex.Single;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
-public class DeviceStorageSearchedFileProvider {
-    private final String TAG = DeviceStorageSearchedFileProvider.class.getSimpleName();
+public class DeviceStorageFileProvider {
+    private final String TAG = DeviceStorageFileProvider.class.getSimpleName();
     private static final String STORAGE = "storage";
     private static final String EMULATED = "emulated";
     private static final String SELF = "self";
@@ -53,15 +56,15 @@ public class DeviceStorageSearchedFileProvider {
     @Inject
     GlobalEventWrapper globalEventWrapper;
 
-    private Function<File, Object> parserFunction;
+    private Function<File, GpxFileInfo> parserFunction;
     private String fileExtension = "";
     private String[] mediaStoreSelectionArgs = new String[]{""};
 
-    private final List<Object> parsedFileList = new ArrayList<>();
+    private final List<GpxFileInfo> parsedFileList = new ArrayList<>();
     private AtomicReference<EventProgress> lastEventProgress = new AtomicReference<>();
 
     @Inject
-    public DeviceStorageSearchedFileProvider() {
+    public DeviceStorageFileProvider() {
     }
 
     private static boolean isExists(File dir) {
@@ -77,7 +80,11 @@ public class DeviceStorageSearchedFileProvider {
         return displayName != null && displayName.toLowerCase().endsWith(fileExtension);
     }
 
-    public Single<List<Object>> searchAndParseFilesRecursively(Context context, Function<File, Object> parserFunction, String fileExtension, String[] mediaStoreSelectionArgs) {
+    public Single<List<GpxFileInfo>> getFiles(Context context, Function<File, GpxFileInfo> parserFunction, String fileExtension, String[] mediaStoreSelectionArgs) {
+        return searchAndParseFilesRecursively(context, parserFunction, fileExtension, mediaStoreSelectionArgs);
+    }
+
+    private Single<List<GpxFileInfo>> searchAndParseFilesRecursively(Context context, Function<File, GpxFileInfo> parserFunction, String fileExtension, String[] mediaStoreSelectionArgs) {
         this.parserFunction = parserFunction;
         this.fileExtension = fileExtension;
         this.mediaStoreSelectionArgs = mediaStoreSelectionArgs;
@@ -189,7 +196,7 @@ public class DeviceStorageSearchedFileProvider {
         // Search in all storage directories
         processedFiles.set(0); // Reset progress for direct scan
 
-        lastEventProgress.set( EventProgress.create(DeviceStorageSearchedFileProvider.class, processedFiles.get(), totalFiles.get()) );
+        lastEventProgress.set( EventProgress.create(DeviceStorageFileProvider.class, processedFiles.get(), totalFiles.get()) );
 
         globalEventWrapper.onNext(lastEventProgress.get());
 
@@ -354,7 +361,7 @@ public class DeviceStorageSearchedFileProvider {
         if (totalFiles.get() > 0) {
 
             EventProgress currentEventProgress
-                    = EventProgress.create(DeviceStorageSearchedFileProvider.class, processedFiles.get(), totalFiles.get());
+                    = EventProgress.create(DeviceStorageFileProvider.class, processedFiles.get(), totalFiles.get());
 
             lastEventProgress.set(globalEventWrapper.onNextChanged(lastEventProgress.get(), currentEventProgress));
         }

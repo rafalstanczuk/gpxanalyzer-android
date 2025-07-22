@@ -15,7 +15,7 @@ import okhttp3.logging.HttpLoggingInterceptor;
 public class NetworkModule {
 
     // Can be toggled manually or controlled via a flavor/build type variable
-    private static final boolean ENABLE_LOGGING = true; // Disable logging for production
+    private static final boolean ENABLE_LOGGING = false; // Disable logging for production
 
     @Provides
     public OkHttpClient provideOkHttpClient() {

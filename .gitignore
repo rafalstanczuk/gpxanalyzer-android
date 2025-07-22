@@ -18,3 +18,4 @@ local.properties
 
 # Secure properties file
 app/secure.properties
+app/stravaapi_secure.properties
