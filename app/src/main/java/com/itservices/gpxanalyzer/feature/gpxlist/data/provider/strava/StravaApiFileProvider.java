@@ -6,14 +6,19 @@ import android.util.Log;
 import com.itservices.gpxanalyzer.feature.gpxlist.data.model.gpxfileinfo.GpxFileInfo;
 import com.itservices.gpxanalyzer.feature.gpxlist.data.provider.strava.mapper.StravaStreamMapper;
 import com.itservices.gpxanalyzer.feature.gpxlist.data.provider.strava.model.StravaActivity;
+import com.itservices.gpxanalyzer.feature.gpxlist.data.provider.strava.model.StravaScope;
 import com.itservices.gpxanalyzer.feature.gpxlist.data.provider.strava.model.StravaStream;
 import com.itservices.gpxanalyzer.feature.gpxlist.data.provider.strava.model.StravaStreamResponse;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -128,7 +133,7 @@ public class StravaApiFileProvider {
                                     Log.e(TAG, "The current token was authorized without the required permissions.");
                                     Log.e(TAG, "To fix this:");
                                     StravaOAuthHelper.debugPrintAuthorizationUrl();
-                                    Log.e(TAG, "1. Go to: " + getAuthorizationUrl(StravaApiService.DEFAULT_SCOPES + ",activity:read"));
+                                    Log.e(TAG, "1. Go to: " + getAuthorizationUrl(StravaApiService.DEFAULT_SCOPES + "," + StravaScope.ACTIVITY_READ.getValue()));
                                     Log.e(TAG, "2. Authorize the app with 'activity:read' permission");
                                     Log.e(TAG, "3. Update stravaapi_secure.properties with the new tokens");
                                     
@@ -423,8 +428,8 @@ public class StravaApiFileProvider {
             gpx.append("  <metadata>\n");
             gpx.append("    <name>").append(escapeXml(activity.getName())).append("</name>\n");
             gpx.append("    <desc>Imported from Strava Activity ID: ").append(activity.getId()).append("</desc>\n");
-            if (activity.getStartDateLocal() != null) {
-                gpx.append("    <time>").append(activity.getStartDateLocal()).append("</time>\n");
+            if (activity.getStartDate() != null) {
+                gpx.append("    <time>").append(formatDateIso8601(activity.getStartDate())).append("</time>\n");
             }
             gpx.append("  </metadata>\n");
             gpx.append("  <trk>\n");
@@ -470,8 +475,7 @@ public class StravaApiFileProvider {
                                     // Get start date and add seconds offset
                                     long startTimeMs = activity.getStartDate().getTime();
                                     long pointTimeMs = startTimeMs + (times.get(i) * 1000L);
-                                    String timeStr = java.time.Instant.ofEpochMilli(pointTimeMs).toString();
-                                    gpx.append("        <time>").append(timeStr).append("</time>\n");
+                                    gpx.append("        <time>").append(formatDateIso8601(new Date(pointTimeMs))).append("</time>\n");
                                 } catch (Exception e) {
                                     // Skip time if parsing fails
                                 }
@@ -488,6 +492,16 @@ public class StravaApiFileProvider {
             gpx.append("</gpx>\n");
             
             return gpx.toString();
+        }
+
+        /**
+         * Formats a Date object to an ISO 8601 compliant string ("yyyy-MM-dd'T'HH:mm:ss'Z'").
+         */
+        private static String formatDateIso8601(Date date) {
+            if (date == null) return null;
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
+            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+            return sdf.format(date);
         }
 
         /**

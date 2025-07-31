@@ -3,6 +3,8 @@ package com.itservices.gpxanalyzer.feature.gpxlist.data.provider.strava;
 import android.util.Log;
 import com.itservices.gpxanalyzer.BuildConfig;
 
+import com.itservices.gpxanalyzer.feature.gpxlist.data.provider.strava.model.StravaScope;
+
 /**
  * Utility class for Strava OAuth 2.0 operations.
  * Provides helper methods for generating authorization URLs and debugging OAuth issues.
@@ -25,8 +27,8 @@ public class StravaOAuthHelper {
         
         // Ensure scopes include both read and activity:read
         String scopes = StravaApiService.DEFAULT_SCOPES;
-        if (!scopes.contains(StravaApiService.SCOPE_ACTIVITY_READ)) {
-            scopes = scopes + "," + StravaApiService.SCOPE_ACTIVITY_READ;
+        if (!scopes.contains(StravaScope.ACTIVITY_READ.getValue())) {
+            scopes = scopes + "," + StravaScope.ACTIVITY_READ.getValue();
         }
         
         String authUrl = "https://www.strava.com/oauth/authorize" +

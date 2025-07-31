@@ -19,6 +19,7 @@ import com.itservices.gpxanalyzer.feature.gpxlist.data.provider.strava.StravaOAu
 import com.itservices.gpxanalyzer.feature.gpxlist.data.provider.strava.StravaTokenManager;
 import com.itservices.gpxanalyzer.feature.gpxlist.data.provider.strava.StravaOAuthManager;
 import com.itservices.gpxanalyzer.feature.gpxlist.data.provider.strava.model.AuthorizationCodeRequest;
+import com.itservices.gpxanalyzer.feature.gpxlist.data.provider.strava.model.StravaScope;
 import com.itservices.gpxanalyzer.feature.gpxlist.data.provider.strava.model.TokenResponse;
 import com.itservices.gpxanalyzer.BuildConfig;
 

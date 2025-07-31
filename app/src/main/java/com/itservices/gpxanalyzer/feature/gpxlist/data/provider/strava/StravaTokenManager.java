@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.itservices.gpxanalyzer.BuildConfig;
+import com.itservices.gpxanalyzer.feature.gpxlist.data.provider.strava.model.StravaScope;
 import com.itservices.gpxanalyzer.feature.gpxlist.data.provider.strava.model.TokenRefreshRequest;
 import com.itservices.gpxanalyzer.feature.gpxlist.data.provider.strava.model.TokenResponse;
 
@@ -186,8 +187,8 @@ public class StravaTokenManager {
         }
 
         // Make sure activity:read scope is included to fix permission issues
-        if (!scopes.contains(StravaApiService.SCOPE_ACTIVITY_READ)) {
-            scopes = scopes + "," + StravaApiService.SCOPE_ACTIVITY_READ;
+        if (!scopes.contains(StravaScope.ACTIVITY_READ.getValue())) {
+            scopes = scopes + "," + StravaScope.ACTIVITY_READ.getValue();
         }
 
         String approvalPrompt = forcePrompt ? "force" : "auto";

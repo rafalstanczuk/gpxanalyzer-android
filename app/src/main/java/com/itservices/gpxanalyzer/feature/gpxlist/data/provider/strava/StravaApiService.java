@@ -2,6 +2,7 @@ package com.itservices.gpxanalyzer.feature.gpxlist.data.provider.strava;
 
 import com.itservices.gpxanalyzer.feature.gpxlist.data.provider.strava.model.AuthorizationCodeRequest;
 import com.itservices.gpxanalyzer.feature.gpxlist.data.provider.strava.model.StravaActivity;
+import com.itservices.gpxanalyzer.feature.gpxlist.data.provider.strava.model.StravaScope;
 import com.itservices.gpxanalyzer.feature.gpxlist.data.provider.strava.model.StravaStream;
 import com.itservices.gpxanalyzer.feature.gpxlist.data.provider.strava.model.StravaStreamResponse;
 import com.itservices.gpxanalyzer.feature.gpxlist.data.provider.strava.model.TokenRefreshRequest;
@@ -34,17 +35,8 @@ public interface StravaApiService {
     String TOKEN_ENDPOINT = "token";
     String DEAUTHORIZE_ENDPOINT = "deauthorize";
     
-    // OAuth 2.0 scopes - see https://developers.strava.com/docs/authentication/#details-about-requesting-access
-    String SCOPE_READ = "read";                           // Basic profile information
-    String SCOPE_READ_ALL = "read_all";                   // All profile information
-    String SCOPE_ACTIVITY_READ = "activity:read";         // Read access to activities
-    String SCOPE_ACTIVITY_READ_ALL = "activity:read_all"; // Read access to all activities (including private)
-    String SCOPE_ACTIVITY_WRITE = "activity:write";       // Write access to activities
-    String SCOPE_PROFILE_READ_ALL = "profile:read_all";   // Read all profile information
-    String SCOPE_PROFILE_WRITE = "profile:write";         // Write access to profile
-    
     // Default scopes required for GPX Analyzer functionality
-    String DEFAULT_SCOPES = SCOPE_READ + "," + SCOPE_ACTIVITY_READ;
+    String DEFAULT_SCOPES = StravaScope.join(StravaScope.READ, StravaScope.ACTIVITY_READ);
     
     // Activity endpoints
     String ACTIVITIES_ENDPOINT = "athlete/activities";
