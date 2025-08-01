@@ -1,16 +1,20 @@
 package com.itservices.gpxanalyzer.feature.gpxlist.data;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.util.Log;
 
 import com.itservices.gpxanalyzer.core.data.model.geocoding.GeocodingResult;
+import com.itservices.gpxanalyzer.core.utils.files.PermissionUtils;
 import com.itservices.gpxanalyzer.feature.gpxlist.data.model.gpxfileinfo.GpxFileInfo;
 import com.itservices.gpxanalyzer.core.data.provider.geocoding.BaseGeocodingRepository;
 import com.itservices.gpxanalyzer.core.data.provider.geocoding.android.GeocodingAndroidRepository;
 import com.itservices.gpxanalyzer.feature.gpxlist.data.provider.GpxFileInfoProvider;
 import com.itservices.gpxanalyzer.core.data.provider.db.geocoding.GeocodingLocalRepository;
 import com.itservices.gpxanalyzer.domain.service.GpxFileInfoUpdateService;
+import com.itservices.gpxanalyzer.feature.gpxlist.data.provider.strava.StravaOAuthManager;
 
 import com.itservices.gpxanalyzer.core.events.EventProgress;
 import com.itservices.gpxanalyzer.core.events.GlobalEventWrapper;
@@ -42,6 +46,7 @@ public class GpxFileInfoUpdateServiceImpl implements GpxFileInfoUpdateService {
     private final BaseGeocodingRepository geocodingRepository;
     private final GeocodingLocalRepository geocodingLocalRepository;
     private final GlobalEventWrapper globalEventWrapper;
+    private final StravaOAuthManager stravaOAuthManager;
     private MiniatureMapView miniatureRenderer;
 
     @Inject
@@ -50,12 +55,37 @@ public class GpxFileInfoUpdateServiceImpl implements GpxFileInfoUpdateService {
             GpxFileInfoMiniatureProvider miniatureProvider,
             GeocodingAndroidRepository geocodingRepository,
             GeocodingLocalRepository geocodingLocalRepository,
-            GlobalEventWrapper globalEventWrapper) {
+            GlobalEventWrapper globalEventWrapper,
+            StravaOAuthManager stravaOAuthManager) {
         this.gpxFileInfoProvider = gpxFileInfoProvider;
         this.miniatureProvider = miniatureProvider;
         this.geocodingRepository = geocodingRepository;
         this.geocodingLocalRepository = geocodingLocalRepository;
         this.globalEventWrapper = globalEventWrapper;
+        this.stravaOAuthManager = stravaOAuthManager;
+    }
+
+    @Override
+    public boolean hasStoragePermissions(Activity activity) {
+        return PermissionUtils.hasFileAccessPermissions(activity);
+    }
+    
+    @Override
+    public Single<Boolean> isStravaAuthenticated() {
+        return stravaOAuthManager.isAuthenticated()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+    
+    @Override
+    public void startStravaAuthentication(Activity activity, int requestCode) {
+        Log.d(TAG, "Starting Strava authentication flow");
+        stravaOAuthManager.startOAuthFlow(activity, requestCode);
+    }
+    
+    @Override
+    public StravaOAuthManager.OAuthResult handleStravaAuthResult(int requestCode, int resultCode, Intent data) {
+        return stravaOAuthManager.handleOAuthResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -65,7 +95,9 @@ public class GpxFileInfoUpdateServiceImpl implements GpxFileInfoUpdateService {
 
     @Override
     public Single<List<GpxFileInfo>> scanFiles(Context context) {
-        return gpxFileInfoProvider.getAndUpdate(context, ProviderType.ONLINE);
+        return gpxFileInfoProvider.getAndUpdate(context, ProviderType.ONLINE)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     @Override

@@ -129,14 +129,21 @@ public class FileSelectorFragment extends DialogFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        
+        Log.d(TAG, "🚀 FileSelectorFragment.onViewCreated - Starting permission flow");
 
         // Initialize all observers
         initializeObservers();
 
+        // Set up observer for permission status changes
         viewModel.getPermissionsGrantedLiveData().observe(getViewLifecycleOwner(), granted -> {
+            Log.d(TAG, "🔒 Permission status changed: " + (granted ? "GRANTED" : "DENIED"));
             if (!granted) {
+                Log.w(TAG, "❌ Storage permissions denied - showing warning and returning to main fragment");
                 warningNeedsPermissions(FileSelectorFragment.this.requireActivity());
             } else {
+                Log.i(TAG, "✅ Storage permissions granted - proceeding with Strava authentication flow");
+                // Storage permissions granted - now proceed with Strava authentication flow
                 checkStravaAuthentication();
                 initViewModelObservers();
                 viewModel.receiveRecentFoundFileList();
@@ -149,6 +156,8 @@ public class FileSelectorFragment extends DialogFragment {
             }
         });
 
+        // Start the permission check flow
+        Log.d(TAG, "🔍 Initiating storage permission check");
         viewModel.checkAndRequestPermissions(FileSelectorFragment.this.requireActivity());
 
         binding.searchFilesButton.setOnClickListener(v -> {
@@ -179,6 +188,11 @@ public class FileSelectorFragment extends DialogFragment {
 
     /**
      * Handles changes to the Strava authentication status.
+     * This implements the required flow:
+     * 1. Check storage permission (already handled before this is called)
+     * 2. If storage permission enabled, proceed to Strava authentication
+     * 3. If storage permission denied, go back (already handled before this is called)
+     * 4. Check if already authenticated, if no run OAuth authentication flow
      */
     private void handleAuthenticationStatusChange(StravaOAuthManager.AuthenticationStatus status) {
         Log.d(TAG, "Strava auth status: " + status);
@@ -186,6 +200,7 @@ public class FileSelectorFragment extends DialogFragment {
         switch (status) {
             case AUTHENTICATED:
                 Log.i(TAG, "✅ Strava authenticated successfully - no action needed");
+                // Already authenticated, no action needed
                 break;
                 
             case NOT_AUTHENTICATED:
@@ -254,21 +269,18 @@ public class FileSelectorFragment extends DialogFragment {
 
     /**
      * Checks Strava authentication status and handles accordingly.
+     * This is called after storage permissions are granted.
      */
     private void checkStravaAuthentication() {
+        Log.d(TAG, "🔄 Checking Strava authentication status...");
         if (viewModel.isStravaOAuthConfigured()) {
-            Log.d(TAG, "Strava OAuth configured, checking authentication...");
+            Log.d(TAG, "🔑 Strava OAuth configured, checking authentication...");
+            // Explicitly update authentication status
+            viewModel.updateStravaAuthenticationStatus();
             // Status updates will be handled by LiveData observers
         } else {
-            Log.d(TAG, "Strava OAuth not configured, skipping authentication check");
+            Log.d(TAG, "⚠️ Strava OAuth not configured, skipping authentication check");
         }
-    }
-
-    /**
-     * Starts the Strava OAuth authentication flow.
-     */
-    private void startStravaOAuthFlow() {
-        startStravaOAuthFlow(false);
     }
 
     /**
@@ -294,42 +306,6 @@ public class FileSelectorFragment extends DialogFragment {
             Toast.makeText(requireContext(), "❌ Failed to start Strava authentication", Toast.LENGTH_SHORT).show();
         }
     }
-
-    /**
-     * Public method to manually trigger Strava authentication.
-     * Can be called from menu items or other UI elements.
-     */
-    public void triggerStravaAuthentication() {
-        startStravaOAuthFlow();
-    }
-
-    /**
-     * Public method to sign out from Strava.
-     */
-    public void signOutFromStrava() {
-        viewModel.signOutFromStrava();
-        Toast.makeText(requireContext(), "📤 Signed out from Strava", Toast.LENGTH_SHORT).show();
-        Log.i(TAG, "User signed out from Strava");
-    }
-
-    /**
-     * Public method to get current Strava authentication status.
-     */
-    public boolean isStravaAuthenticated() {
-        StravaOAuthManager.AuthenticationStatus currentStatus = viewModel.getStravaAuthStatusLiveData().getValue();
-        return currentStatus == StravaOAuthManager.AuthenticationStatus.AUTHENTICATED;
-    }
-
-    /**
-     * Public method to refresh Strava token manually.
-     */
-    public void refreshStravaToken() {
-        Log.i(TAG, "Manually refreshing Strava token...");
-        viewModel.refreshStravaToken();
-        Toast.makeText(requireContext(), "🔄 Refreshing Strava connection...", Toast.LENGTH_SHORT).show();
-    }
-
-
 
     /**
      * Starts the process of recursively searching for GPX files and generating miniatures.
@@ -397,10 +373,12 @@ public class FileSelectorFragment extends DialogFragment {
     /**
      * Handles the case where necessary file access permissions were denied.
      * Dismisses the dialog and shows a warning Toast message.
+     * This is a critical part of the flow - if permissions are denied, we must return to main fragment.
      *
      * @param context The application context.
      */
     private void warningNeedsPermissions(Context context) {
+        Log.w(TAG, "⚠️ Storage permissions denied - returning to main fragment");
         dismiss();
         Toast.makeText(context, R.string.permission_denied_cannot_access_files, Toast.LENGTH_SHORT).show();
     }

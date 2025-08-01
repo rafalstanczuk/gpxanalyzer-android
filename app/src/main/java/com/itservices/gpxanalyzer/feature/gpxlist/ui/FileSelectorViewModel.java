@@ -65,7 +65,7 @@ public class FileSelectorViewModel extends ViewModel {
     private final MutableLiveData<Boolean> searchWasRequestedLiveData = new MutableLiveData<>(null);
     private final MutableLiveData<FileInfoItem> selectedFileInfoItemLiveData = new MutableLiveData<>(null);
     /** LiveData for Strava authentication status */
-    private final MutableLiveData<StravaOAuthManager.AuthenticationStatus> stravaAuthStatusLiveData = new MutableLiveData<>(StravaOAuthManager.AuthenticationStatus.NOT_AUTHENTICATED);
+    private final MutableLiveData<StravaOAuthManager.AuthenticationStatus> stravaAuthStatusLiveData = new MutableLiveData<>(StravaOAuthManager.AuthenticationStatus.NOT_CONFIGURED);
     /** LiveData for Strava authentication status description */
     private final MutableLiveData<String> stravaAuthDescriptionLiveData = new MutableLiveData<>("Not connected to Strava");
 
@@ -222,14 +222,28 @@ public class FileSelectorViewModel extends ViewModel {
      * Checks if necessary file access permissions are granted and requests them if needed.
      * Uses {@link SelectGpxFileUseCase#checkAndRequestPermissions(FragmentActivity)} and updates
      * {@link #requestPermissionsLiveData} with the result (immediately if already granted, or after user interaction).
+     * If permissions are granted, also checks Strava authentication status.
      *
      * @param requireActivity The activity context required for permission checks/requests.
      */
     public void checkAndRequestPermissions(FragmentActivity requireActivity) {
+        Log.d(TAG, "🔒 Checking storage permissions...");
         ConcurrentUtil.tryToDispose(disposableCheckAndRequestPermissions);
         disposableCheckAndRequestPermissions = selectGpxFileUseCase.checkAndRequestPermissions(requireActivity)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
+                .doOnNext(granted -> {
+                    if (granted) {
+                        Log.i(TAG, "✅ Storage permissions GRANTED");
+                        // If permissions granted, check Strava auth status
+                        updateStravaAuthenticationStatus();
+                    } else {
+                        Log.w(TAG, "❌ Storage permissions DENIED");
+                    }
+                })
+                .doOnError(error -> {
+                    Log.e(TAG, "💥 Error during permission check", error);
+                })
                 .subscribe(requestPermissionsLiveData::setValue);
     }
 
@@ -355,8 +369,10 @@ public class FileSelectorViewModel extends ViewModel {
 
     /**
      * Updates the Strava authentication status LiveData.
+     * This is called after storage permissions are granted.
      */
     public void updateStravaAuthenticationStatus() {
+        Log.d(TAG, "🔄 Updating Strava authentication status...");
         disposables.add(
             stravaOAuthManager.getAuthenticationStatus()
                 .subscribeOn(Schedulers.io())
@@ -364,10 +380,10 @@ public class FileSelectorViewModel extends ViewModel {
                 .subscribe(
                     status -> {
                         stravaAuthStatusLiveData.setValue(status);
-                        Log.d(TAG, "Strava auth status updated: " + status);
+                        Log.d(TAG, "🔑 Strava auth status updated: " + status);
                     },
                     error -> {
-                        Log.e(TAG, "Error getting Strava auth status", error);
+                        Log.e(TAG, "💥 Error getting Strava auth status", error);
                         stravaAuthStatusLiveData.setValue(StravaOAuthManager.AuthenticationStatus.ERROR);
                     }
                 )
@@ -380,10 +396,10 @@ public class FileSelectorViewModel extends ViewModel {
                 .subscribe(
                     description -> {
                         stravaAuthDescriptionLiveData.setValue(description);
-                        Log.d(TAG, "Strava auth description updated: " + description);
+                        Log.d(TAG, "📝 Strava auth description updated: " + description);
                     },
                     error -> {
-                        Log.e(TAG, "Error getting Strava auth description", error);
+                        Log.e(TAG, "💥 Error getting Strava auth description", error);
                         stravaAuthDescriptionLiveData.setValue("Error checking Strava connection");
                     }
                 )
