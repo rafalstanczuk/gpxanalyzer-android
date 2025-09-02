@@ -1,5 +1,8 @@
 # GpxAnalyzer
 
+For more technical README, go to:
+https://github.com/rafalstanczuk/gpxanalyzer-android/tree/master/app/src/main/java/com/itservices/gpxanalyzer
+
 🚀 GpxAnalyzer: Advanced GPS Data Analysis on Android – A Showcase of Comprehensive Skills
 
 GpxAnalyzer is not just an application for outdoor enthusiasts, but primarily a **demonstration of comprehensive skills in modern mobile application development**. This project transforms raw GPX data from your adventures – hikes, bike rides, or drives – into engaging visualizations and in-depth analyses.
